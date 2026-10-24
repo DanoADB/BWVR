@@ -25,7 +25,7 @@ public static class QuestControls {
    h.grip=controller.TryGetChildControl<ButtonControl>("gripPressed")?.isPressed??false;
    h.trigger=controller.TryGetChildControl<ButtonControl>("triggerPressed")?.isPressed??false;
    h.menu=side==0&&((controller.TryGetChildControl<ButtonControl>("primaryButton")?.isPressed??false)||(controller.TryGetChildControl<ButtonControl>("menu")?.isPressed??false));
-   h.zoom=side==1&&(controller.TryGetChildControl<ButtonControl>("secondaryButton")?.isPressed??false);
+   h.zoom=side==1&&h.trigger;
    h.recenter=side==0&&(controller.TryGetChildControl<ButtonControl>("secondaryButton")?.isPressed??false);
    return h;
   }

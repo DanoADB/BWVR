@@ -28,7 +28,7 @@ Reference: [Meta Link development workflow](https://developers.meta.com/vr/docum
 
 ## Quest controls
 
-- Hold **B + right stick up/down** to zoom in/out around the island under your gaze (0.5×–8×). Release B for normal height adjustment. **Y** resets zoom and recenters; desktop mouse wheel also zooms. Zoom pauses while carrying an object.
+- Hold **right trigger + right stick up/down** to zoom in/out around the island under your gaze (0.5×–8×). Release the trigger for normal height adjustment. A right-trigger click interacts on release; moving the stick during the hold suppresses that click. **Y** resets zoom and recenters; desktop mouse wheel also zooms. Zoom pauses while carrying an object.
 - Left stick: move forward/back/sideways relative to your head. Right stick left/right: 30-degree snap turn; center the stick before turning again. Right stick up/down: rise/lower above the tabletop.
 - Point a controller at a resource or villager. Hold grip to carry; release while pointing onto the island to place. Rays use the OpenXR aim pose; held objects use the grip pose.
 - Release the blue water offering over the blue village cistern to deliver water.

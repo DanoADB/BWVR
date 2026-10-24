@@ -70,11 +70,16 @@ public static class QuestControlsChecks {
    if(Vector3.Distance(input.position,new Vector3(1,2,3))>.001f||Vector3.Distance(input.aimPosition,new Vector3(4,5,6))>.001f||Quaternion.Angle(input.aimRotation,Quaternion.Euler(0,45,0))>.01f)throw new Exception("Grip/aim poses not separate");
    InputSystem.SetDeviceUsage(device,UnityEngine.InputSystem.CommonUsages.RightHand);
    Set(device.GetChildControl<ButtonControl>("secondaryButton"),1f);
-   if(!QuestControls.Read(1).zoom)throw new Exception("B zoom modifier binding failed");
+   Set(device.GetChildControl<ButtonControl>("triggerPressed"),0f);
+   if(QuestControls.Read(1).zoom)throw new Exception("B still enabled zoom");
+   Set(device.GetChildControl<ButtonControl>("triggerPressed"),1f);
+   if(!QuestControls.Read(1).zoom)throw new Exception("Right trigger zoom modifier binding failed");
+   Set(device.GetChildControl<ButtonControl>("triggerPressed"),0f);
+   if(QuestControls.Read(1).zoom)throw new Exception("Released trigger left zoom enabled");
    InputSystem.SetDeviceUsage(device,UnityEngine.InputSystem.CommonUsages.LeftHand);
    Set(device.GetChildControl<ButtonControl>("isTracked"),0f);InputSystem.Update();
    if(QuestControls.Read(0).grip)throw new Exception("Tracking loss left grip pressed");
-   Debug.Log("BWVR_CONTROLS_PASS: head-relative movement; drift deadzone; snap pivot/latch/rearm; elevation; grip/aim separation; carry/interact/menu/stick controls; tracking loss; B zoom binding, focus stability, rotation, round trip, limits and reset");
+   Debug.Log("BWVR_CONTROLS_PASS: head-relative movement; drift deadzone; snap pivot/latch/rearm; elevation; grip/aim separation; carry/interact/menu/stick controls; tracking loss; right trigger zoom binding, focus stability, rotation, round trip, limits and reset");
   }finally{if(device!=null)InputSystem.RemoveDevice(device);UnityEngine.Object.DestroyImmediate(origin);}
  }
 }
