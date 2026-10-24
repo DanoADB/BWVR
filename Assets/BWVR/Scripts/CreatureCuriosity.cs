@@ -21,6 +21,7 @@ public sealed class CreatureCuriosity:MonoBehaviour {
   if(Current!=Phase.Rest||candidate==null||!candidate.Available||routine.Current!=CreatureRoutine.Task.SeekingWater)return false;
   if(!navigator.world.Sample(candidate.transform.position,navigator.profile,12,out _))return false;
   if(candidate.GetComponent<ConstructionBlock>()!=null)constructionFocus=true;
+  if(candidate.host!=null&&!candidate.host.Accept(candidate))return false;
   routine.ResetTask();navigator.ResetRoute();target=candidate;elapsed=clock=0;Current=Phase.Approach;motion?.LookAt(target.transform);Affect=CreatureAffect.Mood.Curious;return true;
  }
  public bool Tick(float dt,SliceState season,bool allowChoice=true){
@@ -112,7 +113,7 @@ public sealed class CreatureCuriosity:MonoBehaviour {
   }
   if(!success&&target!=null)target.SetCooldown(12);
   owned=null;target=null;Current=Phase.Rest;clock=elapsed=0;cooldown=success?(constructionFocus?3:8):4;emotion=success?5:3;recentMood=success?CreatureAffect.Mood.Happy:CreatureAffect.Mood.Sad;Affect=recentMood;
-  if(finished!=null){if(success)Completed?.Invoke(finished);else Failed?.Invoke("Interaction interrupted or unavailable");}
+  if(finished!=null){var host=finished.host;if(success)Completed?.Invoke(finished);else Failed?.Invoke("Interaction interrupted or unavailable");host?.SharedOutcome(finished,success);}
  }
  void OnDisable(){Finish(false);}
 }

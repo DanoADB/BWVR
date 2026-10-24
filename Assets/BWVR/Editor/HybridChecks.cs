@@ -22,7 +22,7 @@ public static class HybridChecks {
  public static void VerifyRuntime(){
   if(!EditorApplication.isPlaying)throw new Exception("Enter Play mode first");
   var slice=UnityEngine.Object.FindAnyObjectByType<QuestSlice>();var hybrid=UnityEngine.Object.FindAnyObjectByType<CreatureHybrid>();var mind=hybrid.GetComponent<CreatureCuriosity>();var water=hybrid.GetComponent<CreatureRoutine>();var field=typeof(QuestSlice).GetField("state",System.Reflection.BindingFlags.NonPublic|System.Reflection.BindingFlags.Instance);var original=(SliceState)field.GetValue(slice);
-  hybrid.Interrupt("QA setup");var test=new SliceState{water=14,hunger=.1f};field.SetValue(slice,test);
+  bool focus=slice.developmentFocus;slice.developmentFocus=false;hybrid.Interrupt("QA setup");var test=new SliceState{water=14,hunger=.1f};field.SetValue(slice,test);
   try{
    hybrid.NewSeason();int before=water.deliveries;hybrid.Tick(.5f);if(hybrid.Owner!=CreatureHybrid.ActionOwner.Water||mind.Current!=CreatureCuriosity.Phase.Rest)throw new Exception("Critical shortage did not grant exclusive water ownership");
    if(hybrid.Guide(GuidanceIntent.Investigate,hybrid.Targets.Find(t=>t.affordance!=null&&t.affordance.kind==CreatureAffordance.Kind.Roll))||test.Hybrid.guidance.status!=GuidanceStatus.Rejected)throw new Exception("Urgent ownership did not explain rejected distraction");
@@ -41,7 +41,7 @@ public static class HybridChecks {
    for(int i=0;i<1600&&gatherer.completedJobs==jobs;i++){float previous=test.water;slice.Simulate(.1f);if(test.water>previous)improved=true;}
    if(gatherer.completedJobs!=jobs+1||!improved)throw new Exception("Village made no independent resource progress while creature unavailable");hybrid.Suspend(false);
    Debug.Log("BWVR_HYBRID_RUNTIME_PASS: unified urgent water; exclusive owner; confirmed outcome/context; one reinforcement and legacy care; guidance rejection/expiry; pause; carried-object cleanup; saved resumable intention; no suspend advancement");
-  }finally{hybrid.Suspend(false);hybrid.Interrupt("QA complete");field.SetValue(slice,original);hybrid.NewSeason();}
+  }finally{hybrid.Suspend(false);hybrid.Interrupt("QA complete");slice.developmentFocus=focus;field.SetValue(slice,original);hybrid.NewSeason();}
  }
 }
 }

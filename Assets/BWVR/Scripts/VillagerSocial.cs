@@ -4,20 +4,33 @@ namespace BWVR {
 [Serializable] public sealed class SocialMemory {
  public float trust=.45f,affinity=.5f,boldness=.5f;
  public float injury,lastAssistance;
- public int greetings,rides,witnessed,disputes,discoveries,bridgeCrossings;
- public bool Valid()=>Unit(trust)&&Unit(affinity)&&Unit(boldness)&&Unit(injury)&&HybridState.Number(lastAssistance,0,100000000)&&Count(greetings)&&Count(rides)&&Count(witnessed)&&Count(disputes)&&Count(discoveries)&&Count(bridgeCrossings);
+ public int greetings,rides,witnessed,disputes,discoveries,bridgeCrossings,sharedPlay,treatsOffered,missedInvitations;
+ public float nextInvitationAt,lastSharedAt;
+ public bool Valid()=>Unit(trust)&&Unit(affinity)&&Unit(boldness)&&Unit(injury)&&HybridState.Number(lastAssistance,0,100000000)&&HybridState.Number(nextInvitationAt,0,100000300)&&HybridState.Number(lastSharedAt,0,100000000)&&Count(greetings)&&Count(rides)&&Count(witnessed)&&Count(disputes)&&Count(discoveries)&&Count(bridgeCrossings)&&Count(sharedPlay)&&Count(treatsOffered)&&Count(missedInvitations);
  static bool Unit(float n)=>!float.IsNaN(n)&&!float.IsInfinity(n)&&n>=0&&n<=1;
  static bool Count(int n)=>n>=0&&n<=1000000;
 }
 // Social attention competes with other intentions; memories belong to the saved season.
 public sealed class VillagerSocial:MonoBehaviour {
- public enum Phase{Idle,Approach,Greet,Wait}
+ public enum Phase{Idle,Approach,Greet,Wait,FetchGift,CarryGift,PresentGift,WatchGift}
  public Phase Current{get;private set;}public bool Active=>Current!=Phase.Idle;
  public SocialMemory Memory=>season().Social(index);
  public bool Willing=>Memory.trust>=.4f&&Memory.injury<=0;
  public float Attraction=>Memory.affinity*.65f+Memory.trust*.35f;
  CreatureCuriosity creature;IslandNavigator walker;HumanoidMotion motion;CarryItem item;VillagerRoutine routine;
  Func<SliceState> season;int index;float cooldown,clock,elapsed;
+ CreatureHybrid hybrid;CreatureAffordance[] sharingObjects;Vector3 giftOrigin,meeting,offeringPoint;Quaternion giftRotation;bool ownsGift;
+ public CreatureAffordance Offering{get;private set;}public bool Ready=>Current==Phase.PresentGift;public bool Sharing=>Current>=Phase.FetchGift;
+ public void ConfigureSharing(CreatureHybrid god,CreatureAffordance[] objects){hybrid=god;sharingObjects=objects;}
+ bool Shareable(CreatureAffordance prop){if(prop==null||prop.host!=null||!prop.Available||prop.GetComponent<ConstructionBlock>()!=null||prop.kind==CreatureAffordance.Kind.Villager)return false;return prop.kind!=CreatureAffordance.Kind.Food||prop.GetComponent<DiscoveryObject>()?.treat==true;}
+ public bool TryShare(CreatureAffordance prop){
+  if(hybrid==null||season().paused||Active||item.held||!Willing||(!season().developmentFocus&&!season().Finished&&season().water<45)||Memory.nextInvitationAt>season().Hybrid.time||hybrid.Owner!=CreatureHybrid.ActionOwner.None||creature.Current!=CreatureCuriosity.Phase.Rest||(GetComponent<VillagerExploration>()?.Active??false)||(GetComponent<VillagerBlockPlay>()?.Active??false)||!Shareable(prop))return false;
+  if(Vector3.Distance(transform.position,prop.transform.position)>walker.world.Scale*120||!hybrid.CanReach(prop.GetComponent<HybridTarget>())||!walker.world.Sample(prop.transform.position,walker.profile,8,out _))return false;
+  var delta=transform.position-creature.transform.position;delta.y=0;if(delta.sqrMagnitude<1e-10f)delta=-creature.transform.forward;
+  if(!walker.world.Sample(creature.transform.position+delta.normalized*walker.world.Scale*7,walker.profile,8,out meeting)||!walker.world.Sample(creature.transform.position+delta.normalized*walker.world.Scale*4,walker.world.creature,8,out offeringPoint))return false;
+  Offering=prop;prop.host=this;giftOrigin=prop.transform.position;giftRotation=prop.transform.rotation;routine.ResetTask();walker.ResetRoute();clock=elapsed=0;Current=Phase.FetchGift;motion?.LookAt(prop.transform);return true;
+ }
+ bool ChooseShare(){if(sharingObjects==null||hybrid==null||Memory.nextInvitationAt>season().Hybrid.time)return false;CreatureAffordance best=null;float score=float.NegativeInfinity;foreach(var prop in sharingObjects){if(!Shareable(prop))continue;float distance=Vector3.Distance(transform.position,prop.transform.position)/walker.world.Scale;float value=(prop.kind==CreatureAffordance.Kind.Food?season().hunger*2:.8f)-distance*.015f;if(value>score){score=value;best=prop;}}return TryShare(best);}
  public void Initialize(CreatureCuriosity god,int identity,Func<SliceState> current){creature=god;index=identity;season=current;walker=GetComponent<IslandNavigator>();motion=GetComponent<HumanoidMotion>();item=GetComponent<CarryItem>();routine=GetComponent<VillagerRoutine>();cooldown=18+identity*13;}
  public bool TryBegin(){
   if(Active||item.held||creature.Current!=CreatureCuriosity.Phase.Rest||(GetComponent<VillagerExploration>()?.Active??false)||(GetComponent<VillagerBlockPlay>()?.Active??false))return false;
@@ -29,7 +42,8 @@ public sealed class VillagerSocial:MonoBehaviour {
  public bool Tick(float dt,bool paused){
   if(paused||dt<=0)return Active;
   if(item.held){ResetTask();return false;}
-  if(!Active){cooldown-=dt;if(cooldown<=0){if(!TryBegin())cooldown=6;}return Active;}
+  if(!Active){cooldown-=dt;if(cooldown<=0){if(ChooseShare())return true;if(!TryBegin())cooldown=6;}return Active;}
+  if(Sharing)return TickSharing(dt);
   clock+=dt;elapsed+=dt;
   if(elapsed>22||creature.Current!=CreatureCuriosity.Phase.Rest){ResetTask();return false;}
   var delta=transform.position-creature.transform.position;delta.y=0;
@@ -45,13 +59,35 @@ public sealed class VillagerSocial:MonoBehaviour {
   }
   return Active;
  }
+ bool TickSharing(float dt){
+  clock+=dt;elapsed+=dt;
+  if(Offering==null||Offering.host!=this||elapsed>90){ResetTask();return false;}
+  var prop=Offering;var carried=prop.Item;
+  if(Current==Phase.FetchGift){
+   if(carried.held||prop.GetComponent<DiscoveryObject>()?.Owner!=null){ResetTask();return false;}
+   if(walker.MoveTo(prop.transform.position,transform.lossyScale.y*1.6f,dt)){ownsGift=true;carried.held=true;prop.GetComponent<Collider>().enabled=false;motion?.Carry(prop.transform);motion?.Activity(0);Current=Phase.CarryGift;clock=0;walker.ResetRoute();}
+   else if(walker.Blocked&&elapsed>5)ResetTask();
+  }else if(Current==Phase.CarryGift){
+   if(!carried.held||Vector3.Distance(creature.transform.position,meeting)>walker.world.Scale*24){ResetTask();return false;}
+   if(walker.MoveTo(meeting,transform.lossyScale.y*1.6f,dt)){motion?.Carry(null);motion?.Activity(5);offeringPoint=walker.world.ProjectFoot(offeringPoint,walker.world.creature)+Vector3.up*walker.world.Scale*.7f;prop.transform.SetPositionAndRotation(offeringPoint,giftRotation);carried.held=false;ownsGift=false;prop.GetComponent<Collider>().enabled=true;Current=Phase.PresentGift;clock=0;motion?.LookAt(creature.transform);motion?.Signal(true,true,prop.transform.position);hybrid.Journal.Add(season().Hybrid.time,"invitation",prop.kind==CreatureAffordance.Kind.Food?CreatureAction.EatFood:CreatureAction.PlayWithToy,prop.GetComponent<HybridTarget>().id,GetComponent<HybridTarget>().id);}
+   else if(walker.Blocked&&elapsed>5)ResetTask();
+  }else if(Current==Phase.PresentGift){
+   Face();if(carried.held){ResetTask();return false;}
+   if(clock>18){Memory.missedInvitations=Math.Min(1000000,Memory.missedInvitations+1);Memory.nextInvitationAt=season().Hybrid.time+100;ResetTask();}
+  }else if(Current==Phase.WatchGift){
+   Face();if(clock>35){ResetTask();return false;}
+  }
+  return Active;
+ }
+ public bool Accept(CreatureAffordance prop){if(prop!=Offering||!Ready)return false;Current=Phase.WatchGift;clock=0;motion?.Signal(false);motion?.Activity(6);return true;}
+ public void SharedOutcome(CreatureAffordance prop,bool success){if(prop!=Offering||Current!=Phase.WatchGift)return;if(success){var memory=Memory;if(prop.kind==CreatureAffordance.Kind.Food)memory.treatsOffered=Math.Min(1000000,memory.treatsOffered+1);else memory.sharedPlay=Math.Min(1000000,memory.sharedPlay+1);memory.trust=Mathf.Clamp01(memory.trust+.06f);memory.affinity=Mathf.Clamp01(memory.affinity+.04f);memory.lastSharedAt=season().Hybrid.time;memory.nextInvitationAt=season().Hybrid.time+Mathf.Lerp(70,40,memory.boldness);hybrid.Journal.Add(season().Hybrid.time,"shared experience",prop.kind==CreatureAffordance.Kind.Food?CreatureAction.EatFood:CreatureAction.PlayWithToy,GetComponent<HybridTarget>().id,"Completed together");}ResetTask();if(success){motion?.React();creature.NoticeGreeting(transform);}}
  void Face(){var at=creature.transform.position-transform.position;at.y=0;if(at.sqrMagnitude>1e-10f)transform.rotation=Quaternion.LookRotation(at);}
  public void RememberGreeting(){var m=Memory;m.greetings=Math.Min(1000000,m.greetings+1);m.trust=Mathf.Clamp01(m.trust+.08f);m.affinity=Mathf.Clamp01(m.affinity+.025f);}
  public void RememberRide(){var m=Memory;m.rides=Math.Min(1000000,m.rides+1);m.trust=Mathf.Clamp01(m.trust+.12f);m.affinity=Mathf.Clamp01(m.affinity+.08f);}
  public void RememberDispute(){var m=Memory;m.disputes=Math.Min(1000000,m.disputes+1);m.affinity=Mathf.Clamp01(m.affinity-.12f);}
  public void WitnessRide(){var m=Memory;m.witnessed=Math.Min(1000000,m.witnessed+1);m.trust=Mathf.Clamp01(m.trust+.03f);}
  public void Feedback(bool positive){Memory.affinity=Mathf.Clamp01(Memory.affinity+(positive?.08f:-.08f));}
- public void ResetTask(){if(!Active)return;Current=Phase.Idle;clock=elapsed=0;cooldown=Mathf.Lerp(65,25,Memory.boldness)*Mathf.Lerp(1.5f,.75f,Memory.trust);motion?.Signal(false);motion?.LookAt(null);motion?.Activity(0);walker?.ResetRoute();routine?.ResetTask();}
+ public void ResetTask(){if(!Active)return;if(Offering!=null){var prop=Offering;if(ownsGift){prop.Item.held=false;prop.transform.SetPositionAndRotation(giftOrigin,giftRotation);prop.GetComponent<Collider>().enabled=true;motion?.Carry(null);}if(prop.host==this)prop.host=null;prop.GetComponent<DiscoveryObject>()?.Refresh();Memory.nextInvitationAt=Mathf.Max(Memory.nextInvitationAt,season().Hybrid.time+30);}Offering=null;ownsGift=false;Current=Phase.Idle;clock=elapsed=0;cooldown=Mathf.Lerp(65,25,Memory.boldness)*Mathf.Lerp(1.5f,.75f,Memory.trust);motion?.Signal(false);motion?.LookAt(null);motion?.Activity(0);walker?.ResetRoute();routine?.ResetTask();}
  void OnDisable(){ResetTask();}
 }
 }
