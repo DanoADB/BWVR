@@ -5,12 +5,14 @@ using UnityEngine;
 using UnityEditor;
 namespace BWVR.Editor {
 public static class IslandTerrainImporter {
- [Serializable] class Export {public int version,width;public int[] heights,flags,bounds;public float cellSize,heightUnit;public string source,sha256;}
+ [Serializable] class Export {public int version,width;public int[] heights,flags,bounds;public float cellSize,heightUnit;public string source,sha256,placementHash;public IslandPlacement[] placements;}
  const string Local="Assets/LocalTerrain/Resources";
  [MenuItem("BWVR/Import original first island terrain")]
  public static void Import(){
   var input=JsonUtility.FromJson<Export>(File.ReadAllText(".local/land1.json"));if(input.version!=1||input.width!=513||input.heights.Length!=513*513||input.flags.Length!=input.heights.Length||input.bounds.Length!=4)throw new Exception("Invalid first-island export");
   Directory.CreateDirectory(Local);AssetDatabase.Refresh();var path=Local+"/FirstIsland.asset";var data=AssetDatabase.LoadAssetAtPath<IslandTerrainData>(path);if(data==null){data=ScriptableObject.CreateInstance<IslandTerrainData>();AssetDatabase.CreateAsset(data,path);}
+  data.placements=input.placements??Array.Empty<IslandPlacement>();data.placementHash=input.placementHash;
+  foreach(var p in data.placements)if(!float.IsFinite(p.x)||!float.IsFinite(p.z)||!float.IsFinite(p.size)||p.size<=0||p.size>100)throw new Exception("Invalid placement export");
   data.width=input.width;data.heights=input.heights;data.flags=input.flags;data.bounds=input.bounds;data.cellSize=input.cellSize;data.heightUnit=input.heightUnit;data.sourceHash=input.sha256;data.scale=4.8f/((input.bounds[2]-input.bounds[0])*input.cellSize);data.anchorHeight=data.OriginalHeight(data.origin.x,data.origin.y);
   int minX=input.bounds[0]-1,minZ=input.bounds[1]-1,maxX=input.bounds[2]+1,maxZ=input.bounds[3]+1;int w=maxX-minX+1,h=maxZ-minZ+1;var vertices=new Vector3[w*h];var uv=new Vector2[vertices.Length];var triangles=new List<int>();
   for(int z=0;z<h;z++)for(int x=0;x<w;x++){int gx=minX+x,gz=minZ+z,i=z*w+x;vertices[i]=data.World(gx,gz,data.Altitude(gx,gz));uv[i]=new Vector2(vertices[i].x,vertices[i].z);}

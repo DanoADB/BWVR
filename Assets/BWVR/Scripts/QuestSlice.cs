@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.XR;
@@ -17,6 +18,8 @@ public sealed class QuestSlice:MonoBehaviour {
  void Start(){terrain=Resources.Load<IslandTerrainData>("FirstIsland");art=Resources.Load<GameArtCatalog>("BWVRArt/Catalog");font=Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");Load();Build();humanoids=GetComponentsInChildren<HumanoidMotion>();}
  Material Mat(Color c){var m=new Material(Shader.Find("Universal Render Pipeline/Lit")??Shader.Find("Standard"));m.color=c;return m;}
  GameObject Shape(string name,PrimitiveType shape,Vector3 position,Vector3 scale,Color color,Transform parent=null){var g=GameObject.CreatePrimitive(shape);g.name=name;g.transform.SetParent(parent??transform,false);g.transform.localPosition=position;g.transform.localScale=scale;g.GetComponent<Renderer>().sharedMaterial=Mat(color);return g;}
+ IslandPlacement Nearest(string kind,Vector3 from,System.Func<IslandPlacement,bool> filter=null)=>terrain?.placements?.Where(p=>p.kind==kind&&(filter==null||filter(p))).OrderBy(p=>(terrain.PlacementPoint(p)-from).sqrMagnitude).FirstOrDefault();
+ Vector3 Landmark(string kind,Vector3 fallback,System.Func<IslandPlacement,bool> filter=null){var p=Nearest(kind,fallback,filter);return p==null?fallback:terrain.PlacementPoint(p);}
  Vector3 Site(Vector3 at){if(terrain==null)return at;return new Vector3(at.x*.1f,at.y,at.z*.1f);}
  // Heights are in original mesh/game units; island import owns the uniform conversion.
  float Size(float previous,float originalUnits)=>terrain==null?previous:originalUnits*terrain.scale;
@@ -32,7 +35,10 @@ public sealed class QuestSlice:MonoBehaviour {
   if(terrain!=null){
    var island=new GameObject("Land 1 - original island geometry");island.transform.SetParent(transform,false);island.AddComponent<MeshFilter>().sharedMesh=terrain.mesh;ground=island.AddComponent<MeshRenderer>();groundCollider=island.AddComponent<MeshCollider>();((MeshCollider)groundCollider).sharedMesh=terrain.mesh;
    var ocean=Shape("First island sea",PrimitiveType.Plane,new Vector3(.5f,terrain.SeaLevel+.0015f,0),new Vector3(10,1,10),new Color(.18f,.44f,.51f));Destroy(ocean.GetComponent<Collider>());
-   well=terrain.SafePoint(well);cistern=terrain.SafePoint(cistern);
+   if(terrain.HasPlacements){
+    cistern=Landmark("building",Vector3.zero,p=>p.town==0&&p.type.Contains("STORAGE_PIT"));
+    well=Landmark("well",Landmark("drink",cistern));
+   }else{well=terrain.SafePoint(well);cistern=terrain.SafePoint(cistern);}
   }else{
    Shape("Island plinth",PrimitiveType.Cylinder,new Vector3(0,.39f,0),new Vector3(1.9f,.39f,1.9f),new Color(.12f,.2f,.22f));
    ground=Shape("Living island",PrimitiveType.Cylinder,new Vector3(0,.79f,0),new Vector3(1.8f,.03f,1.8f),new Color(.35f,.46f,.25f)).GetComponent<Renderer>();if(art!=null&&art.grass!=null)ground.sharedMaterial=art.grass;
@@ -41,11 +47,12 @@ public sealed class QuestSlice:MonoBehaviour {
   if(environment==null)for(int i=0;i<4;i++){float x=-.5f+i*.28f;if(Original("house"+(i%3+1),new Vector3(x,Floor,.48f),.18f)!=null)continue;Shape("Village dwelling",PrimitiveType.Cube,new Vector3(x,Floor+.065f,.48f),new Vector3(.17f,.13f,.16f),new Color(.74f,.57f,.36f));Shape("Roof",PrimitiveType.Cylinder,new Vector3(x,Floor+.15f,.48f),new Vector3(.22f,.04f,.21f),new Color(.35f,.21f,.13f));}
   if(environment==null)for(int i=0;i<9;i++){float a=i*.55f;Vector3 at=new Vector3(Mathf.Cos(a)*.72f,Floor,Mathf.Sin(a)*.72f);if(Original(new[]{"beech","oak","pine"}[i%3],at,.28f)!=null)continue;Shape("Tree trunk",PrimitiveType.Cylinder,at+Vector3.up*.07f,new Vector3(.025f,.07f,.025f),new Color(.3f,.2f,.12f));Shape("Tree crown",PrimitiveType.Sphere,at+Vector3.up*.18f,new Vector3(.13f,.2f,.13f),new Color(.12f,.3f,.2f));}
   Shape("Village cistern - release water here",PrimitiveType.Cylinder,cistern+Vector3.up*Size(.035f,1),new Vector3(Size(.18f,8),Size(.035f,1),Size(.18f,8)),new Color(.17f,.6f,.7f));
+  if(environment!=null&&terrain!=null&&terrain.HasPlacements)IslandEnvironment.WaterSource(environment,transform,well,terrain.scale);
   Shape("Spring",PrimitiveType.Cylinder,well+Vector3.up*Size(.015f,.4f),new Vector3(Size(.14f,6),Size(.015f,.4f),Size(.14f,6)),new Color(.28f,.68f,.8f));
-  jobs=new VillagerRoutine[3];for(int i=0;i<3;i++){var w=Item("Villager",Offering.Villager,Site(new Vector3(-.2f+i*.14f,Floor,.13f)),PrimitiveType.Capsule,new Color(.9f,.65f,.38f),.055f);workers.Add(w.transform);}
+  jobs=new VillagerRoutine[3];for(int i=0;i<3;i++){var spawn=Site(new Vector3(-.2f+i*.14f,Floor,.13f));if(terrain!=null&&terrain.HasPlacements){var starts=terrain.placements.Where(p=>p.kind=="villager").GroupBy(p=>new Vector2(p.x,p.z)).Take(3).Select(g=>g.First()).ToArray();if(i<starts.Length)spawn=terrain.PlacementPoint(starts[i]);}var w=Item("Villager",Offering.Villager,spawn,PrimitiveType.Capsule,new Color(.9f,.65f,.38f),.055f);workers.Add(w.transform);}
   var waterOffering=Item("Water offering",Offering.Water,well+Vector3.up*Size(.07f,2),PrimitiveType.Sphere,new Color(.25f,.8f,.95f),Size(.065f,1.2f));
-  Item("Food offering",Offering.Food,Ground(Site(new Vector3(.18f,Floor,.35f)))+Vector3.up*Size(.04f,2),PrimitiveType.Sphere,new Color(.95f,.66f,.18f),Size(.065f,1.2f));
-  Item("Wood offering",Offering.Wood,Ground(Site(new Vector3(-.5f,Floor,-.22f)))+Vector3.up*Size(.04f,2),PrimitiveType.Cube,new Color(.5f,.3f,.16f),Size(.07f,1.2f));
+  Item("Food offering",Offering.Food,Ground(Landmark("field",Site(new Vector3(.18f,Floor,.35f)),p=>p.town==0))+Vector3.up*Size(.04f,2),PrimitiveType.Sphere,new Color(.95f,.66f,.18f),Size(.065f,1.2f));
+  Item("Wood offering",Offering.Wood,Ground(Landmark("tree",Site(new Vector3(-.5f,Floor,-.22f))))+Vector3.up*Size(.04f,2),PrimitiveType.Cube,new Color(.5f,.3f,.16f),Size(.07f,1.2f));
   creature=new GameObject("The village's god").transform;creature.SetParent(transform,false);creature.position=Ground(Site(new Vector3(0,Floor,-.12f)));
   var god=Resources.Load<GameObject>("BWVRGod/Puglin");if(god!=null){var instance=Instantiate(god,creature);instance.transform.localPosition=Vector3.zero;instance.transform.localScale=Vector3.one*Size(.34f,13.9236f);Destroy(instance.GetComponent<Collider>());godMotion=instance.GetComponent<HumanoidMotion>();}
   if(god==null&&Original("cow",Vector3.zero,Size(.34f,13.9236f),creature)==null){
@@ -56,7 +63,7 @@ public sealed class QuestSlice:MonoBehaviour {
   if(god==null&&creature.GetComponentInChildren<OriginalCowMotion>()==null&&terrain!=null)foreach(Transform visual in creature){visual.localPosition*=Size(.34f,13.9236f)/.34f;visual.localScale*=Size(.34f,13.9236f)/.34f;}
   cowMotion=creature.GetComponentInChildren<OriginalCowMotion>();
   creatureRoutine=creature.gameObject.AddComponent<CreatureRoutine>();creatureRoutine.speed=(.07f+state.care*.08f)*(terrain!=null?.1f:1);creatureRoutine.Initialize(godMotion,waterOffering,well,cistern,()=>{state.Deliver();notice="The creature delivered water to the village.";},Ground);
-  for(int i=0;i<workers.Count;i++){jobs[i]=workers[i].gameObject.AddComponent<VillagerRoutine>();jobs[i].Initialize((VillagerRoutine.Role)i,i==0?well:i==1?Site(new Vector3(.2f,Floor,.26f)):Site(new Vector3(-.64f,Floor,-.12f)),cistern,Ground,role=>{if(role==VillagerRoutine.Role.WaterGatherer)state.water=Mathf.Min(100,state.water+.7f);else if(role==VillagerRoutine.Role.Farmer)state.crops=Mathf.Min(100,state.crops+1.2f);notice=role+" finished a delivery.";});}
+  for(int i=0;i<workers.Count;i++){jobs[i]=workers[i].gameObject.AddComponent<VillagerRoutine>();jobs[i].Initialize((VillagerRoutine.Role)i,i==0?well:i==1?Landmark("field",Site(new Vector3(.2f,Floor,.26f)),p=>p.town==0):Landmark("tree",Site(new Vector3(-.64f,Floor,-.12f)),p=>p.variant<13),cistern,Ground,role=>{if(role==VillagerRoutine.Role.WaterGatherer)state.water=Mathf.Min(100,state.water+.7f);else if(role==VillagerRoutine.Role.Farmer)state.crops=Mathf.Min(100,state.crops+1.2f);notice=role+" finished a delivery.";});}
   Debug.Log("BWVR_ART_ACTIVE: environment="+(environment!=null)+", Puglin="+(god!=null)+", original fallback="+(art!=null));
   var target=creature.gameObject.AddComponent<SpatialTarget>();target.invoke=()=>{state.Praise();if(godMotion!=null)godMotion.React();notice="Warmth remembered. The creature is more likely to bring water.";};var box=creature.gameObject.AddComponent<BoxCollider>();box.center=new Vector3(0,Size(.18f,7),0);box.size=new Vector3(Size(.2f,8),Size(.4f,15),Size(.2f,8));
   creatureLabel=Label("Creature intent",creature,new Vector3(0,Size(.44f,17),0),new Vector2(420,70),terrain!=null?.00007f:.0007f,22);creatureLabel.text="THEIR GOD · WATCHING";

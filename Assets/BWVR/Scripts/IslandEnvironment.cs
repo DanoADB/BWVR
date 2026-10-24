@@ -5,10 +5,8 @@ public static class IslandEnvironment {
  static GameObject Place(EnvironmentArt art,string key,Transform parent,Vector3 position,Vector3 size,float yaw=0){
   var prefab=art.Find(key);if(prefab==null)return null;var g=Object.Instantiate(prefab,parent);g.transform.localPosition=position;g.transform.localScale=size;g.transform.localRotation=Quaternion.Euler(0,yaw,0);return g;
  }
- public static void Build(EnvironmentArt art,Transform parent,Renderer ground,IslandTerrainData terrain=null){
-  var root=new GameObject("Quaternius CC0 island environment").transform;root.SetParent(parent,false);
-  for(int i=0;i<4;i++){
-   var house=new GameObject("Modular village home "+(i+1)).transform;house.SetParent(root,false);house.localPosition=new Vector3(-.5f+i*.28f,Floor,.48f);house.localRotation=Quaternion.Euler(0,(i%2==0?8:-8),0);
+ static Transform Home(EnvironmentArt art,Transform parent,Vector3 at,float yaw,float scale,string name){
+  var house=new GameObject(name).transform;house.SetParent(parent,false);house.localPosition=at;house.localRotation=Quaternion.Euler(0,yaw,0);house.localScale=Vector3.one*scale;
    Place(art,"Wall_Plaster_Door_Round",house,new Vector3(0,0,-.075f),new Vector3(.17f,.12f,.018f));
    Place(art,"Door_1_Round",house,new Vector3(0,0,-.086f),new Vector3(.05f,.09f,.008f));
    Place(art,"Wall_Plaster_Straight",house,new Vector3(0,0,.075f),new Vector3(.17f,.12f,.018f),180);
@@ -16,7 +14,12 @@ public static class IslandEnvironment {
    Place(art,"Roof_RoundTiles_4x4",house,new Vector3(0,.12f,0),new Vector3(.21f,.075f,.20f));
    Place(art,"Roof_Front_Brick4",house,new Vector3(0,.12f,-.075f),new Vector3(.17f,.065f,.014f));
    var box=house.gameObject.AddComponent<BoxCollider>();box.center=new Vector3(0,.09f,0);box.size=new Vector3(.18f,.18f,.17f);
-  }
+  return house;
+ }
+ public static void Build(EnvironmentArt art,Transform parent,Renderer ground,IslandTerrainData terrain=null){
+  var root=new GameObject("Quaternius CC0 island environment").transform;root.SetParent(parent,false);
+  if(terrain!=null&&terrain.HasPlacements){BuildOriginal(art,root,terrain);Surface(ground,terrain);Clouds(root);return;}
+  for(int i=0;i<4;i++)Home(art,root,new Vector3(-.5f+i*.28f,Floor,.48f),i%2==0?8:-8,1,"Modular village home "+(i+1));
   for(int i=0;i<11;i++){
    float angle=.12f+i*.53f;var at=new Vector3(Mathf.Cos(angle)*.75f,Floor,Mathf.Sin(angle)*.75f);
    if(at.z<-.45f&&Mathf.Abs(at.x)<.48f)continue;
@@ -56,10 +59,68 @@ public static class IslandEnvironment {
   for(int y=0;y<128;y++)for(int x=0;x<128;x++){float noise=Mathf.PerlinNoise(x*.12f,y*.12f);texture.SetPixel(x,y,Color.Lerp(new Color(.31f,.40f,.15f),new Color(.56f,.62f,.29f),noise));}texture.Apply();
   var material=new Material(Shader.Find("BWVR/GameSurface"));material.mainTexture=texture;material.mainTextureScale=Vector2.one*5;ground.sharedMaterial=material;
   }
+  Clouds(root);
+ }
+ static void Clouds(Transform root){
   var cloudMaterial=new Material(Shader.Find("BWVR/GameSurface"));cloudMaterial.color=new Color(.85f,.90f,.87f);
   for(int i=0;i<6;i++)for(int puff=0;puff<3;puff++){
    var cloud=GameObject.CreatePrimitive(PrimitiveType.Sphere);cloud.name="Soft horizon cloud";cloud.transform.SetParent(root,false);float a=i*1.05f;cloud.transform.localPosition=new Vector3(Mathf.Cos(a)*4+puff*.3f,2.6f+Mathf.Sin(i)*.25f,Mathf.Sin(a)*4);cloud.transform.localScale=new Vector3(.8f,.18f+puff*.03f,.4f);Object.Destroy(cloud.GetComponent<Collider>());cloud.GetComponent<Renderer>().sharedMaterial=cloudMaterial;
   }
  }
+ static void Surface(Renderer ground,IslandTerrainData terrain){var surface=Resources.Load<Material>("QuaterniusGround");if(surface!=null){var material=new Material(surface);material.SetFloat("_SeaLevel",terrain.SeaLevel);ground.sharedMaterial=material;}}
+ static void BuildOriginal(EnvironmentArt art,Transform root,IslandTerrainData terrain){
+  int count=0;
+  foreach(var p in terrain.placements){
+   if(p.kind is "drink" or "villager")continue;
+   var at=terrain.PlacementPoint(p);var name="Original "+p.kind+" L"+p.line+" - "+p.type;Transform marker;
+   if(p.kind=="building"&&!p.type.Contains("STORAGE_PIT")&&!p.type.Contains("GRAVEYARD")){
+    marker=Home(art,root,at,p.yaw,3.66f*terrain.scale*p.size/.195f,name);
+   }else{
+    marker=new GameObject(name).transform;marker.SetParent(root,false);marker.localPosition=at;marker.localRotation=Quaternion.Euler(p.pitch,p.yaw,p.roll);
+    float unit=terrain.scale*p.size;
+    if(p.kind=="tree"){
+     bool bush=p.variant>=13&&p.variant<=15;string key=bush?"Bush_Common":p.variant is 3 or 4 or 12?"Pine_1":p.variant%2==0?"CommonTree_1":"CommonTree_2";
+     var tree=Place(art,key,marker,Vector3.zero,(bush?new Vector3(3,2.5f,3):new Vector3(10,12.723f,10))*unit);
+     if(tree==null)throw new System.Exception("Missing replacement: "+key);
+     AddVegetationLOD(tree,bush);
+     // The catalog has no dead/palm meshes yet; use the matching broadleaf silhouette.
+     if(p.variant==22)tree.transform.localScale=new Vector3(4,8,4)*unit;
+    }else if(p.kind=="rock"||p.kind=="feature"){
+     var size=p.kind=="rock"?new Vector3(8,6,7):p.type.Contains("Pilar")?new Vector3(5,22,5):new Vector3(4,8,4);
+     Place(art,"Rock_Medium_"+(p.line%2+1),marker,Vector3.zero,size*unit);
+    }else if(p.kind=="field"){
+     for(int z=-1;z<=1;z++)for(int x=-1;x<=1;x++)Place(art,"Grass_Common_Short",marker,new Vector3(x*3,0,z*3)*unit,new Vector3(3,1.2f,3)*unit);
+    }else if(p.kind=="well"||p.type.Contains("STORAGE_PIT")){
+     StoneRing(art,marker,unit,p.kind=="well"?2:6);
+    }else if(p.type.Contains("GRAVEYARD")){
+     for(int i=0;i<6;i++)Place(art,"Rock_Medium_1",marker,new Vector3((i%3-1)*2,0,(i/3-.5f)*3)*unit,new Vector3(.8f,1.4f,.5f)*unit);
+    }
+   }
+   var view=marker.gameObject.AddComponent<IslandPlacementView>();view.sourceLine=p.line;view.kind=p.kind;count++;
+  }
+  // Repeated Quaternius meshes share instanced materials; avoid one material per tree.
+  foreach(var renderer in root.GetComponentsInChildren<MeshRenderer>())foreach(var material in renderer.sharedMaterials)if(material!=null)material.enableInstancing=true;
+  Debug.Log("BWVR_ORIGINAL_LAYOUT: "+count+" placed replacements; script="+terrain.placementHash);
+ }
+ static Mesh distantVegetation;
+ static Material distantLeaves;
+ static void AddVegetationLOD(GameObject tree,bool bush){
+  if(distantVegetation==null){
+   distantVegetation=new Mesh{name="Distant vegetation silhouette"};var vertices=new System.Collections.Generic.List<Vector3>();var triangles=new System.Collections.Generic.List<int>();
+   // Small shared silhouette for overview distance; the full Quaternius model appears nearby.
+   for(int i=0;i<8;i++){float a=i*Mathf.PI/4,b=(i+1)*Mathf.PI/4;int n=vertices.Count;vertices.Add(new Vector3(0,1,0));vertices.Add(new Vector3(Mathf.Cos(a)*.5f,.3f,Mathf.Sin(a)*.5f));vertices.Add(new Vector3(Mathf.Cos(b)*.5f,.3f,Mathf.Sin(b)*.5f));triangles.AddRange(new[]{n,n+1,n+2});
+    n=vertices.Count;vertices.Add(new Vector3(0,.2f,0));vertices.Add(new Vector3(Mathf.Cos(b)*.5f,.3f,Mathf.Sin(b)*.5f));vertices.Add(new Vector3(Mathf.Cos(a)*.5f,.3f,Mathf.Sin(a)*.5f));triangles.AddRange(new[]{n,n+1,n+2});}
+   vertices.AddRange(new[]{new Vector3(-.04f,0,0),new Vector3(.04f,0,0),new Vector3(.04f,.4f,0),new Vector3(-.04f,.4f,0)});int t=vertices.Count-4;triangles.AddRange(new[]{t,t+2,t+1,t,t+3,t+2});distantVegetation.SetVertices(vertices);distantVegetation.SetTriangles(triangles,0);distantVegetation.RecalculateNormals();distantVegetation.RecalculateBounds();
+   distantLeaves=new Material(Shader.Find("BWVR/GameSurface")){name="Distant meadow foliage",color=new Color(.24f,.38f,.12f),enableInstancing=true};
+  }
+  var detailed=tree.GetComponentsInChildren<Renderer>();var proxy=new GameObject("Distant silhouette");proxy.transform.SetParent(tree.transform,false);proxy.AddComponent<MeshFilter>().sharedMesh=distantVegetation;var renderer=proxy.AddComponent<MeshRenderer>();renderer.sharedMaterial=distantLeaves;
+  var lod=tree.AddComponent<LODGroup>();lod.SetLODs(new[]{new LOD(.04f,detailed),new LOD(.001f,new Renderer[]{renderer})});lod.RecalculateBounds();
+ }
+ public static void WaterSource(EnvironmentArt art,Transform parent,Vector3 at,float unit){
+  var well=new GameObject("Modern well at original drinking waypoint").transform;well.SetParent(parent,false);well.localPosition=at;StoneRing(art,well,unit,2);
+  for(int side=-1;side<=1;side+=2)Place(art,"Wall_Plaster_Straight",well,new Vector3(side*2.1f,0,0)*unit,new Vector3(.4f,4,.4f)*unit);
+  Place(art,"Roof_RoundTiles_4x4",well,new Vector3(0,4,0)*unit,new Vector3(5,1.8f,4)*unit);
+ }
+ static void StoneRing(EnvironmentArt art,Transform parent,float unit,float radius){for(int i=0;i<12;i++){float a=i*Mathf.PI/6;Place(art,"RockPath_Round_Small_1",parent,new Vector3(Mathf.Cos(a)*radius,0,Mathf.Sin(a)*radius)*unit,new Vector3(radius*.65f,1,radius*.5f)*unit,i*30);}}
 }
 }

@@ -54,3 +54,20 @@ To reproduce locally, run `python tools/prepare-island.py <extracted-game>/Data/
 The imported mesh has 44,400 vertices and 44,664 triangles. Scene placement samples the same split triangles as the collider; 48 dry-land probe comparisons differed by at most 0.000002m. Buildings and work sites choose nearby dry, gentle terrain. Object release uses the terrain collider and rejects water/steep ground. Pickup rays reach 8m across the expanded tabletop. The current actors still follow direct routes within the starter village; this is not whole-island obstacle-aware navigation.
 
 Validation: `python tools/test-island-export.py` checks X-major cell orientation, flags and malformed/truncated files using synthetic input. **BWVR > Verify actor actions and terrain (Play mode)** checks the real runtime creature/worker cycles, carried-resource hand reach, drinking reach, pause, exactly-once gift credit and terrain/collider agreement. Carry/drink hand poses are original procedural IK over UAL clips; no dedicated carry/drink clips are claimed to exist in the free library. Headset performance and comfort need hardware testing.
+
+
+## Original island placements
+
+The optional owned `Land1.txt` now supplies the layout as well as the LND terrain. After exporting the height field, run:
+
+```powershell
+python tools/prepare-placements.py "..\Shade\.local\native-game-data\Scripts\Land1.txt"
+```
+
+Then use **BWVR → Import original first island terrain** in Unity. Re-run the placement export after re-exporting terrain: the latter replaces `.local/land1.json`. The script extracts data only; it does not execute original commands. Both raw records and generated Unity assets remain ignored, alongside the owned height field. Public clones retain the procedural fallback.
+
+Current local source: 38 completed buildings/town centres, 1,398 vegetation records (including three dead trees), 132 rocks, 19 fields and 18 landmarks = 1,605 scene placements. Original X/Z, yaw and size multipliers are retained; Y comes from the imported terrain, plus explicit rock vertical offsets. Source line numbers identify each scene object. Planned buildings are not completed structures and are not spawned. Conversion tests cover radians versus legacy milli-radians, current versus maximum tree size, furniture type recognition and invalid coordinates. Runtime checks compare every scene replacement against its source record.
+
+Quaternius modular buildings replace the original abodes. Original storage-pit sites use stone rings and graveyards use small stone markers. Tree variants select broadleaf, pine or bush replacements. The current catalog lacks palms and dead-tree meshes, so those use approximate silhouettes; statues and geological pillars also use approximate stone replacements. Fields use grass patches, not original crop artwork. Decorative streams, fish farms, animals, furniture, lanterns, weather and big-forest commands are reported as unsupported rather than presented as recreated. The detailed Quaternius vegetation switches to a shared 18-triangle silhouette at overview distance; distant material instances are shared. This preserves positions with a lower distant geometry cost, but is not a headset performance certification.
+
+The existing three active workers begin at three distinct original villager positions; the 55 source villager records are not all simulated. Their work targets use original field, tree, drinking and storage locations. There is **no explicit well record** in this Land1 script. The slice's modern well is assembled from Quaternius stone/wall/roof pieces at the drinking waypoint nearest the first town's storage pit. This is a gameplay substitution, not evidence of an original well at that coordinate. The delivery destination is the actual original storage-pit coordinate. The modern drought rules and direct-route actor movement remain the slice's gameplay, not a recreation of every original mission.

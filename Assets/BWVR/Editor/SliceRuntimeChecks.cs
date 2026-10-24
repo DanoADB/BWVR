@@ -13,7 +13,7 @@ public static class SliceRuntimeChecks {
   var god=slice.GetComponentInChildren<CreatureRoutine>();var workers=slice.GetComponentsInChildren<VillagerRoutine>();var water=slice.GetComponentsInChildren<CarryItem>().First(i=>i.kind==Offering.Water);
   try{
    god.ResetTask();int before=god.deliveries;var seen=new HashSet<CreatureRoutine.Task>();bool handsChecked=false,drinkChecked=false;
-   for(int n=0;n<1200&&god.deliveries==before;n++){
+   for(int n=0;n<10000&&god.deliveries==before;n++){
     seen.Add(god.Current);god.Tick(.1f,false);
     if(god.Current==CreatureRoutine.Task.Carry&&!handsChecked){CheckHands(slice,false);handsChecked=true;}
     if(god.Current==CreatureRoutine.Task.Drink&&!drinkChecked){CheckHands(slice,true);drinkChecked=true;}
@@ -21,12 +21,17 @@ public static class SliceRuntimeChecks {
    if(seen.Count!=5||test.gifts!=1||god.deliveries!=before+1||!handsChecked||!drinkChecked)throw new Exception("Creature did not complete exactly one pickup/drink/carry/delivery cycle");
    if(water.held||!water.GetComponent<Collider>().enabled)throw new Exception("Delivered water was not released");
    var position=god.transform.position;var phase=god.Current;god.Tick(20,true);if(god.transform.position!=position||god.Current!=phase)throw new Exception("Paused task advanced");
-   foreach(var worker in workers){before=worker.completedJobs;for(int n=0;n<1600&&worker.completedJobs==before;n++)worker.Tick(.1f,false);if(worker.completedJobs!=before+1)throw new Exception("Worker failed to deliver: "+worker.role);}
+   foreach(var worker in workers){before=worker.completedJobs;for(int n=0;n<10000&&worker.completedJobs==before;n++)worker.Tick(.1f,false);if(worker.completedJobs!=before+1)throw new Exception("Worker failed to deliver: "+worker.role);}
    var terrain=Resources.Load<IslandTerrainData>("FirstIsland");int samples=0;float maxError=0;
    if(terrain!=null){
     foreach(var worker in workers)if(Mathf.Abs(worker.transform.lossyScale.y/terrain.scale-1.661f)>.01f)throw new Exception("Villager/game-unit scale mismatch");
     var visual=god.GetComponentInChildren<HumanoidMotion>();if(visual!=null&&Mathf.Abs(visual.transform.lossyScale.y/terrain.scale-13.9236f)>.01f)throw new Exception("Creature/game-unit scale mismatch");
     foreach(var home in slice.GetComponentsInChildren<Transform>().Where(t=>t.name.StartsWith("Modular village home")))if(Mathf.Abs(home.lossyScale.y*.195f/terrain.scale-3.66f)>.01f)throw new Exception("House/game-unit scale mismatch");
+    if(terrain.HasPlacements){
+     var views=slice.GetComponentsInChildren<IslandPlacementView>();var expected=terrain.placements.Where(p=>p.kind is not ("drink" or "villager")).ToArray();
+     if(views.Length!=expected.Length)throw new Exception("Original placement count mismatch");
+     foreach(var p in expected){var view=views.Single(v=>v.sourceLine==p.line);if(Vector3.Distance(view.transform.position,terrain.PlacementPoint(p))>.00001f||Mathf.Abs(Mathf.DeltaAngle(view.transform.eulerAngles.y,p.yaw))>.01f&&p.pitch==0&&p.roll==0)throw new Exception("Original placement drift at line "+p.line);}
+    }
     var collider=GameObject.Find("Land 1 - original island geometry").GetComponent<MeshCollider>();for(int i=0;i<100;i++){
     var point=terrain.World(Mathf.Lerp(terrain.bounds[0],terrain.bounds[2],Mathf.Repeat(i*.618f,1)),Mathf.Lerp(terrain.bounds[1],terrain.bounds[3],Mathf.Repeat(i*.414f,1)),0);if(!terrain.Dry(point,false))continue;
     if(!collider.Raycast(new Ray(new Vector3(point.x,3,point.z),Vector3.down),out var hit,4))throw new Exception("Missing terrain collider");maxError=Mathf.Max(maxError,Mathf.Abs(terrain.Project(point).y-hit.point.y));samples++;

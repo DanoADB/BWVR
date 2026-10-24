@@ -1,7 +1,12 @@
 using UnityEngine;
 namespace BWVR {
+[System.Serializable] public sealed class IslandPlacement {
+ public int line,town,variant;public string command,kind,type;public float x,z,yaw,size=1,vertical,pitch,roll;
+}
 public sealed class IslandTerrainData:ScriptableObject {
- public int width;public int[] heights,flags,bounds;public float cellSize=10,heightUnit=.67f,scale;public Vector2 origin=new Vector2(1865.61f,2641.24f);public float anchorHeight;public Mesh mesh;public string sourceHash;
+ public int width;public int[] heights,flags,bounds;public float cellSize=10,heightUnit=.67f,scale;public Vector2 origin=new Vector2(1865.61f,2641.24f);public float anchorHeight;public Mesh mesh;public string sourceHash;public string placementHash;public IslandPlacement[] placements=System.Array.Empty<IslandPlacement>();
+ public bool HasPlacements=>placements!=null&&placements.Length>0;
+ public Vector3 PlacementPoint(IslandPlacement item){var point=Project(World(item.x/cellSize,item.z/cellSize,0));point.y+=item.vertical*scale;return point;}
  public float SeaLevel=>.82f-anchorHeight*scale;
  public Vector3 World(float x,float z,float altitude)=>new Vector3((x*cellSize-origin.x)*scale,SeaLevel+altitude*heightUnit*scale,(z*cellSize-origin.y)*scale);
  public float OriginalHeight(float x,float z){float gx=x/cellSize,gz=z/cellSize;int ix=Mathf.FloorToInt(gx),iz=Mathf.FloorToInt(gz);if(ix<0||iz<0||ix>=width-1||iz>=width-1)return 0;

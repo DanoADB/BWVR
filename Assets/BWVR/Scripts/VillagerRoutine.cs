@@ -14,6 +14,6 @@ public sealed class VillagerRoutine:MonoBehaviour {
   else if(phase==2&&Move(role==Role.WaterGatherer?store:item.home,dt)){phase=3;timer=0;motion?.Activity(5);}
   else if(phase==3&&timer>1.2f){completedJobs++;completed?.Invoke(role);ResetTask();}
  }
- bool Move(Vector3 target,float dt){var direction=target-transform.position;direction.y=0;if(direction.magnitude<transform.lossyScale.y*.35f)return true;transform.rotation=Quaternion.LookRotation(direction);transform.position=ground(Vector3.MoveTowards(transform.position,new Vector3(target.x,transform.position.y,target.z),dt*transform.lossyScale.y*.647f));return false;}
+ bool Move(Vector3 target,float dt){var direction=target-transform.position;direction.y=0;if(direction.magnitude<transform.lossyScale.y*.35f)return true;transform.rotation=Quaternion.LookRotation(direction);transform.position=ground(Vector3.MoveTowards(transform.position,new Vector3(target.x,transform.position.y,target.z),dt*transform.lossyScale.y*1.8f));return false;}
 }
 }
