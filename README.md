@@ -20,6 +20,8 @@ BWVR configures the Standalone OpenXR loader, single-pass instanced rendering, a
 
 **BWVR > Quest Link > Enable headset Play mode** reapplies these desktop settings without rebuilding the scene. **BWVR > Quest Link > Use desktop preview without headset** disables desktop XR initialization and keeps keyboard/mouse preview available; re-enable headset mode before the next Link session. Stop Play mode before changing modes, and restart Play after connecting Link.
 
+The island is placed in front of your first tracked headset pose, so your room position and starting direction do not leave the village behind you. Placement runs once; moving or turning afterward is unrestricted. To reset the view during Play mode, use **BWVR > Quest Link > Recenter island in front of headset**. This rotates/translates the virtual origin without overriding head pitch or roll.
+
 If Unity shows only the desktop view, confirm Quest Link is actually running in the headset, Meta is the active OpenXR runtime, and desktop initialization is enabled. USB debugging alone connects Android deployment, not Link. Link runs the game on the PC; use the APK to evaluate standalone Quest performance.
 
 Reference: [Meta Link development workflow](https://developers.meta.com/vr/documentation/unity/unity-link/).

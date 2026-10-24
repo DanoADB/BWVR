@@ -54,6 +54,12 @@ public static class ProjectSetup {
   AssetDatabase.SaveAssets();
   Debug.Log("BWVR_LINK_CONFIGURED: start Quest Link in the headset, then press Play. Android settings are independent.");
  }
+ [MenuItem("BWVR/Quest Link/Recenter island in front of headset")]
+ public static void RecenterQuestLink(){
+  var slice=UnityEngine.Object.FindAnyObjectByType<QuestSlice>();
+  if(!EditorApplication.isPlaying||slice==null)throw new Exception("Start the first slice in Play mode before recentering.");
+  slice.RecenterView();
+ }
  [MenuItem("BWVR/Quest Link/Use desktop preview without headset")]
  public static void ConfigureDesktopPreview(){
   if(EditorApplication.isPlayingOrWillChangePlaymode)throw new Exception("Stop Play mode before changing XR settings.");
