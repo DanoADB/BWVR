@@ -3,10 +3,10 @@ using UnityEngine;
 namespace BWVR {
 // A bounded curiosity loop yields to drought work and owns at most one carried object.
 public sealed class CreatureCuriosity:MonoBehaviour {
- public enum Phase { Rest,Approach,Inspect,Lift,Play,CarryFriend,Place,BuildApproach,BuildPlace,ThrowBall,WatchBall,RallyBall }
+ public enum Phase { Rest,Approach,Inspect,Lift,Play,CarryFriend,Place,BuildApproach,BuildPlace,ThrowBall,WatchBall,RallyBall,FetchCarry,FetchPlace }
  public int built{get;private set;}
  Vector3 buildPoint,buildApproach,buildStart;Quaternion buildRotation;
- bool constructionFocus,askedPlaymate;float inviteGestureUntil;
+ bool fetching;int fetchTicket;bool constructionFocus,askedPlaymate;float inviteGestureUntil;
  VillagerSocial lastFriend;
  public Phase Current{get;private set;}CreatureAffect.Mood affect,feedbackMood;float reaction;bool lastWater;
  public CreatureAffect.Mood Affect{get=>reaction>0?feedbackMood:affect;private set=>affect=value;}
@@ -24,7 +24,7 @@ public sealed class CreatureCuriosity:MonoBehaviour {
   if(!navigator.world.Sample(candidate.transform.position,navigator.profile,12,out _))return false;
   if(candidate.GetComponent<ConstructionBlock>()!=null)constructionFocus=true;
   if(candidate.host!=null&&!candidate.host.Accept(candidate))return false;
-  routine.ResetTask();navigator.ResetRoute();target=candidate;askedPlaymate=false;inviteGestureUntil=0;elapsed=clock=0;Current=Phase.Approach;motion?.LookAt(target.transform);Affect=CreatureAffect.Mood.Curious;return true;
+  var playerBall=candidate.GetComponent<BeachBall>();if(playerBall!=null)playerBall.JustFetched=false;routine.ResetTask();navigator.ResetRoute();target=candidate;fetching=candidate.GetComponent<BeachBall>()?.FetchReady==true;fetchTicket=fetching?candidate.GetComponent<BeachBall>().FetchTicket:0;askedPlaymate=false;inviteGestureUntil=0;elapsed=clock=0;Current=Phase.Approach;motion?.LookAt(target.transform);Affect=CreatureAffect.Mood.Curious;return true;
  }
  public bool Tick(float dt,SliceState season,bool allowChoice=true){
   state=season;if(dt<=0||state.paused)return Current!=Phase.Rest;reaction=Mathf.Max(0,reaction-dt);
@@ -39,7 +39,7 @@ public sealed class CreatureCuriosity:MonoBehaviour {
    return Current!=Phase.Rest;
   }
   elapsed+=dt;clock+=dt;
-  if(target==null||(!owned&&target.Item.held)||elapsed>(target.GetComponentInParent<DiscoveryPoint>()!=null||target.GetComponent<VillageTributeProp>()!=null?120:target.GetComponent<BeachBall>()!=null?60:24)){Finish(false);return false;}
+  if(target==null||(!owned&&target.Item.held)||elapsed>(target.GetComponentInParent<DiscoveryPoint>()!=null||target.GetComponent<VillageTributeProp>()!=null?120:fetching?120:target.GetComponent<BeachBall>()!=null?60:24)){Finish(false);return false;}
   if(Current==Phase.RallyBall){var ball=target.GetComponent<BeachBall>();
    if(ball.Player==null||!ball.CreatureJoined){Finish(false);return false;}
    Affect=CreatureAffect.Mood.Happy;motion?.Signal(false);motion?.LookAt(ball.transform);
@@ -49,7 +49,7 @@ public sealed class CreatureCuriosity:MonoBehaviour {
   }
   if(Current==Phase.Approach){
    var invited=target.GetComponent<BeachBall>();
-   if(invited!=null&&!invited.Inviting&&!askedPlaymate){askedPlaymate=true;if(invited.TryInvitePlaymate())inviteGestureUntil=elapsed+2.5f;}
+   if(!fetching&&invited!=null&&!invited.Inviting&&!askedPlaymate){askedPlaymate=true;if(invited.TryInvitePlaymate())inviteGestureUntil=elapsed+2.5f;}
    if(invited!=null&&invited.Inviting){motion?.Signal(elapsed<inviteGestureUntil,true,invited.transform.position);
     if(invited.MeetingPoint(out var meet)){if(navigator.MoveTo(meet,routine.speed,dt)&&invited.TryJoinCreature()){Current=Phase.RallyBall;clock=0;}return true;}
     Finish(false);return false;
@@ -58,7 +58,7 @@ public sealed class CreatureCuriosity:MonoBehaviour {
    if(navigator.MoveTo(target.transform.position,routine.speed,dt)){Current=Phase.Inspect;clock=0;motion?.Activity(6);}
    else if(navigator.Blocked){Affect=CreatureAffect.Mood.Sad;if(elapsed>5)Finish(false);}
   }else if(Current==Phase.Inspect){
-   if(clock>1.8f){if(target.GetComponent<DiscoveryObject>()?.Owner!=null){Finish(false);return false;}var social=target.GetComponent<VillagerSocial>();if(social!=null&&!social.Willing){Finish(false);return false;}social?.ResetTask();owned=target.Item;original=owned.transform.position;originalRotation=owned.transform.rotation;owned.held=true;owned.GetComponent<Collider>().enabled=false;
+   if(clock>1.8f){if(fetching&&!target.GetComponent<BeachBall>().ClaimFetch(fetchTicket)){Finish(false);return false;}if(target.GetComponent<DiscoveryObject>()?.Owner!=null){Finish(false);return false;}var social=target.GetComponent<VillagerSocial>();if(social!=null&&!social.Willing){Finish(false);return false;}social?.ResetTask();owned=target.Item;original=owned.transform.position;originalRotation=owned.transform.rotation;owned.held=true;owned.GetComponent<Collider>().enabled=false;
     owned.GetComponent<ConstructionBlock>()?.Grab();
     owned.GetComponent<VillagerRoutine>()?.ResetTask();motion?.Activity(1);Current=Phase.Lift;clock=0;}
   }else if(Current==Phase.Lift){
@@ -73,7 +73,7 @@ public sealed class CreatureCuriosity:MonoBehaviour {
      var away=transform.right*navigator.world.Scale*8;
      if(!SafeLanding(transform.position+away,out landing)&&!SafeLanding(original,out landing)){Finish(false);return false;}
      Current=Phase.CarryFriend;
-    }else if(target.GetComponent<BeachBall>()!=null){Current=Phase.ThrowBall;}
+    }else if(target.GetComponent<BeachBall>()!=null){Current=fetching?Phase.FetchCarry:Phase.ThrowBall;}
     else {Current=Phase.Play;var sound=target.GetComponent<AudioSource>();if(sound!=null)sound.Play();}
    }
   }else if(Current==Phase.CarryFriend){
@@ -85,7 +85,9 @@ public sealed class CreatureCuriosity:MonoBehaviour {
   }else if(Current==Phase.BuildPlace){
    Affect=CreatureAffect.Mood.Excited;float blend=Mathf.SmoothStep(0,1,clock/1.3f);motion?.PlaceAt(buildPoint,buildRotation,blend);owned.transform.SetPositionAndRotation(Vector3.Lerp(buildStart,buildPoint,blend),Quaternion.Slerp(originalRotation,buildRotation,blend));
    if(clock>=1.4f){var block=owned.GetComponent<ConstructionBlock>();if(!block.Site.Drop(block,buildPoint,buildRotation,true)){Finish(false);return false;}lastWater=false;built++;played++;target.Discovered();NoticeDiscovery(target.GetComponentInParent<DiscoveryPoint>());boredom=0;feedbackWindow=12;lastSocial=false;owned=null;Finish(true);}
-  }else if(Current==Phase.ThrowBall){Affect=CreatureAffect.Mood.Excited;var ball=target.GetComponent<BeachBall>();var direction=ball.Direction(transform);transform.rotation=Quaternion.RotateTowards(transform.rotation,Quaternion.LookRotation(direction),dt*240);var release=transform.position+direction*navigator.world.Scale*8+Vector3.up*navigator.world.Scale*9;motion?.PlaceAt(release,Quaternion.identity,Mathf.Clamp01(clock/.8f));if(clock>.9f){owned.transform.position=release;motion?.Carry(null);motion?.PlaceAt(default,Quaternion.identity,0);ball.Throw(direction);owned=null;Current=Phase.WatchBall;clock=0;motion?.Activity(6);}}
+  }else if(Current==Phase.FetchCarry){var ball=target.GetComponent<BeachBall>();if(!ball.OwnsFetch(fetchTicket)){Finish(false);return false;}Affect=CreatureAffect.Mood.Happy;if(navigator.MoveTo(ball.FetchHome,routine.speed*.8f,dt)){Current=Phase.FetchPlace;clock=0;motion?.Activity(5);}}
+  else if(Current==Phase.FetchPlace){var ball=target.GetComponent<BeachBall>();motion?.PlaceAt(ball.FetchHome,Quaternion.identity,Mathf.Clamp01(clock));if(clock>1.1f){motion?.Carry(null);if(!ball.CompleteFetch(fetchTicket)){Finish(false);return false;}owned=null;played++;target.Discovered();lastWater=lastSocial=false;feedbackWindow=12;boredom=0;Finish(true);}}
+  else if(Current==Phase.ThrowBall){Affect=CreatureAffect.Mood.Excited;var ball=target.GetComponent<BeachBall>();var direction=ball.Direction(transform);transform.rotation=Quaternion.RotateTowards(transform.rotation,Quaternion.LookRotation(direction),dt*240);var release=transform.position+direction*navigator.world.Scale*8+Vector3.up*navigator.world.Scale*9;motion?.PlaceAt(release,Quaternion.identity,Mathf.Clamp01(clock/.8f));if(clock>.9f){owned.transform.position=release;motion?.Carry(null);motion?.PlaceAt(default,Quaternion.identity,0);ball.Throw(direction);owned=null;Current=Phase.WatchBall;clock=0;motion?.Activity(6);}}
   else if(Current==Phase.WatchBall){var ball=target.GetComponent<BeachBall>();Affect=ball.Harmful?CreatureAffect.Mood.Sad:CreatureAffect.Mood.Excited;motion?.LookAt(ball.transform);if(clock>4.2f){ball.FinishExperience();played++;target.Discovered();lastWater=lastSocial=false;boredom=0;feedbackWindow=12;Finish(true);}}
   else if(Current==Phase.Play){
    Affect=target.kind==CreatureAffordance.Kind.Food?CreatureAffect.Mood.Hungry:CreatureAffect.Mood.Excited;
@@ -118,7 +120,7 @@ public sealed class CreatureCuriosity:MonoBehaviour {
  public bool Feedback(bool positive,bool allowLearning=true){if(state==null||state.paused)return false;bool learned=allowLearning&&feedbackWindow>0;if(learned){float change=positive?.12f:-.12f;if(lastWater)state.care=Mathf.Clamp01(state.care+change);else if(lastSocial){state.socialPreference=Mathf.Clamp01(state.socialPreference+change);lastFriend?.Feedback(positive);}else state.playPreference=Mathf.Clamp01(state.playPreference+change);feedbackWindow=0;}reaction=2;emotion=5;feedbackMood=recentMood=positive?CreatureAffect.Mood.Happy:CreatureAffect.Mood.Sad;Affect=recentMood;return learned;}
  public void ResetTask(){Finish(false);lastFriend=null;lastWater=false;reaction=0;constructionFocus=false;cooldown=7;boredom=emotion=feedbackWindow=0;Affect=CreatureAffect.Mood.Calm;}
  void Finish(bool success){
-  var finished=target;
+  var finished=target;if(fetching)finished?.GetComponent<BeachBall>()?.CancelFetch(fetchTicket);fetching=false;
   if(Current==Phase.RallyBall)finished?.GetComponent<BeachBall>()?.CancelRally();
   motion?.Signal(false);motion?.Carry(null);motion?.Playful(0);motion?.PlaceAt(default,Quaternion.identity,0);motion?.LookAt(null);motion?.Activity(0);navigator?.ResetRoute();
   if(owned!=null){var item=owned;var point=original;
