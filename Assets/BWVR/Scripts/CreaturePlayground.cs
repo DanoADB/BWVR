@@ -18,6 +18,7 @@ public sealed class CreaturePlayground:MonoBehaviour {
    var toy=GameObject.CreatePrimitive(i==0?PrimitiveType.Sphere:i==1?PrimitiveType.Cube:PrimitiveType.Cylinder);toy.name=new[]{"Blue rolling ball","Amber turning blocks","Golden discovery chime"}[i];toy.transform.SetParent(transform,false);toy.transform.position=safe+Vector3.up*u*1.5f;toy.transform.localScale=Vector3.one*u*(i==2?2:3);toy.GetComponent<Renderer>().sharedMaterial=materials[i];
    var item=toy.AddComponent<CarryItem>();item.kind=Offering.Toy;item.home=toy.transform.position;
    var affordance=toy.AddComponent<CreatureAffordance>();affordance.kind=(CreatureAffordance.Kind)i;
+   if(i==0){toy.name="Large striped beachball";toy.AddComponent<BeachBall>().Initialize(nav);}
    if(i==1)for(int block=0;block<2;block++){var child=GameObject.CreatePrimitive(PrimitiveType.Cube);Destroy(child.GetComponent<Collider>());child.transform.SetParent(toy.transform,false);child.transform.localPosition=new Vector3((block==0?-.65f:.65f),.6f,0);child.transform.localScale=Vector3.one*.65f;child.GetComponent<Renderer>().sharedMaterial=materials[(block+2)%3];}
    if(i==2){var audio=toy.AddComponent<AudioSource>();audio.clip=chime;audio.playOnAwake=false;audio.spatialBlend=1;audio.minDistance=u*10;audio.maxDistance=u*100;audio.volume=.35f;}
   }

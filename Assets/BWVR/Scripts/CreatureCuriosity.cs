@@ -3,7 +3,7 @@ using UnityEngine;
 namespace BWVR {
 // A bounded curiosity loop yields to drought work and owns at most one carried object.
 public sealed class CreatureCuriosity:MonoBehaviour {
- public enum Phase { Rest,Approach,Inspect,Lift,Play,CarryFriend,Place,BuildApproach,BuildPlace }
+ public enum Phase { Rest,Approach,Inspect,Lift,Play,CarryFriend,Place,BuildApproach,BuildPlace,ThrowBall,WatchBall }
  public int built{get;private set;}
  Vector3 buildPoint,buildApproach,buildStart;Quaternion buildRotation;
  bool constructionFocus;
@@ -37,7 +37,7 @@ public sealed class CreatureCuriosity:MonoBehaviour {
    return Current!=Phase.Rest;
   }
   elapsed+=dt;clock+=dt;
-  if(target==null||(!owned&&target.Item.held)||elapsed>(target.GetComponentInParent<DiscoveryPoint>()!=null?120:24)){Finish(false);return false;}
+  if(target==null||(!owned&&target.Item.held)||elapsed>(target.GetComponentInParent<DiscoveryPoint>()!=null||target.GetComponent<VillageTributeProp>()!=null?120:target.GetComponent<BeachBall>()!=null?60:24)){Finish(false);return false;}
   if(Current==Phase.Approach){
    Affect=CreatureAffect.Mood.Curious;
    if(navigator.MoveTo(target.transform.position,routine.speed,dt)){Current=Phase.Inspect;clock=0;motion?.Activity(6);}
@@ -58,7 +58,8 @@ public sealed class CreatureCuriosity:MonoBehaviour {
      var away=transform.right*navigator.world.Scale*8;
      if(!SafeLanding(transform.position+away,out landing)&&!SafeLanding(original,out landing)){Finish(false);return false;}
      Current=Phase.CarryFriend;
-    }else {Current=Phase.Play;var sound=target.GetComponent<AudioSource>();if(sound!=null)sound.Play();}
+    }else if(target.GetComponent<BeachBall>()!=null){Current=Phase.ThrowBall;}
+    else {Current=Phase.Play;var sound=target.GetComponent<AudioSource>();if(sound!=null)sound.Play();}
    }
   }else if(Current==Phase.CarryFriend){
    Affect=CreatureAffect.Mood.Happy;
@@ -69,7 +70,9 @@ public sealed class CreatureCuriosity:MonoBehaviour {
   }else if(Current==Phase.BuildPlace){
    Affect=CreatureAffect.Mood.Excited;float blend=Mathf.SmoothStep(0,1,clock/1.3f);motion?.PlaceAt(buildPoint,buildRotation,blend);owned.transform.SetPositionAndRotation(Vector3.Lerp(buildStart,buildPoint,blend),Quaternion.Slerp(originalRotation,buildRotation,blend));
    if(clock>=1.4f){var block=owned.GetComponent<ConstructionBlock>();if(!block.Site.Drop(block,buildPoint,buildRotation,true)){Finish(false);return false;}lastWater=false;built++;played++;target.Discovered();NoticeDiscovery(target.GetComponentInParent<DiscoveryPoint>());boredom=0;feedbackWindow=12;lastSocial=false;owned=null;Finish(true);}
-  }else if(Current==Phase.Play){
+  }else if(Current==Phase.ThrowBall){Affect=CreatureAffect.Mood.Excited;var ball=target.GetComponent<BeachBall>();var direction=ball.Direction(transform);var release=transform.position+direction*navigator.world.Scale*8+Vector3.up*navigator.world.Scale*9;motion?.PlaceAt(release,Quaternion.identity,Mathf.Clamp01(clock/.8f));if(clock>.9f){owned.transform.position=release;motion?.Carry(null);motion?.PlaceAt(default,Quaternion.identity,0);ball.Throw(direction);owned=null;Current=Phase.WatchBall;clock=0;motion?.Activity(6);}}
+  else if(Current==Phase.WatchBall){var ball=target.GetComponent<BeachBall>();Affect=ball.Harmful?CreatureAffect.Mood.Sad:CreatureAffect.Mood.Excited;motion?.LookAt(ball.transform);if(clock>4.2f){ball.FinishExperience();played++;target.Discovered();lastWater=lastSocial=false;boredom=0;feedbackWindow=12;Finish(true);}}
+  else if(Current==Phase.Play){
    Affect=target.kind==CreatureAffordance.Kind.Food?CreatureAffect.Mood.Hungry:CreatureAffect.Mood.Excited;
    if(target.kind==CreatureAffordance.Kind.Food)motion?.Carry(owned.transform,true);
    else {motion?.Carry(owned.transform);motion?.Playful(clock);}
@@ -77,7 +80,7 @@ public sealed class CreatureCuriosity:MonoBehaviour {
   }else if(Current==Phase.Place&&clock>1.1f){
    lastWater=false;
    if(target.kind==CreatureAffordance.Kind.Villager){friendsCarried++;lastSocial=true;lastFriend=target.GetComponent<VillagerSocial>();if(lastFriend!=null){lastFriend.RememberRide();foreach(var witness in lastFriend.transform.parent.GetComponentsInChildren<VillagerSocial>())if(witness!=lastFriend&&!witness.GetComponent<CarryItem>().held&&Vector3.Distance(witness.transform.position,transform.position)<navigator.world.Scale*22)witness.WitnessRide();}}
-   else {played++;lastSocial=false;if(target.kind==CreatureAffordance.Kind.Food){state.hunger=.05f;target.GetComponent<DiscoveryObject>()?.Eat();}}
+   else {played++;lastSocial=false;if(target.kind==CreatureAffordance.Kind.Food){state.hunger=.05f;target.GetComponent<DiscoveryObject>()?.Eat();target.GetComponent<VillageTributeProp>()?.owner.Eat();}}
    target.Discovered();NoticeDiscovery(target.GetComponentInParent<DiscoveryPoint>());boredom=0;emotion=5;feedbackWindow=12;Finish(true);
   }
   return Current!=Phase.Rest;
@@ -91,6 +94,7 @@ public sealed class CreatureCuriosity:MonoBehaviour {
  public void NoticeDiscovery(DiscoveryPoint point){if(point==null||state==null||!point.Discover(0))return;state.creatureDiscoveries=Mathf.Min(6,state.creatureDiscoveries+1);state.playPreference=Mathf.Clamp01(state.playPreference+.025f);reaction=2;feedbackMood=recentMood=CreatureAffect.Mood.Happy;emotion=5;motion?.React();}
  public void NoticeGreeting(Transform villager){emotion=4;recentMood=CreatureAffect.Mood.Happy;Affect=recentMood;motion?.LookAt(villager);}
  public void NoticeDisassembly(Transform villager){villager.GetComponent<VillagerSocial>()?.RememberDispute();emotion=4;recentMood=CreatureAffect.Mood.Sad;Affect=recentMood;motion?.LookAt(villager);}
+ public void NoticeBadPlay(Transform harmed){reaction=3;feedbackMood=recentMood=CreatureAffect.Mood.Sad;emotion=5;motion?.LookAt(harmed);}
  public void RememberWaterDelivery(SliceState season){state=season;lastWater=true;lastSocial=false;feedbackWindow=12;}
  public void RememberObservation(SliceState season){state=season;feedbackWindow=0;}
  public void InvalidateFeedback(){feedbackWindow=0;}

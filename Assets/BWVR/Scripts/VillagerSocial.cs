@@ -4,15 +4,16 @@ namespace BWVR {
 [Serializable] public sealed class SocialMemory {
  public float trust=.45f,affinity=.5f,boldness=.5f;
  public float injury,lastAssistance;
- public int greetings,rides,witnessed,disputes,discoveries,bridgeCrossings,sharedPlay,treatsOffered,missedInvitations;
+ public int greetings,rides,witnessed,disputes,discoveries,bridgeCrossings,sharedPlay,treatsOffered,missedInvitations,frights;
  public float nextInvitationAt,lastSharedAt;
- public bool Valid()=>Unit(trust)&&Unit(affinity)&&Unit(boldness)&&Unit(injury)&&HybridState.Number(lastAssistance,0,100000000)&&HybridState.Number(nextInvitationAt,0,100000300)&&HybridState.Number(lastSharedAt,0,100000000)&&Count(greetings)&&Count(rides)&&Count(witnessed)&&Count(disputes)&&Count(discoveries)&&Count(bridgeCrossings)&&Count(sharedPlay)&&Count(treatsOffered)&&Count(missedInvitations);
+ public float restNeed=.5f,nextBuildingRequest;public int usedForms,constructionUses,buildRequests,buildDisappointments;
+ public bool Valid()=>Unit(trust)&&Unit(affinity)&&Unit(boldness)&&Unit(injury)&&Unit(restNeed)&&HybridState.Number(nextBuildingRequest,0,100000300)&&usedForms>=0&&usedForms<=15&&Count(constructionUses)&&Count(buildRequests)&&Count(buildDisappointments)&&HybridState.Number(lastAssistance,0,100000000)&&HybridState.Number(nextInvitationAt,0,100000300)&&HybridState.Number(lastSharedAt,0,100000000)&&Count(greetings)&&Count(rides)&&Count(witnessed)&&Count(disputes)&&Count(discoveries)&&Count(bridgeCrossings)&&Count(sharedPlay)&&Count(treatsOffered)&&Count(missedInvitations)&&Count(frights);
  static bool Unit(float n)=>!float.IsNaN(n)&&!float.IsInfinity(n)&&n>=0&&n<=1;
  static bool Count(int n)=>n>=0&&n<=1000000;
 }
 // Social attention competes with other intentions; memories belong to the saved season.
 public sealed class VillagerSocial:MonoBehaviour {
- public enum Phase{Idle,Approach,Greet,Wait,FetchGift,CarryGift,PresentGift,WatchGift}
+ public enum Phase{Idle,Approach,Greet,Wait,FetchGift,CarryGift,PresentGift,WatchGift,Recoil}
  public Phase Current{get;private set;}public bool Active=>Current!=Phase.Idle;
  public SocialMemory Memory=>season().Social(index);
  public bool Willing=>Memory.trust>=.4f&&Memory.injury<=0;
@@ -20,9 +21,11 @@ public sealed class VillagerSocial:MonoBehaviour {
  CreatureCuriosity creature;IslandNavigator walker;HumanoidMotion motion;CarryItem item;VillagerRoutine routine;
  Func<SliceState> season;int index;float cooldown,clock,elapsed;
  CreatureHybrid hybrid;CreatureAffordance[] sharingObjects;Vector3 giftOrigin,meeting,offeringPoint;Quaternion giftRotation;bool ownsGift;
- public CreatureAffordance Offering{get;private set;}public bool Ready=>Current==Phase.PresentGift;public bool Sharing=>Current>=Phase.FetchGift;
+ public CreatureAffordance Offering{get;private set;}public bool Ready=>Current==Phase.PresentGift;public bool Sharing=>Current>=Phase.FetchGift&&Current<=Phase.WatchGift;
+ Transform frightening;Vector3 retreat;
+ public void ReactToBall(Transform ball,bool blameCreature){if(item.held)return;ResetTask();GetComponent<VillagerExploration>()?.ResetTask();GetComponent<VillagerBlockPlay>()?.ResetTask();routine.ResetTask();if(blameCreature){Memory.trust=Mathf.Clamp01(Memory.trust-.18f);Memory.affinity=Mathf.Clamp01(Memory.affinity-.06f);Memory.frights=Math.Min(1000000,Memory.frights+1);}frightening=ball;var away=transform.position-ball.position;away.y=0;if(away.sqrMagnitude<1e-10f)away=transform.right;retreat=transform.position+away.normalized*walker.world.Scale*5;walker.ResetRoute();Current=Phase.Recoil;clock=elapsed=0;motion?.Signal(false,true,ball.position,-20);motion?.LookAt(ball);}
  public void ConfigureSharing(CreatureHybrid god,CreatureAffordance[] objects){hybrid=god;sharingObjects=objects;}
- bool Shareable(CreatureAffordance prop){if(prop==null||prop.host!=null||!prop.Available||prop.GetComponent<ConstructionBlock>()!=null||prop.kind==CreatureAffordance.Kind.Villager)return false;return prop.kind!=CreatureAffordance.Kind.Food||prop.GetComponent<DiscoveryObject>()?.treat==true;}
+ bool Shareable(CreatureAffordance prop){if(prop==null||prop.host!=null||!prop.Available||prop.GetComponent<ConstructionBlock>()!=null||prop.GetComponent<BeachBall>()!=null||prop.kind==CreatureAffordance.Kind.Villager)return false;return prop.kind!=CreatureAffordance.Kind.Food||prop.GetComponent<DiscoveryObject>()?.treat==true;}
  public bool TryShare(CreatureAffordance prop){
   if(hybrid==null||season().paused||Active||item.held||!Willing||(!season().developmentFocus&&!season().Finished&&season().water<45)||Memory.nextInvitationAt>season().Hybrid.time||hybrid.Owner!=CreatureHybrid.ActionOwner.None||creature.Current!=CreatureCuriosity.Phase.Rest||(GetComponent<VillagerExploration>()?.Active??false)||(GetComponent<VillagerBlockPlay>()?.Active??false)||!Shareable(prop))return false;
   if(Vector3.Distance(transform.position,prop.transform.position)>walker.world.Scale*120||!hybrid.CanReach(prop.GetComponent<HybridTarget>())||!walker.world.Sample(prop.transform.position,walker.profile,8,out _))return false;
@@ -42,6 +45,7 @@ public sealed class VillagerSocial:MonoBehaviour {
  public bool Tick(float dt,bool paused){
   if(paused||dt<=0)return Active;
   if(item.held){ResetTask();return false;}
+  if(Current==Phase.Recoil){clock+=dt;walker.MoveTo(retreat,transform.lossyScale.y*2,dt);if(frightening!=null)motion?.Signal(false,true,frightening.position,-20);if(clock>3)ResetTask();return Active;}
   if(!Active){cooldown-=dt;if(cooldown<=0){if(ChooseShare())return true;if(!TryBegin())cooldown=6;}return Active;}
   if(Sharing)return TickSharing(dt);
   clock+=dt;elapsed+=dt;

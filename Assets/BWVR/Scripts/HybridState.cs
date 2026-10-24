@@ -19,19 +19,24 @@ public enum GuidanceStatus {None,Active,Completed,Rejected,Expired,Superseded,Ab
  public bool active;public CreatureAction action;public CreatureSituation situation;public string target="",partner="";public float startedAt,deadline;
 }
 [Serializable] public sealed class TargetCooldown {public string target;public float until;}
+[Serializable] public sealed class CreatureInterest {public string target;public float appeal=.5f,lastUsed;public int experiences;}
 [Serializable] public sealed class HybridState {
  public float time,energy=60,lastBenefit=-100,rainRemaining,nextMiracleAt;public int seed=1347,decisions;public bool injuryIntroduced,energyInitialized;
  public GuidanceState guidance=new GuidanceState();public CreatureIntention intention=new CreatureIntention();public ActionReceipt receipt=new ActionReceipt();
  public LearnedAssociation[] associations=Array.Empty<LearnedAssociation>();
  public TargetCooldown[] cooldowns=Array.Empty<TargetCooldown>();
+ public CreatureInterest[] interests=Array.Empty<CreatureInterest>();
+ public CreatureInterest Interest(string id,bool create=false){foreach(var value in interests)if(value.target==id)return value;if(!create||interests.Length>=128)return null;var added=new CreatureInterest{target=id};Array.Resize(ref interests,interests.Length+1);interests[interests.Length-1]=added;return added;}
+ public void Experience(string id,float change){if(string.IsNullOrEmpty(id))return;var value=Interest(id,true);if(value==null)return;value.appeal=Mathf.Clamp01(value.appeal+Mathf.Clamp(change,-.15f,.15f));value.lastUsed=time;value.experiences=Math.Min(1000000,value.experiences+1);}
  public float Cooldown(string target){foreach(var c in cooldowns)if(c.target==target)return c.until;return 0;}
  public void RememberCooldown(string target,float until){foreach(var c in cooldowns)if(c.target==target){c.until=until;return;}if(cooldowns.Length>=128)return;Array.Resize(ref cooldowns,cooldowns.Length+1);cooldowns[cooldowns.Length-1]=new TargetCooldown{target=target,until=until};}
  public LearnedAssociation Association(CreatureSituation situation,CreatureAction action,bool create=false){foreach(var a in associations)if(a.situation==situation&&a.action==action)return a;if(!create||associations.Length>=24)return null;var next=new LearnedAssociation{situation=situation,action=action};Array.Resize(ref associations,associations.Length+1);associations[associations.Length-1]=next;return next;}
  public float Preference(CreatureSituation situation,CreatureAction action)=>Association(situation,action)?.preference??.5f;
- public bool Reinforce(bool positive){var r=receipt;if(!r.eligible||r.consumed||time-r.completedAt>12||time<r.completedAt)return false;var a=Association(r.situation,r.action,true);if(a==null)return false;a.preference=Mathf.Clamp01(a.preference+(positive?.12f:-.12f));a.samples=Math.Min(1000000,a.samples+1);a.reinforcedAt=time;r.consumed=true;return true;}
+ public bool Reinforce(bool positive){var r=receipt;if(!r.eligible||r.consumed||time-r.completedAt>12||time<r.completedAt)return false;var a=Association(r.situation,r.action,true);if(a==null)return false;a.preference=Mathf.Clamp01(a.preference+(positive?.12f:-.12f));a.samples=Math.Min(1000000,a.samples+1);a.reinforcedAt=time;Experience(r.target,positive?.1f:-.1f);r.consumed=true;return true;}
  public bool Valid(){
   if(!Number(time,0,100000000)||!Number(energy,0,100)||!Number(lastBenefit,-100,100000000)||!Number(rainRemaining,0,6)||!Number(nextMiracleAt,0,100000001)||decisions<0||decisions>100000000||guidance==null||intention==null||receipt==null||associations==null||associations.Length>24||cooldowns==null||cooldowns.Length>128)return false;
   var ids=new System.Collections.Generic.HashSet<string>();foreach(var c in cooldowns)if(c==null||!Text(c.target)||!ids.Add(c.target)||!Number(c.until,0,100000180))return false;
+  if(interests==null||interests.Length>128)return false;ids.Clear();foreach(var value in interests)if(value==null||!Text(value.target)||!ids.Add(value.target)||!Number(value.appeal,0,1)||!Number(value.lastUsed,0,time)||value.experiences<0||value.experiences>1000000)return false;
   if(!Enum.IsDefined(typeof(GuidanceIntent),guidance.intention)||!Enum.IsDefined(typeof(GuidanceStatus),guidance.status)||!Text(guidance.target)||!Text(guidance.reason)||!Number(guidance.requestedAt,0,time)||!Number(guidance.expiresAt,0,100000060))return false;
   if(!Enum.IsDefined(typeof(CreatureAction),intention.action)||!Enum.IsDefined(typeof(CreatureSituation),intention.situation)||!Text(intention.target)||!Text(intention.partner)||!Number(intention.startedAt,0,time)||!Number(intention.deadline,0,100000300))return false;
   if(!Enum.IsDefined(typeof(CreatureAction),receipt.action)||!Enum.IsDefined(typeof(CreatureSituation),receipt.situation)||!Text(receipt.target)||!Text(receipt.partner)||!Number(receipt.completedAt,0,time)||receipt.constructionRecipe< -1||receipt.constructionRecipe>3)return false;

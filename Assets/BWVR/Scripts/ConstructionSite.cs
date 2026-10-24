@@ -13,6 +13,7 @@ public sealed class ConstructionSite:MonoBehaviour {
  BuildRecipe recipe;BrickPlacement[] plan;public BuildRecipe Recipe{get=>recipe;set{recipe=value;plan=null;}}public bool IsBridge{get;private set;}public bool Locked;
  public float LayerHeight{get;private set;}=1.2f;public float Clock{get;private set;}
  public event System.Action Changed;
+ public VillagerExploration Visitor,Requester;
  BrickPlacement[] Pattern=>plan??(plan=ConstructionPatterns.Plan(Recipe,LayerHeight));
  bool Matches(ConstructionBlock block,BrickPlacement p)=>block.Attached&&!block.Item.held&&(block.size.x>3)==p.beam&&Vector3.Distance(block.Body.position,p.position)<.09f&&Quaternion.Angle(block.Body.rotation,Quaternion.identity)<4;
  public bool RecipeComplete{get{foreach(var p in Pattern){bool found=false;foreach(var b in blocks)if(Matches(b,p)){found=true;break;}if(!found)return false;}return true;}}
