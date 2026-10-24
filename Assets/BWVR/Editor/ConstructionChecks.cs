@@ -7,7 +7,7 @@ public static class ConstructionChecks {
  [MenuItem("BWVR/Verify physical construction (Play mode)")]
  public static void Verify(){
   if(!EditorApplication.isPlaying)throw new Exception("Enter Play mode first");
-  var site=UnityEngine.Object.FindObjectsByType<ConstructionSite>().First(s=>s.GetComponentInParent<IslandDiscoveries>()==null);if(site.Snapped!=0)throw new Exception("Run on a fresh construction tray");site.Paused=false;site.SelectRecipe(BuildRecipe.Arch);
+  var site=UnityEngine.Object.FindObjectsByType<ConstructionSite>().First(s=>!s.IsBridge&&s.GetComponentInParent<IslandDiscoveries>()==null);if(site.Snapped!=0)throw new Exception("Run on a fresh construction tray");site.Paused=false;site.SelectRecipe(BuildRecipe.Arch);
   var mind=UnityEngine.Object.FindAnyObjectByType<CreatureCuriosity>();var routine=mind.GetComponent<CreatureRoutine>();mind.ResetTask();routine.ResetTask();
   var loose=site.blocks[0];loose.Body.position=loose.spawn+Vector3.up*2;loose.Body.transform.position=loose.Body.position;float before=loose.Body.position.y;for(int i=0;i<100;i++)site.Advance(.02f);
   if(loose.Body.position.y>before-.02f||Mathf.Abs(loose.Body.position.y-.6f)>.03f)throw new Exception("Loose brick did not fall and settle");

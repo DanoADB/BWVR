@@ -4,8 +4,8 @@ namespace BWVR {
 [Serializable] public sealed class SocialMemory {
  public float trust=.45f,affinity=.5f,boldness=.5f;
  public float injury,lastAssistance;
- public int greetings,rides,witnessed,disputes,discoveries;
- public bool Valid()=>Unit(trust)&&Unit(affinity)&&Unit(boldness)&&Unit(injury)&&HybridState.Number(lastAssistance,0,100000000)&&Count(greetings)&&Count(rides)&&Count(witnessed)&&Count(disputes)&&Count(discoveries);
+ public int greetings,rides,witnessed,disputes,discoveries,bridgeCrossings;
+ public bool Valid()=>Unit(trust)&&Unit(affinity)&&Unit(boldness)&&Unit(injury)&&HybridState.Number(lastAssistance,0,100000000)&&Count(greetings)&&Count(rides)&&Count(witnessed)&&Count(disputes)&&Count(discoveries)&&Count(bridgeCrossings);
  static bool Unit(float n)=>!float.IsNaN(n)&&!float.IsInfinity(n)&&n>=0&&n<=1;
  static bool Count(int n)=>n>=0&&n<=1000000;
 }

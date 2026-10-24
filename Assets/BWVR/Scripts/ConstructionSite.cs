@@ -12,6 +12,7 @@ public sealed class ConstructionSite:MonoBehaviour {
  public float LastCreatureBuildTime{get;private set;}=float.NegativeInfinity;public float nextVillagerPlayAt;
  BuildRecipe recipe;BrickPlacement[] plan;public BuildRecipe Recipe{get=>recipe;set{recipe=value;plan=null;}}public bool IsBridge{get;private set;}public bool Locked;
  public float LayerHeight{get;private set;}=1.2f;public float Clock{get;private set;}
+ public event System.Action Changed;
  BrickPlacement[] Pattern=>plan??(plan=ConstructionPatterns.Plan(Recipe,LayerHeight));
  bool Matches(ConstructionBlock block,BrickPlacement p)=>block.Attached&&!block.Item.held&&(block.size.x>3)==p.beam&&Vector3.Distance(block.Body.position,p.position)<.09f&&Quaternion.Angle(block.Body.rotation,Quaternion.identity)<4;
  public bool RecipeComplete{get{foreach(var p in Pattern){bool found=false;foreach(var b in blocks)if(Matches(b,p)){found=true;break;}if(!found)return false;}return true;}}
@@ -41,27 +42,33 @@ public sealed class ConstructionSite:MonoBehaviour {
  }
  public Vector3 World(Vector3 point)=>transform.TransformPoint(point*unit);
  public Vector3 Local(Vector3 point)=>transform.InverseTransformPoint(point)/unit;
+ public Vector3 WorkApproach(Vector3 worker,Vector3 destination,float clearance){if(IsBridge)return World(new Vector3(Local(worker).x<0?-5:5,0,0));var delta=destination-worker;delta.y=0;return destination-(delta.sqrMagnitude>1e-10f?delta.normalized:transform.forward)*clearance;}
+ public static ConstructionSite BuildBridge(Transform parent,Vector3 centre,Quaternion facing,float scale){var root=new GameObject("Creek bridge construction");root.transform.SetParent(parent,false);root.transform.SetPositionAndRotation(centre,facing);var site=root.AddComponent<ConstructionSite>();site.IsBridge=true;site.Recipe=BuildRecipe.Bridge;site.LayerHeight=.3f;site.Locked=true;site.Initialize(scale);return site;}
  void Initialize(float scale){
   unit=scale;simulationScene=SceneManager.CreateScene("BWVR toy physics "+System.Guid.NewGuid().ToString("N"),new CreateSceneParameters(LocalPhysicsMode.Physics3D));physics=simulationScene.GetPhysicsScene();
   colors=new[]{new Color(.42f,.18f,.07f),new Color(.08f,.32f,.44f),new Color(.55f,.38f,.08f),new Color(.20f,.37f,.15f)}.Select(c=>{var m=new Material(Shader.Find("BWVR/GameSurface"));m.color=c;m.SetFloat("_Cutoff",0);return m;}).ToArray();
-  var pad=GameObject.CreatePrimitive(PrimitiveType.Cube);pad.name="Construction foundation - snap grid";pad.transform.SetParent(transform,false);pad.transform.localPosition=Vector3.down*unit*.5f;pad.transform.localScale=new Vector3(18,1,18)*unit;pad.GetComponent<Renderer>().sharedMaterial=colors[0];pad.GetComponent<BoxCollider>().contactOffset=unit*.02f;
-  StaticBox("Foundation collider",new Vector3(0,-.5f,0),new Vector3(18,1,18));
+  if(IsBridge){foreach(int side in new[]{-1,1}){Foundation(new Vector3(side*2,-.5f,0),new Vector3(2,1,2));Foundation(new Vector3(side*5,-.5f,1),new Vector3(4,1,10));}}
+  else{
+  Foundation(new Vector3(0,-.5f,0),new Vector3(18,1,18));
   // Low tray edges keep loose pieces within this bounded toy sandbox.
   foreach(int side in new[]{-1,1})foreach(bool horizontal in new[]{false,true}){
    var position=horizontal?new Vector3(0,.35f,side*9):new Vector3(side*9,.35f,0);var dimensions=horizontal?new Vector3(18,1,.3f):new Vector3(.3f,1,18);
    StaticBox("Tray edge",position,dimensions);var rail=GameObject.CreatePrimitive(PrimitiveType.Cube);rail.name="Wooden toy tray rim";rail.transform.SetParent(transform,false);rail.transform.localPosition=position*unit;rail.transform.localScale=dimensions*unit;rail.GetComponent<Renderer>().sharedMaterial=colors[0];Destroy(rail.GetComponent<Collider>());
   }
+  }
   var art=Resources.Load<EnvironmentArt>("ConstructionArt");
   for(int i=0;i<8;i++){
-   bool beam=i==6;var dimensions=new Vector3(beam?6:2,1.2f,2);var source=art!=null?art.Find(beam?"Beam":"Brick"):null;
+   bool beam=i==6;var dimensions=new Vector3(beam?6:2,LayerHeight,2);var source=art!=null?art.Find(beam?"Beam":"Brick"):null;
    var go=source!=null?Instantiate(source,transform):GameObject.CreatePrimitive(PrimitiveType.Cube);go.name=beam?"Long construction lintel":"Construction brick "+(i+1);go.transform.SetParent(transform,false);go.transform.localScale=Vector3.one*unit;
    if(source==null){go.transform.localScale=dimensions*unit;Destroy(go.GetComponent<Collider>());}
    foreach(var r in go.GetComponentsInChildren<Renderer>())r.sharedMaterial=colors[i%colors.Length];
-   var box=go.GetComponent<BoxCollider>()??go.AddComponent<BoxCollider>();box.center=Vector3.zero;box.size=source!=null?dimensions:Vector3.one;box.contactOffset=unit*.02f;
+   if(source!=null)go.transform.localScale=new Vector3(1,LayerHeight/1.2f,1)*unit;
+   var box=go.GetComponent<BoxCollider>()??go.AddComponent<BoxCollider>();box.center=Vector3.zero;box.size=source!=null?new Vector3(dimensions.x,1.2f,dimensions.z):Vector3.one;box.contactOffset=unit*.02f;
    var item=go.AddComponent<CarryItem>();item.kind=Offering.Toy;
    var proxy=new GameObject(go.name+" physics");SceneManager.MoveGameObjectToScene(proxy,simulationScene);var collider=proxy.AddComponent<BoxCollider>();collider.size=dimensions;collider.contactOffset=.005f;
    var body=proxy.AddComponent<Rigidbody>();body.mass=beam?.3f:.1f;body.interpolation=RigidbodyInterpolation.None;body.collisionDetectionMode=CollisionDetectionMode.ContinuousDynamic;body.solverIterations=12;body.solverVelocityIterations=4;body.maxAngularVelocity=12;
    body.position=new Vector3(-6+(i%3)*6,.7f,-6+(i/3)*6);if(i==4)body.position=new Vector3(6,.7f,0);if(i==5)body.position=new Vector3(-6,.7f,6);if(beam)body.position=new Vector3(0,.7f,6);if(i==7)body.position=new Vector3(6,.7f,6);
+   if(IsBridge)body.position=new Vector3(i%2==0?-5:5,.2f,-2+(i/2)*2);
    go.transform.position=World(body.position);item.home=go.transform.position;
    var block=go.AddComponent<ConstructionBlock>();block.Initialize(this,body,dimensions);blocks.Add(block);
    go.AddComponent<CreatureAffordance>().kind=CreatureAffordance.Kind.Turn;
@@ -69,6 +76,7 @@ public sealed class ConstructionSite:MonoBehaviour {
   var p=new GameObject("Construction snap preview");p.transform.SetParent(transform,false);preview=p.AddComponent<LineRenderer>();preview.useWorldSpace=true;preview.positionCount=16;preview.startWidth=preview.endWidth=unit*.08f;preview.shadowCastingMode=UnityEngine.Rendering.ShadowCastingMode.Off;
   outlineMaterial=new Material(Resources.Load<Material>("ConstructionPreview"));preview.sharedMaterial=outlineMaterial;preview.enabled=false;
  }
+ void Foundation(Vector3 position,Vector3 size){var pad=GameObject.CreatePrimitive(PrimitiveType.Cube);pad.name="Construction foundation - snap grid";pad.transform.SetParent(transform,false);pad.transform.localPosition=position*unit;pad.transform.localScale=size*unit;pad.GetComponent<Renderer>().sharedMaterial=colors[0];pad.GetComponent<BoxCollider>().contactOffset=unit*.02f;pad.AddComponent<ConstructionFoundation>();StaticBox("Foundation collider",position,size);}
  void StaticBox(string label,Vector3 position,Vector3 size){var go=new GameObject(label);SceneManager.MoveGameObjectToScene(go,simulationScene);go.transform.position=position;var box=go.AddComponent<BoxCollider>();box.size=size;box.contactOffset=.005f;}
  void FixedUpdate(){Advance(Time.fixedDeltaTime);}
  public void Advance(float dt){
@@ -79,15 +87,18 @@ public sealed class ConstructionSite:MonoBehaviour {
   foreach(var block in blocks)if(block.VillagerOwner!=null)block.VillagerOwner.ApplyPhysicsPush();
   physics.Simulate(Mathf.Min(dt,.04f));
   foreach(var block in blocks)if(!block.Item.held){if(block.Body.position.y< -3||block.Body.position.sqrMagnitude>1600)ReturnLoose(block);block.transform.SetPositionAndRotation(World(block.Body.position),transform.rotation*block.Body.rotation);}
+  Changed?.Invoke();
  }
  public void Detach(ConstructionBlock block){
   foreach(var piece in blocks)if(piece.Connection!=null&&(piece==block||piece.Connection.connectedBody==block.Body)){piece.Connection.xMotion=piece.Connection.yMotion=piece.Connection.zMotion=ConfigurableJointMotion.Free;piece.Connection.angularXMotion=piece.Connection.angularYMotion=piece.Connection.angularZMotion=ConfigurableJointMotion.Free;Destroy(piece.Connection);piece.Connection=null;}
+  Changed?.Invoke();
  }
  public void ReturnLoose(ConstructionBlock block){Detach(block);block.creatureBuilt=false;Activate(block);block.Body.transform.SetPositionAndRotation(block.spawn,Quaternion.identity);block.Body.position=block.spawn;block.Body.rotation=Quaternion.identity;block.transform.SetPositionAndRotation(World(block.spawn),transform.rotation);}
  public void ResetConstruction(){HidePreview();foreach(var block in blocks){if(block.VillagerOwner!=null)block.VillagerOwner.ResetTask();block.Item.held=false;block.wasHeld=false;ReturnLoose(block);block.GetComponent<CreatureAffordance>().cooldown=0;}LastCreatureBuildTime=float.NegativeInfinity;nextVillagerPlayAt=0;}
  void Activate(ConstructionBlock block){block.Body.isKinematic=false;block.Body.detectCollisions=true;block.Body.linearVelocity=Vector3.zero;block.Body.angularVelocity=Vector3.zero;block.Body.WakeUp();block.Item.held=false;block.wasHeld=false;block.GetComponent<Collider>().enabled=true;}
  bool Empty(ConstructionBlock block,Vector3 point,Quaternion rotation){int count=physics.OverlapBox(point,block.size*.5f-Vector3.one*.025f,overlaps,rotation);for(int i=0;i<count;i++)if(overlaps[i].attachedRigidbody!=block.Body)return false;return true;}
  bool Support(Vector3 point,ConstructionBlock block,out Rigidbody support,Quaternion rotation=default){support=null;if(Mathf.Abs(point.y-block.size.y*.5f)<.05f)return !IsBridge||(block.size.x<3&&Mathf.Abs(Mathf.Abs(point.x)-2)<.1f&&Mathf.Abs(point.z)<.1f);
+  if(IsBridge&&block.size.x>3){if(Mathf.Abs(point.x)>.1f||Mathf.Abs(point.z)>.1f||Mathf.Abs(point.y-LayerHeight*1.5f)>.05f||blocks.Count(b=>b.Attached&&!b.Item.held&&b.size.x<3&&Mathf.Abs(b.Body.position.y-LayerHeight*.5f)<.05f&&Mathf.Abs(b.Body.position.z)<.1f&&Mathf.Abs(Mathf.Abs(b.Body.position.x)-2)<.1f)<2)return false;}
   if(rotation==default)rotation=Quaternion.identity;var x=rotation*new Vector3(block.size.x*.5f,0,0);var z=rotation*new Vector3(0,0,block.size.z*.5f);var half=new Vector3(Mathf.Abs(x.x)+Mathf.Abs(z.x),0,Mathf.Abs(x.z)+Mathf.Abs(z.z));
   foreach(var other in blocks)if(other!=block&&!other.Item.held&&other.Attached&&Mathf.Abs(other.Body.position.y+(other.size.y+block.size.y)*.5f-point.y)<.04f){var bounds=other.Body.GetComponent<BoxCollider>().bounds;
    if(bounds.max.x>point.x-half.x+.25f&&bounds.min.x<point.x+half.x-.25f&&bounds.max.z>point.z-half.z+.25f&&bounds.min.z<point.z+half.z-.25f){support=other.Body;return true;}}
@@ -114,9 +125,9 @@ public sealed class ConstructionSite:MonoBehaviour {
   if(snap){Activate(block);block.Body.transform.SetPositionAndRotation(at,facing);block.Body.position=at;block.Body.rotation=facing;Connect(block,under);successfulSnaps++;}
   else {var p=Local(desired);if(Mathf.Abs(p.x)>8||Mathf.Abs(p.z)>8||p.y<.6f)p=block.spawn;Activate(block);var q=Quaternion.Inverse(transform.rotation)*rotation;block.Body.transform.SetPositionAndRotation(p,q);block.Body.position=p;block.Body.rotation=q;}
   block.creatureBuilt=snap&&byCreature;if(block.creatureBuilt)LastCreatureBuildTime=Clock;
-  block.transform.SetPositionAndRotation(World(block.Body.position),transform.rotation*block.Body.rotation);return snap;
+  block.transform.SetPositionAndRotation(World(block.Body.position),transform.rotation*block.Body.rotation);Changed?.Invoke();return snap;
  }
- bool RayPoint(ConstructionBlock block,Ray ray,out Vector3 point){foreach(var hit in Physics.RaycastAll(ray,10).OrderBy(h=>h.distance))if(hit.collider!=block.GetComponent<Collider>()&&(hit.collider.transform==transform.GetChild(0)||hit.collider.GetComponent<ConstructionBlock>()?.Site==this)){point=hit.point+Vector3.up*unit*.6f;return true;}point=World(block.spawn);return false;}
+ bool RayPoint(ConstructionBlock block,Ray ray,out Vector3 point){foreach(var hit in Physics.RaycastAll(ray,10).OrderBy(h=>h.distance))if(hit.collider!=block.GetComponent<Collider>()&&((hit.collider.GetComponent<ConstructionFoundation>()!=null&&hit.collider.transform.parent==transform)||hit.collider.GetComponent<ConstructionBlock>()?.Site==this)){point=hit.point+Vector3.up*unit*LayerHeight*.5f;return true;}point=World(block.spawn);return false;}
  public bool DropRay(ConstructionBlock block,Ray ray){RayPoint(block,ray,out var point);return Drop(block,point,transform.rotation);}
  public void PreviewRay(ConstructionBlock block,Ray ray){if(RayPoint(block,ray,out var point)&&FindSnap(block,point,transform.rotation,out var local,out var rotation,out _))ShowPreview(block,World(local),transform.rotation*rotation);else preview.enabled=false;}
  public void ShowPreview(ConstructionBlock block,Vector3 point,Quaternion rotation){

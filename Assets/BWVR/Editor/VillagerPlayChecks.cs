@@ -7,7 +7,7 @@ public static class VillagerPlayChecks {
  [MenuItem("BWVR/Verify villager block play (Play mode)")]
  public static void Verify(){
   if(!EditorApplication.isPlaying)throw new Exception("Enter Play mode first");
-  var site=UnityEngine.Object.FindObjectsByType<ConstructionSite>().First(s=>s.GetComponentInParent<IslandDiscoveries>()==null);var actors=UnityEngine.Object.FindObjectsByType<VillagerBlockPlay>();var play=actors[0];var actor=play.GetComponent<CarryItem>();var walker=play.GetComponent<IslandNavigator>();var creature=UnityEngine.Object.FindAnyObjectByType<CreatureCuriosity>();
+  var site=UnityEngine.Object.FindObjectsByType<ConstructionSite>().First(s=>!s.IsBridge&&s.GetComponentInParent<IslandDiscoveries>()==null);var actors=UnityEngine.Object.FindObjectsByType<VillagerBlockPlay>();var play=actors[0];var actor=play.GetComponent<CarryItem>();var walker=play.GetComponent<IslandNavigator>();var creature=UnityEngine.Object.FindAnyObjectByType<CreatureCuriosity>();
   creature.ResetTask();foreach(var a in actors)a.ResetTask();site.ResetConstruction();site.Paused=false;var block=site.blocks[0];var point=site.World(new Vector3(-2,.6f,0));
   if(!site.Drop(block,point,site.transform.rotation))throw new Exception("Player test piece could not attach");
   if(play.Eligible(block)||play.TryBegin(block))throw new Exception("Villager targeted a player-built piece");

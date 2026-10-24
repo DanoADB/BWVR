@@ -52,7 +52,7 @@ public sealed class CreatureCuriosity:MonoBehaviour {
     if(block!=null){
      if(!block.Site.TryPlan(block,out buildPoint,out buildRotation)){Finish(false);return false;}
      var direction=buildPoint-transform.position;direction.y=0;if(direction.sqrMagnitude<1e-9f)direction=transform.forward;
-     buildApproach=buildPoint-direction.normalized*navigator.world.Scale*6;Current=Phase.BuildApproach;
+     buildApproach=block.Site.WorkApproach(transform.position,buildPoint,navigator.world.Scale*6);Current=Phase.BuildApproach;
     }else if(target.kind==CreatureAffordance.Kind.Villager){
      var away=transform.right*navigator.world.Scale*8;
      if(!SafeLanding(transform.position+away,out landing)&&!SafeLanding(original,out landing)){Finish(false);return false;}

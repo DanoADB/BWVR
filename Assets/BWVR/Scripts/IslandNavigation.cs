@@ -7,9 +7,9 @@ namespace BWVR {
 // Routing uses original-size coordinates. Millimetre-sized tabletop agents otherwise
 // lose clearance and shoreline detail to the navigation rasterizer's precision.
 public sealed class IslandNavigation:MonoBehaviour {
- public sealed class Profile {public int id;public float radius,height;public NavMeshSurface surface;}
+ public sealed class Profile {public int id;public float radius,height;public NavMeshSurface surface;public NavMeshBuildSettings settings;}
  public Profile villager,creature;public float Scale{get;private set;}public int obstacleCount{get;private set;}
- public IslandTerrainData Terrain{get;private set;}Mesh walkMesh;float baseY;
+ public IslandTerrainData Terrain{get;private set;}Mesh walkMesh;float baseY;List<NavMeshBuildSource> baseSources;CreatureBridge bridge;
  public Vector3 ToNav(Vector3 point)=>(point-Vector3.up*baseY)/Scale;
  public Vector3 ToWorld(Vector3 point)=>point*Scale+Vector3.up*baseY;
  public void Initialize(IslandTerrainData terrain,Vector3 well){
@@ -39,6 +39,7 @@ public sealed class IslandNavigation:MonoBehaviour {
   if(terrain!=null)Box(sources,well+Vector3.up*Scale*3,new Vector3(5,6,4)*Scale,Quaternion.identity);
   else foreach(var box in GetComponentsInChildren<BoxCollider>())if((box.name.StartsWith("Modular village home")||box.name.Contains("Tree")||box.name.Contains("Pine")))Box(sources,box.transform.TransformPoint(box.center),Vector3.Scale(box.size,box.transform.lossyScale),box.transform.rotation);
   var watch=System.Diagnostics.Stopwatch.StartNew();
+  baseSources=sources;
   villager=Bake("Villager",.4f*QuestSlice.ActorScale,(terrain!=null?1.661f:1.7f)*QuestSlice.ActorScale,.2f,sources);
   creature=Bake("Creature",(terrain!=null?2.2f:1.1f)*QuestSlice.ActorScale,(terrain!=null?13.9236f:6.8f)*QuestSlice.ActorScale,.6f,sources);
   Debug.Log("BWVR_NAV_READY: two profiles, "+obstacleCount+" obstacles; bake "+watch.ElapsedMilliseconds+"ms");
@@ -54,10 +55,18 @@ public sealed class IslandNavigation:MonoBehaviour {
   var expanded=new List<NavMeshBuildSource>(sources.Count);foreach(var source in sources){var item=source;if(item.shape==NavMeshBuildSourceShape.ModifierBox)item.size+=new Vector3(radius*2,0,radius*2);expanded.Add(item);}
   var data=NavMeshBuilder.BuildNavMeshData(settings,expanded,bounds,Vector3.zero,Quaternion.identity);if(data==null)throw new InvalidOperationException(name+" navigation bake failed");
   var go=new GameObject(name+" navigation surface (game-unit coordinates)");go.transform.SetParent(transform,false);var surface=go.AddComponent<NavMeshSurface>();surface.agentTypeID=settings.agentTypeID;surface.navMeshData=data;surface.AddData();
-  return new Profile{id=settings.agentTypeID,radius=radius,height=height,surface=surface};
+  return new Profile{id=settings.agentTypeID,radius=radius,height=height,surface=surface,settings=settings};
+ }
+ public Vector3 ProjectFoot(Vector3 position,Profile profile){if(profile==villager&&bridge!=null&&bridge.Walkable&&bridge.Project(position,out var raised))return raised;return Terrain!=null?Terrain.Project(position):position;}
+ public void BridgeChanged(CreatureBridge crossing){
+  bridge=crossing;var sources=new List<NavMeshBuildSource>();foreach(var source in baseSources){var item=source;if(item.shape==NavMeshBuildSourceShape.ModifierBox)item.size+=new Vector3(villager.radius*2,0,villager.radius*2);sources.Add(item);}
+  if(crossing.Walkable)sources.Add(new NavMeshBuildSource{shape=NavMeshBuildSourceShape.Mesh,sourceObject=crossing.NavigationMesh,transform=Matrix4x4.identity,area=0});
+  var bounds=walkMesh.bounds;bounds.Expand(new Vector3(10,80,10));var data=NavMeshBuilder.BuildNavMeshData(villager.settings,sources,bounds,Vector3.zero,Quaternion.identity);if(data==null)throw new InvalidOperationException("Bridge navigation bake failed");
+  var previous=villager.surface.navMeshData;villager.surface.RemoveData();villager.surface.navMeshData=data;villager.surface.AddData();if(previous!=null)Destroy(previous);
+  foreach(var actor in GetComponentsInChildren<IslandNavigator>())if(actor.profile==villager){if(!crossing.Walkable&&crossing.OverWater(actor.transform.position))actor.transform.position=crossing.NearestBank(actor.transform.position);actor.ResetRoute();}
  }
  public bool Sample(Vector3 position,Profile profile,float distance,out Vector3 result){
-  var ground=Terrain!=null?Terrain.Project(position):new Vector3(position.x,baseY,position.z);var at=ToNav(ground);
+  var ground=Terrain!=null?ProjectFoot(position,profile):new Vector3(position.x,baseY,position.z);var at=ToNav(ground);
   var filter=new NavMeshQueryFilter{agentTypeID=profile.id,areaMask=1};if(NavMesh.SamplePosition(at,out var hit,distance+1,filter)&&new Vector2(hit.position.x-at.x,hit.position.z-at.z).magnitude<=distance){result=ToWorld(hit.position);return true;}result=position;return false;
  }
  public bool SegmentClear(Vector3 from,Vector3 to,Profile profile){var end=ToNav(to);return !NavMesh.Raycast(ToNav(from),end,out var hit,new NavMeshQueryFilter{agentTypeID=profile.id,areaMask=1})||new Vector2(hit.position.x-end.x,hit.position.z-end.z).magnitude<.05f;}
