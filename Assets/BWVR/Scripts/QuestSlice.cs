@@ -1,0 +1,88 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using UnityEngine;
+using UnityEngine.UI;
+using UnityEngine.XR;
+using UnityEngine.InputSystem;
+using CommonUsages=UnityEngine.XR.CommonUsages;
+namespace BWVR {
+public sealed class QuestSlice:MonoBehaviour {
+ const float Floor=.82f; SliceState state=new SliceState(); Camera eye; Transform rig,left,right,creature; Text status,creatureLabel; GameObject panel; Font font;
+ readonly List<CarryItem> items=new List<CarryItem>(); readonly List<Transform> workers=new List<Transform>();
+ readonly CarryItem[] held=new CarryItem[2]; readonly bool[] lastGrip=new bool[2],lastTrigger=new bool[2]; readonly LineRenderer[] rays=new LineRenderer[2];
+ float clock,saveClock,creatureTrip; bool returning,menuLast; string notice="Their creature is their god. Your touch guides its instincts.";
+ readonly Vector3 cistern=new Vector3(-.32f,Floor,.25f),well=new Vector3(.4f,Floor,-.2f);
+ string SavePath=>Path.Combine(Application.persistentDataPath,"bwvr-season-v1.json");
+ void Start(){font=Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");Load();Build();}
+ Material Mat(Color c){var m=new Material(Shader.Find("Universal Render Pipeline/Lit")??Shader.Find("Standard"));m.color=c;return m;}
+ GameObject Shape(string name,PrimitiveType shape,Vector3 position,Vector3 scale,Color color,Transform parent=null){var g=GameObject.CreatePrimitive(shape);g.name=name;g.transform.SetParent(parent??transform,false);g.transform.localPosition=position;g.transform.localScale=scale;g.GetComponent<Renderer>().sharedMaterial=Mat(color);return g;}
+ void Build(){
+  RenderSettings.ambientLight=new Color(.56f,.65f,.65f);RenderSettings.fog=true;RenderSettings.fogColor=new Color(.035f,.075f,.085f);RenderSettings.fogDensity=.025f;
+  var sun=new GameObject("Warm morning sun").AddComponent<Light>();sun.type=LightType.Directional;sun.intensity=1.1f;sun.transform.rotation=Quaternion.Euler(40,-35,0);
+  rig=new GameObject("XR Origin - seated or standing").transform;rig.position=new Vector3(0,0,-1.2f);
+  var cam=new GameObject("Head");cam.tag="MainCamera";cam.transform.SetParent(rig,false);eye=cam.AddComponent<Camera>();eye.nearClipPlane=.03f;eye.farClipPlane=40;eye.backgroundColor=RenderSettings.fogColor;eye.clearFlags=CameraClearFlags.SolidColor;cam.AddComponent<AudioListener>();eye.transform.localPosition=new Vector3(0,1.55f,0);
+  left=Controller("Left hand",0);right=Controller("Right hand",1);
+  Shape("Quiet horizon",PrimitiveType.Plane,new Vector3(0,-.03f,0),new Vector3(3,1,3),new Color(.035f,.075f,.085f));
+  Shape("Island plinth",PrimitiveType.Cylinder,new Vector3(0,.39f,0),new Vector3(1.9f,.39f,1.9f),new Color(.12f,.2f,.22f));
+  Shape("Living island",PrimitiveType.Cylinder,new Vector3(0,.79f,0),new Vector3(1.8f,.03f,1.8f),new Color(.35f,.46f,.25f));
+  for(int i=0;i<4;i++){float x=-.5f+i*.28f;Shape("Village dwelling",PrimitiveType.Cube,new Vector3(x,Floor+.065f,.48f),new Vector3(.17f,.13f,.16f),new Color(.74f,.57f,.36f));Shape("Roof",PrimitiveType.Cylinder,new Vector3(x,Floor+.15f,.48f),new Vector3(.22f,.04f,.21f),new Color(.35f,.21f,.13f));}
+  for(int i=0;i<9;i++){float a=i*.55f;Vector3 at=new Vector3(Mathf.Cos(a)*.72f,Floor,Mathf.Sin(a)*.72f);Shape("Tree trunk",PrimitiveType.Cylinder,at+Vector3.up*.07f,new Vector3(.025f,.07f,.025f),new Color(.3f,.2f,.12f));Shape("Tree crown",PrimitiveType.Sphere,at+Vector3.up*.18f,new Vector3(.13f,.2f,.13f),new Color(.12f,.3f,.2f));}
+  Shape("Village cistern - release water here",PrimitiveType.Cylinder,cistern+Vector3.up*.035f,new Vector3(.18f,.035f,.18f),new Color(.17f,.6f,.7f));
+  Shape("Spring",PrimitiveType.Cylinder,well+Vector3.up*.015f,new Vector3(.14f,.015f,.14f),new Color(.28f,.68f,.8f));
+  for(int i=0;i<3;i++){var w=Item("Villager",Offering.Villager,new Vector3(-.2f+i*.14f,Floor+.04f,.13f),PrimitiveType.Capsule,new Color(.9f,.65f,.38f),.055f);workers.Add(w.transform);}
+  Item("Water offering",Offering.Water,well+new Vector3(0,.07f,0),PrimitiveType.Sphere,new Color(.25f,.8f,.95f),.065f);
+  Item("Food offering",Offering.Food,new Vector3(.18f,Floor+.04f,.35f),PrimitiveType.Sphere,new Color(.95f,.66f,.18f),.065f);
+  Item("Wood offering",Offering.Wood,new Vector3(-.5f,Floor+.04f,-.22f),PrimitiveType.Cube,new Color(.5f,.3f,.16f),.07f);
+  creature=new GameObject("The village's god").transform;creature.SetParent(transform,false);creature.position=new Vector3(0,Floor,-.12f);
+  Shape("Creature body",PrimitiveType.Capsule,new Vector3(0,.13f,0),new Vector3(.15f,.17f,.14f),Color.white,creature);
+  Shape("Creature head",PrimitiveType.Sphere,new Vector3(0,.27f,-.015f),new Vector3(.13f,.12f,.11f),new Color(.9f,.85f,.73f),creature);
+  for(int i=-1;i<=1;i+=2)Shape("Creature horn",PrimitiveType.Capsule,new Vector3(i*.065f,.32f,-.015f),new Vector3(.025f,.04f,.025f),new Color(.35f,.3f,.25f),creature);
+  var target=creature.gameObject.AddComponent<SpatialTarget>();target.invoke=()=>{state.Praise();notice="Warmth remembered. The creature is more likely to bring water.";};var box=creature.gameObject.AddComponent<BoxCollider>();box.center=new Vector3(0,.18f,0);box.size=new Vector3(.2f,.4f,.2f);
+  creatureLabel=Label("Creature intent",creature,new Vector3(0,.44f,0),new Vector2(420,70),.0007f,22);creatureLabel.text="THEIR GOD · WATCHING";
+  panel=new GameObject("Wrist sanctuary");panel.transform.SetParent(left,false);panel.transform.localPosition=new Vector3(0,.13f,.12f);panel.transform.localRotation=Quaternion.Euler(25,0,0);
+  var canvas=panel.AddComponent<Canvas>();canvas.renderMode=RenderMode.WorldSpace;var rect=panel.GetComponent<RectTransform>();rect.sizeDelta=new Vector2(600,560);panel.transform.localScale=Vector3.one*.0008f;
+  var bg=new GameObject("Obsidian panel",typeof(RectTransform),typeof(Image));bg.transform.SetParent(panel.transform,false);bg.GetComponent<RectTransform>().sizeDelta=rect.sizeDelta;bg.GetComponent<Image>().color=new Color(.035f,.095f,.11f,.96f);
+  status=Label("Season and guidance",panel.transform,new Vector3(0,130,0),new Vector2(540,260),1,25);status.alignment=TextAnchor.UpperLeft;
+  Button("Pause / resume",new Vector3(-140,-70,0),()=>{state.paused=!state.paused;notice=state.paused?"Season paused.":"Season resumed.";});
+  Button("Save season",new Vector3(140,-70,0),Save);
+  Button("Begin again",new Vector3(-140,-160,0),()=>{state=new SliceState();creatureTrip=0;notice="A new dry season begins.";});
+  Button("Close",new Vector3(140,-160,0),()=>panel.SetActive(false));
+  if(!XRSettings.isDeviceActive){left.localPosition=new Vector3(-.36f,1.35f,.55f);left.localRotation=Quaternion.Euler(0,0,0);panel.transform.localRotation=Quaternion.identity;}
+ }
+ Transform Controller(string name,int side){var g=new GameObject(name);g.transform.SetParent(rig,false);Shape("Controller presence",PrimitiveType.Sphere,Vector3.zero,Vector3.one*.035f,new Color(.85f,.72f,.42f),g.transform);var line=g.AddComponent<LineRenderer>();line.positionCount=2;line.startWidth=.002f;line.endWidth=.001f;line.material=new Material(Shader.Find("Sprites/Default"));line.startColor=line.endColor=new Color(.6f,.85f,.8f,.7f);rays[side]=line;return g.transform;}
+ CarryItem Item(string name,Offering kind,Vector3 at,PrimitiveType primitive,Color color,float size){var g=Shape(name,primitive,at,Vector3.one*size,color);var item=g.AddComponent<CarryItem>();item.kind=kind;item.home=at;items.Add(item);return item;}
+ Text Label(string name,Transform parent,Vector3 position,Vector2 size,float scale,int fontSize){var g=new GameObject(name,typeof(RectTransform));g.transform.SetParent(parent,false);g.transform.localPosition=position;g.transform.localScale=Vector3.one*scale;if(!parent.GetComponentInParent<Canvas>()){var c=g.AddComponent<Canvas>();c.renderMode=RenderMode.WorldSpace;}var t=g.AddComponent<Text>();t.font=font;t.fontSize=fontSize;t.color=new Color(.94f,.9f,.74f);t.alignment=TextAnchor.MiddleCenter;t.horizontalOverflow=HorizontalWrapMode.Wrap;g.GetComponent<RectTransform>().sizeDelta=size;return t;}
+ void Button(string title,Vector3 position,Action action){var g=new GameObject(title,typeof(RectTransform),typeof(Image),typeof(BoxCollider),typeof(SpatialTarget));g.transform.SetParent(panel.transform,false);g.transform.localPosition=position;g.GetComponent<RectTransform>().sizeDelta=new Vector2(260,68);g.GetComponent<Image>().color=new Color(.13f,.28f,.29f);g.GetComponent<BoxCollider>().size=new Vector3(260,68,15);g.GetComponent<SpatialTarget>().invoke=action;Label("Caption",g.transform,Vector3.zero,new Vector2(250,65),1,24).text=title;}
+ void Update(){if(eye==null)return;clock+=Time.deltaTime;state.Step(Time.deltaTime);bool xr=XRSettings.isDeviceActive;
+  if(xr){Pose(XRNode.Head,eye.transform);Pose(XRNode.LeftHand,left);Pose(XRNode.RightHand,right);}
+  else Desktop();
+  for(int i=0;i<2;i++){var device=InputDevices.GetDeviceAtXRNode(i==0?XRNode.LeftHand:XRNode.RightHand);device.TryGetFeatureValue(CommonUsages.gripButton,out bool grip);device.TryGetFeatureValue(CommonUsages.triggerButton,out bool trigger);if(!xr){grip=i==1&&Keyboard.current!=null&&Keyboard.current.eKey.isPressed;trigger=i==1&&Keyboard.current!=null&&Keyboard.current.fKey.isPressed;}
+   var hand=i==0?left:right;var ray=new Ray(hand.position,hand.forward);Physics.Raycast(ray,out var hit,3);rays[i].SetPosition(0,ray.origin);rays[i].SetPosition(1,hit.collider?hit.point:ray.GetPoint(2));rays[i].enabled=xr||i==1;
+   if(grip&&!lastGrip[i]&&hit.collider){var item=hit.collider.GetComponentInParent<CarryItem>();if(item!=null&&!item.held){held[i]=item;item.held=true;item.GetComponent<Collider>().enabled=false;notice="Release grip over the island to place. Water belongs in the blue cistern.";}}
+   if(held[i]!=null){held[i].transform.position=hand.position+hand.forward*.16f;if(!grip)Release(i,ray);}
+   if(trigger&&!lastTrigger[i]&&hit.collider)hit.collider.GetComponentInParent<SpatialTarget>()?.Activate();lastGrip[i]=grip;lastTrigger[i]=trigger;
+  }
+  var ld=InputDevices.GetDeviceAtXRNode(XRNode.LeftHand);ld.TryGetFeatureValue(CommonUsages.menuButton,out bool menu);if(!xr)menu=Keyboard.current!=null&&Keyboard.current.tabKey.isPressed;if(menu&&!menuLast)panel.SetActive(!panel.activeSelf);menuLast=menu;
+  if(!state.paused&&!state.Finished)AnimateVillage();
+  status.text="BWVR / THE LONG DRY\n"+Mathf.CeilToInt(state.seconds)+"s · Water "+Mathf.RoundToInt(state.water)+" · Crops "+Mathf.RoundToInt(state.crops)+"\nTrust "+Mathf.RoundToInt(state.trust)+" · Gifts "+state.gifts+"\n\n"+(state.Finished?(state.Won?"The village survives.":"The village needs a different lesson."):notice)+"\n\nGrip: carry · Trigger: warmth / select\nLeft menu: sanctuary";
+  if(!xr)status.text+="\nDesktop: RMB look · WASD move · E carry · F select · Tab panel";
+  creatureLabel.transform.rotation=Quaternion.LookRotation(creatureLabel.transform.position-eye.transform.position);
+  saveClock+=Time.deltaTime;if(saveClock>=15){saveClock=0;Save();}
+ }
+ void Pose(XRNode node,Transform target){var d=InputDevices.GetDeviceAtXRNode(node);if(d.TryGetFeatureValue(CommonUsages.devicePosition,out Vector3 p))target.localPosition=p;if(d.TryGetFeatureValue(CommonUsages.deviceRotation,out Quaternion r))target.localRotation=r;}
+ void Desktop(){var k=Keyboard.current;var m=Mouse.current;if(k==null||m==null)return;if(m.rightButton.isPressed){var delta=m.delta.ReadValue()*.12f;var e=eye.transform.localEulerAngles;float pitch=Mathf.DeltaAngle(0,e.x);eye.transform.localRotation=Quaternion.Euler(Mathf.Clamp(pitch-delta.y,-65,65),e.y+delta.x,0);}var movement=new Vector3((k.dKey.isPressed?1:0)-(k.aKey.isPressed?1:0),0,(k.wKey.isPressed?1:0)-(k.sKey.isPressed?1:0));rig.position+=Quaternion.Euler(0,eye.transform.eulerAngles.y,0)*movement*Time.deltaTime*.6f;right.position=eye.transform.position-eye.transform.up*.08f;right.rotation=eye.transform.rotation;}
+ void Release(int i,Ray ray){var item=held[i];held[i]=null;item.held=false;item.GetComponent<Collider>().enabled=true;var plane=new Plane(Vector3.up,new Vector3(0,Floor,0));if(!plane.Raycast(ray,out float distance)||distance>3){item.transform.position=item.home;return;}var point=ray.GetPoint(distance);if(new Vector2(point.x,point.z).magnitude>.82f){item.transform.position=item.home;notice="Returned safely to the island.";return;}item.transform.position=point+Vector3.up*.04f;
+  if(item.kind==Offering.Water&&Vector3.Distance(point,cistern)<.18f){state.Deliver();notice="Water delivered. Villagers celebrate their creature's gift.";item.transform.position=item.home;}
+  else if(item.kind==Offering.Food&&Vector3.Distance(point,creature.position)<.2f){state.Praise();notice="The creature accepts your offering.";item.transform.position=item.home;}
+  else {if(item.kind==Offering.Villager)item.home=item.transform.position;notice="Placed on the island.";}
+ }
+ void AnimateVillage(){for(int i=0;i<workers.Count;i++){var item=workers[i].GetComponent<CarryItem>();if(item.held)continue;float t=Mathf.PingPong(clock*.08f+i*.3f,1);workers[i].position=Vector3.Lerp(item.home,well,t)+Vector3.up*.005f*Mathf.Sin(clock*8+i);}
+  creatureTrip+=Time.deltaTime*(.035f+state.care*.04f);float trip=creatureTrip%2;var target=trip<1?well:cistern;creature.position=Vector3.MoveTowards(creature.position,target,Time.deltaTime*.09f);var direction=target-creature.position;if(direction.sqrMagnitude>.0001f)creature.rotation=Quaternion.LookRotation(direction);if(trip>=1&&!returning){returning=true;}if(trip<1&&returning){returning=false;state.Deliver();notice="The creature brought water. Point and squeeze trigger to encourage it.";}creatureLabel.text=trip<1?"THEIR GOD · SEEKING WATER":"THEIR GOD · HELPING VILLAGE";
+ }
+ void Save(){try{File.WriteAllText(SavePath+".tmp",JsonUtility.ToJson(state,true));File.Copy(SavePath+".tmp",SavePath,true);notice="Season saved on this device.";}catch(Exception e){notice="Could not save: "+e.Message;}}
+ void Load(){if(!File.Exists(SavePath))return;try{var s=JsonUtility.FromJson<SliceState>(File.ReadAllText(SavePath));if(s==null||!s.Valid())throw new Exception("Invalid season data");state=s;state.paused=true;notice="Season restored and paused. Resume from your sanctuary.";}catch(Exception){notice="Save could not be read. A fresh season is ready.";}}
+ void OnApplicationPause(bool paused){if(paused){for(int i=0;i<2;i++)if(held[i]!=null){held[i].transform.position=held[i].home;held[i].held=false;held[i].GetComponent<Collider>().enabled=true;held[i]=null;}Save();}}
+ void OnApplicationQuit(){Save();}
+}
+}
