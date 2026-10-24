@@ -33,3 +33,6 @@ Verified in Editor: compilation, humanoid avatars for all four actors, advancing
 5. Profile on Quest 3 and Quest Pro before increasing foliage density, material count or shader complexity.
 
 Texture resolution alone will not fix the flat terrain, weak composition, placeholder water and inconsistent scale. Those are part of the same visual pass. Prefer efficient silhouettes, shared materials, controlled transparency and LODs to unbounded scene detail.
+
+Quest APK build completed successfully (52,440,823 bytes). Unity also logged internal BuildPipeline assertions during packaging; the log still ended with Build Finished, Result: Success. These assertions remain unexplained, and the APK has not been tested on a headset.
+
