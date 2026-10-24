@@ -11,7 +11,7 @@ public sealed class QuestSlice:MonoBehaviour {
  const float Floor=.82f; SliceState state=new SliceState(); Camera eye; Transform rig,left,right,creature; Text status,creatureLabel; GameObject panel; Font font;
  readonly List<CarryItem> items=new List<CarryItem>(); readonly List<Transform> workers=new List<Transform>();
  readonly CarryItem[] held=new CarryItem[2]; readonly bool[] lastGrip=new bool[2],lastTrigger=new bool[2]; readonly LineRenderer[] rays=new LineRenderer[2];
- float clock,saveClock,creatureTrip; bool returning,menuLast; string notice="Their creature is their god. Your touch guides its instincts.";
+ float clock,saveClock,creatureTrip; bool returning,menuLast,trackingConfigured; string notice="Their creature is their god. Your touch guides its instincts.";
  readonly Vector3 cistern=new Vector3(-.32f,Floor,.25f),well=new Vector3(.4f,Floor,-.2f);
  string SavePath=>Path.Combine(Application.persistentDataPath,"bwvr-season-v1.json");
  void Start(){font=Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");Load();Build();}
@@ -48,14 +48,14 @@ public sealed class QuestSlice:MonoBehaviour {
   Button("Save season",new Vector3(140,-70,0),Save);
   Button("Begin again",new Vector3(-140,-160,0),()=>{state=new SliceState();creatureTrip=0;notice="A new dry season begins.";});
   Button("Close",new Vector3(140,-160,0),()=>panel.SetActive(false));
-  if(!XRSettings.isDeviceActive){left.localPosition=new Vector3(-.36f,1.35f,.55f);left.localRotation=Quaternion.Euler(0,0,0);panel.transform.localRotation=Quaternion.identity;}
+  if(!XRSettings.isDeviceActive){eye.transform.localRotation=Quaternion.Euler(25,0,0);left.localPosition=new Vector3(-.6f,1.15f,1.05f);left.localRotation=Quaternion.Euler(0,0,0);panel.transform.localRotation=Quaternion.identity;}
  }
  Transform Controller(string name,int side){var g=new GameObject(name);g.transform.SetParent(rig,false);Shape("Controller presence",PrimitiveType.Sphere,Vector3.zero,Vector3.one*.035f,new Color(.85f,.72f,.42f),g.transform);var line=g.AddComponent<LineRenderer>();line.positionCount=2;line.startWidth=.002f;line.endWidth=.001f;line.material=new Material(Shader.Find("Sprites/Default"));line.startColor=line.endColor=new Color(.6f,.85f,.8f,.7f);rays[side]=line;return g.transform;}
  CarryItem Item(string name,Offering kind,Vector3 at,PrimitiveType primitive,Color color,float size){var g=Shape(name,primitive,at,Vector3.one*size,color);var item=g.AddComponent<CarryItem>();item.kind=kind;item.home=at;items.Add(item);return item;}
  Text Label(string name,Transform parent,Vector3 position,Vector2 size,float scale,int fontSize){var g=new GameObject(name,typeof(RectTransform));g.transform.SetParent(parent,false);g.transform.localPosition=position;g.transform.localScale=Vector3.one*scale;if(!parent.GetComponentInParent<Canvas>()){var c=g.AddComponent<Canvas>();c.renderMode=RenderMode.WorldSpace;}var t=g.AddComponent<Text>();t.font=font;t.fontSize=fontSize;t.color=new Color(.94f,.9f,.74f);t.alignment=TextAnchor.MiddleCenter;t.horizontalOverflow=HorizontalWrapMode.Wrap;g.GetComponent<RectTransform>().sizeDelta=size;return t;}
  void Button(string title,Vector3 position,Action action){var g=new GameObject(title,typeof(RectTransform),typeof(Image),typeof(BoxCollider),typeof(SpatialTarget));g.transform.SetParent(panel.transform,false);g.transform.localPosition=position;g.GetComponent<RectTransform>().sizeDelta=new Vector2(260,68);g.GetComponent<Image>().color=new Color(.13f,.28f,.29f);g.GetComponent<BoxCollider>().size=new Vector3(260,68,15);g.GetComponent<SpatialTarget>().invoke=action;Label("Caption",g.transform,Vector3.zero,new Vector2(250,65),1,24).text=title;}
  void Update(){if(eye==null)return;clock+=Time.deltaTime;state.Step(Time.deltaTime);bool xr=XRSettings.isDeviceActive;
-  if(xr){Pose(XRNode.Head,eye.transform);Pose(XRNode.LeftHand,left);Pose(XRNode.RightHand,right);}
+  if(xr){if(!trackingConfigured){var inputs=new List<XRInputSubsystem>();SubsystemManager.GetSubsystems(inputs);bool floor=false;foreach(var input in inputs)floor|=input.TrySetTrackingOriginMode(TrackingOriginModeFlags.Floor);if(!floor)rig.position+=Vector3.up*1.55f;trackingConfigured=true;}Pose(XRNode.Head,eye.transform);Pose(XRNode.LeftHand,left);Pose(XRNode.RightHand,right);}
   else Desktop();
   for(int i=0;i<2;i++){var device=InputDevices.GetDeviceAtXRNode(i==0?XRNode.LeftHand:XRNode.RightHand);device.TryGetFeatureValue(CommonUsages.gripButton,out bool grip);device.TryGetFeatureValue(CommonUsages.triggerButton,out bool trigger);if(!xr){grip=i==1&&Keyboard.current!=null&&Keyboard.current.eKey.isPressed;trigger=i==1&&Keyboard.current!=null&&Keyboard.current.fKey.isPressed;}
    var hand=i==0?left:right;var ray=new Ray(hand.position,hand.forward);Physics.Raycast(ray,out var hit,3);rays[i].SetPosition(0,ray.origin);rays[i].SetPosition(1,hit.collider?hit.point:ray.GetPoint(2));rays[i].enabled=xr||i==1;

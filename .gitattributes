@@ -1,0 +1,7 @@
+* text=auto eol=lf
+*.png binary
+*.jpg binary
+*.fbx binary
+# Unity serialization writes empty YAML values with trailing spaces.
+*.asset whitespace=-blank-at-eol
+*.unity whitespace=-blank-at-eol
