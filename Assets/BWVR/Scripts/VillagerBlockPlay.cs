@@ -12,13 +12,13 @@ public sealed class VillagerBlockPlay:MonoBehaviour {
  public bool TryBegin(ConstructionBlock block){
   if(Active||actor.held||!Eligible(block))return false;
   if(!navigator.world.Sample(block.transform.position,navigator.profile,10,out _))return false;
-  target=block;target.VillagerOwner=this;site.nextVillagerPlayAt=Time.time+90;routine.ResetTask();navigator.ResetRoute();clock=elapsed=0;Current=Phase.Approach;motion?.LookAt(target.transform);return true;
+  target=block;target.VillagerOwner=this;site.nextVillagerPlayAt=site.Clock+90;routine.ResetTask();navigator.ResetRoute();clock=elapsed=0;Current=Phase.Approach;motion?.LookAt(target.transform);return true;
  }
  public bool Tick(float dt,bool paused){
   if(paused||dt<=0)return Active;
   if(actor.held){if(Active)ResetTask();return false;}
   if(!Active){
-   cooldown-=dt;if(site==null||cooldown>0||Time.time<site.nextVillagerPlayAt||Time.time<site.LastCreatureBuildTime+20)return false;
+   cooldown-=dt;if(site==null||cooldown>0||site.Clock<site.nextVillagerPlayAt||site.Clock<site.LastCreatureBuildTime+20)return false;
    var candidate=site.blocks.Where(Eligible).OrderBy(b=>(b.transform.position-transform.position).sqrMagnitude).FirstOrDefault();
    if(candidate==null||!TryBegin(candidate))cooldown=10;return Active;
   }

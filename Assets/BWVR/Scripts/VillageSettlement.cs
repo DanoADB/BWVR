@@ -73,6 +73,7 @@ public sealed class VillageSettlement:MonoBehaviour {
    if(!found)continue;detailGroups++;
    Vector3 P(float x,float y,float z)=>centre+Quaternion.Euler(0,yaw,0)*new Vector3(x,y,z)*unit;
    if(i%3==0){ // A bench for the shared green.
+    ConstructionInspiration.At(transform,P(0,0,0),BuildRecipe.Bench,"bench-"+i,unit);
     Box(P(0,.8f,0),new Vector3(2.4f,.22f,.8f),yaw);Box(P(-.85f,.4f,0),new Vector3(.2f,.8f,.6f),yaw);Box(P(.85f,.4f,0),new Vector3(.2f,.8f,.6f),yaw);Box(P(0,1.25f,.35f),new Vector3(2.4f,.6f,.15f),yaw);
    }else if(i%3==1){ // Stacked cut timber beside the home.
     for(int row=0;row<2;row++)for(int log=0;log<3-row;log++)Box(P((log-(2-row)*.5f)*.55f,.22f+row*.43f,0),new Vector3(.48f,.4f,1.8f),yaw);

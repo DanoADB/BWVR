@@ -13,6 +13,7 @@ public enum GuidanceStatus {None,Active,Completed,Rejected,Expired,Superseded,Ab
 }
 [Serializable] public sealed class ActionReceipt {
  public CreatureAction action;public CreatureSituation situation;public string target="";public float completedAt;public bool eligible,consumed;
+ public int constructionRecipe=-1;
 }
 [Serializable] public sealed class CreatureIntention {
  public bool active;public CreatureAction action;public CreatureSituation situation;public string target="";public float startedAt,deadline;
@@ -33,7 +34,7 @@ public enum GuidanceStatus {None,Active,Completed,Rejected,Expired,Superseded,Ab
   var ids=new System.Collections.Generic.HashSet<string>();foreach(var c in cooldowns)if(c==null||!Text(c.target)||!ids.Add(c.target)||!Number(c.until,0,100000180))return false;
   if(!Enum.IsDefined(typeof(GuidanceIntent),guidance.intention)||!Enum.IsDefined(typeof(GuidanceStatus),guidance.status)||!Text(guidance.target)||!Text(guidance.reason)||!Number(guidance.requestedAt,0,time)||!Number(guidance.expiresAt,0,100000060))return false;
   if(!Enum.IsDefined(typeof(CreatureAction),intention.action)||!Enum.IsDefined(typeof(CreatureSituation),intention.situation)||!Text(intention.target)||!Number(intention.startedAt,0,time)||!Number(intention.deadline,0,100000300))return false;
-  if(!Enum.IsDefined(typeof(CreatureAction),receipt.action)||!Enum.IsDefined(typeof(CreatureSituation),receipt.situation)||!Text(receipt.target)||!Number(receipt.completedAt,0,time))return false;
+  if(!Enum.IsDefined(typeof(CreatureAction),receipt.action)||!Enum.IsDefined(typeof(CreatureSituation),receipt.situation)||!Text(receipt.target)||!Number(receipt.completedAt,0,time)||receipt.constructionRecipe< -1||receipt.constructionRecipe>3)return false;
   var keys=new System.Collections.Generic.HashSet<int>();foreach(var a in associations)if(a==null||!Enum.IsDefined(typeof(CreatureSituation),a.situation)||!Enum.IsDefined(typeof(CreatureAction),a.action)||!Number(a.preference,0,1)||!Number(a.reinforcedAt,0,time)||a.samples<0||a.samples>1000000||!keys.Add((int)a.situation*16+(int)a.action))return false;return true;
  }
  public static bool Number(float value,float min,float max)=>!float.IsNaN(value)&&!float.IsInfinity(value)&&value>=min&&value<=max;

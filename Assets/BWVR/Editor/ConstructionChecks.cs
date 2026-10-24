@@ -7,7 +7,7 @@ public static class ConstructionChecks {
  [MenuItem("BWVR/Verify physical construction (Play mode)")]
  public static void Verify(){
   if(!EditorApplication.isPlaying)throw new Exception("Enter Play mode first");
-  var site=UnityEngine.Object.FindObjectsByType<ConstructionSite>().First(s=>s.GetComponentInParent<IslandDiscoveries>()==null);if(site.Snapped!=0)throw new Exception("Run on a fresh construction tray");site.Paused=false;
+  var site=UnityEngine.Object.FindObjectsByType<ConstructionSite>().First(s=>s.GetComponentInParent<IslandDiscoveries>()==null);if(site.Snapped!=0)throw new Exception("Run on a fresh construction tray");site.Paused=false;site.SelectRecipe(BuildRecipe.Arch);
   var mind=UnityEngine.Object.FindAnyObjectByType<CreatureCuriosity>();var routine=mind.GetComponent<CreatureRoutine>();mind.ResetTask();routine.ResetTask();
   var loose=site.blocks[0];loose.Body.position=loose.spawn+Vector3.up*2;loose.Body.transform.position=loose.Body.position;float before=loose.Body.position.y;for(int i=0;i<100;i++)site.Advance(.02f);
   if(loose.Body.position.y>before-.02f||Mathf.Abs(loose.Body.position.y-.6f)>.03f)throw new Exception("Loose brick did not fall and settle");
@@ -32,7 +32,7 @@ public static class ConstructionChecks {
    season.construction=site.Capture();var restored=JsonUtility.FromJson<SliceState>(JsonUtility.ToJson(season));if(!restored.Valid())throw new Exception("Construction save rejected");site.Restore(restored.construction);for(int i=0;i<100;i++)site.Advance(.02f);
    if(site.Snapped!=8||site.blocks.Select((b,i)=>Vector3.Distance(b.Body.position,positions[i])).Max()>.02f)throw new Exception("Restored assembly unstable");
    restored.construction[0].support=0;if(restored.Valid())throw new Exception("Cyclic connection accepted in save data");
-   site.Paused=true;loose.Body.AddForce(Vector3.right*10,ForceMode.Impulse);var still=loose.Body.position;site.Advance(.02f);if(loose.Body.position!=still)throw new Exception("Paused physics advanced");site.Paused=false;
+   site.Paused=true;loose.Body.AddForce(Vector3.right*10,ForceMode.Impulse);var still=loose.Body.position;site.Advance(.02f);if(loose.Body.position!=still)throw new Exception("Paused physics advanced");site.Paused=false;site.SelectRecipe(BuildRecipe.Arch);
    var probe=site.blocks[7];if(site.FindSnap(probe,site.World(new Vector3(-2,.6f,0)),site.transform.rotation,out _,out _,out _))throw new Exception("Occupied connection accepted");
    // Removing a support detaches only its direct connections, leaving physics to settle the rest.
    var support=site.blocks.First(b=>b.Attached&&b.Body.position.y<1);support.Item.held=true;support.Grab();
