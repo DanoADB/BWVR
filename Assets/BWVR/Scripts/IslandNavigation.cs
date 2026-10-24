@@ -24,7 +24,10 @@ public sealed class IslandNavigation:MonoBehaviour {
   walkMesh.indexFormat=UnityEngine.Rendering.IndexFormat.UInt32;walkMesh.vertices=vertices;walkMesh.triangles=triangles;walkMesh.RecalculateBounds();
   sources.Add(new NavMeshBuildSource{shape=NavMeshBuildSourceShape.Mesh,sourceObject=walkMesh,transform=Matrix4x4.identity,area=0});
   foreach(var view in GetComponentsInChildren<IslandPlacementView>()){
-   if(view.kind=="building")foreach(var box in view.GetComponentsInChildren<BoxCollider>())Box(sources,box.transform.TransformPoint(box.center),Vector3.Scale(box.size,box.transform.lossyScale),box.transform.rotation);
+   if(view.kind=="building"){
+    if(view.name.Contains("STORAGE_PIT"))Box(sources,view.transform.position+Vector3.up*Scale,new Vector3(12,2,12)*Scale,view.transform.rotation);
+    else foreach(var box in view.GetComponentsInChildren<BoxCollider>())Box(sources,box.transform.TransformPoint(box.center),Vector3.Scale(box.size,box.transform.lossyScale),box.transform.rotation);
+   }
    else if(view.kind is "rock" or "feature"){var renderers=view.GetComponentsInChildren<Renderer>();if(renderers.Length>0){var bounds=renderers[0].bounds;foreach(var renderer in renderers)bounds.Encapsulate(renderer.bounds);Box(sources,bounds.center,bounds.size,Quaternion.identity);}}
   }
   // Block trunks, not broad canopies, ferns or low bushes.

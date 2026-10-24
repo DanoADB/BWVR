@@ -1,5 +1,5 @@
 Shader "BWVR/IslandGround" {
- Properties { _Grass("Quaternius grass palette",2D)="white" {} _Rock("Quaternius rock",2D)="white" {} _Sand("Quaternius sand",2D)="white" {} _Detail("Quaternius ground detail",2D)="white" {} _Biome("Forest, paths and fields",2D)="black" {} _BiomeRect("Biome coordinates",Vector)=(0,0,1,1) _SeaLevel("Sea level",Float)=0.75 }
+ Properties { _Grass("Quaternius grass palette",2D)="white" {} _Rock("Quaternius rock",2D)="white" {} _Sand("Quaternius sand",2D)="white" {} _Detail("Quaternius ground detail",2D)="white" {} _Biome("Forest, paths and fields",2D)="black" {} _BiomeRect("Biome coordinates",Vector)=(0,0,1,1) _Drought("Water stress",Range(0,1))=0.48 _CropHealth("Crop health",Range(0,1))=0.66 _SeaLevel("Sea level",Float)=0.75 }
  SubShader { Tags {"RenderType"="Opaque"} Pass { Tags {"LightMode"="ForwardBase"}
  CGPROGRAM
  #pragma vertex vert
@@ -8,7 +8,7 @@ Shader "BWVR/IslandGround" {
  #pragma multi_compile_fog
  #include "UnityCG.cginc"
  #include "Lighting.cginc"
- sampler2D _Grass,_Rock,_Sand,_Detail,_Biome;float4 _BiomeRect;float _SeaLevel;
+ sampler2D _Grass,_Rock,_Sand,_Detail,_Biome;float4 _BiomeRect;float _SeaLevel,_Drought,_CropHealth;
  float hash(float2 p){return frac(sin(dot(p,float2(127.1,311.7)))*43758.5453);}
  float noise2(float2 p){float2 a=floor(p),f=frac(p);f=f*f*(3-2*f);return lerp(lerp(hash(a),hash(a+float2(1,0)),f.x),lerp(hash(a+float2(0,1)),hash(a+1),f.x),f.y);}
  struct input {float4 vertex:POSITION;float3 normal:NORMAL;UNITY_VERTEX_INPUT_INSTANCE_ID};
@@ -18,13 +18,13 @@ Shader "BWVR/IslandGround" {
   float4 biome=tex2D(_Biome,(i.world.xz-_BiomeRect.xy)*_BiomeRect.zw);
   float3 palette=lerp(float3(.065,.16,.028),float3(.17,.25,.065),broad);
   float dry=smoothstep(.52,.8,noise2(i.world.xz*7+17))*(1-biome.g*.75);
-  float3 grass=lerp(palette,float3(.33,.24,.085),dry*.65)*( .87+patch*.2+grain*.12);
+  float3 grass=lerp(palette,float3(.33,.24,.085),dry*lerp(.2,.9,_Drought))*( .87+patch*.2+grain*.12);
   grass=lerp(grass,grass*float3(.65,.83,.74),biome.g*.65);
   float3 detail=tex2D(_Detail,i.world.xz*85).rgb;
   float3 soil=float3(.16,.09,.035)*(.7+detail.r*.65);
   grass=lerp(grass,soil,saturate(biome.r*.82));
   float furrow=smoothstep(.25,.65,sin(i.world.x*2200)*.5+.5);
-  float3 crops=lerp(float3(.10,.075,.02),float3(.26,.21,.065),furrow);
+  float3 crops=lerp(float3(.10,.075,.02),lerp(float3(.34,.19,.045),float3(.11,.27,.04),_CropHealth),furrow);
   grass=lerp(grass,crops,biome.b*.8);
   float3 weights=pow(abs(n),4);weights/=max(.0001,weights.x+weights.y+weights.z);
   float3 rock=tex2D(_Rock,i.world.yz*9).rgb*weights.x+tex2D(_Rock,i.world.xz*9).rgb*weights.y+tex2D(_Rock,i.world.xy*9).rgb*weights.z;

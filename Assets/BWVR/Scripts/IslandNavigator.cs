@@ -18,7 +18,7 @@ public sealed class IslandNavigator:MonoBehaviour {
   if(corners==null){if(retry>0)return false;retry=1;
    // Re-enter safely after the player has carried and placed an actor.
    if(!world.Sample(transform.position,profile,profile.radius+1,out var start)||!agent.Warp(world.ToNav(start))){Blocked=true;return false;}
-   if(!world.Sample(target,profile,profile.radius*2+4,out var goal)||!agent.CalculatePath(world.ToNav(goal),path)||path.status!=NavMeshPathStatus.PathComplete){Blocked=true;return false;}
+   if(!world.Sample(target,profile,profile.radius*2+8,out var goal)||!agent.CalculatePath(world.ToNav(goal),path)||path.status!=NavMeshPathStatus.PathComplete){Blocked=true;return false;}
    corners=path.corners;corner=1;Blocked=false;if(corners.Length>2)detours++;
   }
   float budget=dt*speed/world.Scale;

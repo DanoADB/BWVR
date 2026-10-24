@@ -28,3 +28,16 @@ There are no screen-edge meters, browser controls or forced viewpoint changes. T
 ## Limits of this milestone
 
 The art and creature gait are placeholders. Controller rays use Unity XR device input with OpenXR rather than a full interaction toolkit rig. Hand tracking, physics throwing, complete OpenBlack behavior and asset parity are not implemented. Saves cover the logical season, not the whole physical world. Android packaging and headset performance remain unverified until a real device build is tested.
+
+
+## First nonverbal drought loop
+
+Routine world labels and detailed meters are now off by default. The wrist menu keeps short save/pause/restart controls; **Help / details** opts into the existing meters, control instructions and creature intent caption. A restored paused season opens that menu so the player is not silently left in a frozen scene. Save/load errors and the season outcome still get a short visible message.
+
+When water is low, the water gatherer can interrupt an outbound work trip to check the cistern, show an empty open bucket, look toward the creature, beckon and point toward the water source. The demonstration uses a nearby walkable spot across the cistern from the creature. If it is seeking water and nearby, the creature briefly acknowledges the gatherer with its gaze, then resumes its own routine. Busy creatures are not forced out of their current action. The gatherer resumes work regardless of whether it receives help. Requests have a cooldown and cannot start while paused or carried.
+
+The bucket visibly fills during collection and empties during delivery. The cistern shows the actual village water level, and terrain field colors respond to crop health and water stress. A successful water gift prompts a short villager gesture toward the creature. These reactions do not grant extra resources, trust or learning rewards. Storage footprints now stop actors beside the cistern rather than letting them stand inside the new container.
+
+This is a deterministic visual communication pass, not the future BDI, social relationships, tool/toy learning or possession systems. Speech, creature vocalizations, custom emotional animations and headset readability testing remain future work. Temporary gesture/request state is not added to the season save format.
+
+Validation menu: **BWVR → Verify nonverbal drought cues (Play mode)**. It checks optional text, visible water levels, automatic low-water requests, paused behavior, empty-bucket display, gaze, beckoning, pointing, creature acknowledgement, independent worker completion, bucket fill/delivery and celebration without extra rewards. Existing navigation, terrain, actor action and release checks also pass. No Quest APK was built for this pass.

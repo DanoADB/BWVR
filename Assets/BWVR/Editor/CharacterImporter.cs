@@ -37,7 +37,7 @@ public static class CharacterImporter {
   if(!controller.parameters.Any(p=>p.name=="Activity"))controller.AddParameter("Activity",AnimatorControllerParameterType.Int);
   var layers=controller.layers;layers[0].iKPass=true;controller.layers=layers;var machine=layers[0].stateMachine;
   var clips=AssetDatabase.LoadAllAssetsAtPath(Library).OfType<AnimationClip>().Where(c=>!c.name.StartsWith("__")).ToArray();
-  var names=new[]{"Pickup","Drinking reach","Tend crops","Gather wood","Deliver supplies"};var sources=new[]{"PickUp_Table","Interact","Fixing_Kneeling","Push_Loop","Interact"};
+  var names=new[]{"Pickup","Drinking reach","Tend crops","Gather wood","Deliver supplies","Request water"};var sources=new[]{"PickUp_Table","Interact","Fixing_Kneeling","Push_Loop","Interact","Idle_Talking_Loop"};
   for(int i=0;i<names.Length;i++){
    var state=machine.states.Select(s=>s.state).FirstOrDefault(s=>s.name==names[i])??machine.AddState(names[i]);state.motion=clips.First(c=>c.name.EndsWith("|"+sources[i]));
    if(!machine.anyStateTransitions.Any(t=>t.destinationState==state)){var enter=machine.AddAnyStateTransition(state);enter.AddCondition(AnimatorConditionMode.Equals,i+1,"Activity");enter.canTransitionToSelf=false;enter.duration=.12f;}

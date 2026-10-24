@@ -4,6 +4,7 @@ Recorded from the user's design notes on 2026-10-23. These are future gameplay r
 
 ## Core direction
 
+- Minimize text. Communicate needs, intentions and relationships through natural behavior, gaze, gesture, objects, environmental change and eventually sound. Textual help and accessibility cues remain optional; operational errors and pause/resume controls must stay understandable.
 - The player remains unseen. The creature is the god that villagers perceive and worship.
 - Normal interaction with the creature happens through **tools, toys and positive/negative feedback**. Teach and influence its choices rather than issue direct action commands.
 - **Possession is an exceptional form of control:** the player can possess the creature for a short period, at great cost. It must remain rare enough that learning and indirect influence matter.

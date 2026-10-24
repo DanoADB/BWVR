@@ -20,6 +20,8 @@ The generated scene contains the BWVR bootstrap. It builds the island and spatia
 - Press the left controller menu button to show/hide the wrist sanctuary. Point and trigger to pause, save, resume or begin again.
 - The player stays outside the island. No forced camera movement or smooth locomotion in VR.
 
+Routine labels and meters are hidden by default. Open the wrist sanctuary (left menu / desktop Tab) and choose **Help / details** for controls, resource numbers and the optional creature intent caption. The world communicates drought through water levels, bucket demonstrations, gestures and ground/crop color. A restored paused season opens the sanctuary for resume.
+
 Controllers are the first input target. Tracked-hand gestures are not implemented yet.
 
 ## Quest build
