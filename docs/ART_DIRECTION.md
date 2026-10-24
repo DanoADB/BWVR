@@ -97,3 +97,7 @@ Six 480-triangle Quaternius clouds drift above the island (2,880 added mesh tria
 Clouds cast real directional-light shadows. IslandGround and GameSurface now receive the sun shadow map. Desktop uses soft shadows; Quest uses hard shadows to bound sampling cost, a single 1024px map, no cascades and 8m shadow distance. Quest frame rate has not yet been measured.
 
 Sources and licenses are checked into Assets/ThirdParty/Quaternius/Clouds and Assets/ThirdParty/Kenney/Smoke. BWVR > Import CC0 atmosphere artwork rebuilds the resource/material references. Original glTF was converted to normalized OBJ with its node transform applied.
+
+## Animated ocean
+
+Ocean uses one 64x64 grid plus an outer horizon ring (8,200 triangles), two shader wave directions, filtered fine ripples, a sun highlight and Fresnel sky tint. A 256px shore-distance map is generated once from the original terrain for shallow turquoise water and animated shoreline foam. Water receives cloud shadows, casts none, and has no collider, depth-copy, planar reflection or refraction pass. Runtime mesh/material/map are released when the scene ends. Render comparison verified wave animation (187,365 changed pixels) and shadow response (18,381 changed pixels) before the final horizon/filter refinement. Final shader and mesh budget passed; standalone Quest performance remains unmeasured.

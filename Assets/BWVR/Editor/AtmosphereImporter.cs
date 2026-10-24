@@ -4,6 +4,13 @@ using UnityEditor;
 using UnityEngine;
 namespace BWVR.Editor {
 public static class AtmosphereImporter {
+ [MenuItem("BWVR/Import ocean material")]
+ public static void ImportOcean(){
+  const string folder="Assets/BWVR/Atmosphere/Resources";Directory.CreateDirectory(folder);AssetDatabase.Refresh();
+  var path=folder+"/IslandOcean.mat";var m=AssetDatabase.LoadAssetAtPath<Material>(path);
+  if(m==null){m=new Material(Shader.Find("BWVR/IslandWater"));AssetDatabase.CreateAsset(m,path);}
+  EditorUtility.SetDirty(m);AssetDatabase.SaveAssets();
+ }
  [MenuItem("BWVR/Import CC0 atmosphere artwork")]
  public static void Import(){
   const string output="Assets/BWVR/Atmosphere/Resources";

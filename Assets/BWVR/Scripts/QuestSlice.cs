@@ -35,7 +35,7 @@ public sealed class QuestSlice:MonoBehaviour {
   Renderer ground;
   if(terrain!=null){
    var island=new GameObject("Land 1 - original island geometry");island.transform.SetParent(transform,false);island.AddComponent<MeshFilter>().sharedMesh=terrain.mesh;ground=island.AddComponent<MeshRenderer>();groundCollider=island.AddComponent<MeshCollider>();((MeshCollider)groundCollider).sharedMesh=terrain.mesh;
-   var ocean=Shape("First island sea",PrimitiveType.Plane,new Vector3(.5f,terrain.SeaLevel+.0015f,0),new Vector3(10,1,10),new Color(.18f,.44f,.51f));Destroy(ocean.GetComponent<Collider>());
+   IslandOcean.Build(transform,terrain);
    if(terrain.HasPlacements){
     cistern=Landmark("building",Vector3.zero,p=>p.town==0&&p.type.Contains("STORAGE_PIT"));
     well=Landmark("well",Landmark("drink",cistern));
