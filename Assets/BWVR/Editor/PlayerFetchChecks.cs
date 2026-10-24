@@ -14,6 +14,8 @@ public static class PlayerFetchChecks {
   var field=typeof(QuestSlice).GetField("state",BindingFlags.NonPublic|BindingFlags.Instance);var original=(SliceState)field.GetValue(slice);var position=god.transform.position;god.Interrupt("Player fetch QA");slice.SendMessage("OnApplicationPause",false);
   foreach(var resident in slice.GetComponentsInChildren<VillagerExploration>()){resident.ResetTask();resident.GetComponent<VillagerSocial>().ResetTask();resident.GetComponent<VillagerBlockPlay>().ResetTask();}
   var test=new SliceState{water=100,crops=100,hunger=0,playPreference=1,socialPreference=0,developmentFocus=true};field.SetValue(slice,test);
+  // The saved season may be older than the fixture clock. Reset decision deadlines after switching states.
+  god.NewSeason();
   try{
    test.Building.observed=15;test.WorldPlay.caution=1;ball.ResetWorld();Require(nav.world.Sample(ball.FetchHome+Vector3.back*nav.world.Scale*12,nav.profile,12,out var at),"No play approach");god.transform.position=nav.world.ProjectFoot(at,nav.profile);nav.ResetRoute();
    test.paused=true;Require(!ball.PlayerToss(Vector3.right*.5f),"Paused toss accepted");test.paused=false;
