@@ -28,9 +28,39 @@ public static class ProjectSetup {
   var android=settings.SettingsForBuildTarget(BuildTargetGroup.Android);android.InitManagerOnStart=true;
   if(!XRPackageMetadataStore.AssignLoader(android.Manager,"UnityEngine.XR.OpenXR.OpenXRLoader",BuildTargetGroup.Android))throw new Exception("OpenXR loader assignment failed");
   ConfigureOpenXR();EditorUtility.SetDirty(settings);
-  // Desktop preview deliberately starts without an XR loader; the Android player initializes OpenXR.
+  ConfigureQuestLink();
   var scene=EditorSceneManager.NewScene(NewSceneSetup.EmptyScene,NewSceneMode.Single);new GameObject("BWVR - First Quest Slice").AddComponent<QuestSlice>();EditorSceneManager.SaveScene(scene,Scene);EditorBuildSettings.scenes=new[]{new EditorBuildSettingsScene(Scene,true)};
   AssetDatabase.SaveAssets();Validate();Debug.Log("BWVR_SETUP_OK");
+ }
+ [MenuItem("BWVR/Quest Link/Enable headset Play mode")]
+ public static void ConfigureQuestLink(){
+  if(EditorApplication.isPlayingOrWillChangePlaymode)throw new Exception("Stop Play mode before changing XR settings.");
+  var settings=AssetDatabase.LoadAssetAtPath<XRGeneralSettingsPerBuildTarget>("Assets/BWVR/QuestXRSettings.asset");
+  if(settings==null)throw new Exception("Run BWVR setup first to create XR settings.");
+  EditorBuildSettings.AddConfigObject(XRGeneralSettings.k_SettingsKey,settings,true);
+  if(!settings.HasManagerSettingsForBuildTarget(BuildTargetGroup.Standalone))settings.CreateDefaultManagerSettingsForBuildTarget(BuildTargetGroup.Standalone);
+  var desktop=settings.SettingsForBuildTarget(BuildTargetGroup.Standalone);
+  desktop.InitManagerOnStart=true;
+  if(!XRPackageMetadataStore.AssignLoader(desktop.Manager,"UnityEngine.XR.OpenXR.OpenXRLoader",BuildTargetGroup.Standalone))throw new Exception("Desktop OpenXR loader assignment failed.");
+  var xr=OpenXRSettings.GetSettingsForBuildTargetGroup(BuildTargetGroup.Standalone);
+  if(xr==null)throw new Exception("Desktop OpenXR settings unavailable.");
+  xr.renderMode=OpenXRSettings.RenderMode.SinglePassInstanced;
+  var touch=xr.GetFeature<OculusTouchControllerProfile>();
+  if(touch==null)throw new Exception("Desktop Touch controller profile missing.");
+  touch.enabled=true;
+  var plus=xr.GetFeature<MetaQuestTouchPlusControllerProfile>();if(plus!=null)plus.enabled=true;
+  var pro=xr.GetFeature<MetaQuestTouchProControllerProfile>();if(pro!=null)pro.enabled=true;
+  EditorUtility.SetDirty(xr);EditorUtility.SetDirty(desktop);EditorUtility.SetDirty(desktop.Manager);EditorUtility.SetDirty(settings);
+  AssetDatabase.SaveAssets();
+  Debug.Log("BWVR_LINK_CONFIGURED: start Quest Link in the headset, then press Play. Android settings are independent.");
+ }
+ [MenuItem("BWVR/Quest Link/Use desktop preview without headset")]
+ public static void ConfigureDesktopPreview(){
+  if(EditorApplication.isPlayingOrWillChangePlaymode)throw new Exception("Stop Play mode before changing XR settings.");
+  var settings=AssetDatabase.LoadAssetAtPath<XRGeneralSettingsPerBuildTarget>("Assets/BWVR/QuestXRSettings.asset");
+  var desktop=settings?.SettingsForBuildTarget(BuildTargetGroup.Standalone);
+  if(desktop!=null){desktop.InitManagerOnStart=false;EditorUtility.SetDirty(desktop);AssetDatabase.SaveAssets();}
+  Debug.Log("BWVR_DESKTOP_PREVIEW: headset initialization disabled for desktop only.");
  }
  static bool ConfigureOpenXR(){
   var xr=OpenXRSettings.GetSettingsForBuildTargetGroup(BuildTargetGroup.Android);

@@ -12,6 +12,18 @@ Future design: [gameplay direction](docs/GAMEPLAY_DIRECTION.md) — tools, toys 
 
 The generated scene contains the BWVR bootstrap. It builds the island and spatial UI at runtime. To regenerate the scene and Quest settings, select **BWVR > Set up first Quest slice**. This replaces the prototype scene, so save custom scene work elsewhere first.
 
+## Quest Link: press Play in the headset
+
+Install Meta Horizon Link on Windows and set it as the active OpenXR runtime in its Settings > General. Connect your Quest over USB or Air Link, then launch Quest Link inside the headset before pressing Play in Unity.
+
+BWVR configures the Standalone OpenXR loader, single-pass instanced rendering, and Touch / Touch Plus / Touch Pro controller profiles. Unity uses the Standalone XR settings for Editor Play mode even with Android as the active build target. Open the first slice scene and press Play; head and controller tracking use the same gameplay path as the Quest APK. The Android Meta Quest configuration remains separate.
+
+**BWVR > Quest Link > Enable headset Play mode** reapplies these desktop settings without rebuilding the scene. **BWVR > Quest Link > Use desktop preview without headset** disables desktop XR initialization and keeps keyboard/mouse preview available; re-enable headset mode before the next Link session. Stop Play mode before changing modes, and restart Play after connecting Link.
+
+If Unity shows only the desktop view, confirm Quest Link is actually running in the headset, Meta is the active OpenXR runtime, and desktop initialization is enabled. USB debugging alone connects Android deployment, not Link. Link runs the game on the PC; use the APK to evaluate standalone Quest performance.
+
+Reference: [Meta Link development workflow](https://developers.meta.com/vr/documentation/unity/unity-link/).
+
 ## Quest controls
 
 - Point a controller at a resource or villager. Hold grip to carry; release while pointing onto the island to place.
@@ -26,7 +38,7 @@ Controllers are the first input target. Tracked-hand gestures are not implemente
 
 ## Quest build
 
-In Unity Hub, add **Android Build Support**, including Android SDK/NDK and OpenJDK, to this editor version. Then select **BWVR > Build Quest APK**. Output: `Builds/BWVR-Quest.apk`. The initial setup sets ARM64 / IL2CPP, Vulkan and linear color, and assigns the Android OpenXR loader. Single-pass rendering, Touch controller and Meta Quest features are enabled when Android Build Support is available; setup logs `BWVR_ANDROID_PENDING` otherwise. Rerun setup after installing the module. Android OpenXR starts automatically; desktop preview does not require a PC XR runtime.
+In Unity Hub, add **Android Build Support**, including Android SDK/NDK and OpenJDK, to this editor version. Then select **BWVR > Build Quest APK**. Output: `Builds/BWVR-Quest.apk`. The initial setup sets ARM64 / IL2CPP, Vulkan and linear color, and assigns the Android OpenXR loader. Single-pass rendering, Touch controller and Meta Quest features are enabled when Android Build Support is available; setup logs `BWVR_ANDROID_PENDING` otherwise. Rerun setup after installing the module. Android OpenXR starts automatically. Desktop Play mode also initializes OpenXR for Quest Link; use the desktop preview menu below when testing without a headset.
 
 Android Build Support, SDK and NDK are available on the setup machine. Unity-provided OpenJDK 17 was downloaded into ignored `.local/jdk` after the initial build reported a missing Java installation. The build helper uses that local JDK when present; other machines should install OpenJDK through Unity Hub. A compiled editor project does not establish headset compatibility. Install and test on Quest Pro and Quest 3 before treating this as a verified Quest build.
 
