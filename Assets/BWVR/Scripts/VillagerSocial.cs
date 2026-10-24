@@ -3,8 +3,8 @@ using UnityEngine;
 namespace BWVR {
 [Serializable] public sealed class SocialMemory {
  public float trust=.45f,affinity=.5f,boldness=.5f;
- public int greetings,rides,witnessed,disputes;
- public bool Valid()=>Unit(trust)&&Unit(affinity)&&Unit(boldness)&&Count(greetings)&&Count(rides)&&Count(witnessed)&&Count(disputes);
+ public int greetings,rides,witnessed,disputes,discoveries;
+ public bool Valid()=>Unit(trust)&&Unit(affinity)&&Unit(boldness)&&Count(greetings)&&Count(rides)&&Count(witnessed)&&Count(disputes)&&Count(discoveries);
  static bool Unit(float n)=>!float.IsNaN(n)&&!float.IsInfinity(n)&&n>=0&&n<=1;
  static bool Count(int n)=>n>=0&&n<=1000000;
 }
@@ -19,7 +19,7 @@ public sealed class VillagerSocial:MonoBehaviour {
  Func<SliceState> season;int index;float cooldown,clock,elapsed;
  public void Initialize(CreatureCuriosity god,int identity,Func<SliceState> current){creature=god;index=identity;season=current;walker=GetComponent<IslandNavigator>();motion=GetComponent<HumanoidMotion>();item=GetComponent<CarryItem>();routine=GetComponent<VillagerRoutine>();cooldown=18+identity*13;}
  public bool TryBegin(){
-  if(Active||item.held||creature.Current!=CreatureCuriosity.Phase.Rest||(GetComponent<VillagerBlockPlay>()?.Active??false))return false;
+  if(Active||item.held||creature.Current!=CreatureCuriosity.Phase.Rest||(GetComponent<VillagerExploration>()?.Active??false)||(GetComponent<VillagerBlockPlay>()?.Active??false))return false;
   var delta=transform.position-creature.transform.position;delta.y=0;
   if(delta.sqrMagnitude<1e-10f)delta=-creature.transform.forward;
   if(!walker.world.Sample(creature.transform.position+delta.normalized*walker.world.Scale*5,walker.profile,8,out _))return false;

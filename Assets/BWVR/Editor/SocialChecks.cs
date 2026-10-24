@@ -8,6 +8,7 @@ public static class SocialChecks {
  public static void Verify(){
   if(!EditorApplication.isPlaying)throw new Exception("Enter Play mode first");
   var actors=UnityEngine.Object.FindObjectsByType<VillagerSocial>();var creature=UnityEngine.Object.FindAnyObjectByType<CreatureCuriosity>();var water=creature.GetComponent<CreatureRoutine>();
+  foreach(var a in UnityEngine.Object.FindObjectsByType<VillagerExploration>())a.ResetTask();
   foreach(var a in actors){a.ResetTask();a.GetComponent<VillagerBlockPlay>().ResetTask();}creature.ResetTask();water.ResetTask();
   var actor=actors[0];var memory=actor.Memory;var offer=actor.GetComponent<CreatureAffordance>();offer.cooldown=0;
   float initial=memory.trust;memory.trust=.2f;

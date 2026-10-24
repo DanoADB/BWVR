@@ -11,15 +11,24 @@ public sealed class ConstructionSite:MonoBehaviour {
  public int Snapped=>blocks.Count(b=>b.Attached);public bool Paused;public int successfulSnaps{get;private set;}
  public float LastCreatureBuildTime{get;private set;}=float.NegativeInfinity;public float nextVillagerPlayAt;
  Scene simulationScene;PhysicsScene physics;Material[] colors;Material outlineMaterial;LineRenderer preview;readonly Collider[] overlaps=new Collider[32];
- public static ConstructionSite Build(Transform parent,IslandNavigation nav,Vector3 village){
+ public static ConstructionSite Build(Transform parent,IslandNavigation nav,Vector3 village,bool requireOpen=false){
   Vector3 centre=village+new Vector3(-20,0,-20)*nav.Scale;
-  for(int i=0;i<48;i++){
-   float angle=i*137.5f*Mathf.Deg2Rad;var at=village+new Vector3(Mathf.Cos(angle),0,Mathf.Sin(angle))*(24+i*.35f)*nav.Scale;
+  var foliage=new List<Bounds>();if(requireOpen)foreach(var group in nav.GetComponentsInChildren<LODGroup>()){var visible=group.GetComponentsInChildren<Renderer>();if(visible.Length==0)continue;var bounds=visible[0].bounds;foreach(var r in visible)bounds.Encapsulate(r.bounds);foliage.Add(bounds);}
+  var lanes=requireOpen?nav.GetComponentInChildren<VillageSettlement>():null;
+  bool found=false;for(int i=0;i<(requireOpen?512:48);i++){
+   float angle=i*137.5f*Mathf.Deg2Rad;var at=village+new Vector3(Mathf.Cos(angle),0,Mathf.Sin(angle))*(24+i*(requireOpen?.6f:.35f))*nav.Scale;
    if(!nav.Sample(at,nav.creature,3,out var safe))continue;
    bool clear=true;for(int j=0;j<8;j++){float a=j*Mathf.PI/4;var edge=safe+new Vector3(Mathf.Cos(a),0,Mathf.Sin(a))*nav.Scale*11;
     if(!nav.Sample(edge,nav.villager,1,out var point)||Mathf.Abs(point.y-safe.y)>nav.Scale*.7f){clear=false;break;}}
-   if(clear){centre=nav.Terrain!=null?nav.Terrain.Project(safe):safe;break;}
+   if(clear&&requireOpen){
+    for(int x=-8;x<=8&&clear;x+=4)for(int z=-8;z<=8;z+=4)if(!nav.Sample(safe+new Vector3(x,0,z)*nav.Scale,nav.villager,.6f,out _)){clear=false;break;}
+    foreach(var bounds in foliage)if(Mathf.Abs(bounds.center.x-safe.x)<bounds.extents.x+nav.Scale*10&&Mathf.Abs(bounds.center.z-safe.z)<bounds.extents.z+nav.Scale*10){clear=false;break;}
+    foreach(var other in nav.GetComponentsInChildren<ConstructionSite>())if(Vector3.Distance(other.transform.position,safe)<nav.Scale*32){clear=false;break;}
+    if(lanes!=null)foreach(var route in lanes.routes)for(int n=1;n<route.Length;n++){var a=route[n-1];var delta=route[n]-a;delta.y=0;var offset=safe-a;offset.y=0;float t=delta.sqrMagnitude>1e-10f?Mathf.Clamp01(Vector3.Dot(offset,delta)/delta.sqrMagnitude):0;if((offset-delta*t).sqrMagnitude<nav.Scale*nav.Scale*225){clear=false;break;}}
+   }
+   if(clear){centre=nav.Terrain!=null?nav.Terrain.Project(safe):safe;found=true;break;}
   }
+  if(requireOpen&&!found){Debug.LogWarning("BWVR_DISCOVERY_TRAY_SKIPPED: no open flat construction clearing");return null;}
   if(nav.Terrain!=null){float highest=nav.Terrain.Project(centre).y;for(int j=0;j<8;j++){float a=j*Mathf.PI/4;highest=Mathf.Max(highest,nav.Terrain.Project(centre+new Vector3(Mathf.Cos(a),0,Mathf.Sin(a))*nav.Scale*13).y);}centre.y=highest+nav.Scale*.1f;}
   var root=new GameObject("Creature construction green");root.transform.SetParent(parent,false);root.transform.position=centre;
   var site=root.AddComponent<ConstructionSite>();site.Initialize(nav.Scale);return site;
