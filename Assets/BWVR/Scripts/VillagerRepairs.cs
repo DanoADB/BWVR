@@ -16,7 +16,7 @@ public sealed partial class VillagerExploration {
  void RememberStructure(ConstructionSite site){social.Memory.usefulStructures|=StructureBit(site);}
  bool ChooseRepair(){if(construction==null)return false;foreach(var site in construction.sites.OrderBy(s=>(s.transform.position-transform.position).sqrMagnitude))if(TryRepair(site))return true;return false;}
  public bool TryRepair(ConstructionSite site){
-  if(!CanStartStructure||construction==null||site==null||site.IsBridge||site.Paused||site.Locked||site.RecipeComplete||site.Snapped==0||site.Repairer!=null||site.Visitor!=null||site.Requester!=null||social.Memory.injury>0||social.RecentFright)return false;
+  if(!CanStartStructure||construction==null||site==null||site.Paused||site.Locked||site.RecipeComplete||site.Snapped==0||site.Repairer!=null||site.Visitor!=null||site.Requester!=null||social.Memory.injury>0||social.RecentFright)return false;
   var god=construction.GetComponent<CreatureHybrid>();
   if(god.Season.paused||god.State.time<social.Memory.nextRepairAt||(social.Memory.usefulStructures&StructureBit(site))==0||site.Clock<site.LastCreatureBuildTime+20||god.GetComponent<CreatureCuriosity>().UsingConstruction(site)||site.blocks.Any(b=>b.Item.held||b.VillagerOwner!=null))return false;
   foreach(var block in site.blocks.Where(b=>!b.Attached).OrderBy(b=>(b.transform.position-transform.position).sqrMagnitude)){
@@ -47,7 +47,7 @@ public sealed partial class VillagerExploration {
     ResetTask();if(placed){Current=Phase.Celebrate;motion?.React();}return Active;
    }
   }
-  var local=site.Local(transform.position);if(Mathf.Abs(local.x)<9&&Mathf.Abs(local.z)<9){var feet=transform.position;feet.y=Mathf.Max(feet.y,site.transform.position.y);transform.position=feet;}
+  var local=site.Local(transform.position);if(!site.IsBridge&&Mathf.Abs(local.x)<9&&Mathf.Abs(local.z)<9){var feet=transform.position;feet.y=Mathf.Max(feet.y,site.transform.position.y);transform.position=feet;}
   if(nav.Blocked&&elapsed>5)ResetTask();return Active;
  }
  void ReleaseRepair(){
