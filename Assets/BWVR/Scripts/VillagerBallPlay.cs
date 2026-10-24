@@ -2,6 +2,8 @@ using UnityEngine;
 namespace BWVR {
 public sealed partial class VillagerExploration {
  BeachBall[] beachballs=System.Array.Empty<BeachBall>();BeachBall playingBall;int soloNudges;
+ public bool CanReceivePlayInvite(BeachBall ball)=>ball!=null&&CanStartStructure&&social.Willing&&!ball.Playmate.Season.paused&&(ball.Playmate.Season.developmentFocus||ball.Playmate.Season.Finished||(ball.Playmate.Season.water>=45&&ball.Playmate.Season.crops>=45));
+ public bool TryCreaturePlayInvite(BeachBall ball){if(!CanReceivePlayInvite(ball)||!TryBall(ball))return false;motion?.React();motion?.Signal(true,true,ball.transform.position);return true;}
  public void ConfigureBalls(BeachBall[] balls){beachballs=balls;}
  bool ChooseBall(){foreach(var ball in beachballs)if(ball!=null&&Vector3.Distance(transform.position,ball.transform.position)<nav.world.Scale*120&&TryBall(ball))return true;return false;}
  public bool TryBall(BeachBall ball){

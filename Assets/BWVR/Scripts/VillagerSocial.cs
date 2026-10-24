@@ -3,12 +3,12 @@ using UnityEngine;
 namespace BWVR {
 [Serializable] public sealed class SocialMemory {
  public float trust=.45f,affinity=.5f,boldness=.5f;
- public float injury,lastAssistance;
+ public float injury,lastAssistance,lastFrightAt=-100;
  public int greetings,rides,witnessed,disputes,discoveries,bridgeCrossings,sharedPlay,treatsOffered,missedInvitations,frights;
  public float nextInvitationAt,lastSharedAt;
  public int ballReturns,ballGames;
  public float restNeed=.5f,nextBuildingRequest;public int usedForms,constructionUses,buildRequests,buildDisappointments;
- public bool Valid()=>Count(ballReturns)&&Count(ballGames)&&Unit(trust)&&Unit(affinity)&&Unit(boldness)&&Unit(injury)&&Unit(restNeed)&&HybridState.Number(nextBuildingRequest,0,100000300)&&usedForms>=0&&usedForms<=15&&Count(constructionUses)&&Count(buildRequests)&&Count(buildDisappointments)&&HybridState.Number(lastAssistance,0,100000000)&&HybridState.Number(nextInvitationAt,0,100000300)&&HybridState.Number(lastSharedAt,0,100000000)&&Count(greetings)&&Count(rides)&&Count(witnessed)&&Count(disputes)&&Count(discoveries)&&Count(bridgeCrossings)&&Count(sharedPlay)&&Count(treatsOffered)&&Count(missedInvitations)&&Count(frights);
+ public bool Valid()=>HybridState.Number(lastFrightAt,-100,100000000)&&Count(ballReturns)&&Count(ballGames)&&Unit(trust)&&Unit(affinity)&&Unit(boldness)&&Unit(injury)&&Unit(restNeed)&&HybridState.Number(nextBuildingRequest,0,100000300)&&usedForms>=0&&usedForms<=15&&Count(constructionUses)&&Count(buildRequests)&&Count(buildDisappointments)&&HybridState.Number(lastAssistance,0,100000000)&&HybridState.Number(nextInvitationAt,0,100000300)&&HybridState.Number(lastSharedAt,0,100000000)&&Count(greetings)&&Count(rides)&&Count(witnessed)&&Count(disputes)&&Count(discoveries)&&Count(bridgeCrossings)&&Count(sharedPlay)&&Count(treatsOffered)&&Count(missedInvitations)&&Count(frights);
  static bool Unit(float n)=>!float.IsNaN(n)&&!float.IsInfinity(n)&&n>=0&&n<=1;
  static bool Count(int n)=>n>=0&&n<=1000000;
 }
@@ -17,14 +17,15 @@ public sealed class VillagerSocial:MonoBehaviour {
  public enum Phase{Idle,Approach,Greet,Wait,FetchGift,CarryGift,PresentGift,WatchGift,Recoil}
  public Phase Current{get;private set;}public bool Active=>Current!=Phase.Idle;
  public SocialMemory Memory=>season().Social(index);
- public bool Willing=>Memory.trust>=.4f&&Memory.injury<=0;
+ public bool RecentFright=>Memory.frights>0&&season().Hybrid.time-Memory.lastFrightAt<90;
+ public bool Willing=>Memory.trust>=.4f&&Memory.injury<=0&&!RecentFright;
  public float Attraction=>Memory.affinity*.65f+Memory.trust*.35f;
  CreatureCuriosity creature;IslandNavigator walker;HumanoidMotion motion;CarryItem item;VillagerRoutine routine;
  Func<SliceState> season;int index;float cooldown,clock,elapsed;
  CreatureHybrid hybrid;CreatureAffordance[] sharingObjects;Vector3 giftOrigin,meeting,offeringPoint;Quaternion giftRotation;bool ownsGift;
  public CreatureAffordance Offering{get;private set;}public bool Ready=>Current==Phase.PresentGift;public bool Sharing=>Current>=Phase.FetchGift&&Current<=Phase.WatchGift;
  Transform frightening;Vector3 retreat;
- public void ReactToBall(Transform ball,bool blameCreature){if(item.held)return;ResetTask();GetComponent<VillagerExploration>()?.ResetTask();GetComponent<VillagerBlockPlay>()?.ResetTask();routine.ResetTask();if(blameCreature){Memory.trust=Mathf.Clamp01(Memory.trust-.18f);Memory.affinity=Mathf.Clamp01(Memory.affinity-.06f);Memory.frights=Math.Min(1000000,Memory.frights+1);}frightening=ball;var away=transform.position-ball.position;away.y=0;if(away.sqrMagnitude<1e-10f)away=transform.right;retreat=transform.position+away.normalized*walker.world.Scale*5;walker.ResetRoute();Current=Phase.Recoil;clock=elapsed=0;motion?.Signal(false,true,ball.position,-20);motion?.LookAt(ball);}
+ public void ReactToBall(Transform ball,bool blameCreature){if(item.held)return;ResetTask();GetComponent<VillagerExploration>()?.ResetTask();GetComponent<VillagerBlockPlay>()?.ResetTask();routine.ResetTask();if(blameCreature){Memory.trust=Mathf.Clamp01(Memory.trust-.18f);Memory.affinity=Mathf.Clamp01(Memory.affinity-.06f);Memory.frights=Math.Min(1000000,Memory.frights+1);Memory.lastFrightAt=season().Hybrid.time;hybrid?.State.RememberBond(GetComponent<HybridTarget>().id,false);}frightening=ball;var away=transform.position-ball.position;away.y=0;if(away.sqrMagnitude<1e-10f)away=transform.right;retreat=transform.position+away.normalized*walker.world.Scale*5;walker.ResetRoute();Current=Phase.Recoil;clock=elapsed=0;motion?.Signal(false,true,ball.position,-20);motion?.LookAt(ball);}
  public void ConfigureSharing(CreatureHybrid god,CreatureAffordance[] objects){hybrid=god;sharingObjects=objects;}
  bool Shareable(CreatureAffordance prop){if(prop==null||prop.host!=null||!prop.Available||prop.GetComponent<ConstructionBlock>()!=null||prop.GetComponent<BeachBall>()!=null||prop.kind==CreatureAffordance.Kind.Villager)return false;return prop.kind!=CreatureAffordance.Kind.Food||prop.GetComponent<DiscoveryObject>()?.treat==true;}
  public bool TryShare(CreatureAffordance prop){
@@ -37,7 +38,7 @@ public sealed class VillagerSocial:MonoBehaviour {
  bool ChooseShare(){if(sharingObjects==null||hybrid==null||Memory.nextInvitationAt>season().Hybrid.time)return false;CreatureAffordance best=null;float score=float.NegativeInfinity;foreach(var prop in sharingObjects){if(!Shareable(prop))continue;float distance=Vector3.Distance(transform.position,prop.transform.position)/walker.world.Scale;float value=(prop.kind==CreatureAffordance.Kind.Food?season().hunger*2:.8f)-distance*.015f;if(value>score){score=value;best=prop;}}return TryShare(best);}
  public void Initialize(CreatureCuriosity god,int identity,Func<SliceState> current){creature=god;index=identity;season=current;walker=GetComponent<IslandNavigator>();motion=GetComponent<HumanoidMotion>();item=GetComponent<CarryItem>();routine=GetComponent<VillagerRoutine>();cooldown=18+identity*13;}
  public bool TryBegin(){
-  if(Active||item.held||creature.Current!=CreatureCuriosity.Phase.Rest||(GetComponent<VillagerExploration>()?.Active??false)||(GetComponent<VillagerBlockPlay>()?.Active??false))return false;
+  if(Active||item.held||RecentFright||creature.Current!=CreatureCuriosity.Phase.Rest||(GetComponent<VillagerExploration>()?.Active??false)||(GetComponent<VillagerBlockPlay>()?.Active??false))return false;
   var delta=transform.position-creature.transform.position;delta.y=0;
   if(delta.sqrMagnitude<1e-10f)delta=-creature.transform.forward;
   if(!walker.world.Sample(creature.transform.position+delta.normalized*walker.world.Scale*5,walker.profile,8,out _))return false;
@@ -85,11 +86,11 @@ public sealed class VillagerSocial:MonoBehaviour {
   return Active;
  }
  public bool Accept(CreatureAffordance prop){if(prop!=Offering||!Ready)return false;Current=Phase.WatchGift;clock=0;motion?.Signal(false);motion?.Activity(6);return true;}
- public void SharedOutcome(CreatureAffordance prop,bool success){if(prop!=Offering||Current!=Phase.WatchGift)return;if(success){var memory=Memory;if(prop.kind==CreatureAffordance.Kind.Food)memory.treatsOffered=Math.Min(1000000,memory.treatsOffered+1);else memory.sharedPlay=Math.Min(1000000,memory.sharedPlay+1);memory.trust=Mathf.Clamp01(memory.trust+.06f);memory.affinity=Mathf.Clamp01(memory.affinity+.04f);memory.lastSharedAt=season().Hybrid.time;memory.nextInvitationAt=season().Hybrid.time+Mathf.Lerp(70,40,memory.boldness);hybrid.Journal.Add(season().Hybrid.time,"shared experience",prop.kind==CreatureAffordance.Kind.Food?CreatureAction.EatFood:CreatureAction.PlayWithToy,GetComponent<HybridTarget>().id,"Completed together");}ResetTask();if(success){motion?.React();creature.NoticeGreeting(transform);}}
+ public void SharedOutcome(CreatureAffordance prop,bool success){if(prop!=Offering||Current!=Phase.WatchGift)return;if(success){var memory=Memory;if(prop.kind==CreatureAffordance.Kind.Food)memory.treatsOffered=Math.Min(1000000,memory.treatsOffered+1);else memory.sharedPlay=Math.Min(1000000,memory.sharedPlay+1);memory.trust=Mathf.Clamp01(memory.trust+.06f);memory.affinity=Mathf.Clamp01(memory.affinity+.04f);memory.lastSharedAt=season().Hybrid.time;hybrid.State.RememberBond(GetComponent<HybridTarget>().id,true);memory.nextInvitationAt=season().Hybrid.time+Mathf.Lerp(70,40,memory.boldness);hybrid.Journal.Add(season().Hybrid.time,"shared experience",prop.kind==CreatureAffordance.Kind.Food?CreatureAction.EatFood:CreatureAction.PlayWithToy,GetComponent<HybridTarget>().id,"Completed together");}ResetTask();if(success){motion?.React();creature.NoticeGreeting(transform);}}
  void Face(){var at=creature.transform.position-transform.position;at.y=0;if(at.sqrMagnitude>1e-10f)transform.rotation=Quaternion.LookRotation(at);}
- public void RememberGreeting(){var m=Memory;m.greetings=Math.Min(1000000,m.greetings+1);m.trust=Mathf.Clamp01(m.trust+.08f);m.affinity=Mathf.Clamp01(m.affinity+.025f);}
- public void RememberRide(){var m=Memory;m.rides=Math.Min(1000000,m.rides+1);m.trust=Mathf.Clamp01(m.trust+.12f);m.affinity=Mathf.Clamp01(m.affinity+.08f);}
- public void RememberDispute(){var m=Memory;m.disputes=Math.Min(1000000,m.disputes+1);m.affinity=Mathf.Clamp01(m.affinity-.12f);}
+ public void RememberGreeting(){hybrid?.State.RememberBond(GetComponent<HybridTarget>().id,true);var m=Memory;m.greetings=Math.Min(1000000,m.greetings+1);m.trust=Mathf.Clamp01(m.trust+.08f);m.affinity=Mathf.Clamp01(m.affinity+.025f);}
+ public void RememberRide(){hybrid?.State.RememberBond(GetComponent<HybridTarget>().id,true);var m=Memory;m.rides=Math.Min(1000000,m.rides+1);m.trust=Mathf.Clamp01(m.trust+.12f);m.affinity=Mathf.Clamp01(m.affinity+.08f);}
+ public void RememberDispute(){hybrid?.State.RememberBond(GetComponent<HybridTarget>().id,false);var m=Memory;m.disputes=Math.Min(1000000,m.disputes+1);m.affinity=Mathf.Clamp01(m.affinity-.12f);}
  public void WitnessRide(){var m=Memory;m.witnessed=Math.Min(1000000,m.witnessed+1);m.trust=Mathf.Clamp01(m.trust+.03f);}
  public void Feedback(bool positive){Memory.affinity=Mathf.Clamp01(Memory.affinity+(positive?.08f:-.08f));}
  public void ResetTask(){if(!Active)return;if(Offering!=null){var prop=Offering;if(ownsGift){prop.Item.held=false;prop.transform.SetPositionAndRotation(giftOrigin,giftRotation);prop.GetComponent<Collider>().enabled=true;motion?.Carry(null);}if(prop.host==this)prop.host=null;prop.GetComponent<DiscoveryObject>()?.Refresh();Memory.nextInvitationAt=Mathf.Max(Memory.nextInvitationAt,season().Hybrid.time+30);}Offering=null;ownsGift=false;Current=Phase.Idle;clock=elapsed=0;cooldown=Mathf.Lerp(65,25,Memory.boldness)*Mathf.Lerp(1.5f,.75f,Memory.trust);motion?.Signal(false);motion?.LookAt(null);motion?.Activity(0);walker?.ResetRoute();routine?.ResetTask();}

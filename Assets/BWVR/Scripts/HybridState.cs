@@ -20,7 +20,7 @@ public enum GuidanceStatus {None,Active,Completed,Rejected,Expired,Superseded,Ab
 }
 [Serializable] public sealed class TargetCooldown {public string target;public float until;}
 [Serializable] public sealed class CreatureInterest {public string target;public float appeal=.5f,lastUsed;public int experiences;}
-[Serializable] public sealed class HybridState {
+[Serializable] public sealed partial class HybridState {
  public float time,energy=60,lastBenefit=-100,rainRemaining,nextMiracleAt;public int seed=1347,decisions;public bool injuryIntroduced,energyInitialized;
  public GuidanceState guidance=new GuidanceState();public CreatureIntention intention=new CreatureIntention();public ActionReceipt receipt=new ActionReceipt();
  public LearnedAssociation[] associations=Array.Empty<LearnedAssociation>();
@@ -34,7 +34,7 @@ public enum GuidanceStatus {None,Active,Completed,Rejected,Expired,Superseded,Ab
  public float Preference(CreatureSituation situation,CreatureAction action)=>Association(situation,action)?.preference??.5f;
  public bool Reinforce(bool positive){var r=receipt;if(!r.eligible||r.consumed||time-r.completedAt>12||time<r.completedAt)return false;var a=Association(r.situation,r.action,true);if(a==null)return false;a.preference=Mathf.Clamp01(a.preference+(positive?.12f:-.12f));a.samples=Math.Min(1000000,a.samples+1);a.reinforcedAt=time;Experience(r.target,positive?.1f:-.1f);r.consumed=true;return true;}
  public bool Valid(){
-  if(!Number(time,0,100000000)||!Number(energy,0,100)||!Number(lastBenefit,-100,100000000)||!Number(rainRemaining,0,6)||!Number(nextMiracleAt,0,100000001)||decisions<0||decisions>100000000||guidance==null||intention==null||receipt==null||associations==null||associations.Length>24||cooldowns==null||cooldowns.Length>128)return false;
+  if(!BondsValid()||!Number(time,0,100000000)||!Number(energy,0,100)||!Number(lastBenefit,-100,100000000)||!Number(rainRemaining,0,6)||!Number(nextMiracleAt,0,100000001)||decisions<0||decisions>100000000||guidance==null||intention==null||receipt==null||associations==null||associations.Length>24||cooldowns==null||cooldowns.Length>128)return false;
   var ids=new System.Collections.Generic.HashSet<string>();foreach(var c in cooldowns)if(c==null||!Text(c.target)||!ids.Add(c.target)||!Number(c.until,0,100000180))return false;
   if(interests==null||interests.Length>128)return false;ids.Clear();foreach(var value in interests)if(value==null||!Text(value.target)||!ids.Add(value.target)||!Number(value.appeal,0,1)||!Number(value.lastUsed,0,time)||value.experiences<0||value.experiences>1000000)return false;
   if(!Enum.IsDefined(typeof(GuidanceIntent),guidance.intention)||!Enum.IsDefined(typeof(GuidanceStatus),guidance.status)||!Text(guidance.target)||!Text(guidance.reason)||!Number(guidance.requestedAt,0,time)||!Number(guidance.expiresAt,0,100000060))return false;

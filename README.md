@@ -68,3 +68,5 @@ Use `tools/unity.ps1 -Action Setup`, `-Action Validate`, `-Action Smoke`, or `-A
 ## Verified locally
 
 Unity setup and rules validation passed. Play Mode created and rendered the scene. An ARM64 development APK was built successfully at `Builds/BWVR-Quest.apk` (build output stays local). OpenXR/Meta Quest Android settings are enabled. No USB headset was attached; controller operation, comfort and performance on Quest remain untested. Unity emitted a search-index startup exception during automated editor startup; the smoke runner records that known editor-only failure separately and still fails on game/runtime errors.
+
+Creature–villager relationships now retain individual affection/confidence and recent frightening encounters. A creature that has enjoyed gentle rallies can invite an available playmate, favor familiar partners, and learn from correctly attributed partner feedback. See the remembered-playmates section in [play and village response](docs/PLAY_AND_VILLAGE_RESPONSE.md).

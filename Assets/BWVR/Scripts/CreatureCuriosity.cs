@@ -6,7 +6,7 @@ public sealed class CreatureCuriosity:MonoBehaviour {
  public enum Phase { Rest,Approach,Inspect,Lift,Play,CarryFriend,Place,BuildApproach,BuildPlace,ThrowBall,WatchBall,RallyBall }
  public int built{get;private set;}
  Vector3 buildPoint,buildApproach,buildStart;Quaternion buildRotation;
- bool constructionFocus;
+ bool constructionFocus,askedPlaymate;float inviteGestureUntil;
  VillagerSocial lastFriend;
  public Phase Current{get;private set;}CreatureAffect.Mood affect,feedbackMood;float reaction;bool lastWater;
  public CreatureAffect.Mood Affect{get=>reaction>0?feedbackMood:affect;private set=>affect=value;}
@@ -23,7 +23,7 @@ public sealed class CreatureCuriosity:MonoBehaviour {
   if(!navigator.world.Sample(candidate.transform.position,navigator.profile,12,out _))return false;
   if(candidate.GetComponent<ConstructionBlock>()!=null)constructionFocus=true;
   if(candidate.host!=null&&!candidate.host.Accept(candidate))return false;
-  routine.ResetTask();navigator.ResetRoute();target=candidate;elapsed=clock=0;Current=Phase.Approach;motion?.LookAt(target.transform);Affect=CreatureAffect.Mood.Curious;return true;
+  routine.ResetTask();navigator.ResetRoute();target=candidate;askedPlaymate=false;inviteGestureUntil=0;elapsed=clock=0;Current=Phase.Approach;motion?.LookAt(target.transform);Affect=CreatureAffect.Mood.Curious;return true;
  }
  public bool Tick(float dt,SliceState season,bool allowChoice=true){
   state=season;if(dt<=0||state.paused)return Current!=Phase.Rest;reaction=Mathf.Max(0,reaction-dt);
@@ -41,13 +41,15 @@ public sealed class CreatureCuriosity:MonoBehaviour {
   if(target==null||(!owned&&target.Item.held)||elapsed>(target.GetComponentInParent<DiscoveryPoint>()!=null||target.GetComponent<VillageTributeProp>()!=null?120:target.GetComponent<BeachBall>()!=null?60:24)){Finish(false);return false;}
   if(Current==Phase.RallyBall){var ball=target.GetComponent<BeachBall>();
    if(ball.Player==null||!ball.CreatureJoined){Finish(false);return false;}
-   Affect=CreatureAffect.Mood.Happy;motion?.LookAt(ball.transform);
+   Affect=CreatureAffect.Mood.Happy;motion?.Signal(false);motion?.LookAt(ball.transform);
    if(ball.RallyReceptions>=4){played++;target.Discovered();lastWater=lastSocial=false;boredom=0;feedbackWindow=12;Finish(true);return false;}
    if(ball.CreatureTurn&&!ball.PassPending){if(ball.ApproachPass(navigator,routine.speed*.65f,dt,true)){motion?.Activity(5);ball.TryPass(true);navigator.ResetRoute();}}else{motion?.Activity(6);}
    if(navigator.Blocked&&elapsed>8)Finish(false);return Current!=Phase.Rest;
   }
   if(Current==Phase.Approach){
-   var invited=target.GetComponent<BeachBall>();if(invited!=null&&invited.Inviting){
+   var invited=target.GetComponent<BeachBall>();
+   if(invited!=null&&!invited.Inviting&&!askedPlaymate){askedPlaymate=true;if(invited.TryInvitePlaymate())inviteGestureUntil=elapsed+2.5f;}
+   if(invited!=null&&invited.Inviting){motion?.Signal(elapsed<inviteGestureUntil,true,invited.transform.position);
     if(invited.MeetingPoint(out var meet)){if(navigator.MoveTo(meet,routine.speed,dt)&&invited.TryJoinCreature()){Current=Phase.RallyBall;clock=0;}return true;}
     Finish(false);return false;
    }
@@ -117,7 +119,7 @@ public sealed class CreatureCuriosity:MonoBehaviour {
  void Finish(bool success){
   var finished=target;
   if(Current==Phase.RallyBall)finished?.GetComponent<BeachBall>()?.CancelRally();
-  motion?.Carry(null);motion?.Playful(0);motion?.PlaceAt(default,Quaternion.identity,0);motion?.LookAt(null);motion?.Activity(0);navigator?.ResetRoute();
+  motion?.Signal(false);motion?.Carry(null);motion?.Playful(0);motion?.PlaceAt(default,Quaternion.identity,0);motion?.LookAt(null);motion?.Activity(0);navigator?.ResetRoute();
   if(owned!=null){var item=owned;var point=original;
    var block=item.GetComponent<ConstructionBlock>();if(block!=null){block.Site.HidePreview();block.CancelHold();owned=null;}
    else {
