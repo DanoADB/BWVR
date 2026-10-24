@@ -57,6 +57,8 @@ The creature's water, food, toy, social, observation and construction actions no
 
 Villagers can also fetch an available toy or berry, carry it near the creature, set it down and invite a shared experience. The creature weighs that invitation against its other needs. Completed play or eating improves that individual relationship; ignored invitations cause a longer wait, without a trust penalty. Teaching after a shared action can reinforce the creature's preference toward its actual inviting partner. Reservations and carry cleanup protect player-held objects and other villagers' discoveries.
 
+The large striped beachball adds physical throwing, bouncing and consequences: houses/trees can be damaged and villagers can be injured, with nearby negative reactions and saved caution. Individual toys/tools develop saved appeal alongside behavior preferences, while repetition encourages variety. Construction has less automatic priority; villagers can use completed forms and gesture toward a need for a gathering place. Communal fruit tributes require a strongly affectionate or fearful majority and remain separate from personal gifts. See [play and village response](docs/PLAY_AND_VILLAGE_RESPONSE.md) for the exact rules and prototype limits.
+
 Saves preserve resources, learned category/context preferences, relationships, injury, spiritual energy, guidance, a logical intention, discovery memories and physical construction. Reload resumes automatically and revalidates a saved intention from a safe action boundary; held objects and exact animation poses are not resumed. Loose tool positions and the transient 48-event journal are not saved. See [hybrid audit and validation](docs/HYBRID_IMPLEMENTATION_AUDIT.md).
 
 ## Development
