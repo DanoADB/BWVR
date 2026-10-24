@@ -420,6 +420,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2563273622859576754}
   - component: {fileID: 4647893862572153311}
+  - component: {fileID: 93194095668101365}
   m_Layer: 0
   m_Name: Female_Peasant(Clone)
   m_TagString: Untagged
@@ -469,6 +470,21 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &93194095668101365
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1582360219927898055}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b7056b33306600343bfcba0df26a486c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BWVR.HumanoidHands
+  actor: {fileID: 0}
+  resource: {fileID: 0}
+  drinking: 0
 --- !u!1 &1801731739624626510
 GameObject:
   m_ObjectHideFlags: 0

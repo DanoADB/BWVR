@@ -11,7 +11,7 @@ public sealed class QuestSlice:MonoBehaviour {
  const float Floor=.82f; SliceState state=new SliceState(); Camera eye; Transform rig,left,right,creature; Text status,creatureLabel; GameObject panel; Font font; GameArtCatalog art; OriginalCowMotion cowMotion; HumanoidMotion godMotion; HumanoidMotion[] humanoids=Array.Empty<HumanoidMotion>();
  readonly List<CarryItem> items=new List<CarryItem>(); readonly List<Transform> workers=new List<Transform>();
  readonly CarryItem[] held=new CarryItem[2]; readonly bool[] lastGrip=new bool[2],lastTrigger=new bool[2]; readonly LineRenderer[] rays=new LineRenderer[2];
- float clock,saveClock,creatureTrip; bool returning,menuLast,trackingConfigured; string notice="Their creature is their god. Your touch guides its instincts.";
+ CreatureRoutine creatureRoutine; VillagerRoutine[] jobs; float clock,saveClock,creatureTrip; bool returning,menuLast,trackingConfigured; string notice="Their creature is their god. Your touch guides its instincts.";
  readonly Vector3 cistern=new Vector3(-.32f,Floor,.25f),well=new Vector3(.4f,Floor,-.2f);
  string SavePath=>Path.Combine(Application.persistentDataPath,"bwvr-season-v1.json");
  void Start(){art=Resources.Load<GameArtCatalog>("BWVRArt/Catalog");font=Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");Load();Build();humanoids=GetComponentsInChildren<HumanoidMotion>();}
@@ -31,8 +31,8 @@ public sealed class QuestSlice:MonoBehaviour {
   if(environment==null)for(int i=0;i<9;i++){float a=i*.55f;Vector3 at=new Vector3(Mathf.Cos(a)*.72f,Floor,Mathf.Sin(a)*.72f);if(Original(new[]{"beech","oak","pine"}[i%3],at,.28f)!=null)continue;Shape("Tree trunk",PrimitiveType.Cylinder,at+Vector3.up*.07f,new Vector3(.025f,.07f,.025f),new Color(.3f,.2f,.12f));Shape("Tree crown",PrimitiveType.Sphere,at+Vector3.up*.18f,new Vector3(.13f,.2f,.13f),new Color(.12f,.3f,.2f));}
   Shape("Village cistern - release water here",PrimitiveType.Cylinder,cistern+Vector3.up*.035f,new Vector3(.18f,.035f,.18f),new Color(.17f,.6f,.7f));
   Shape("Spring",PrimitiveType.Cylinder,well+Vector3.up*.015f,new Vector3(.14f,.015f,.14f),new Color(.28f,.68f,.8f));
-  for(int i=0;i<3;i++){var w=Item("Villager",Offering.Villager,new Vector3(-.2f+i*.14f,Floor+.04f,.13f),PrimitiveType.Capsule,new Color(.9f,.65f,.38f),.055f);workers.Add(w.transform);}
-  Item("Water offering",Offering.Water,well+new Vector3(0,.07f,0),PrimitiveType.Sphere,new Color(.25f,.8f,.95f),.065f);
+  jobs=new VillagerRoutine[3];for(int i=0;i<3;i++){var w=Item("Villager",Offering.Villager,new Vector3(-.2f+i*.14f,Floor+.04f,.13f),PrimitiveType.Capsule,new Color(.9f,.65f,.38f),.055f);workers.Add(w.transform);}
+  var waterOffering=Item("Water offering",Offering.Water,well+new Vector3(0,.07f,0),PrimitiveType.Sphere,new Color(.25f,.8f,.95f),.065f);
   Item("Food offering",Offering.Food,new Vector3(.18f,Floor+.04f,.35f),PrimitiveType.Sphere,new Color(.95f,.66f,.18f),.065f);
   Item("Wood offering",Offering.Wood,new Vector3(-.5f,Floor+.04f,-.22f),PrimitiveType.Cube,new Color(.5f,.3f,.16f),.07f);
   creature=new GameObject("The village's god").transform;creature.SetParent(transform,false);creature.position=new Vector3(0,Floor,-.12f);
@@ -43,6 +43,8 @@ public sealed class QuestSlice:MonoBehaviour {
   for(int i=-1;i<=1;i+=2)Shape("Creature horn",PrimitiveType.Capsule,new Vector3(i*.065f,.32f,-.015f),new Vector3(.025f,.04f,.025f),new Color(.35f,.3f,.25f),creature);
   }
   cowMotion=creature.GetComponentInChildren<OriginalCowMotion>();
+  creatureRoutine=creature.gameObject.AddComponent<CreatureRoutine>();creatureRoutine.Initialize(godMotion,waterOffering,well,cistern,()=>{state.Deliver();notice="The creature delivered water to the village.";},Ground);
+  for(int i=0;i<workers.Count;i++){jobs[i]=workers[i].gameObject.AddComponent<VillagerRoutine>();jobs[i].Initialize((VillagerRoutine.Role)i,i==0?well:i==1?new Vector3(.2f,Floor,.26f):new Vector3(-.64f,Floor,-.12f),cistern,Ground,role=>{if(role==VillagerRoutine.Role.WaterGatherer)state.water=Mathf.Min(100,state.water+.7f);else if(role==VillagerRoutine.Role.Farmer)state.crops=Mathf.Min(100,state.crops+1.2f);notice=role+" finished a delivery.";});}
   Debug.Log("BWVR_ART_ACTIVE: environment="+(environment!=null)+", Puglin="+(god!=null)+", original fallback="+(art!=null));
   var target=creature.gameObject.AddComponent<SpatialTarget>();target.invoke=()=>{state.Praise();if(godMotion!=null)godMotion.React();notice="Warmth remembered. The creature is more likely to bring water.";};var box=creature.gameObject.AddComponent<BoxCollider>();box.center=new Vector3(0,.18f,0);box.size=new Vector3(.2f,.4f,.2f);
   creatureLabel=Label("Creature intent",creature,new Vector3(0,.44f,0),new Vector2(420,70),.0007f,22);creatureLabel.text="THEIR GOD · WATCHING";
@@ -52,7 +54,7 @@ public sealed class QuestSlice:MonoBehaviour {
   status=Label("Season and guidance",panel.transform,new Vector3(0,130,0),new Vector2(540,260),1,25);status.alignment=TextAnchor.UpperLeft;
   Button("Pause / resume",new Vector3(-140,-70,0),()=>{state.paused=!state.paused;notice=state.paused?"Season paused.":"Season resumed.";});
   Button("Save season",new Vector3(140,-70,0),Save);
-  Button("Begin again",new Vector3(-140,-160,0),()=>{state=new SliceState();creatureTrip=0;notice="A new dry season begins.";});
+  Button("Begin again",new Vector3(-140,-160,0),()=>{state=new SliceState();creatureTrip=0;creatureRoutine.ResetTask();foreach(var job in jobs)job.ResetTask();notice="A new dry season begins.";});
   Button("Close",new Vector3(140,-160,0),()=>panel.SetActive(false));
   if(!XRSettings.isDeviceActive){eye.transform.localRotation=Quaternion.Euler(25,0,0);left.localPosition=new Vector3(-.6f,1.15f,1.05f);left.localRotation=Quaternion.Euler(0,0,0);panel.transform.localRotation=Quaternion.identity;}
  }
@@ -89,9 +91,8 @@ public sealed class QuestSlice:MonoBehaviour {
   else if(item.kind==Offering.Food&&Vector3.Distance(point,creature.position)<.2f){state.Praise();notice="The creature accepts your offering.";item.transform.position=item.home;}
   else {if(item.kind==Offering.Villager)item.home=item.transform.position;notice="Placed on the island.";}
  }
- void AnimateVillage(){for(int i=0;i<workers.Count;i++){var item=workers[i].GetComponent<CarryItem>();if(item.held)continue;float t=Mathf.PingPong(clock*.08f+i*.3f,1);workers[i].position=Vector3.Lerp(item.home,well,t)+Vector3.up*.005f*Mathf.Sin(clock*8+i);}
-  creatureTrip+=Time.deltaTime*(.035f+state.care*.04f);float trip=creatureTrip%2;var target=trip<1?well:cistern;creature.position=Vector3.MoveTowards(creature.position,target,Time.deltaTime*.09f);var direction=target-creature.position;if(direction.sqrMagnitude>.0001f)creature.rotation=Quaternion.LookRotation(direction);if(trip>=1&&!returning){returning=true;}if(trip<1&&returning){returning=false;state.Deliver();notice="The creature brought water. Point and squeeze trigger to encourage it.";}creatureLabel.text=trip<1?"THEIR GOD · SEEKING WATER":"THEIR GOD · HELPING VILLAGE";
- }
+ Vector3 Ground(Vector3 at){at.y=Floor;return at;}
+ void AnimateVillage(){foreach(var job in jobs)job.Tick(Time.deltaTime,false);creatureRoutine.Tick(Time.deltaTime,false);creatureLabel.text="THEIR GOD · "+creatureRoutine.Current.ToString().ToUpperInvariant();}
  void Save(){try{File.WriteAllText(SavePath+".tmp",JsonUtility.ToJson(state,true));File.Copy(SavePath+".tmp",SavePath,true);notice="Season saved on this device.";}catch(Exception e){notice="Could not save: "+e.Message;}}
  void Load(){if(!File.Exists(SavePath))return;try{var s=JsonUtility.FromJson<SliceState>(File.ReadAllText(SavePath));if(s==null||!s.Valid())throw new Exception("Invalid season data");state=s;state.paused=true;notice="Season restored and paused. Resume from your sanctuary.";}catch(Exception){notice="Save could not be read. A fresh season is ready.";}}
  void OnApplicationPause(bool paused){if(paused){for(int i=0;i<2;i++)if(held[i]!=null){held[i].transform.position=held[i].home;held[i].held=false;held[i].GetComponent<Collider>().enabled=true;held[i]=null;}Save();}}

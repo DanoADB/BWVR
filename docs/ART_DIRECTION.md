@@ -39,3 +39,6 @@ Quest APK build completed successfully (52,440,823 bytes). Unity also logged int
 
 Animation correction: the initial controller accidentally referenced Unity's __preview__ FBX subassets. The importer now filters those out and repairs existing controllers to reference the real humanoid clips. Verification measured 0.0675m of natural creature travel with a 66-degree knee swing over 0.75 seconds; idle selection and frozen paused poses also passed for all four actors. Advancing controller time alone was insufficient evidence in the initial pass.
 
+
+Creature actions now use an arrival-driven pickup/drink/carry/delivery routine, with visible carried water, humanoid hand IK, and UAL pickup/interaction/locomotion clips. Drinking and carrying are procedural hand poses over UAL, not dedicated clips in the free pack. Villagers travel to work, animate, carry supplies home, and deliver; water gathering and farming improve the village counters. Verified all five creature phases, one gift per completed delivery, pause, and completed jobs for all three workers in the running scene.
+
