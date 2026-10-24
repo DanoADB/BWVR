@@ -14,8 +14,15 @@ public static class CharacterImporter {
   importer.SaveAndReimport();var avatar=AssetDatabase.LoadAllAssetsAtPath(path).OfType<Avatar>().FirstOrDefault();if(avatar==null||!avatar.isValid||!avatar.isHuman)throw new Exception("Invalid humanoid avatar: "+path);
  }
  static RuntimeAnimatorController Controller(){
-  var path=Output+"/IslandHumanoid.controller";var existing=AssetDatabase.LoadAssetAtPath<RuntimeAnimatorController>(path);if(existing!=null)return existing;
-  var clips=AssetDatabase.LoadAllAssetsAtPath(Library).OfType<AnimationClip>().ToArray();AnimationClip Clip(string name)=>clips.First(c=>c.name.EndsWith("|"+name));
+  var path=Output+"/IslandHumanoid.controller";
+  // FBX imports also expose static __preview__ clips. They must never drive a player.
+  var clips=AssetDatabase.LoadAllAssetsAtPath(Library).OfType<AnimationClip>().Where(c=>!c.name.StartsWith("__")).ToArray();AnimationClip Clip(string name)=>clips.First(c=>c.name.EndsWith("|"+name));
+  var existing=AssetDatabase.LoadAssetAtPath<AnimatorController>(path);
+  if(existing!=null){
+   var states=existing.layers[0].stateMachine.states.Select(s=>s.state).ToArray();var tree=(BlendTree)states.First(s=>s.name=="Idle and walk").motion;
+   tree.children=new[]{new ChildMotion{motion=Clip("Idle_Loop"),threshold=0,timeScale=1},new ChildMotion{motion=Clip("Walk_Loop"),threshold=1,timeScale=1}};
+   states.First(s=>s.name=="Warmth reaction").motion=Clip("Interact");EditorUtility.SetDirty(tree);EditorUtility.SetDirty(existing);return existing;
+  }
   var controller=AnimatorController.CreateAnimatorControllerAtPath(path);controller.AddParameter("Speed",AnimatorControllerParameterType.Float);controller.AddParameter("Warmth",AnimatorControllerParameterType.Trigger);
   var machine=controller.layers[0].stateMachine;var move=machine.AddState("Idle and walk");var blend=new BlendTree{name="UAL idle walk",blendParameter="Speed",useAutomaticThresholds=false};AssetDatabase.AddObjectToAsset(blend,controller);blend.AddChild(Clip("Idle_Loop"),0);blend.AddChild(Clip("Walk_Loop"),1);move.motion=blend;machine.defaultState=move;
   var react=machine.AddState("Warmth reaction");react.motion=Clip("Interact");var enter=machine.AddAnyStateTransition(react);enter.AddCondition(AnimatorConditionMode.If,0,"Warmth");enter.duration=.12f;enter.canTransitionToSelf=false;var exit=react.AddTransition(move);exit.hasExitTime=true;exit.exitTime=.9f;exit.duration=.12f;return controller;

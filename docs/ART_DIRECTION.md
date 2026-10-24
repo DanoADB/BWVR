@@ -36,3 +36,6 @@ Texture resolution alone will not fix the flat terrain, weak composition, placeh
 
 Quest APK build completed successfully (52,440,823 bytes). Unity also logged internal BuildPipeline assertions during packaging; the log still ended with Build Finished, Result: Success. These assertions remain unexplained, and the APK has not been tested on a headset.
 
+
+Animation correction: the initial controller accidentally referenced Unity's __preview__ FBX subassets. The importer now filters those out and repairs existing controllers to reference the real humanoid clips. Verification measured 0.0675m of natural creature travel with a 66-degree knee swing over 0.75 seconds; idle selection and frozen paused poses also passed for all four actors. Advancing controller time alone was insufficient evidence in the initial pass.
+

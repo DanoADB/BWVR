@@ -9,20 +9,20 @@ BlendTree:
   m_Name: UAL idle walk
   m_Childs:
   - serializedVersion: 2
-    m_Motion: {fileID: 110800018, guid: ad5df6f69445b614cae242c739b0894c, type: 3}
+    m_Motion: {fileID: 7994627924475153551, guid: ad5df6f69445b614cae242c739b0894c, type: 3}
     m_Threshold: 0
     m_Position: {x: 0, y: 0}
     m_TimeScale: 1
     m_CycleOffset: 0
-    m_DirectBlendParameter: Blend
+    m_DirectBlendParameter: 
     m_Mirror: 0
   - serializedVersion: 2
-    m_Motion: {fileID: 110800084, guid: ad5df6f69445b614cae242c739b0894c, type: 3}
+    m_Motion: {fileID: -7003542030617561338, guid: ad5df6f69445b614cae242c739b0894c, type: 3}
     m_Threshold: 1
     m_Position: {x: 0, y: 0}
     m_TimeScale: 1
     m_CycleOffset: 0
-    m_DirectBlendParameter: Blend
+    m_DirectBlendParameter: 
     m_Mirror: 0
   m_BlendParameter: Speed
   m_BlendParameterY: Blend
@@ -112,7 +112,7 @@ AnimatorState:
   m_MirrorParameterActive: 0
   m_CycleOffsetParameterActive: 0
   m_TimeParameterActive: 0
-  m_Motion: {fileID: 110800024, guid: ad5df6f69445b614cae242c739b0894c, type: 3}
+  m_Motion: {fileID: -2328835098782832033, guid: ad5df6f69445b614cae242c739b0894c, type: 3}
   m_Tag: 
   m_SpeedParameter: 
   m_MirrorParameter: 
