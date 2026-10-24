@@ -37,8 +37,8 @@ public sealed class IslandNavigation:MonoBehaviour {
   if(terrain!=null)Box(sources,well+Vector3.up*Scale*3,new Vector3(5,6,4)*Scale,Quaternion.identity);
   else foreach(var box in GetComponentsInChildren<BoxCollider>())if((box.name.StartsWith("Modular village home")||box.name.Contains("Tree")||box.name.Contains("Pine")))Box(sources,box.transform.TransformPoint(box.center),Vector3.Scale(box.size,box.transform.lossyScale),box.transform.rotation);
   var watch=System.Diagnostics.Stopwatch.StartNew();
-  villager=Bake("Villager",.4f,terrain!=null?1.661f:1.7f,.2f,sources);
-  creature=Bake("Creature",terrain!=null?2.2f:1.1f,terrain!=null?13.9236f:6.8f,.6f,sources);
+  villager=Bake("Villager",.4f*QuestSlice.ActorScale,(terrain!=null?1.661f:1.7f)*QuestSlice.ActorScale,.2f,sources);
+  creature=Bake("Creature",(terrain!=null?2.2f:1.1f)*QuestSlice.ActorScale,(terrain!=null?13.9236f:6.8f)*QuestSlice.ActorScale,.6f,sources);
   Debug.Log("BWVR_NAV_READY: two profiles, "+obstacleCount+" obstacles; bake "+watch.ElapsedMilliseconds+"ms");
  }
  void Box(List<NavMeshBuildSource> sources,Vector3 position,Vector3 size,Quaternion rotation){

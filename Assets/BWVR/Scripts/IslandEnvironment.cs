@@ -6,7 +6,7 @@ public static class IslandEnvironment {
   var prefab=art.Find(key);if(prefab==null)return null;var g=Object.Instantiate(prefab,parent);g.transform.localPosition=position;g.transform.localScale=size;g.transform.localRotation=Quaternion.Euler(0,yaw,0);return g;
  }
  static Transform Home(EnvironmentArt art,Transform parent,Vector3 at,float yaw,float scale,string name){
-  var house=new GameObject(name).transform;house.SetParent(parent,false);house.localPosition=at;house.localRotation=Quaternion.Euler(0,yaw,0);house.localScale=Vector3.one*scale;
+  var house=new GameObject(name).transform;house.SetParent(parent,false);house.localPosition=at;house.localRotation=Quaternion.Euler(0,yaw,0);house.localScale=Vector3.one*(scale*QuestSlice.ActorScale);
    Place(art,"Wall_Plaster_Door_Round",house,new Vector3(0,0,-.075f),new Vector3(.17f,.12f,.018f));
    Place(art,"Door_1_Round",house,new Vector3(0,0,-.086f),new Vector3(.05f,.09f,.008f));
    Place(art,"Wall_Plaster_Straight",house,new Vector3(0,0,.075f),new Vector3(.17f,.12f,.018f),180);
