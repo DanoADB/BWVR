@@ -28,7 +28,7 @@ Android Build Support, SDK and NDK are available on the setup machine. Unity-pro
 
 ## First slice
 
-A three-minute dry season, tabletop village, three moving villagers, a placeholder creature, carryable offerings, encouragement, water delivery, a wrist sanctuary and local season save/resume. Saves preserve season resources and learned care; object placement and in-flight creature travel are not yet persistent. Reload restores paused. The prototype uses original primitive art; copied Black & White assets are not included.
+A three-minute dry season, tabletop village, three moving villagers, a placeholder creature, carryable offerings, encouragement, water delivery, a wrist sanctuary and local season save/resume. Saves preserve season resources and learned care; object placement and in-flight creature travel are not yet persistent. Reload restores paused. The prototype includes a local original-game-art importer for the cow, village, villagers, trees and grass. See [local artwork setup](docs/GAME_ART.md). Without a locally generated catalog it falls back to primitive art; copied artwork is excluded from Git.
 
 ## Development
 

@@ -17,3 +17,5 @@ Assets/LocalGameAssets/
 
 build/
 .utmp/
+
+Assets/LocalGameAssets.meta
