@@ -63,7 +63,7 @@ public sealed partial class BeachBall {
  }
  void AdvanceRally(float dt){
   if(Player==null)return;rallyClock+=dt;
-  if(item.held||Player.GetComponent<CarryItem>().held||!Player.GetComponent<VillagerSocial>().Willing||Harmful||rallyClock>(CreatureJoined?50:35)){CancelRally();return;}
+  if(item.held||Player.GetComponent<CarryItem>().held||!Player.GetComponent<VillagerSocial>().Willing||Harmful||rallyClock>(CreatureJoined?50:90)){CancelRally();return;}
   if(!PassPending)return;passClock+=dt;if(passClock>10){CancelRally();return;}
   // Solo play remains an invitation; it creates no fictional social reward.
   if(!CreatureJoined){if(passClock>2){PassPending=false;CreatureTurn=false;}return;}
