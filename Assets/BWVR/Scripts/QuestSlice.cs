@@ -14,7 +14,7 @@ public sealed class QuestSlice:MonoBehaviour {
  readonly Transform[] aims=new Transform[2]; readonly QuestControls.Hand[] controllerHands=new QuestControls.Hand[2]; bool turnHeld,recenterLast,zoomHeld; Vector3 zoomFocus;
  readonly List<CarryItem> items=new List<CarryItem>(); readonly List<Transform> workers=new List<Transform>();
  readonly CarryItem[] held=new CarryItem[2]; readonly bool[] lastGrip=new bool[2],lastTrigger=new bool[2]; readonly LineRenderer[] rays=new LineRenderer[2];
- DroughtSignals signals;bool helpVisible,outcomeShown;string saveError; CreatureRoutine creatureRoutine; VillagerRoutine[] jobs; float clock,saveClock,creatureTrip; bool returning,menuLast,trackingConfigured,viewPlaced; string notice="Their creature is their god. Your touch guides its instincts.";
+ DroughtSignals signals;bool helpVisible,outcomeShown;string saveError; CreatureRoutine creatureRoutine; CreatureCuriosity curiosity; VillagerRoutine[] jobs; float clock,saveClock,creatureTrip; bool returning,menuLast,trackingConfigured,viewPlaced; string notice="Their creature is their god. Your touch guides its instincts.";
  Vector3 cistern=new Vector3(-.32f,Floor,.25f),well=new Vector3(.4f,Floor,-.2f);
  string SavePath=>Path.Combine(Application.persistentDataPath,"bwvr-season-v1.json");
  void Start(){terrain=Resources.Load<IslandTerrainData>("FirstIsland");art=Resources.Load<GameArtCatalog>("BWVRArt/Catalog");font=Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");Load();Build();humanoids=GetComponentsInChildren<HumanoidMotion>();}
@@ -69,9 +69,13 @@ public sealed class QuestSlice:MonoBehaviour {
   cowMotion=creature.GetComponentInChildren<OriginalCowMotion>();
   creatureRoutine=creature.gameObject.AddComponent<CreatureRoutine>();creatureRoutine.speed=(.07f+state.care*.08f)*(terrain!=null?.1f:1);creatureRoutine.Initialize(godMotion,waterOffering,well,cistern,()=>{DeliverWater();notice="The creature delivered water to the village.";},Ground);
   for(int i=0;i<workers.Count;i++){jobs[i]=workers[i].gameObject.AddComponent<VillagerRoutine>();jobs[i].Initialize((VillagerRoutine.Role)i,i==0?well:i==1?Landmark("field",Site(new Vector3(.2f,Floor,.26f)),p=>p.town==0):Landmark("tree",Site(new Vector3(-.64f,Floor,-.12f)),p=>p.variant<13),cistern,Ground,role=>{if(role==VillagerRoutine.Role.WaterGatherer)state.water=Mathf.Min(100,state.water+.7f);else if(role==VillagerRoutine.Role.Farmer)state.crops=Mathf.Min(100,state.crops+1.2f);notice=role+" finished a delivery.";});}
+  var affordances=CreaturePlayground.Build(transform,navigation,cistern,items.ToArray());
+  curiosity=creature.gameObject.AddComponent<CreatureCuriosity>();curiosity.Initialize(creatureRoutine,godMotion,affordances);
+  foreach(var affordance in affordances){var cue=affordance.gameObject.AddComponent<SpatialTarget>();var offered=affordance;cue.invoke=()=>curiosity.Offer(offered);}
+  creature.gameObject.AddComponent<CreatureAffect>().Initialize(curiosity,terrain!=null?terrain.scale:.025f);
   signals=gameObject.AddComponent<DroughtSignals>();signals.Initialize(reservoir,ground.sharedMaterial,jobs,creatureRoutine);
   Debug.Log("BWVR_ART_ACTIVE: environment="+(environment!=null)+", Puglin="+(god!=null)+", original fallback="+(art!=null));
-  var target=creature.gameObject.AddComponent<SpatialTarget>();target.invoke=()=>{state.Praise();if(godMotion!=null)godMotion.React();notice="Warmth remembered. The creature is more likely to bring water.";};var box=creature.gameObject.AddComponent<BoxCollider>();box.center=new Vector3(0,Size(.18f,7),0);box.size=new Vector3(Size(.2f,8),Size(.4f,15),Size(.2f,8));
+  var target=creature.gameObject.AddComponent<SpatialTarget>();target.invoke=()=>{state.Praise();curiosity?.Feedback(true);if(godMotion!=null)godMotion.React();notice="Warmth remembered. The creature is more likely to bring water.";};var box=creature.gameObject.AddComponent<BoxCollider>();box.center=new Vector3(0,Size(.18f,7),0);box.size=new Vector3(Size(.2f,8),Size(.4f,15),Size(.2f,8));
   creatureLabel=Label("Creature intent",creature,new Vector3(0,Size(.44f,17),0),new Vector2(420,70),terrain!=null?.00007f:.0007f,22);creatureLabel.text="THEIR GOD · WATCHING";creatureLabel.gameObject.SetActive(false);
   panel=new GameObject("Wrist sanctuary");panel.transform.SetParent(left,false);panel.transform.localPosition=new Vector3(0,.13f,.12f);panel.transform.localRotation=Quaternion.Euler(25,0,0);
   var canvas=panel.AddComponent<Canvas>();canvas.renderMode=RenderMode.WorldSpace;var rect=panel.GetComponent<RectTransform>();rect.sizeDelta=new Vector2(600,560);panel.transform.localScale=Vector3.one*.0008f;
@@ -79,7 +83,7 @@ public sealed class QuestSlice:MonoBehaviour {
   status=Label("Season and guidance",panel.transform,new Vector3(0,130,0),new Vector2(540,260),1,25);status.alignment=TextAnchor.UpperLeft;
   Button("Pause / resume",new Vector3(-140,-70,0),()=>{state.paused=!state.paused;notice=state.paused?"Season paused.":"Season resumed.";});
   Button("Save season",new Vector3(140,-70,0),Save);
-  Button("Begin again",new Vector3(-140,-160,0),()=>{state=new SliceState();creatureTrip=0;outcomeShown=false;signals.ResetRequests();creatureRoutine.ResetTask();foreach(var job in jobs)job.ResetTask();notice="A new dry season begins.";});
+  Button("Begin again",new Vector3(-140,-160,0),()=>{state=new SliceState();creatureTrip=0;outcomeShown=false;signals.ResetRequests();curiosity?.ResetTask();creatureRoutine.ResetTask();foreach(var job in jobs)job.ResetTask();notice="A new dry season begins.";});
   Button("Close",new Vector3(140,-160,0),()=>panel.SetActive(false));
   Button("Help / details",new Vector3(0,-240,0),()=>SetHelp(!helpVisible));
   panel.SetActive(false);
@@ -161,11 +165,11 @@ public sealed class QuestSlice:MonoBehaviour {
   if(item.kind==Offering.Villager){var walker=item.GetComponent<IslandNavigator>();if(walker!=null&&!walker.CanPlace(point,out point)){item.transform.position=item.home;notice="Returned safely: villagers need a clear walking space.";return;}walker?.ResetRoute();}
   item.transform.position=point+Vector3.up*(item.kind==Offering.Villager?0:Size(.04f,2));
   if(item.kind==Offering.Water&&Vector3.Distance(point,cistern)<Size(.18f,8)){DeliverWater();notice="Water delivered. Villagers celebrate their creature's gift.";item.transform.position=item.home;}
-  else if(item.kind==Offering.Food&&Vector3.Distance(point,creature.position)<Size(.2f,8)){state.Praise();notice="The creature accepts your offering.";item.transform.position=item.home;}
+  else if(item.kind==Offering.Food&&Vector3.Distance(point,creature.position)<Size(.2f,8)){state.hunger=.05f;state.Praise();curiosity?.Feedback(true);notice="The creature accepts your offering.";item.transform.position=item.home;}
   else {if(item.kind==Offering.Villager)item.home=item.transform.position;notice="Placed on the island.";}
  }
  Vector3 Ground(Vector3 at){if(terrain!=null)return terrain.Project(at);at.y=Floor;return at;}
- void AnimateVillage(){foreach(var job in jobs)job.Tick(Time.deltaTime,false);creatureRoutine.speed=(.07f+state.care*.08f)*(terrain!=null?.1f:1);creatureRoutine.Tick(Time.deltaTime,false);creatureLabel.text="THEIR GOD · "+(creatureRoutine.WaitingForRoute?"WAITING FOR A SAFE ROUTE":creatureRoutine.Current.ToString().ToUpperInvariant());}
+ void AnimateVillage(){foreach(var job in jobs)job.Tick(Time.deltaTime,false);creatureRoutine.speed=(.07f+state.care*.08f)*(terrain!=null?.1f:1);if(!curiosity.Tick(Time.deltaTime,state))creatureRoutine.Tick(Time.deltaTime,false);creatureLabel.text="THEIR GOD · "+(creatureRoutine.WaitingForRoute?"WAITING FOR A SAFE ROUTE":creatureRoutine.Current.ToString().ToUpperInvariant());}
  public bool HelpVisible=>helpVisible;
  public void SetHelp(bool enabled){helpVisible=enabled;if(creatureLabel!=null)creatureLabel.gameObject.SetActive(enabled);}
  void DeliverWater(){int before=state.gifts;state.Deliver();if(state.gifts>before)signals?.WaterArrived();}
