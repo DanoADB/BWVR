@@ -28,13 +28,14 @@ Reference: [Meta Link development workflow](https://developers.meta.com/vr/docum
 
 ## Quest controls
 
-- Point a controller at a resource or villager. Hold grip to carry; release while pointing onto the island to place.
+- Left stick: move forward/back/sideways relative to your head. Right stick left/right: 30-degree snap turn; center the stick before turning again. Right stick up/down: rise/lower above the tabletop.
+- Point a controller at a resource or villager. Hold grip to carry; release while pointing onto the island to place. Rays use the OpenXR aim pose; held objects use the grip pose.
 - Release the blue water offering over the blue village cistern to deliver water.
 - Point at the creature and squeeze trigger to encourage care. Food placed near the creature also encourages it.
-- Press the left controller menu button to show/hide the wrist sanctuary. Point and trigger to pause, save, resume or begin again.
-- The player stays outside the island. No forced camera movement or smooth locomotion in VR.
+- Press X (or the left controller menu button) to show/hide the wrist sanctuary. Press Y to recenter the island ahead. Point and trigger to pause, save, resume or begin again.
+- Locomotion is user-controlled; no forced camera travel after the initial placement. The right stick changes viewing height, with ground clearance.
 
-Routine labels and meters are hidden by default. Open the wrist sanctuary (left menu / desktop Tab) and choose **Help / details** for controls, resource numbers and the optional creature intent caption. The world communicates drought through water levels, bucket demonstrations, gestures and ground/crop color. A restored paused season opens the sanctuary for resume.
+Routine labels and meters are hidden by default. Open the wrist sanctuary (left menu / desktop Tab) and choose **Help / details** for controls, resource numbers and the optional creature intent caption. The world communicates drought through water levels, bucket demonstrations, gestures and ground/crop color. The wrist sanctuary starts closed, including restored seasons, which resume automatically. Open it with X / left menu / desktop Tab.
 
 Controllers are the first input target. Tracked-hand gestures are not implemented yet.
 

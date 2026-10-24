@@ -32,7 +32,7 @@ The art and creature gait are placeholders. Controller rays use Unity XR device 
 
 ## First nonverbal drought loop
 
-Routine world labels and detailed meters are now off by default. The wrist menu keeps short save/pause/restart controls; **Help / details** opts into the existing meters, control instructions and creature intent caption. A restored paused season opens that menu so the player is not silently left in a frozen scene. Save/load errors and the season outcome still get a short visible message.
+Routine world labels and detailed meters are now off by default. The wrist menu keeps short save/pause/restart controls; **Help / details** opts into the existing meters, control instructions and creature intent caption. The wrist menu starts closed; restored seasons resume automatically. X / left menu opens it on demand. Save/load errors and the season outcome still get a short visible message.
 
 When water is low, the water gatherer can interrupt an outbound work trip to check the cistern, show an empty open bucket, look toward the creature, beckon and point toward the water source. The demonstration uses a nearby walkable spot across the cistern from the creature. If it is seeking water and nearby, the creature briefly acknowledges the gatherer with its gaze, then resumes its own routine. Busy creatures are not forced out of their current action. The gatherer resumes work regardless of whether it receives help. Requests have a cooldown and cannot start while paused or carried.
 
@@ -41,3 +41,11 @@ The bucket visibly fills during collection and empties during delivery. The cist
 This is a deterministic visual communication pass, not the future BDI, social relationships, tool/toy learning or possession systems. Speech, creature vocalizations, custom emotional animations and headset readability testing remain future work. Temporary gesture/request state is not added to the season save format.
 
 Validation menu: **BWVR → Verify nonverbal drought cues (Play mode)**. It checks optional text, visible water levels, automatic low-water requests, paused behavior, empty-bucket display, gaze, beckoning, pointing, creature acknowledgement, independent worker completion, bucket fill/delivery and celebration without extra rewards. Existing navigation, terrain, actor action and release checks also pass. No Quest APK was built for this pass.
+
+## Quest controller navigation
+
+Left stick moves relative to the horizontal head direction at 0.65 m/s with a drift deadzone. Right stick left/right snap-turns 30 degrees around the head, once per stick deflection; up/down changes viewing height at up to 0.45 m/s. Ground clearance limits downward travel. This is floating-player travel, not villager pathfinding.
+
+Controller poses and inputs read OpenXR Input System layouts. Aim pose drives the pointing ray; grip pose drives the carried object and wrist attachment. Grip holds/releases, trigger interacts, X / left menu toggles the sanctuary, Y recenters. Tracking loss returns a held resource safely home. No tracked controller means no ray or action from its stale pose.
+
+BWVR > Validate Quest controls checks simulated OpenXR inputs, distinct grip/aim poses, head-relative movement, deadzone, snap-turn pivot/latch/rearm, vertical travel and tracking loss. Physical Quest Pro controller comfort and direction still need headset confirmation.
