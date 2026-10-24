@@ -2,6 +2,8 @@
 
 A standalone Quest god-game prototype: the player is unseen, the creature is worshipped, and its learned choices shape a village's survival.
 
+Future design: [gameplay direction](docs/GAMEPLAY_DIRECTION.md) — tools, toys and feedback, rare costly possession, and villagers who build, form relationships and develop technology independently.
+
 ## Open and play
 
 1. In Unity Hub, add this repository folder and open with **Unity 6000.6.7f1**.

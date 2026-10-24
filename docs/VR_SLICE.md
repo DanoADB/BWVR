@@ -1,5 +1,7 @@
 # First Quest slice
 
+Future gameplay requirements: [indirect creature teaching, costly possession and evolving autonomous villages](GAMEPLAY_DIRECTION.md). Those notes describe intended systems; the sections below describe the original slice plan.
+
 ## Experience
 
 The village lives on an island roughly 1.8 metres across, at a comfortable tabletop height. The player sits or stands beside it. The creature is the villagers' god. The player teaches through encouragement and offerings; villagers do not address a visible player avatar.
