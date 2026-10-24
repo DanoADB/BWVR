@@ -55,3 +55,12 @@ Sketchfab alternatives checked on 2026-10-24:
 - Free3D Ball: https://free3d.com/3d-model/ball-12524.html — listed as personal-use only, so excluded from the project.
 
 Model scale is normalized to the creature during import; visual character and texture quality matter more than the download's original dimensions.
+## Villager curiosity and disassembly
+
+Villagers occasionally investigate the creature's construction, look at a reachable piece, make a short prying gesture, loosen its connection and physically push it toward the tray edge. This is independent toy play alongside their existing routine, not a new job. Normal activity resumes afterward, and the behavior remains available in post-scenario free play. Visible feet follow the raised tray top without a dynamic navigation rebake.
+
+Only attached bricks explicitly marked as creature-built are candidates. Player-built pieces, held pieces, large lintels and pieces above villager reach are excluded as direct targets. Removing a support can destabilize connected pieces under the existing physics. Build provenance is saved with each piece; older saves without provenance remain unmarked. Rebuilding a piece with the creature marks it again.
+
+Each villager has a staggered initial delay and a 100–160 second cooldown after an attempt. The tray additionally permits only one attempt per 90 seconds, with a 20-second quiet period after the creature attaches a piece. A target reservation prevents conflicting grabs or duplicate actors during the interaction. Lifting or disabling the villager interrupts the attempt and frees the reservation. Resetting the construction also cancels any ongoing interaction. Actual disassembly prompts a brief sad/frustrated affect in the creature; an already-active task can take display priority.
+
+BWVR > Verify villager block play (Play mode) checks player-built/held protection, target ownership, inspect/pry/push phases, physical brick displacement (4.25 game units in the checked cycle), pause, tray cooldown, saved provenance and interruption/disable cleanup. Construction, curiosity, action/terrain and navigation regression checks passed. Quest performance remains unmeasured; no APK was rebuilt.

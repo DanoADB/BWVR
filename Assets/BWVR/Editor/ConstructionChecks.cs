@@ -24,7 +24,7 @@ public static class ConstructionChecks {
     for(int n=0;n<500&&mind.Current!=CreatureCuriosity.Phase.Rest;n++){
      mind.Tick(.1f,season);site.Advance(.02f);placement|=mind.Current==CreatureCuriosity.Phase.BuildPlace;
     }
-    if(!placement||mind.built!=built+piece+1||!block.Attached||block.Item.held)throw new Exception("Creature failed to attach brick "+piece+" at phase "+mind.Current);
+    if(!placement||mind.built!=built+piece+1||!block.Attached||block.Item.held||!block.creatureBuilt)throw new Exception("Creature failed to attach brick "+piece+" at phase "+mind.Current);
     if(site.blocks.Count(b=>b.Item.held)>0)throw new Exception("Construction stranded a held piece");
    }
    var positions=site.blocks.Select(b=>b.Body.position).ToArray();for(int i=0;i<250;i++)site.Advance(.02f);

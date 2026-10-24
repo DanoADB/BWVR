@@ -63,7 +63,7 @@ public sealed class CreatureCuriosity:MonoBehaviour {
    if(navigator.MoveTo(buildApproach,routine.speed,dt)){buildStart=owned.transform.position;Current=Phase.BuildPlace;clock=0;motion?.Activity(5);}
   }else if(Current==Phase.BuildPlace){
    Affect=CreatureAffect.Mood.Excited;float blend=Mathf.SmoothStep(0,1,clock/1.3f);motion?.PlaceAt(buildPoint,buildRotation,blend);owned.transform.SetPositionAndRotation(Vector3.Lerp(buildStart,buildPoint,blend),Quaternion.Slerp(originalRotation,buildRotation,blend));
-   if(clock>=1.4f){var block=owned.GetComponent<ConstructionBlock>();if(!block.Site.Drop(block,buildPoint,buildRotation)){Finish(false);return false;}built++;played++;target.Discovered();boredom=0;feedbackWindow=12;lastSocial=false;owned=null;Finish(true);}
+   if(clock>=1.4f){var block=owned.GetComponent<ConstructionBlock>();if(!block.Site.Drop(block,buildPoint,buildRotation,true)){Finish(false);return false;}built++;played++;target.Discovered();boredom=0;feedbackWindow=12;lastSocial=false;owned=null;Finish(true);}
   }else if(Current==Phase.Play){
    Affect=target.kind==CreatureAffordance.Kind.Food?CreatureAffect.Mood.Hungry:CreatureAffect.Mood.Excited;
    if(target.kind==CreatureAffordance.Kind.Food)motion?.Carry(owned.transform,true);
@@ -82,6 +82,7 @@ public sealed class CreatureCuriosity:MonoBehaviour {
  }
  bool SafeLanding(Vector3 at,out Vector3 result){var friend=owned!=null?owned.GetComponent<IslandNavigator>():null;result=at;return friend!=null&&navigator.world.Sample(at,friend.profile,8,out result);}
  public void Offer(CreatureAffordance item){if(Current==Phase.Rest)TryBegin(item);}
+ public void NoticeDisassembly(Transform villager){emotion=4;recentMood=CreatureAffect.Mood.Sad;Affect=recentMood;motion?.LookAt(villager);}
  public void Feedback(bool positive){if(state==null)return;if(feedbackWindow>0){float change=positive?.12f:-.12f;if(lastSocial)state.socialPreference=Mathf.Clamp01(state.socialPreference+change);else state.playPreference=Mathf.Clamp01(state.playPreference+change);feedbackWindow=0;}emotion=5;recentMood=positive?CreatureAffect.Mood.Happy:CreatureAffect.Mood.Sad;Affect=recentMood;}
  public void ResetTask(){Finish(false);constructionFocus=false;cooldown=7;boredom=emotion=feedbackWindow=0;Affect=CreatureAffect.Mood.Calm;}
  void Finish(bool success){
