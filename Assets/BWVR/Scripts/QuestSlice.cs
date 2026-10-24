@@ -9,7 +9,7 @@ using UnityEngine.InputSystem;
 using CommonUsages=UnityEngine.XR.CommonUsages;
 namespace BWVR {
 public sealed class QuestSlice:MonoBehaviour {
- IslandTerrainData terrain; Collider groundCollider; const float Floor=.82f; SliceState state=new SliceState(); Camera eye; Transform rig,left,right,creature; Text status,creatureLabel; GameObject panel; Font font; GameArtCatalog art; OriginalCowMotion cowMotion; HumanoidMotion godMotion; HumanoidMotion[] humanoids=Array.Empty<HumanoidMotion>();
+ IslandNavigation navigation; IslandTerrainData terrain; Collider groundCollider; const float Floor=.82f; SliceState state=new SliceState(); Camera eye; Transform rig,left,right,creature; Text status,creatureLabel; GameObject panel; Font font; GameArtCatalog art; OriginalCowMotion cowMotion; HumanoidMotion godMotion; HumanoidMotion[] humanoids=Array.Empty<HumanoidMotion>();
  readonly List<CarryItem> items=new List<CarryItem>(); readonly List<Transform> workers=new List<Transform>();
  readonly CarryItem[] held=new CarryItem[2]; readonly bool[] lastGrip=new bool[2],lastTrigger=new bool[2]; readonly LineRenderer[] rays=new LineRenderer[2];
  CreatureRoutine creatureRoutine; VillagerRoutine[] jobs; float clock,saveClock,creatureTrip; bool returning,menuLast,trackingConfigured; string notice="Their creature is their god. Your touch guides its instincts.";
@@ -49,7 +49,8 @@ public sealed class QuestSlice:MonoBehaviour {
   Shape("Village cistern - release water here",PrimitiveType.Cylinder,cistern+Vector3.up*Size(.035f,1),new Vector3(Size(.18f,8),Size(.035f,1),Size(.18f,8)),new Color(.17f,.6f,.7f));
   if(environment!=null&&terrain!=null&&terrain.HasPlacements)IslandEnvironment.WaterSource(environment,transform,well,terrain.scale);
   Shape("Spring",PrimitiveType.Cylinder,well+Vector3.up*Size(.015f,.4f),new Vector3(Size(.14f,6),Size(.015f,.4f),Size(.14f,6)),new Color(.28f,.68f,.8f));
-  jobs=new VillagerRoutine[3];for(int i=0;i<3;i++){var spawn=Site(new Vector3(-.2f+i*.14f,Floor,.13f));if(terrain!=null&&terrain.HasPlacements){var starts=terrain.placements.Where(p=>p.kind=="villager").GroupBy(p=>new Vector2(p.x,p.z)).Take(3).Select(g=>g.First()).ToArray();if(i<starts.Length)spawn=terrain.PlacementPoint(starts[i]);}var w=Item("Villager",Offering.Villager,spawn,PrimitiveType.Capsule,new Color(.9f,.65f,.38f),.055f);workers.Add(w.transform);}
+  navigation=gameObject.AddComponent<IslandNavigation>();navigation.Initialize(terrain,well);
+  jobs=new VillagerRoutine[3];for(int i=0;i<3;i++){var spawn=Site(new Vector3(-.2f+i*.14f,Floor,.13f));if(terrain!=null&&terrain.HasPlacements){var starts=terrain.placements.Where(p=>p.kind=="villager").GroupBy(p=>new Vector2(p.x,p.z)).Take(3).Select(g=>g.First()).ToArray();if(i<starts.Length)spawn=terrain.PlacementPoint(starts[i]);}var w=Item("Villager",Offering.Villager,spawn,PrimitiveType.Capsule,new Color(.9f,.65f,.38f),.055f);var walker=w.gameObject.AddComponent<IslandNavigator>();walker.Initialize(navigation,false);w.GetComponent<CarryItem>().home=w.transform.position;workers.Add(w.transform);}
   var waterOffering=Item("Water offering",Offering.Water,well+Vector3.up*Size(.07f,2),PrimitiveType.Sphere,new Color(.25f,.8f,.95f),Size(.065f,1.2f));
   Item("Food offering",Offering.Food,Ground(Landmark("field",Site(new Vector3(.18f,Floor,.35f)),p=>p.town==0))+Vector3.up*Size(.04f,2),PrimitiveType.Sphere,new Color(.95f,.66f,.18f),Size(.065f,1.2f));
   Item("Wood offering",Offering.Wood,Ground(Landmark("tree",Site(new Vector3(-.5f,Floor,-.22f))))+Vector3.up*Size(.04f,2),PrimitiveType.Cube,new Color(.5f,.3f,.16f),Size(.07f,1.2f));
@@ -61,6 +62,7 @@ public sealed class QuestSlice:MonoBehaviour {
   for(int i=-1;i<=1;i+=2)Shape("Creature horn",PrimitiveType.Capsule,new Vector3(i*.065f,.32f,-.015f),new Vector3(.025f,.04f,.025f),new Color(.35f,.3f,.25f),creature);
   }
   if(god==null&&creature.GetComponentInChildren<OriginalCowMotion>()==null&&terrain!=null)foreach(Transform visual in creature){visual.localPosition*=Size(.34f,13.9236f)/.34f;visual.localScale*=Size(.34f,13.9236f)/.34f;}
+  creature.gameObject.AddComponent<IslandNavigator>().Initialize(navigation,true);
   cowMotion=creature.GetComponentInChildren<OriginalCowMotion>();
   creatureRoutine=creature.gameObject.AddComponent<CreatureRoutine>();creatureRoutine.speed=(.07f+state.care*.08f)*(terrain!=null?.1f:1);creatureRoutine.Initialize(godMotion,waterOffering,well,cistern,()=>{state.Deliver();notice="The creature delivered water to the village.";},Ground);
   for(int i=0;i<workers.Count;i++){jobs[i]=workers[i].gameObject.AddComponent<VillagerRoutine>();jobs[i].Initialize((VillagerRoutine.Role)i,i==0?well:i==1?Landmark("field",Site(new Vector3(.2f,Floor,.26f)),p=>p.town==0):Landmark("tree",Site(new Vector3(-.64f,Floor,-.12f)),p=>p.variant<13),cistern,Ground,role=>{if(role==VillagerRoutine.Role.WaterGatherer)state.water=Mathf.Min(100,state.water+.7f);else if(role==VillagerRoutine.Role.Farmer)state.crops=Mathf.Min(100,state.crops+1.2f);notice=role+" finished a delivery.";});}
@@ -108,13 +110,14 @@ public sealed class QuestSlice:MonoBehaviour {
  void Release(int i,Ray ray){var item=held[i];held[i]=null;item.held=false;item.GetComponent<Collider>().enabled=true;Vector3 point;
   if(terrain!=null){if(!groundCollider.Raycast(ray,out var hit,8)||!terrain.Dry(hit.point)){item.transform.position=item.home;notice="Returned safely: place on dry, gentle ground.";return;}point=hit.point;}
   else{var plane=new Plane(Vector3.up,new Vector3(0,Floor,0));if(!plane.Raycast(ray,out float distance)||distance>8){item.transform.position=item.home;return;}point=ray.GetPoint(distance);if(new Vector2(point.x,point.z).magnitude>.82f){item.transform.position=item.home;notice="Returned safely to the island.";return;}}
+  if(item.kind==Offering.Villager){var walker=item.GetComponent<IslandNavigator>();if(walker!=null&&!walker.CanPlace(point,out point)){item.transform.position=item.home;notice="Returned safely: villagers need a clear walking space.";return;}walker?.ResetRoute();}
   item.transform.position=point+Vector3.up*(item.kind==Offering.Villager?0:Size(.04f,2));
   if(item.kind==Offering.Water&&Vector3.Distance(point,cistern)<Size(.18f,8)){state.Deliver();notice="Water delivered. Villagers celebrate their creature's gift.";item.transform.position=item.home;}
   else if(item.kind==Offering.Food&&Vector3.Distance(point,creature.position)<Size(.2f,8)){state.Praise();notice="The creature accepts your offering.";item.transform.position=item.home;}
   else {if(item.kind==Offering.Villager)item.home=item.transform.position;notice="Placed on the island.";}
  }
  Vector3 Ground(Vector3 at){if(terrain!=null)return terrain.Project(at);at.y=Floor;return at;}
- void AnimateVillage(){foreach(var job in jobs)job.Tick(Time.deltaTime,false);creatureRoutine.speed=(.07f+state.care*.08f)*(terrain!=null?.1f:1);creatureRoutine.Tick(Time.deltaTime,false);creatureLabel.text="THEIR GOD · "+creatureRoutine.Current.ToString().ToUpperInvariant();}
+ void AnimateVillage(){foreach(var job in jobs)job.Tick(Time.deltaTime,false);creatureRoutine.speed=(.07f+state.care*.08f)*(terrain!=null?.1f:1);creatureRoutine.Tick(Time.deltaTime,false);creatureLabel.text="THEIR GOD · "+(creatureRoutine.WaitingForRoute?"WAITING FOR A SAFE ROUTE":creatureRoutine.Current.ToString().ToUpperInvariant());}
  void Save(){try{File.WriteAllText(SavePath+".tmp",JsonUtility.ToJson(state,true));File.Copy(SavePath+".tmp",SavePath,true);notice="Season saved on this device.";}catch(Exception e){notice="Could not save: "+e.Message;}}
  void Load(){if(!File.Exists(SavePath))return;try{var s=JsonUtility.FromJson<SliceState>(File.ReadAllText(SavePath));if(s==null||!s.Valid())throw new Exception("Invalid season data");state=s;state.paused=true;notice="Season restored and paused. Resume from your sanctuary.";}catch(Exception){notice="Save could not be read. A fresh season is ready.";}}
  void OnApplicationPause(bool paused){if(paused){for(int i=0;i<2;i++)if(held[i]!=null){held[i].transform.position=held[i].home;held[i].held=false;held[i].GetComponent<Collider>().enabled=true;held[i]=null;}Save();}}
