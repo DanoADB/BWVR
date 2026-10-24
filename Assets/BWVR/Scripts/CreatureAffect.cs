@@ -26,7 +26,7 @@ public sealed class CreatureAffect:MonoBehaviour {
   }
   atlas.SetPixels(pixels);atlas.Apply(false,true);canvas.enabled=false;
  }
- void LateUpdate(){if(mind==null||canvas==null)return;var mood=mind.Affect;if(mood!=Displayed&&(Time.unscaledTime-changed>1||Displayed==Mood.Calm)){Displayed=mood;changed=Time.unscaledTime;image.sprite=sprites[(int)mood];}
+ void LateUpdate(){if(mind==null||canvas==null)return;var mood=mind.Affect;if(mood!=Displayed&&(mind.Responding||Time.unscaledTime-changed>1||Displayed==Mood.Calm)){Displayed=mood;changed=Time.unscaledTime;image.sprite=sprites[(int)mood];}
   canvas.enabled=Displayed!=Mood.Calm;canvas.transform.localPosition=new Vector3(0,height+Mathf.Sin(Time.time*2)*size*.04f,0);var camera=Camera.main;if(camera!=null)canvas.transform.rotation=Quaternion.LookRotation(canvas.transform.position-camera.transform.position);
  }
  void OnDestroy(){if(sprites!=null)foreach(var sprite in sprites)if(sprite!=null)Destroy(sprite);if(atlas!=null)Destroy(atlas);}

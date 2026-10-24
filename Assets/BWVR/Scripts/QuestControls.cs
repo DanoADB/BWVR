@@ -7,7 +7,7 @@ namespace BWVR {
 // use the aim pose for selection rays instead of adding a guessed angle.
 public static class QuestControls {
  public struct Hand {
-  public bool tracked,grip,trigger,menu,recenter,zoom;
+  public bool tracked,grip,trigger,menu,recenter,zoom,praise,discourage;
   public Vector2 stick;
   public Vector3 position,aimPosition;
   public Quaternion rotation,aimRotation;
@@ -26,6 +26,8 @@ public static class QuestControls {
    h.trigger=controller.TryGetChildControl<ButtonControl>("triggerPressed")?.isPressed??false;
    h.menu=side==0&&((controller.TryGetChildControl<ButtonControl>("primaryButton")?.isPressed??false)||(controller.TryGetChildControl<ButtonControl>("menu")?.isPressed??false));
    h.zoom=side==1&&h.grip;
+   h.praise=side==1&&(controller.TryGetChildControl<ButtonControl>("primaryButton")?.isPressed??false);
+   h.discourage=side==1&&(controller.TryGetChildControl<ButtonControl>("secondaryButton")?.isPressed??false);
    h.recenter=side==0&&(controller.TryGetChildControl<ButtonControl>("secondaryButton")?.isPressed??false);
    return h;
   }

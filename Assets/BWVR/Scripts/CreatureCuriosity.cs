@@ -8,7 +8,9 @@ public sealed class CreatureCuriosity:MonoBehaviour {
  Vector3 buildPoint,buildApproach,buildStart;Quaternion buildRotation;
  bool constructionFocus;
  VillagerSocial lastFriend;
- public Phase Current{get;private set;}public CreatureAffect.Mood Affect{get;private set;}
+ public Phase Current{get;private set;}CreatureAffect.Mood affect,feedbackMood;float reaction;bool lastWater;
+ public CreatureAffect.Mood Affect{get=>reaction>0?feedbackMood:affect;private set=>affect=value;}
+ public bool Responding=>reaction>0;
  public int played{get;private set;}public int friendsCarried{get;private set;}public CarryItem Holding=>owned;
  CreatureAffect.Mood recentMood=CreatureAffect.Mood.Happy;
  CreatureRoutine routine;HumanoidMotion motion;IslandNavigator navigator;CreatureAffordance[] affordances;
@@ -21,7 +23,7 @@ public sealed class CreatureCuriosity:MonoBehaviour {
   routine.ResetTask();navigator.ResetRoute();target=candidate;elapsed=clock=0;Current=Phase.Approach;motion?.LookAt(target.transform);Affect=CreatureAffect.Mood.Curious;return true;
  }
  public bool Tick(float dt,SliceState season){
-  state=season;if(dt<=0||state.paused)return Current!=Phase.Rest;
+  state=season;if(dt<=0||state.paused)return Current!=Phase.Rest;reaction=Mathf.Max(0,reaction-dt);
   state.hunger=Mathf.Clamp01(state.hunger+dt*.0035f);boredom+=dt;emotion=Mathf.Max(0,emotion-dt);feedbackWindow=Mathf.Max(0,feedbackWindow-dt);
   if(Current==Phase.Rest){
    Affect=state.hunger>.67f?CreatureAffect.Mood.Hungry:emotion>0?recentMood:boredom>32?CreatureAffect.Mood.Bored:CreatureAffect.Mood.Calm;
@@ -64,13 +66,14 @@ public sealed class CreatureCuriosity:MonoBehaviour {
    if(navigator.MoveTo(buildApproach,routine.speed,dt)){buildStart=owned.transform.position;Current=Phase.BuildPlace;clock=0;motion?.Activity(5);}
   }else if(Current==Phase.BuildPlace){
    Affect=CreatureAffect.Mood.Excited;float blend=Mathf.SmoothStep(0,1,clock/1.3f);motion?.PlaceAt(buildPoint,buildRotation,blend);owned.transform.SetPositionAndRotation(Vector3.Lerp(buildStart,buildPoint,blend),Quaternion.Slerp(originalRotation,buildRotation,blend));
-   if(clock>=1.4f){var block=owned.GetComponent<ConstructionBlock>();if(!block.Site.Drop(block,buildPoint,buildRotation,true)){Finish(false);return false;}built++;played++;target.Discovered();boredom=0;feedbackWindow=12;lastSocial=false;owned=null;Finish(true);}
+   if(clock>=1.4f){var block=owned.GetComponent<ConstructionBlock>();if(!block.Site.Drop(block,buildPoint,buildRotation,true)){Finish(false);return false;}lastWater=false;built++;played++;target.Discovered();boredom=0;feedbackWindow=12;lastSocial=false;owned=null;Finish(true);}
   }else if(Current==Phase.Play){
    Affect=target.kind==CreatureAffordance.Kind.Food?CreatureAffect.Mood.Hungry:CreatureAffect.Mood.Excited;
    if(target.kind==CreatureAffordance.Kind.Food)motion?.Carry(owned.transform,true);
    else {motion?.Carry(owned.transform);motion?.Playful(clock);}
    if(clock>3.5f){Current=Phase.Place;clock=0;motion?.Carry(owned.transform);motion?.Activity(5);}
   }else if(Current==Phase.Place&&clock>1.1f){
+   lastWater=false;
    if(target.kind==CreatureAffordance.Kind.Villager){friendsCarried++;lastSocial=true;lastFriend=target.GetComponent<VillagerSocial>();if(lastFriend!=null){lastFriend.RememberRide();foreach(var witness in lastFriend.transform.parent.GetComponentsInChildren<VillagerSocial>())if(witness!=lastFriend&&!witness.GetComponent<CarryItem>().held&&Vector3.Distance(witness.transform.position,transform.position)<navigator.world.Scale*22)witness.WitnessRide();}}
    else {played++;lastSocial=false;if(target.kind==CreatureAffordance.Kind.Food)state.hunger=.05f;}
    target.Discovered();boredom=0;emotion=5;feedbackWindow=12;Finish(true);
@@ -85,8 +88,9 @@ public sealed class CreatureCuriosity:MonoBehaviour {
  public void Offer(CreatureAffordance item){if(Current==Phase.Rest)TryBegin(item);}
  public void NoticeGreeting(Transform villager){emotion=4;recentMood=CreatureAffect.Mood.Happy;Affect=recentMood;motion?.LookAt(villager);}
  public void NoticeDisassembly(Transform villager){villager.GetComponent<VillagerSocial>()?.RememberDispute();emotion=4;recentMood=CreatureAffect.Mood.Sad;Affect=recentMood;motion?.LookAt(villager);}
- public void Feedback(bool positive){if(state==null)return;if(feedbackWindow>0){float change=positive?.12f:-.12f;if(lastSocial){state.socialPreference=Mathf.Clamp01(state.socialPreference+change);lastFriend?.Feedback(positive);}else state.playPreference=Mathf.Clamp01(state.playPreference+change);feedbackWindow=0;}emotion=5;recentMood=positive?CreatureAffect.Mood.Happy:CreatureAffect.Mood.Sad;Affect=recentMood;}
- public void ResetTask(){Finish(false);lastFriend=null;constructionFocus=false;cooldown=7;boredom=emotion=feedbackWindow=0;Affect=CreatureAffect.Mood.Calm;}
+ public void RememberWaterDelivery(SliceState season){state=season;lastWater=true;lastSocial=false;feedbackWindow=12;}
+ public bool Feedback(bool positive){if(state==null||state.paused)return false;bool learned=feedbackWindow>0;if(learned){float change=positive?.12f:-.12f;if(lastWater)state.care=Mathf.Clamp01(state.care+change);else if(lastSocial){state.socialPreference=Mathf.Clamp01(state.socialPreference+change);lastFriend?.Feedback(positive);}else state.playPreference=Mathf.Clamp01(state.playPreference+change);feedbackWindow=0;}reaction=2;emotion=5;feedbackMood=recentMood=positive?CreatureAffect.Mood.Happy:CreatureAffect.Mood.Sad;Affect=recentMood;return learned;}
+ public void ResetTask(){Finish(false);lastFriend=null;lastWater=false;reaction=0;constructionFocus=false;cooldown=7;boredom=emotion=feedbackWindow=0;Affect=CreatureAffect.Mood.Calm;}
  void Finish(bool success){
   motion?.Carry(null);motion?.Playful(0);motion?.PlaceAt(default,Quaternion.identity,0);motion?.LookAt(null);motion?.Activity(0);navigator?.ResetRoute();
   if(owned!=null){var item=owned;var point=original;

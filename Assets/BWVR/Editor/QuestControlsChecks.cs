@@ -69,7 +69,11 @@ public static class QuestControlsChecks {
    if(!input.tracked||!input.grip||!input.trigger||!input.menu||input.stick.y<.9f)throw new Exception("Controller button/stick binding failed");
    if(Vector3.Distance(input.position,new Vector3(1,2,3))>.001f||Vector3.Distance(input.aimPosition,new Vector3(4,5,6))>.001f||Quaternion.Angle(input.aimRotation,Quaternion.Euler(0,45,0))>.01f)throw new Exception("Grip/aim poses not separate");
    InputSystem.SetDeviceUsage(device,UnityEngine.InputSystem.CommonUsages.RightHand);
+   Set(device.GetChildControl<ButtonControl>("secondaryButton"),0f);
+   if(!QuestControls.Read(1).praise||QuestControls.Read(1).discourage||QuestControls.Read(1).menu)throw new Exception("Right A praise binding conflicts with menu");
+   Set(device.GetChildControl<ButtonControl>("primaryButton"),0f);
    Set(device.GetChildControl<ButtonControl>("secondaryButton"),1f);
+   if(QuestControls.Read(1).praise||!QuestControls.Read(1).discourage||QuestControls.Read(1).recenter)throw new Exception("Right B discourage binding conflicts with recenter");
    Set(device.GetChildControl<ButtonControl>("gripPressed"),0f);
    if(QuestControls.Read(1).zoom)throw new Exception("Front trigger or B enabled zoom");
    Set(device.GetChildControl<ButtonControl>("triggerPressed"),0f);
