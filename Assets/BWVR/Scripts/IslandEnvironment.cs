@@ -35,8 +35,9 @@ public static class IslandEnvironment {
   var texture=new Texture2D(128,128);texture.name="BWVR painted meadow";texture.wrapMode=TextureWrapMode.Repeat;
   for(int y=0;y<128;y++)for(int x=0;x<128;x++){float noise=Mathf.PerlinNoise(x*.12f,y*.12f);texture.SetPixel(x,y,Color.Lerp(new Color(.31f,.40f,.15f),new Color(.56f,.62f,.29f),noise));}texture.Apply();
   var material=new Material(Shader.Find("BWVR/GameSurface"));material.mainTexture=texture;material.mainTextureScale=Vector2.one*5;ground.sharedMaterial=material;
+  var cloudMaterial=new Material(Shader.Find("BWVR/GameSurface"));cloudMaterial.color=new Color(.85f,.90f,.87f);
   for(int i=0;i<6;i++)for(int puff=0;puff<3;puff++){
-   var cloud=GameObject.CreatePrimitive(PrimitiveType.Sphere);cloud.name="Soft horizon cloud";cloud.transform.SetParent(root,false);float a=i*1.05f;cloud.transform.localPosition=new Vector3(Mathf.Cos(a)*4+puff*.3f,2.6f+Mathf.Sin(i)*.25f,Mathf.Sin(a)*4);cloud.transform.localScale=new Vector3(.8f,.18f+puff*.03f,.4f);Object.Destroy(cloud.GetComponent<Collider>());var cm=new Material(Shader.Find("Unlit/Color"));cm.color=new Color(.85f,.90f,.87f);cloud.GetComponent<Renderer>().sharedMaterial=cm;
+   var cloud=GameObject.CreatePrimitive(PrimitiveType.Sphere);cloud.name="Soft horizon cloud";cloud.transform.SetParent(root,false);float a=i*1.05f;cloud.transform.localPosition=new Vector3(Mathf.Cos(a)*4+puff*.3f,2.6f+Mathf.Sin(i)*.25f,Mathf.Sin(a)*4);cloud.transform.localScale=new Vector3(.8f,.18f+puff*.03f,.4f);Object.Destroy(cloud.GetComponent<Collider>());cloud.GetComponent<Renderer>().sharedMaterial=cloudMaterial;
   }
  }
 }
