@@ -16,6 +16,7 @@ public sealed class CreatureCuriosity:MonoBehaviour {
  CreatureAffect.Mood recentMood=CreatureAffect.Mood.Happy;
  CreatureRoutine routine;HumanoidMotion motion;IslandNavigator navigator;CreatureAffordance[] affordances;
  public bool HandlingBeachBall=>target!=null&&target.GetComponent<BeachBall>()!=null&&Current!=Phase.Rest;
+ public bool UsingConstruction(ConstructionSite site)=>Current!=Phase.Rest&&target!=null&&target.GetComponent<ConstructionBlock>()?.Site==site;
  CreatureAffordance target;CarryItem owned;SliceState state;Vector3 original,landing;Quaternion originalRotation;float clock,elapsed,cooldown=7,boredom,emotion,feedbackWindow;bool lastSocial;
  public void Initialize(CreatureRoutine water,HumanoidMotion visual,CreatureAffordance[] objects){routine=water;motion=visual;navigator=GetComponent<IslandNavigator>();affordances=objects;}
  public bool TryBegin(CreatureAffordance candidate){

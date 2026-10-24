@@ -7,7 +7,7 @@ public sealed class ConstructionBlock:MonoBehaviour {
  internal bool wasHeld;
  public void Initialize(ConstructionSite site,Rigidbody body,Vector3 dimensions){Site=site;Body=body;size=dimensions;Item=GetComponent<CarryItem>();spawn=body.position;}
  public void Grab(){Site.Detach(this);wasHeld=true;Body.isKinematic=true;Body.detectCollisions=false;}
- public bool CanBuild=>VillagerOwner==null&&!Attached&&Site.TryPlan(this,out _,out _);
+ public bool CanBuild=>Site.Repairer==null&&VillagerOwner==null&&!Attached&&Site.TryPlan(this,out _,out _);
  public void CancelHold(){Item.held=false;wasHeld=false;Site.ReturnLoose(this);}
 }
 }

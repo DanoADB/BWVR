@@ -74,3 +74,5 @@ Creature–villager relationships now retain individual affection/confidence and
 Villagers also develop saved peer familiarity through independent two-villager beachball games. Preferred friends compete with distance and availability; witnessed harmful peer play causes individual caution toward its source. These relationships are separate from creature trust and worship.
 
 Nearby idle villagers can now watch visible ball exchanges, learn confidence from their outcomes, and become more inclined to try shared play. Practice is remembered separately from observation; a learner can later become another villager's example. Occlusion, facing, watching time, pause and carrying gate observation.
+
+Villagers remember construction they have used and can autonomously carry loose pieces back to repair a partly intact tray structure. Repairs share the existing navigation, carry and physical snapping systems, respect player grabs and reservations, and save site-specific experience. Creek-bridge and building repairs remain future work; see docs/PLAY_AND_VILLAGE_RESPONSE.md for the tested scope.

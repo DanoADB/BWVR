@@ -8,7 +8,7 @@ public sealed class VillagerBlockPlay:MonoBehaviour {
  ConstructionSite site;ConstructionBlock target;CreatureCuriosity creature;VillagerRoutine routine;CarryItem actor;HumanoidMotion motion;IslandNavigator navigator;
  float cooldown,clock,elapsed;Vector3 away,start;int personality;
  public void Initialize(ConstructionSite construction,CreatureCuriosity god,int index){site=construction;creature=god;personality=index;cooldown=75+index*25;routine=GetComponent<VillagerRoutine>();actor=GetComponent<CarryItem>();motion=GetComponent<HumanoidMotion>();navigator=GetComponent<IslandNavigator>();}
- public bool Eligible(ConstructionBlock block)=>block!=null&&block.Site==site&&site.Visitor==null&&block.creatureBuilt&&block.Attached&&!block.Item.held&&block.VillagerOwner==null&&block.size.x<3&&block.Body.position.y<=1.9f;
+ public bool Eligible(ConstructionBlock block)=>block!=null&&block.Site==site&&site.Visitor==null&&site.Repairer==null&&block.creatureBuilt&&block.Attached&&!block.Item.held&&block.VillagerOwner==null&&block.size.x<3&&block.Body.position.y<=1.9f;
  public bool TryBegin(ConstructionBlock block){
   if(Active||actor.held||!Eligible(block))return false;
   if(!navigator.world.Sample(block.transform.position,navigator.profile,10,out _))return false;

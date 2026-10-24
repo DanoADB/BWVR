@@ -13,11 +13,11 @@ public sealed class ConstructionSite:MonoBehaviour {
  BuildRecipe recipe;BrickPlacement[] plan;public BuildRecipe Recipe{get=>recipe;set{recipe=value;plan=null;}}public bool IsBridge{get;private set;}public bool Locked;
  public float LayerHeight{get;private set;}=1.2f;public float Clock{get;private set;}
  public event System.Action Changed;
- public VillagerExploration Visitor,Requester;
+ public VillagerExploration Visitor,Requester,Repairer;
  BrickPlacement[] Pattern=>plan??(plan=ConstructionPatterns.Plan(Recipe,LayerHeight));
  bool Matches(ConstructionBlock block,BrickPlacement p)=>block.Attached&&!block.Item.held&&(block.size.x>3)==p.beam&&Vector3.Distance(block.Body.position,p.position)<.09f&&Quaternion.Angle(block.Body.rotation,Quaternion.identity)<4;
  public bool RecipeComplete{get{foreach(var p in Pattern){bool found=false;foreach(var b in blocks)if(Matches(b,p)){found=true;break;}if(!found)return false;}return true;}}
- public bool SelectRecipe(BuildRecipe selected){if(IsBridge||selected==Recipe||Snapped>0||blocks.Any(b=>b.Item.held||b.VillagerOwner!=null))return false;Recipe=selected;return true;}
+ public bool SelectRecipe(BuildRecipe selected){if(IsBridge||Repairer!=null||selected==Recipe||Snapped>0||blocks.Any(b=>b.Item.held||b.VillagerOwner!=null))return false;Recipe=selected;return true;}
  Scene simulationScene;PhysicsScene physics;Material[] colors;Material outlineMaterial;LineRenderer preview;readonly Collider[] overlaps=new Collider[32];
  public static ConstructionSite Build(Transform parent,IslandNavigation nav,Vector3 village,bool requireOpen=false){
   Vector3 centre=village+new Vector3(-20,0,-20)*nav.Scale;
@@ -95,7 +95,7 @@ public sealed class ConstructionSite:MonoBehaviour {
   Changed?.Invoke();
  }
  public void ReturnLoose(ConstructionBlock block){Detach(block);block.creatureBuilt=false;Activate(block);block.Body.transform.SetPositionAndRotation(block.spawn,Quaternion.identity);block.Body.position=block.spawn;block.Body.rotation=Quaternion.identity;block.transform.SetPositionAndRotation(World(block.spawn),transform.rotation);}
- public void ResetConstruction(){HidePreview();foreach(var block in blocks){if(block.VillagerOwner!=null)block.VillagerOwner.ResetTask();block.Item.held=false;block.wasHeld=false;ReturnLoose(block);block.GetComponent<CreatureAffordance>().cooldown=0;}LastCreatureBuildTime=float.NegativeInfinity;nextVillagerPlayAt=0;}
+ public void ResetConstruction(){Repairer?.ResetTask();HidePreview();foreach(var block in blocks){if(block.VillagerOwner!=null)block.VillagerOwner.ResetTask();block.Item.held=false;block.wasHeld=false;ReturnLoose(block);block.GetComponent<CreatureAffordance>().cooldown=0;}LastCreatureBuildTime=float.NegativeInfinity;nextVillagerPlayAt=0;}
  void Activate(ConstructionBlock block){block.Body.isKinematic=false;block.Body.detectCollisions=true;block.Body.linearVelocity=Vector3.zero;block.Body.angularVelocity=Vector3.zero;block.Body.WakeUp();block.Item.held=false;block.wasHeld=false;block.GetComponent<Collider>().enabled=true;}
  bool Empty(ConstructionBlock block,Vector3 point,Quaternion rotation){int count=physics.OverlapBox(point,block.size*.5f-Vector3.one*.025f,overlaps,rotation);for(int i=0;i<count;i++)if(overlaps[i].attachedRigidbody!=block.Body)return false;return true;}
  bool Support(Vector3 point,ConstructionBlock block,out Rigidbody support,Quaternion rotation=default){support=null;if(Mathf.Abs(point.y-block.size.y*.5f)<.05f)return !IsBridge||(block.size.x<3&&Mathf.Abs(Mathf.Abs(point.x)-2)<.1f&&Mathf.Abs(point.z)<.1f);
