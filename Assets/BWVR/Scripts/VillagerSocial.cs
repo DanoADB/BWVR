@@ -3,8 +3,9 @@ using UnityEngine;
 namespace BWVR {
 [Serializable] public sealed class SocialMemory {
  public float trust=.45f,affinity=.5f,boldness=.5f;
+ public float injury,lastAssistance;
  public int greetings,rides,witnessed,disputes,discoveries;
- public bool Valid()=>Unit(trust)&&Unit(affinity)&&Unit(boldness)&&Count(greetings)&&Count(rides)&&Count(witnessed)&&Count(disputes)&&Count(discoveries);
+ public bool Valid()=>Unit(trust)&&Unit(affinity)&&Unit(boldness)&&Unit(injury)&&HybridState.Number(lastAssistance,0,100000000)&&Count(greetings)&&Count(rides)&&Count(witnessed)&&Count(disputes)&&Count(discoveries);
  static bool Unit(float n)=>!float.IsNaN(n)&&!float.IsInfinity(n)&&n>=0&&n<=1;
  static bool Count(int n)=>n>=0&&n<=1000000;
 }
@@ -13,7 +14,7 @@ public sealed class VillagerSocial:MonoBehaviour {
  public enum Phase{Idle,Approach,Greet,Wait}
  public Phase Current{get;private set;}public bool Active=>Current!=Phase.Idle;
  public SocialMemory Memory=>season().Social(index);
- public bool Willing=>Memory.trust>=.4f;
+ public bool Willing=>Memory.trust>=.4f&&Memory.injury<=0;
  public float Attraction=>Memory.affinity*.65f+Memory.trust*.35f;
  CreatureCuriosity creature;IslandNavigator walker;HumanoidMotion motion;CarryItem item;VillagerRoutine routine;
  Func<SliceState> season;int index;float cooldown,clock,elapsed;

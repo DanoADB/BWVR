@@ -6,6 +6,8 @@ public sealed class CreatureRoutine:MonoBehaviour {
  public Task Current{get;private set;} public int deliveries{get;private set;} public float speed=.09f;
  IslandNavigator navigator; HumanoidMotion motion;CarryItem water;Vector3 spring,cistern;Action delivered;Func<Vector3,Vector3> ground;float timer,attention;bool ownsWater;public int acknowledgements{get;private set;}
  public bool WaitingForRoute=>navigator!=null&&navigator.Blocked;
+ public bool WaterAvailable=>water!=null&&!water.held;public Vector3 WaterPosition=>water!=null?water.transform.position:spring;
+ public event Action Completed;
  public void Initialize(HumanoidMotion visual,CarryItem offering,Vector3 source,Vector3 destination,Action onDelivery,Func<Vector3,Vector3> sample){navigator=GetComponent<IslandNavigator>();motion=visual;water=offering;spring=source;cistern=destination;delivered=onDelivery;ground=sample;ResetTask();}
  public bool Notice(Transform villager){if(Current!=Task.SeekingWater||ownsWater||villager==null)return false;float height=motion!=null?motion.transform.lossyScale.y:.1f;if(Vector3.Distance(transform.position,villager.position)>height*6)return false;attention=1.4f;motion?.LookAt(villager);acknowledgements++;return true;}
  public void ResetTask(){attention=0;motion?.LookAt(null);navigator?.ResetRoute();ReturnWater();Current=Task.SeekingWater;timer=0;motion?.Activity(0);}
@@ -21,7 +23,7 @@ public sealed class CreatureRoutine:MonoBehaviour {
    case Task.Carry:
     if(Move(cistern,dt))Change(Task.Deliver,5);break;
    case Task.Deliver:
-    if(timer>=1.1f){ReturnWater();deliveries++;delivered?.Invoke();Change(Task.SeekingWater,0);}break;
+    if(timer>=1.1f){ReturnWater();deliveries++;delivered?.Invoke();Change(Task.SeekingWater,0);Completed?.Invoke();}break;
   }
  }
  bool Move(Vector3 target,float dt){if(navigator!=null)return navigator.MoveTo(target,speed,dt);var flat=target-transform.position;flat.y=0;if(flat.magnitude<speed*.55f)return true;

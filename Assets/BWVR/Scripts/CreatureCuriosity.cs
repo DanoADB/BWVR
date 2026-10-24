@@ -11,6 +11,7 @@ public sealed class CreatureCuriosity:MonoBehaviour {
  public Phase Current{get;private set;}CreatureAffect.Mood affect,feedbackMood;float reaction;bool lastWater;
  public CreatureAffect.Mood Affect{get=>reaction>0?feedbackMood:affect;private set=>affect=value;}
  public bool Responding=>reaction>0;
+ public event System.Action<CreatureAffordance> Completed;public event System.Action<string> Failed;
  public int played{get;private set;}public int friendsCarried{get;private set;}public CarryItem Holding=>owned;
  CreatureAffect.Mood recentMood=CreatureAffect.Mood.Happy;
  CreatureRoutine routine;HumanoidMotion motion;IslandNavigator navigator;CreatureAffordance[] affordances;
@@ -22,13 +23,13 @@ public sealed class CreatureCuriosity:MonoBehaviour {
   if(candidate.GetComponent<ConstructionBlock>()!=null)constructionFocus=true;
   routine.ResetTask();navigator.ResetRoute();target=candidate;elapsed=clock=0;Current=Phase.Approach;motion?.LookAt(target.transform);Affect=CreatureAffect.Mood.Curious;return true;
  }
- public bool Tick(float dt,SliceState season){
+ public bool Tick(float dt,SliceState season,bool allowChoice=true){
   state=season;if(dt<=0||state.paused)return Current!=Phase.Rest;reaction=Mathf.Max(0,reaction-dt);
   state.hunger=Mathf.Clamp01(state.hunger+dt*.0035f);boredom+=dt;emotion=Mathf.Max(0,emotion-dt);feedbackWindow=Mathf.Max(0,feedbackWindow-dt);
   if(Current==Phase.Rest){
    Affect=state.hunger>.67f?CreatureAffect.Mood.Hungry:emotion>0?recentMood:boredom>32?CreatureAffect.Mood.Bored:CreatureAffect.Mood.Calm;
    cooldown-=dt;
-   if(cooldown<=0&&(state.Finished||state.water>=35)&&routine.Current==CreatureRoutine.Task.SeekingWater){
+   if(allowChoice&&cooldown<=0&&(state.Finished||state.water>=35)&&routine.Current==CreatureRoutine.Task.SeekingWater){
     var choice=affordances.Where(a=>a!=null&&a.Available).OrderByDescending(Score).FirstOrDefault();
     if(choice==null||!TryBegin(choice))cooldown=4;
    }
@@ -85,14 +86,16 @@ public sealed class CreatureCuriosity:MonoBehaviour {
   return novelty+drive+(a.GetComponentInParent<DiscoveryPoint>()?.Unseen(0)==true?1.25f:0)-distance*.008f+(constructionFocus&&a.GetComponent<ConstructionBlock>()!=null?2.5f:0)+(a.GetComponent<VillagerSocial>()?.Attraction??0);
  }
  bool SafeLanding(Vector3 at,out Vector3 result){var friend=owned!=null?owned.GetComponent<IslandNavigator>():null;result=at;return friend!=null&&navigator.world.Sample(at,friend.profile,8,out result);}
- public void Offer(CreatureAffordance item){if(Current==Phase.Rest)TryBegin(item);}
+ public void Offer(CreatureAffordance item){var hybrid=GetComponent<CreatureHybrid>();if(hybrid!=null){hybrid.Guide(GuidanceIntent.Investigate,item!=null?item.GetComponent<HybridTarget>():null);return;}if(Current==Phase.Rest)TryBegin(item);}
  public void NoticeDiscovery(DiscoveryPoint point){if(point==null||state==null||!point.Discover(0))return;state.creatureDiscoveries=Mathf.Min(6,state.creatureDiscoveries+1);state.playPreference=Mathf.Clamp01(state.playPreference+.025f);reaction=2;feedbackMood=recentMood=CreatureAffect.Mood.Happy;emotion=5;motion?.React();}
  public void NoticeGreeting(Transform villager){emotion=4;recentMood=CreatureAffect.Mood.Happy;Affect=recentMood;motion?.LookAt(villager);}
  public void NoticeDisassembly(Transform villager){villager.GetComponent<VillagerSocial>()?.RememberDispute();emotion=4;recentMood=CreatureAffect.Mood.Sad;Affect=recentMood;motion?.LookAt(villager);}
  public void RememberWaterDelivery(SliceState season){state=season;lastWater=true;lastSocial=false;feedbackWindow=12;}
- public bool Feedback(bool positive){if(state==null||state.paused)return false;bool learned=feedbackWindow>0;if(learned){float change=positive?.12f:-.12f;if(lastWater)state.care=Mathf.Clamp01(state.care+change);else if(lastSocial){state.socialPreference=Mathf.Clamp01(state.socialPreference+change);lastFriend?.Feedback(positive);}else state.playPreference=Mathf.Clamp01(state.playPreference+change);feedbackWindow=0;}reaction=2;emotion=5;feedbackMood=recentMood=positive?CreatureAffect.Mood.Happy:CreatureAffect.Mood.Sad;Affect=recentMood;return learned;}
+ public void RememberObservation(SliceState season){state=season;feedbackWindow=0;}
+ public bool Feedback(bool positive,bool allowLearning=true){if(state==null||state.paused)return false;bool learned=allowLearning&&feedbackWindow>0;if(learned){float change=positive?.12f:-.12f;if(lastWater)state.care=Mathf.Clamp01(state.care+change);else if(lastSocial){state.socialPreference=Mathf.Clamp01(state.socialPreference+change);lastFriend?.Feedback(positive);}else state.playPreference=Mathf.Clamp01(state.playPreference+change);feedbackWindow=0;}reaction=2;emotion=5;feedbackMood=recentMood=positive?CreatureAffect.Mood.Happy:CreatureAffect.Mood.Sad;Affect=recentMood;return learned;}
  public void ResetTask(){Finish(false);lastFriend=null;lastWater=false;reaction=0;constructionFocus=false;cooldown=7;boredom=emotion=feedbackWindow=0;Affect=CreatureAffect.Mood.Calm;}
  void Finish(bool success){
+  var finished=target;
   motion?.Carry(null);motion?.Playful(0);motion?.PlaceAt(default,Quaternion.identity,0);motion?.LookAt(null);motion?.Activity(0);navigator?.ResetRoute();
   if(owned!=null){var item=owned;var point=original;
    var block=item.GetComponent<ConstructionBlock>();if(block!=null){block.Site.HidePreview();block.CancelHold();owned=null;}
@@ -104,8 +107,9 @@ public sealed class CreatureCuriosity:MonoBehaviour {
    if(item.kind==Offering.Villager){item.home=point;item.GetComponent<IslandNavigator>()?.ResetRoute();item.GetComponent<VillagerRoutine>()?.ResetTask();item.GetComponent<HumanoidMotion>()?.React();}
    }
   }
-  if(!success&&target!=null)target.cooldown=Time.time+12;
+  if(!success&&target!=null)target.SetCooldown(12);
   owned=null;target=null;Current=Phase.Rest;clock=elapsed=0;cooldown=success?(constructionFocus?3:8):4;emotion=success?5:3;recentMood=success?CreatureAffect.Mood.Happy:CreatureAffect.Mood.Sad;Affect=recentMood;
+  if(finished!=null){if(success)Completed?.Invoke(finished);else Failed?.Invoke("Interaction interrupted or unavailable");}
  }
  void OnDisable(){Finish(false);}
 }

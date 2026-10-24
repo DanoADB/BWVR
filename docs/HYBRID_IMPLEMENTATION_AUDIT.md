@@ -37,3 +37,9 @@ Risks: double ownership between controllers; rewarding a miracle as creature wor
 ## Validation gates
 
 Each code increment must compile, pass its focused Editor checks and relevant regressions, then commit and push on the feature branch. Confirm live frames advance. Validate a full saved season and preserve the pre-test user save. Physics checks use tolerances; logical utility checks use fixed seeds. Only claim a useful bridge after comparing native route lengths and observing a villager actually follow the crossing above the water. Hardware haptics, standalone performance and comfort remain explicit device checks. A reviewable branch targets main; no unrelated XR settings are included.
+
+## Implementation receipts
+
+- Pure model check: identical seed/sequence gives identical decisions; over 500 matched decisions, water choices changed from 263 neutral to 492 praised and 7 discouraged. These are controlled utility experiments, not whole-season survival statistics.
+- Coordinator integration: confirmed urgent water completion, typed contextual receipt, one reinforcement plus existing care update, rejection of distracting guidance during urgent work, pause, carried-object cleanup, safe suspended intention save, and a completed villager water delivery while the creature was unavailable. The combined fixed-step harness found repeated distress requests could starve work; requests now require an intervening completed job before repeating.
+- Existing feedback, social, curiosity, nonverbal drought and action/terrain checks pass after this integration. Navigation remains the existing two-profile system at this stage. Miracles and learned bridge construction are subsequent increments, not yet verified by these receipts.

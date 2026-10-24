@@ -14,7 +14,7 @@ public static class NonverbalChecks {
    slice.SetHelp(false);var label=(UnityEngine.UI.Text)typeof(QuestSlice).GetField("creatureLabel",flags).GetValue(slice);if(label.gameObject.activeSelf)throw new Exception("Floating intent visible with help off");slice.SetHelp(true);if(!label.gameObject.activeSelf)throw new Exception("Optional intent help unavailable");slice.SetHelp(false);
    int requests=signals.requests;signals.Tick(100,test);if(signals.requests!=requests)throw new Exception("Paused village started a request");var cistern=slice.GetComponentsInChildren<WaterVessel>().First(v=>v.name=="Village cistern");if(Mathf.Abs(cistern.Fill-.3f)>.001f)throw new Exception("Cistern does not show water amount");
    god.ResetTask();gatherer.ResetTask();signals.ResetRequests();test.paused=false;signals.Tick(2.1f,test);if(signals.requests!=requests+1||!gatherer.Signalling)throw new Exception("Low water did not trigger an autonomous request");test.paused=true;
-   god.ResetTask();gatherer.ResetTask();int shown=gatherer.requestsShown,noticed=god.acknowledgements;if(!gatherer.RequestWater(god))throw new Exception("Water request refused");
+   god.ResetTask();gatherer.ResetTask();gatherer.ResetRequestCycle();int shown=gatherer.requestsShown,noticed=god.acknowledgements;if(!gatherer.RequestWater(god))throw new Exception("Water request refused");
    for(int i=0;i<10000&&gatherer.requestsShown==shown;i++)gatherer.Tick(.1f,false);
    if(gatherer.requestsShown!=shown+1||gatherer.bucket.Fill!=0)throw new Exception("Empty bucket demonstration failed");
    var hands=gatherer.GetComponentInChildren<HumanoidHands>();if(hands==null||hands.lookTarget==null||Mathf.Abs(hands.displayTilt)<40)throw new Exception("Missing gaze or empty-bucket gesture");

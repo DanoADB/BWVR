@@ -9,7 +9,7 @@ public sealed class DroughtSignals:MonoBehaviour {
   if(state.paused||state.Finished||dt<=0)return;requestClock-=dt;
   if(requestClock<=0&&state.water<65){foreach(var villager in villagers)if(villager.role==VillagerRoutine.Role.WaterGatherer&&villager.RequestWater(creature)){requests++;requestClock=30;return;}requestClock=2;}
  }
- public void ResetRequests(){requestClock=2;}
+ public void ResetRequests(){requestClock=2;foreach(var villager in villagers)villager.ResetRequestCycle();}
  public void WaterArrived(){celebrations++;foreach(var villager in villagers)villager.Celebrate(creature.transform);}
 }
 }

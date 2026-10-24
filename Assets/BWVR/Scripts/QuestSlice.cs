@@ -14,7 +14,7 @@ public sealed class QuestSlice:MonoBehaviour {
  readonly Transform[] aims=new Transform[2]; readonly QuestControls.Hand[] controllerHands=new QuestControls.Hand[2]; bool turnHeld,recenterLast,zoomHeld; Vector3 zoomFocus;
  readonly List<CarryItem> items=new List<CarryItem>(); readonly List<Transform> workers=new List<Transform>();
  readonly CarryItem[] held=new CarryItem[2]; readonly bool[] lastGrip=new bool[2],lastTrigger=new bool[2]; readonly LineRenderer[] rays=new LineRenderer[2];
- DroughtSignals signals;bool helpVisible,outcomeShown;string saveError; CreatureRoutine creatureRoutine; CreatureCuriosity curiosity; ConstructionSite construction; IslandDiscoveries discoveries; VillagerRoutine[] jobs; float clock,saveClock,creatureTrip; bool returning,menuLast,trackingConfigured,viewPlaced; string notice="Their creature is their god. Your touch guides its instincts.";
+ DroughtSignals signals;bool helpVisible,outcomeShown;string saveError; CreatureRoutine creatureRoutine; CreatureCuriosity curiosity; ConstructionSite construction; IslandDiscoveries discoveries; CreatureHybrid hybrid;bool applicationSuspended; VillagerRoutine[] jobs; float clock,saveClock,creatureTrip; bool returning,menuLast,trackingConfigured,viewPlaced; string notice="Their creature is their god. Your touch guides its instincts.";
  Vector3 cistern=new Vector3(-.32f,Floor,.25f),well=new Vector3(.4f,Floor,-.2f);
  bool praiseLast,discourageLast;float feedbackReady;
  string SavePath=>Path.Combine(Application.persistentDataPath,"bwvr-season-v1.json");
@@ -75,6 +75,7 @@ public sealed class QuestSlice:MonoBehaviour {
   discoveries=IslandDiscoveries.Build(transform,navigation,cistern,construction,()=>state);affordances=GetComponentsInChildren<CreatureAffordance>();
   curiosity=creature.gameObject.AddComponent<CreatureCuriosity>();curiosity.Initialize(creatureRoutine,godMotion,affordances);
   for(int i=0;i<jobs.Length;i++){jobs[i].gameObject.AddComponent<VillagerBlockPlay>().Initialize(construction,curiosity,i);jobs[i].gameObject.AddComponent<VillagerSocial>().Initialize(curiosity,i,()=>state);jobs[i].gameObject.AddComponent<VillagerExploration>().Initialize(discoveries,i);}
+  hybrid=creature.gameObject.AddComponent<CreatureHybrid>();hybrid.Initialize(creatureRoutine,curiosity,godMotion,affordances,jobs,reservoir.gameObject,waterOffering,()=>state);
   foreach(var affordance in affordances){var cue=affordance.gameObject.AddComponent<SpatialTarget>();var offered=affordance;cue.invoke=()=>curiosity.Offer(offered);}
   creature.gameObject.AddComponent<CreatureAffect>().Initialize(curiosity,terrain!=null?terrain.scale:.025f);
   signals=gameObject.AddComponent<DroughtSignals>();signals.Initialize(reservoir,ground.sharedMaterial,jobs,creatureRoutine);
@@ -87,7 +88,7 @@ public sealed class QuestSlice:MonoBehaviour {
   status=Label("Season and guidance",panel.transform,new Vector3(0,130,0),new Vector2(540,260),1,25);status.alignment=TextAnchor.UpperLeft;
   Button("Pause / resume",new Vector3(-140,-70,0),()=>{state.paused=!state.paused;notice=state.paused?"Season paused.":"Season resumed.";});
   Button("Save season",new Vector3(140,-70,0),Save);
-  Button("Begin again",new Vector3(-140,-160,0),()=>{state=new SliceState();creatureTrip=0;outcomeShown=false;signals.ResetRequests();curiosity?.ResetTask();construction?.ResetConstruction();discoveries?.ResetWorld();creatureRoutine.ResetTask();foreach(var job in jobs){job.GetComponent<VillagerExploration>().ResetTask();job.GetComponent<VillagerSocial>().ResetTask();job.ResetTask();}notice="A new dry season begins.";});
+  Button("Begin again",new Vector3(-140,-160,0),()=>{state=new SliceState();hybrid?.NewSeason();creatureTrip=0;outcomeShown=false;signals.ResetRequests();curiosity?.ResetTask();construction?.ResetConstruction();discoveries?.ResetWorld();creatureRoutine.ResetTask();foreach(var job in jobs){job.GetComponent<VillagerExploration>().ResetTask();job.GetComponent<VillagerSocial>().ResetTask();job.ResetTask();}notice="A new dry season begins.";});
   Button("Close",new Vector3(140,-160,0),()=>panel.SetActive(false));
   Button("Help / details",new Vector3(0,-240,0),()=>SetHelp(!helpVisible));
   panel.SetActive(false);
@@ -103,7 +104,7 @@ public sealed class QuestSlice:MonoBehaviour {
  CarryItem Item(string name,Offering kind,Vector3 at,PrimitiveType primitive,Color color,float size){var modern=kind==Offering.Villager?Resources.Load<GameObject>("Villagers/Villager"+(items.Count%3)):null;GameObject fitted=null;if(modern!=null){fitted=Instantiate(modern,transform);fitted.transform.position=Ground(at);fitted.transform.localScale=Vector3.one*Size(.085f,1.661f);}var original=fitted??(kind==Offering.Villager?Original(items.Count%2==0?"woman":"man",Ground(at),Size(.07f,1.661f)):null);var g=original??Shape(name,primitive,at,Vector3.one*size,color);if(kind==Offering.Villager)g.transform.localScale*=ActorScale;var item=g.AddComponent<CarryItem>();item.kind=kind;item.home=g.transform.position;items.Add(item);return item;}
  Text Label(string name,Transform parent,Vector3 position,Vector2 size,float scale,int fontSize){var g=new GameObject(name,typeof(RectTransform));g.transform.SetParent(parent,false);g.transform.localPosition=position;g.transform.localScale=Vector3.one*scale;if(!parent.GetComponentInParent<Canvas>()){var c=g.AddComponent<Canvas>();c.renderMode=RenderMode.WorldSpace;}var t=g.AddComponent<Text>();t.font=font;t.fontSize=fontSize;t.color=new Color(.94f,.9f,.74f);t.alignment=TextAnchor.MiddleCenter;t.horizontalOverflow=HorizontalWrapMode.Wrap;g.GetComponent<RectTransform>().sizeDelta=size;return t;}
  void Button(string title,Vector3 position,Action action){var g=new GameObject(title,typeof(RectTransform),typeof(Image),typeof(BoxCollider),typeof(SpatialTarget));g.transform.SetParent(panel.transform,false);g.transform.localPosition=position;g.GetComponent<RectTransform>().sizeDelta=new Vector2(260,68);g.GetComponent<Image>().color=new Color(.13f,.28f,.29f);g.GetComponent<BoxCollider>().size=new Vector3(260,68,15);g.GetComponent<SpatialTarget>().invoke=action;Label("Caption",g.transform,Vector3.zero,new Vector2(250,65),1,24).text=title;}
- void Update(){if(eye==null)return;foreach(var motion in humanoids)motion.paused=state.paused||(state.Finished&&motion.GetComponent<CarryItem>()!=null&&!(motion.GetComponent<VillagerBlockPlay>()?.Active??false)&&!(motion.GetComponent<VillagerSocial>()?.Active??false)&&!(motion.GetComponent<VillagerExploration>()?.Active??false));if(cowMotion!=null)cowMotion.paused=state.paused;clock+=Time.deltaTime;state.Step(Time.deltaTime);bool xr=XRSettings.isDeviceActive;
+ void Update(){if(eye==null||applicationSuspended)return;foreach(var motion in humanoids)motion.paused=state.paused||(state.Finished&&motion.GetComponent<CarryItem>()!=null&&!(motion.GetComponent<VillagerBlockPlay>()?.Active??false)&&!(motion.GetComponent<VillagerSocial>()?.Active??false)&&!(motion.GetComponent<VillagerExploration>()?.Active??false));if(cowMotion!=null)cowMotion.paused=state.paused;clock+=Time.deltaTime;bool xr=XRSettings.isDeviceActive;
   if(xr){if(!trackingConfigured){var inputs=new List<XRInputSubsystem>();SubsystemManager.GetSubsystems(inputs);bool floor=false;foreach(var input in inputs)floor|=input.TrySetTrackingOriginMode(TrackingOriginModeFlags.Floor);if(!floor)rig.position+=Vector3.up*1.55f;trackingConfigured=true;}Pose(XRNode.Head,eye.transform);UpdateController(0,left);UpdateController(1,right);if(!viewPlaced){var head=InputDevices.GetDeviceAtXRNode(XRNode.Head);if(head.TryGetFeatureValue(CommonUsages.isTracked,out bool tracked)&&tracked)RecenterView();}
    bool zoom=controllerHands[1].zoom;
    if(zoom&&!zoomHeld)zoomFocus=ZoomFocus();
@@ -128,10 +129,9 @@ public sealed class QuestSlice:MonoBehaviour {
    if(interact&&hit.collider)hit.collider.GetComponentInParent<SpatialTarget>()?.Activate();lastGrip[i]=grip;lastTrigger[i]=trigger;
   }
   bool menu=controllerHands[0].menu;if(!xr)menu=Keyboard.current!=null&&Keyboard.current.tabKey.isPressed;if(menu&&!menuLast)panel.SetActive(!panel.activeSelf);menuLast=menu;
-  if(construction!=null)construction.Paused=state.paused;discoveries?.Advance(Time.deltaTime,state.paused);
-  if(!state.paused)AnimateVillage();
-  signals.Tick(Time.deltaTime,state);if(state.Finished&&!outcomeShown){outcomeShown=true;panel.SetActive(true);}
+  Simulate(Time.deltaTime);if(state.Finished&&!outcomeShown){outcomeShown=true;panel.SetActive(true);}
   status.text=helpVisible?"BWVR / THE LONG DRY\n"+Mathf.CeilToInt(state.seconds)+"s · Water "+Mathf.RoundToInt(state.water)+" · Crops "+Mathf.RoundToInt(state.crops)+"\nTrust "+Mathf.RoundToInt(state.trust)+" · Gifts "+state.gifts+"\n\n"+(state.Finished?(state.Won?"The village survives.":"The village needs a different lesson."):notice)+"\n\nRight A: praise · B: discourage (aim at creature)\nFront trigger: carry / select · Left menu: sanctuary":("THE LONG DRY\n"+(state.Finished?(state.Won?"Village safe":"Village struggling"):state.paused?"Paused":"")+(saveError!=null?"\n"+saveError:""));
+  if(helpVisible&&hybrid!=null)status.text+="\n"+hybrid.Explanation+"\nGuidance: "+state.Hybrid.guidance.status;
   if(helpVisible&&!xr)status.text+="\nDesktop: RMB look · WASD move · E carry · F select · 1 praise / 2 discourage · Tab panel";
   creatureLabel.transform.rotation=Quaternion.LookRotation(creatureLabel.transform.position-eye.transform.position);
   saveClock+=Time.deltaTime;if(saveClock>=15){saveClock=0;Save();}
@@ -178,19 +178,32 @@ public sealed class QuestSlice:MonoBehaviour {
   else {if(item.kind==Offering.Villager)item.home=item.transform.position;notice="Placed on the island.";}
  }
  Vector3 Ground(Vector3 at){if(terrain!=null)return terrain.Project(at);at.y=Floor;return at;}
- void AnimateVillage(){foreach(var job in jobs){var social=job.GetComponent<VillagerSocial>();bool playing=social.Tick(Time.deltaTime,false);if(!playing)playing=job.GetComponent<VillagerExploration>().Tick(Time.deltaTime,false);if(!playing)playing=job.GetComponent<VillagerBlockPlay>().Tick(Time.deltaTime,false);if(!playing&&!state.Finished)job.Tick(Time.deltaTime,false);}if(state.Finished&&curiosity.Current==CreatureCuriosity.Phase.Rest)creatureRoutine.ResetTask();creatureRoutine.speed=(.07f+state.care*.08f)*(terrain!=null?.1f:1);if(!curiosity.Tick(Time.deltaTime,state)&&!state.Finished)creatureRoutine.Tick(Time.deltaTime,false);creatureLabel.text="THEIR GOD · "+(creatureRoutine.WaitingForRoute?"WAITING FOR A SAFE ROUTE":creatureRoutine.Current.ToString().ToUpperInvariant());}
+ public void Simulate(float dt){
+  if(dt<=0||float.IsNaN(dt)||float.IsInfinity(dt))return;bool paused=state.paused||applicationSuspended;
+  if(construction!=null)construction.Paused=paused;discoveries?.Advance(dt,paused);
+  if(!paused){state.Hybrid.time=Mathf.Min(100000000,state.Hybrid.time+dt);state.Step(dt);AnimateVillage(dt);}signals.Tick(paused?0:dt,state);
+ }
+ void AnimateVillage(float dt){
+  foreach(var job in jobs){var social=job.GetComponent<VillagerSocial>();var explore=job.GetComponent<VillagerExploration>();var play=job.GetComponent<VillagerBlockPlay>();
+   bool urgent=!state.Finished&&((job.role==VillagerRoutine.Role.WaterGatherer&&state.water<45)||(job.role==VillagerRoutine.Role.Farmer&&state.crops<45));
+   if(urgent){if(social.Active)social.ResetTask();if(explore.Active)explore.ResetTask();if(play.Active)play.ResetTask();job.Tick(dt,false);continue;}
+   bool playing=social.Tick(dt,false);if(!playing)playing=explore.Tick(dt,false);if(!playing)playing=play.Tick(dt,false);if(!playing&&!state.Finished)job.Tick(dt,false);
+  }
+  creatureRoutine.speed=(.07f+state.care*.08f)*(terrain!=null?.1f:1);hybrid.Tick(dt,false);
+  creatureLabel.text="THEIR GOD · "+(helpVisible?hybrid.Explanation:creatureRoutine.Current.ToString().ToUpperInvariant());
+ }
  public bool HelpVisible=>helpVisible;
  public void SetHelp(bool enabled){helpVisible=enabled;if(creatureLabel!=null)creatureLabel.gameObject.SetActive(enabled);}
  public bool GiveFeedback(bool positive){
   if(state.paused||curiosity==null||held[0]!=null||held[1]!=null||Time.unscaledTime<feedbackReady)return false;
-  feedbackReady=Time.unscaledTime+.5f;bool learned=curiosity.Feedback(positive);if(positive)godMotion?.React();
+  feedbackReady=Time.unscaledTime+.5f;bool learned=hybrid!=null?hybrid.Feedback(positive):curiosity.Feedback(positive);if(positive)godMotion?.React();
   if(XRSettings.isDeviceActive)InputDevices.GetDeviceAtXRNode(XRNode.RightHand).SendHapticImpulse(0,positive?.25f:.55f,.08f);
   notice=learned?(positive?"That action encouraged.":"That action discouraged."):"The creature feels your presence. No recent action to teach.";return true;
  }
  void DeliverWater(){int before=state.gifts;state.Deliver();if(state.gifts>before)signals?.WaterArrived();}
  void Save(){try{if(construction!=null)state.construction=construction.Capture();discoveries?.Capture();File.WriteAllText(SavePath+".tmp",JsonUtility.ToJson(state,true));File.Copy(SavePath+".tmp",SavePath,true);saveError=null;notice="Season saved on this device.";}catch(Exception e){saveError="Save failed. Please try again.";notice="Could not save: "+e.Message;if(panel!=null)panel.SetActive(true);Debug.LogError("BWVR_SAVE_FAILED: "+e.Message);}}
  void Load(){if(!File.Exists(SavePath))return;try{var s=JsonUtility.FromJson<SliceState>(File.ReadAllText(SavePath));if(s==null||!s.Valid())throw new Exception("Invalid season data");state=s;state.paused=false;notice="Season restored.";}catch(Exception){saveError="Saved season unavailable. A fresh season is ready.";notice=saveError;}}
- void OnApplicationPause(bool paused){if(paused){for(int i=0;i<2;i++)if(held[i]!=null){held[i].transform.position=held[i].home;held[i].held=false;held[i].GetComponent<Collider>().enabled=true;held[i]=null;}Save();}}
+ void OnApplicationPause(bool paused){applicationSuspended=paused;hybrid?.Suspend(paused);if(paused){if(construction!=null)construction.Paused=true;discoveries?.Advance(0,true);for(int i=0;i<2;i++)if(held[i]!=null){held[i].transform.position=held[i].home;held[i].held=false;held[i].GetComponent<Collider>().enabled=true;held[i]=null;}Save();}}
  void OnApplicationQuit(){Save();}
 }
 }
