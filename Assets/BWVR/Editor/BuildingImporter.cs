@@ -34,7 +34,7 @@ public static class BuildingImporter {
    var box=root.AddComponent<BoxCollider>();box.center=new Vector3(0,targetHeight/2,0);box.size=new Vector3(bounds.size.x*fit,targetHeight,bounds.size.z*fit);
    prefabs.Add(PrefabUtility.SaveAsPrefabAsset(root,Output+"/Prefabs/"+key+".prefab"));UnityEngine.Object.DestroyImmediate(root);
   }
-  var catalog=AssetDatabase.LoadAssetAtPath<EnvironmentArt>(Output+"/VillageBuildings.asset");if(catalog==null){catalog=ScriptableObject.CreateInstance<EnvironmentArt>();AssetDatabase.CreateAsset(catalog,Output+"/VillageBuildings.asset");}
+  var catalog=AssetDatabase.LoadAssetAtPath<EnvironmentArt>(Output+"/Resources/VillageBuildings.asset");if(catalog==null){catalog=ScriptableObject.CreateInstance<EnvironmentArt>();AssetDatabase.CreateAsset(catalog,Output+"/Resources/VillageBuildings.asset");}
   catalog.models=prefabs.ToArray();EditorUtility.SetDirty(catalog);AssetDatabase.SaveAssets();Debug.Log("BWVR_BUILDINGS_IMPORTED: three complete house styles, inn and blacksmith; uniform proportions");
  }
 }

@@ -30,8 +30,10 @@ public sealed class IslandNavigation:MonoBehaviour {
    }
    else if(view.kind is "rock" or "feature"){var renderers=view.GetComponentsInChildren<Renderer>();if(renderers.Length>0){var bounds=renderers[0].bounds;foreach(var renderer in renderers)bounds.Encapsulate(renderer.bounds);Box(sources,bounds.center,bounds.size,Quaternion.identity);}}
   }
+  var cleared=new HashSet<int>();
+  foreach(var view in GetComponentsInChildren<IslandPlacementView>(true))if(!view.gameObject.activeInHierarchy)cleared.Add(view.sourceLine);
   // Block trunks, not broad canopies, ferns or low bushes.
-  if(terrain!=null&&terrain.HasPlacements)foreach(var p in terrain.placements)if(p.kind=="tree"&&!(p.variant>=13&&p.variant<=15)){
+  if(terrain!=null&&terrain.HasPlacements)foreach(var p in terrain.placements)if(p.kind=="tree"&&!cleared.Contains(p.line)&&!(p.variant>=13&&p.variant<=15)){
    var at=ToNav(terrain.PlacementPoint(p));float r=.45f*p.size;sources.Add(new NavMeshBuildSource{shape=NavMeshBuildSourceShape.ModifierBox,transform=Matrix4x4.TRS(at+Vector3.up*10,Quaternion.identity,Vector3.one),size=new Vector3(r*2,24,r*2),area=1});obstacleCount++;
   }
   if(terrain!=null)Box(sources,well+Vector3.up*Scale*3,new Vector3(5,6,4)*Scale,Quaternion.identity);

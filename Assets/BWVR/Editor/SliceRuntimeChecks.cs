@@ -28,9 +28,20 @@ public static class SliceRuntimeChecks {
     var visual=god.GetComponentInChildren<HumanoidMotion>();if(visual!=null&&Mathf.Abs(visual.transform.lossyScale.y/terrain.scale-13.9236f*QuestSlice.ActorScale)>.01f)throw new Exception("Creature/game-unit scale mismatch");
     foreach(var home in slice.GetComponentsInChildren<Transform>().Where(t=>t.name.StartsWith("Modular village home")))if(Mathf.Abs(home.lossyScale.y*.195f/terrain.scale-3.66f*QuestSlice.ActorScale)>.01f)throw new Exception("House/game-unit scale mismatch");
     if(terrain.HasPlacements){
-     var views=slice.GetComponentsInChildren<IslandPlacementView>();var expected=terrain.placements.Where(p=>p.kind is not ("drink" or "villager")).ToArray();
+     var views=slice.GetComponentsInChildren<IslandPlacementView>(true);var expected=terrain.placements.Where(p=>p.kind is not ("drink" or "villager")).ToArray();
      if(views.Length!=expected.Length)throw new Exception("Original placement count mismatch");
-     foreach(var p in expected){var view=views.Single(v=>v.sourceLine==p.line);if(Vector3.Distance(view.transform.position,terrain.PlacementPoint(p))>.00001f||Mathf.Abs(Mathf.DeltaAngle(view.transform.eulerAngles.y,p.yaw))>.01f&&p.pitch==0&&p.roll==0)throw new Exception("Original placement drift at line "+p.line);}
+     var catalog=Resources.Load<EnvironmentArt>("VillageBuildings");
+     if(catalog!=null){
+      var layout=new VillageLayout(terrain,catalog);var homes=views.Where(v=>v.redesigned).ToArray();
+      if(homes.Length!=34||homes.Select(h=>h.modelKey).Distinct().Count()!=5)throw new Exception("Missing full medieval building variants");
+      foreach(var home in homes){
+       var plot=layout.plots[home.sourceLine];
+       if(Vector3.Distance(home.transform.localPosition,plot.position)>.00001f||Mathf.Abs(home.transform.localScale.x-plot.scale)>.00001f||!terrain.Dry(plot.position))throw new Exception("Invalid redesigned plot or house scale");
+       if(home.GetComponent<BoxCollider>()==null)throw new Exception("Missing building navigation footprint");
+       foreach(var other in layout.plots)if(other.Key!=home.sourceLine&&Vector2.Distance(new Vector2(plot.position.x,plot.position.z),new Vector2(other.Value.position.x,other.Value.position.z))<plot.radius+other.Value.radius+.017f)throw new Exception("Overlapping medieval village plots");
+      }
+     }
+     foreach(var p in expected){var view=views.Single(v=>v.sourceLine==p.line);if(!view.redesigned&&(Vector3.Distance(view.transform.position,terrain.PlacementPoint(p))>.00001f||Mathf.Abs(Mathf.DeltaAngle(view.transform.eulerAngles.y,p.yaw))>.01f&&p.pitch==0&&p.roll==0))throw new Exception("Original placement drift at line "+p.line);}
     }
     var collider=GameObject.Find("Land 1 - original island geometry").GetComponent<MeshCollider>();for(int i=0;i<100;i++){
     var point=terrain.World(Mathf.Lerp(terrain.bounds[0],terrain.bounds[2],Mathf.Repeat(i*.618f,1)),Mathf.Lerp(terrain.bounds[1],terrain.bounds[3],Mathf.Repeat(i*.414f,1)),0);if(!terrain.Dry(point,false))continue;

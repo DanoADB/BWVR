@@ -38,7 +38,7 @@ public static class IslandEnvironment {
  }
  public static void Build(EnvironmentArt art,Transform parent,Renderer ground,IslandTerrainData terrain=null){
   var root=new GameObject("Quaternius CC0 island environment").transform;root.SetParent(parent,false);
-  if(terrain!=null&&terrain.HasPlacements){BuildOriginal(art,root,terrain);Understory(art,root,terrain);Surface(ground,terrain);IslandAtmosphere.Build(root,terrain);return;}
+  if(terrain!=null&&terrain.HasPlacements){BuildOriginal(art,root,terrain);Understory(art,root,terrain);Surface(ground,terrain,root);IslandAtmosphere.Build(root,terrain);return;}
   for(int i=0;i<4;i++)Home(art,root,new Vector3(-.5f+i*.28f,Floor,.48f),i%2==0?8:-8,1,"Modular village home "+(i+1),i);
   for(int i=0;i<11;i++){
    float angle=.12f+i*.53f;var at=new Vector3(Mathf.Cos(angle)*.75f,Floor,Mathf.Sin(angle)*.75f);
@@ -81,8 +81,8 @@ public static class IslandEnvironment {
   }
   IslandAtmosphere.Build(root,terrain);
  }
- static void Surface(Renderer ground,IslandTerrainData terrain){var surface=Resources.Load<Material>("QuaterniusGround");if(surface!=null){var material=new Material(surface);material.SetFloat("_SeaLevel",terrain.SeaLevel);PaintBiomes(material,terrain);ground.sharedMaterial=material;}}
- static void PaintBiomes(Material material,IslandTerrainData terrain){
+ static void Surface(Renderer ground,IslandTerrainData terrain,Transform layout){var surface=Resources.Load<Material>("QuaterniusGround");if(surface!=null){var material=new Material(surface);material.SetFloat("_SeaLevel",terrain.SeaLevel);PaintBiomes(material,terrain,layout);ground.sharedMaterial=material;}}
+ static void PaintBiomes(Material material,IslandTerrainData terrain,Transform layout){
   const int size=512;var pixels=new Color[size*size];
   var min=terrain.World(terrain.bounds[0],terrain.bounds[1],0);var max=terrain.World(terrain.bounds[2],terrain.bounds[3],0);var span=max-min;
   void Dab(Vector3 at,float radius,int channel,float strength){
@@ -91,14 +91,17 @@ public static class IslandEnvironment {
     float d=new Vector2((x-cx)/rx,(y-cy)/ry).magnitude;var color=pixels[y*size+x];color[channel]=Mathf.Max(color[channel],(1-Mathf.SmoothStep(.25f,1,d))*strength);pixels[y*size+x]=color;
    }
   }
+  var moved=new System.Collections.Generic.Dictionary<int,Vector3>();
+  foreach(var view in layout.GetComponentsInChildren<IslandPlacementView>())if(view.redesigned)moved[view.sourceLine]=view.transform.position;
+  Vector3 Position(IslandPlacement p)=>moved.TryGetValue(p.line,out var point)?point:terrain.PlacementPoint(p);
   if(terrain.HasPlacements){
-   foreach(var p in terrain.placements){var at=terrain.PlacementPoint(p);
+   foreach(var p in terrain.placements){var at=Position(p);
     if(p.kind=="tree")Dab(at,terrain.scale*18,1,.8f);
     if(p.kind=="field")Dab(at,terrain.scale*8,2,1);
     if(p.kind!="building")continue;Dab(at,terrain.scale*8,0,.8f);
     IslandPlacement centre=null;float closest=float.MaxValue;
     foreach(var candidate in terrain.placements)if(candidate.kind=="building"&&candidate.town==p.town&&candidate.type.Contains("TOWN_CENTRE")){float d=Vector3.Distance(terrain.PlacementPoint(candidate),at);if(d<closest){closest=d;centre=candidate;}}
-    if(centre==null)continue;var end=terrain.PlacementPoint(centre);int steps=Mathf.CeilToInt(Vector3.Distance(at,end)/(terrain.scale*2));
+    if(centre==null)continue;var end=Position(centre);int steps=Mathf.CeilToInt(Vector3.Distance(at,end)/(terrain.scale*2));
     for(int i=0;i<=steps;i++){var point=Vector3.Lerp(at,end,i/(float)Mathf.Max(1,steps));if(terrain.Dry(point))Dab(point,terrain.scale*3.5f,0,.85f);}
    }
   }
@@ -106,21 +109,27 @@ public static class IslandEnvironment {
  }
  static void Understory(EnvironmentArt art,Transform root,IslandTerrainData terrain){
   var plants=new GameObject("Meadow and forest understory").transform;plants.SetParent(root,false);int count=0;
+  var houses=root.GetComponentsInChildren<BoxCollider>();
   foreach(var p in terrain.placements){if(p.kind!="tree"||p.line%3!=0)continue;var centre=terrain.PlacementPoint(p);
    for(int i=0;i<3;i++){float a=(p.line*137.5f+i*119)*Mathf.Deg2Rad;var at=centre+new Vector3(Mathf.Cos(a),0,Mathf.Sin(a))*terrain.scale*(5+i*3);if(!terrain.Dry(at))continue;
-    bool blocked=false;foreach(var building in terrain.placements)if(building.kind=="building"&&Vector3.Distance(at,terrain.PlacementPoint(building))<terrain.scale*7){blocked=true;break;}if(blocked)continue;
+    bool blocked=false;foreach(var box in houses)if(box.bounds.SqrDistance(terrain.Project(at))<terrain.scale*terrain.scale*9){blocked=true;break;}if(blocked)continue;
     at=terrain.Project(at);string key=i==0?"Fern_1":p.line%5==0?"Bush_Common_Flowers":"Grass_Common_Short";var g=Place(art,key,plants,at,new Vector3(4,1.5f,4)*terrain.scale,a*Mathf.Rad2Deg);if(g!=null){AddVegetationLOD(g,true);count++;}
    }
   }
   Debug.Log("BWVR_UNDERSTORY: "+count+" ground-cover clusters; original placements preserved");
  }
  static void BuildOriginal(EnvironmentArt art,Transform root,IslandTerrainData terrain){
+  var buildings=Resources.Load<EnvironmentArt>("VillageBuildings");
+  var layout=buildings!=null?new VillageLayout(terrain,buildings):null;
   int count=0;
   foreach(var p in terrain.placements){
    if(p.kind is "drink" or "villager")continue;
    var at=terrain.PlacementPoint(p);var name="Original "+p.kind+" L"+p.line+" - "+p.type;Transform marker;
    if(p.kind=="building"&&!p.type.Contains("STORAGE_PIT")&&!p.type.Contains("GRAVEYARD")){
-    marker=Home(art,root,at,p.yaw,3.66f*terrain.scale*p.size/.195f,name,p.line+p.town);
+    if(layout!=null){
+     var plot=layout.plots[p.line];marker=Object.Instantiate(buildings.Find(plot.model),root).transform;
+     marker.name="Medieval "+plot.model+" L"+p.line;marker.localPosition=plot.position;marker.localRotation=Quaternion.Euler(0,plot.yaw,0);marker.localScale=Vector3.one*plot.scale;
+    }else marker=Home(art,root,at,p.yaw,3.66f*terrain.scale*p.size/.195f,name,p.line+p.town);
    }else{
     marker=new GameObject(name).transform;marker.SetParent(root,false);marker.localPosition=at;marker.localRotation=Quaternion.Euler(p.pitch,p.yaw,p.roll);
     float unit=terrain.scale*p.size;
@@ -142,7 +151,10 @@ public static class IslandEnvironment {
      for(int i=0;i<6;i++)Place(art,"Rock_Medium_1",marker,new Vector3((i%3-1)*2,0,(i/3-.5f)*3)*unit,new Vector3(.8f,1.4f,.5f)*unit);
     }
    }
-   var view=marker.gameObject.AddComponent<IslandPlacementView>();view.sourceLine=p.line;view.kind=p.kind;count++;
+   var view=marker.gameObject.AddComponent<IslandPlacementView>();view.sourceLine=p.line;view.kind=p.kind;
+   if(layout!=null&&layout.plots.TryGetValue(p.line,out var plotInfo)){view.redesigned=true;view.modelKey=plotInfo.model;}
+   else if(layout!=null&&(p.kind=="tree"||p.kind=="rock"||p.kind=="feature")&&layout.Cleared(at))marker.gameObject.SetActive(false);
+   count++;
   }
   // Repeated Quaternius meshes share instanced materials; avoid one material per tree.
   foreach(var renderer in root.GetComponentsInChildren<MeshRenderer>())foreach(var material in renderer.sharedMaterials)if(material!=null)material.enableInstancing=true;
