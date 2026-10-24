@@ -23,7 +23,11 @@ public static class SliceRuntimeChecks {
    var position=god.transform.position;var phase=god.Current;god.Tick(20,true);if(god.transform.position!=position||god.Current!=phase)throw new Exception("Paused task advanced");
    foreach(var worker in workers){before=worker.completedJobs;for(int n=0;n<1600&&worker.completedJobs==before;n++)worker.Tick(.1f,false);if(worker.completedJobs!=before+1)throw new Exception("Worker failed to deliver: "+worker.role);}
    var terrain=Resources.Load<IslandTerrainData>("FirstIsland");int samples=0;float maxError=0;
-   if(terrain!=null){var collider=GameObject.Find("Land 1 - original island geometry").GetComponent<MeshCollider>();for(int i=0;i<100;i++){
+   if(terrain!=null){
+    foreach(var worker in workers)if(Mathf.Abs(worker.transform.lossyScale.y/terrain.scale-1.661f)>.01f)throw new Exception("Villager/game-unit scale mismatch");
+    var visual=god.GetComponentInChildren<HumanoidMotion>();if(visual!=null&&Mathf.Abs(visual.transform.lossyScale.y/terrain.scale-13.9236f)>.01f)throw new Exception("Creature/game-unit scale mismatch");
+    foreach(var home in slice.GetComponentsInChildren<Transform>().Where(t=>t.name.StartsWith("Modular village home")))if(Mathf.Abs(home.lossyScale.y*.195f/terrain.scale-3.66f)>.01f)throw new Exception("House/game-unit scale mismatch");
+    var collider=GameObject.Find("Land 1 - original island geometry").GetComponent<MeshCollider>();for(int i=0;i<100;i++){
     var point=terrain.World(Mathf.Lerp(terrain.bounds[0],terrain.bounds[2],Mathf.Repeat(i*.618f,1)),Mathf.Lerp(terrain.bounds[1],terrain.bounds[3],Mathf.Repeat(i*.414f,1)),0);if(!terrain.Dry(point,false))continue;
     if(!collider.Raycast(new Ray(new Vector3(point.x,3,point.z),Vector3.down),out var hit,4))throw new Exception("Missing terrain collider");maxError=Mathf.Max(maxError,Mathf.Abs(terrain.Project(point).y-hit.point.y));samples++;
    }if(samples<10||maxError>.001f)throw new Exception("Terrain collision and sample height disagree");}
@@ -35,8 +39,8 @@ public static class SliceRuntimeChecks {
   if(hands.resource==null||hands.drinking!=drinking)throw new Exception("Missing held resource/pose");
   motion.paused=false;motion.SendMessage("LateUpdate");hands.AdvancePose(.4f);animator.Update(.2f);hands.SendMessage("LateUpdate");
   float reach=Vector3.Distance(animator.GetBoneTransform(HumanBodyBones.RightHand).position,hands.resource.position);
-  if(reach>.14f)throw new Exception("Hand missed carried water: "+reach);
-  if(drinking&&Vector3.Distance(animator.GetBoneTransform(HumanBodyBones.Head).position,hands.resource.position)>.14f)throw new Exception("Drinking water did not reach the mouth");
+  if(reach>motion.transform.lossyScale.y*.42f)throw new Exception("Hand missed carried water: "+reach);
+  if(drinking&&Vector3.Distance(animator.GetBoneTransform(HumanBodyBones.Head).position,hands.resource.position)>motion.transform.lossyScale.y*.42f)throw new Exception("Drinking water did not reach the mouth");
   if(animator.GetCurrentAnimatorClipInfo(0).Any(c=>c.clip.name.StartsWith("__")))throw new Exception("Preview animation bound at runtime");
  }
 }

@@ -32,15 +32,22 @@ public static class IslandEnvironment {
   for(int i=0;i<15;i++){float a=i*Mathf.PI*2/15;Place(art,"Rock_Medium_"+(i%2+1),root,new Vector3(Mathf.Cos(a)*.86f,Floor-.035f,Mathf.Sin(a)*.86f),new Vector3(.13f,.075f,.11f),i*63);}
   for(int i=0;i<12;i++)Place(art,"RockPath_Round_Small_1",root,new Vector3(-.37f+i*.065f,Floor+.002f,.32f-i*.04f),new Vector3(.045f,.004f,.04f),i*29);
   if(terrain!=null){
+   // Match original mesh heights to the same game-unit conversion as Land 1.
+   foreach(Transform child in root){
+    var at=child.localPosition;child.localPosition=new Vector3(at.x*.1f,at.y,at.z*.1f);
+    float factor=child.name.StartsWith("Modular village home")?3.66f*terrain.scale/.195f:
+     child.name.Contains("Tree")||child.name.Contains("Pine")?12.723f*terrain.scale/.325f:.1f;
+    child.localScale*=factor;
+   }
    // Scatter only outside the active village so scenery does not cover its work sites.
    for(int i=0;i<140;i++){
     float u=Mathf.Repeat(i*.61803399f,1),v=Mathf.Repeat(i*.41421356f,1);var at=terrain.World(Mathf.Lerp(terrain.bounds[0],terrain.bounds[2],u),Mathf.Lerp(terrain.bounds[1],terrain.bounds[3],v),0);
-    if(new Vector2(at.x,at.z).magnitude<.95f||!terrain.Dry(at))continue;at=terrain.Project(at);
-    bool tree=i%3!=0;Place(art,tree?(i%2==0?"CommonTree_1":"Pine_1"):(i%2==0?"Bush_Common":"Rock_Medium_1"),root,at,tree?new Vector3(.13f,.2f,.13f):new Vector3(.10f,.065f,.10f),i*137.5f);
+    if(new Vector2(at.x,at.z).magnitude<.095f||!terrain.Dry(at))continue;at=terrain.Project(at);
+    bool tree=i%3!=0;Place(art,tree?(i%2==0?"CommonTree_1":"Pine_1"):(i%2==0?"Bush_Common":"Rock_Medium_1"),root,at,tree?new Vector3(10,12.723f,10)*terrain.scale:new Vector3(.010f,.0065f,.010f),i*137.5f);
    }
-   foreach(Transform child in root){if(child.localPosition.y>2)continue;if(child.name.StartsWith("Modular village home")){child.localPosition=terrain.SafePoint(child.localPosition);continue;}if(!terrain.Dry(child.localPosition)){child.gameObject.SetActive(false);continue;}float offset=child.localPosition.y-Floor;
+   foreach(Transform child in root){if(child.localPosition.y>2)continue;if(child.name.StartsWith("Modular village home")){child.localPosition=terrain.SafePoint(child.localPosition);continue;}if(!terrain.Dry(child.localPosition)){child.gameObject.SetActive(false);continue;}float offset=(child.localPosition.y-Floor)*.1f;
     // Scattered instances already have their sampled heights.
-    if(new Vector2(child.localPosition.x,child.localPosition.z).magnitude<.95f){var at=terrain.Project(child.localPosition);at.y+=offset;child.localPosition=at;}
+    if(new Vector2(child.localPosition.x,child.localPosition.z).magnitude<.095f){var at=terrain.Project(child.localPosition);at.y+=offset;child.localPosition=at;}
    }
    var surface=Resources.Load<Material>("QuaterniusGround");if(surface!=null){var material=new Material(surface);material.SetFloat("_SeaLevel",terrain.SeaLevel);ground.sharedMaterial=material;}
   }else{

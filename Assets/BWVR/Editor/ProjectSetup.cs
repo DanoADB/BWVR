@@ -64,7 +64,7 @@ public static class ProjectSetup {
   var hands=(CarryItem[])typeof(QuestSlice).GetField("held",flags).GetValue(slice);var release=typeof(QuestSlice).GetMethod("Release",flags);
   var offerings=UnityEngine.Object.FindObjectsByType<CarryItem>();var water=Array.Find(offerings,item=>item.kind==Offering.Water);var villager=Array.Find(offerings,item=>item.kind==Offering.Villager);
   state.seconds=180;int gifts=state.gifts;hands[1]=water;water.held=true;water.GetComponent<Collider>().enabled=false;
-  release.Invoke(slice,new object[]{1,new Ray(new Vector3(-.32f,2,.25f),Vector3.down)});
+  release.Invoke(slice,new object[]{1,new Ray((Vector3)typeof(QuestSlice).GetField("cistern",System.Reflection.BindingFlags.Instance|System.Reflection.BindingFlags.NonPublic).GetValue(slice)+Vector3.up,Vector3.down)});
   if(state.gifts!=gifts+1||hands[1]!=null||water.held||!water.GetComponent<Collider>().enabled)throw new Exception("Water delivery/release failed");
   hands[1]=villager;villager.held=true;villager.GetComponent<Collider>().enabled=false;
   release.Invoke(slice,new object[]{1,new Ray(new Vector3(4,2,4),Vector3.down)});

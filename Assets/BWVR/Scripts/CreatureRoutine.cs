@@ -22,7 +22,7 @@ public sealed class CreatureRoutine:MonoBehaviour {
     if(timer>=1.1f){ReturnWater();deliveries++;delivered?.Invoke();Change(Task.SeekingWater,0);}break;
   }
  }
- bool Move(Vector3 target,float dt){var flat=target-transform.position;flat.y=0;if(flat.sqrMagnitude<.0025f)return true;
+ bool Move(Vector3 target,float dt){var flat=target-transform.position;flat.y=0;if(flat.magnitude<speed*.55f)return true;
   transform.rotation=Quaternion.LookRotation(flat);transform.position=ground(Vector3.MoveTowards(transform.position,new Vector3(target.x,transform.position.y,target.z),dt*speed));return false;
  }
  void Change(Task task,int animation){Current=task;timer=0;motion?.Activity(animation);}
