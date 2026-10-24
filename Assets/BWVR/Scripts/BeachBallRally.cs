@@ -1,0 +1,83 @@
+using System;
+using UnityEngine;
+namespace BWVR {
+// A bounded invitation/turn-taking state on the existing ball, not another movement owner.
+public sealed partial class BeachBall {
+ public const string RallyInterest="gentle-ball-rally";
+ public VillagerExploration Player{get;private set;}
+ public bool CreatureJoined{get;private set;}
+ public bool CreatureTurn{get;private set;}
+ public bool PassPending{get;private set;}
+ public int RallyReceptions{get;private set;}
+ public bool Inviting=>Player!=null&&!Harmful&&!item.held;
+ public CreatureHybrid Playmate=>creature;
+ float rallyClock,passClock,nextMeeting; Vector3 passOrigin,soloGoal,meeting;bool passFromCreature;
+ public bool ReservePlay(VillagerExploration villager){
+  if(creature==null||Player!=null||villager==null||item.held||InFlight||Body.linearVelocity.magnitude>8||creature.Season.paused)return false;
+  FinishExperience();thrown=false;Harmful=false;Player=villager;soloGoal=creature.transform.position;
+  float apart=Flat(soloGoal-transform.position).magnitude/nav.Scale;
+  if(apart<10||apart>40||!ClearLane(soloGoal)){bool found=false;for(int i=0;i<8;i++){var wanted=transform.position+Quaternion.Euler(0,i*45,0)*Vector3.forward*nav.Scale*16;if(nav.Sample(wanted,nav.villager,2,out var at)&&Mathf.Abs(at.y-transform.position.y+nav.Scale*Radius)<nav.Scale*3&&ClearLane(at)){soloGoal=at;found=true;break;}}if(!found){Player=null;return false;}}
+  CreatureJoined=CreatureTurn=PassPending=false;RallyReceptions=0;rallyClock=0;nextMeeting=0;meeting=default;return true;
+ }
+ public void CancelRally(){Player=null;CreatureJoined=CreatureTurn=PassPending=false;rallyClock=passClock=0;}
+ public bool MeetingPoint(out Vector3 point){
+  point=meeting;if(creature.State.time<nextMeeting)return meeting!=default;
+  nextMeeting=creature.State.time+1;meeting=default;float best=float.MaxValue;float groundY=nav.ProjectFoot(transform.position,nav.creature).y;
+  for(int i=0;i<16;i++){var wanted=transform.position+Quaternion.Euler(0,i*22.5f,0)*Vector3.forward*nav.Scale*20;
+   if(!nav.Sample(wanted,nav.creature,2,out var sample))continue;var at=nav.ProjectFoot(sample,nav.creature);
+   if(Mathf.Abs(at.y-groundY)>nav.Scale*1.1f||!ClearLane(at))continue;
+   float distance=(at-creature.transform.position).sqrMagnitude;if(distance>=best||!creature.CanReach(at))continue;best=distance;meeting=at;
+  }point=meeting;return meeting!=default;
+ }
+ public bool TryJoinCreature(){
+  if(creature.Season.paused||!Inviting||CreatureJoined||Player.GetComponent<CarryItem>().held||!Player.GetComponent<VillagerSocial>().Willing||Vector3.Distance(creature.transform.position,transform.position)>nav.Scale*28||Vector3.Distance(Player.transform.position,transform.position)>nav.Scale*16)return false;
+  FinishExperience();PassPending=false;CreatureJoined=true;CreatureTurn=false;rallyClock=0;
+  creature.Journal.Add(creature.State.time,"ball invitation accepted",CreatureAction.PlayWithToy,StableId,"Try gentle returns with a villager");return true;
+ }
+ Vector3 Receiver(bool fromCreature)=>fromCreature?Player.transform.position:CreatureJoined?creature.transform.position:soloGoal;
+ static Vector3 Flat(Vector3 delta){delta.y=0;return delta;}
+ bool ClearLane(Vector3 end){
+  var start=nav.ToNav(transform.position);var finish=nav.ToNav(end);var line=Flat(finish-start);float length=line.magnitude;if(length<8)return false;var direction=line/length;
+  foreach(var target in targets){if(target==null||target.villager?.GetComponent<VillagerExploration>()==Player)continue;var bounds=target.Bounds(nav.Scale);var at=nav.ToNav(bounds.center);float along=Vector3.Dot(Flat(at-start),direction);if(along<0||along>length)continue;float side=Flat(at-start-direction*along).magnitude;float width=Mathf.Max(bounds.extents.x,bounds.extents.z)/nav.Scale;if(side<Radius+width+.5f)return false;}
+  return true;
+ }
+ // Both actors use their existing native navigator to get behind the ball before a tap.
+ public bool ApproachPass(IslandNavigator walker,float speed,float dt,bool fromCreature){
+  if(creature.Season.paused||!Inviting||PassPending||CreatureTurn!=fromCreature||fromCreature&&!CreatureJoined)return false;
+  var receiver=Receiver(fromCreature);var direction=Flat(receiver-transform.position);if(direction.sqrMagnitude<nav.Scale*nav.Scale*64)return false;
+  var behind=transform.position-direction.normalized*(Radius+1.2f)*nav.Scale;
+  if(!nav.Sample(behind,walker.profile,1.5f,out var safe))return false;
+  walker.MoveTo(safe,speed,dt);
+  return Flat(walker.transform.position-transform.position).magnitude<=nav.Scale*(Radius+2)&&Vector3.Dot(Flat(walker.transform.position-transform.position),direction.normalized)<-nav.Scale;
+ }
+ public bool TryPass(bool fromCreature){
+  if(creature.Season.paused||!Inviting||PassPending||CreatureTurn!=fromCreature||fromCreature&&!CreatureJoined||Body.linearVelocity.magnitude>8||Harmful||fromCreature&&creature.State.time<creature.Season.WorldPlay.nextKick)return false;
+  var sender=fromCreature?creature.transform:Player.transform;var receiver=Receiver(fromCreature);float distance=Flat(receiver-transform.position).magnitude/nav.Scale;
+  if(Flat(sender.position-transform.position).magnitude>nav.Scale*(Radius+2)||distance<10||distance>45||!ClearLane(receiver))return false;
+  var direction=Flat(receiver-transform.position).normalized;FinishExperience();Throw(direction,fromCreature,Mathf.Clamp(distance*.35f,4,6.5f));kicking=true;kickReward=.006f;
+  Body.linearVelocity=direction*Mathf.Clamp(distance*.35f,4,6.5f)+Vector3.up*.2f;
+  if(fromCreature){var m=creature.Season.WorldPlay;m.kicks=Math.Min(1000000,m.kicks+1);m.nextKick=creature.State.time+1.2f;}
+  else creature.Season.WorldPlay.villagerKicks=Math.Min(1000000,creature.Season.WorldPlay.villagerKicks+1);
+  PassPending=true;passFromCreature=fromCreature;passClock=0;passOrigin=Body.position;
+  creature.Journal.Add(creature.State.time,fromCreature?"creature gentle pass":"villager ball nudge",CreatureAction.PlayWithToy,StableId,"Physical rolling ball, not a carried prop");return true;
+ }
+ void AdvanceRally(float dt){
+  if(Player==null)return;rallyClock+=dt;
+  if(item.held||Player.GetComponent<CarryItem>().held||!Player.GetComponent<VillagerSocial>().Willing||Harmful||rallyClock>(CreatureJoined?50:35)){CancelRally();return;}
+  if(!PassPending)return;passClock+=dt;if(passClock>10){CancelRally();return;}
+  // Solo play remains an invitation; it creates no fictional social reward.
+  if(!CreatureJoined){if(passClock>2){PassPending=false;CreatureTurn=false;}return;}
+  var receiver=Receiver(passFromCreature);float moved=Flat(Body.position-passOrigin).magnitude;
+  if(moved<4||Flat(receiver-transform.position).magnitude>nav.Scale*(Radius+3)||Mathf.Abs(receiver.y-transform.position.y)>nav.Scale*(Radius+3)||Body.linearVelocity.magnitude>8)return;
+  FinishExperience();Body.linearVelocity=Vector3.zero;Body.angularVelocity*=.2f;PassPending=false;CreatureTurn=!passFromCreature;RallyReceptions++;
+  creature.GetComponent<CreatureCuriosity>().NoticeGreeting(Player.transform);Player.GetComponent<HumanoidMotion>()?.React();
+  if(RallyReceptions>=2){
+   var m=creature.Season.WorldPlay;m.rallyReturns=Math.Min(1000000,m.rallyReturns+1);m.rallyFun=Mathf.Clamp01(m.rallyFun+.06f);creature.State.Experience(RallyInterest,.04f);creature.State.Experience(StableId,.015f);
+   var social=Player.GetComponent<VillagerSocial>().Memory;social.ballReturns=Math.Min(1000000,social.ballReturns+1);
+   if(RallyReceptions<=4){social.trust=Mathf.Clamp01(social.trust+.008f);social.affinity=Mathf.Clamp01(social.affinity+.012f);}
+   if(RallyReceptions==2)social.ballGames=Math.Min(1000000,social.ballGames+1);
+   creature.Journal.Add(creature.State.time,"gentle rally is fun",CreatureAction.PlayWithToy,StableId,"Confirmed alternating return with "+Player.GetComponent<HybridTarget>().id);
+  }
+ }
+}
+}
