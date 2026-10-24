@@ -45,9 +45,9 @@ def read_placements(text):
                 position = args[0]
                 # Mobile statics use radians, not the legacy milli-radians convention.
                 record.update(kind="rock", variant=int(args[1]), type=args[1], yaw=-float(args[4]) * 180 / math.pi, size=float(args[6]), vertical=float(args[2]), pitch=-float(args[3])*180/math.pi, roll=-float(args[5])*180/math.pi)
-            elif command == "CREATE_MOBILEOBJECT" and int(args[1]) in (29, 30):
+            elif command == "CREATE_FEATURE":
                 position = args[0]
-                record.update(kind="well", type=args[1], yaw=-float(args[2]) * .001 * 180 / math.pi, size=float(args[3]) * .001)
+                record.update(kind="well" if int(args[1]) == 6 else "feature", type=args[1], yaw=-float(args[2]) * .001 * 180 / math.pi, size=float(args[3]) * .001)
             elif command == "CREATE_DRINK_WAYPOINT":
                 position = args[0]
                 record.update(kind="drink", type="drinking waypoint")

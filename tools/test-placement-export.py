@@ -18,11 +18,11 @@ class PlacementTests(unittest.TestCase):
         self.assertEqual((records[0]["x"], records[0]["z"]), (100, 200))
         self.assertEqual(records[1]["line"], 2)
 
-    def test_furniture_is_not_mistaken_for_a_well(self):
-        records, skipped = placements.read_placements('CREATE_MOBILEOBJECT("100,200", 18, 0, 1000)\nCREATE_MOBILEOBJECT("110,220", 29, 0, 1000)')
+    def test_mobile_puzzle_is_not_mistaken_for_a_well(self):
+        records, skipped = placements.read_placements('CREATE_MOBILEOBJECT("100,200", 18, 0, 1000)\nCREATE_MOBILEOBJECT("110,220", 29, 0, 1000)\nCREATE_FEATURE("120,230", 6, 0, 1000, 0)')
         self.assertEqual(len(records), 1)
         self.assertEqual(records[0]["kind"], "well")
-        self.assertEqual(skipped["CREATE_MOBILEOBJECT"], 1)
+        self.assertEqual(skipped["CREATE_MOBILEOBJECT"], 2)
 
     def test_rock_offset_and_rotation(self):
         records, _ = placements.read_placements('CREATE_MOBILE_STATIC("100,200", 2, .4, .1, .2, .3, .7)')
