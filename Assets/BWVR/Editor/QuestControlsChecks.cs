@@ -37,6 +37,21 @@ public static class QuestControlsChecks {
    float y=origin.transform.position.y;
    QuestControls.Move(origin.transform,head.transform,Vector2.zero,Vector2.up,.05f,ref latch);
    if(origin.transform.position.y<=y)throw new Exception("Vertical stick travel failed");
+   origin.transform.localScale=Vector3.one;
+   var focus=head.transform.position+head.transform.forward*2;
+   var originalPosition=origin.transform.position;var originalRotation=head.transform.rotation;
+   var focusInHead=head.transform.InverseTransformPoint(focus);
+   QuestControls.Zoom(origin.transform,focus,.5f);
+   if(origin.transform.localScale.x>=1||Vector3.Distance(head.transform.InverseTransformPoint(focus),focusInHead)>.0001f)throw new Exception("Zoom moved gaze focus");
+   if(Quaternion.Angle(head.transform.rotation,originalRotation)>.001f)throw new Exception("Zoom rotated tracked head");
+   QuestControls.Zoom(origin.transform,focus,-.5f);
+   if(Vector3.Distance(origin.transform.position,originalPosition)>.0001f||Mathf.Abs(origin.transform.localScale.x-1)>.0001f)throw new Exception("Zoom round trip drifted");
+   for(int i=0;i<30;i++)QuestControls.Zoom(origin.transform,focus,1);
+   if(Mathf.Abs(origin.transform.localScale.x-.125f)>.00001f)throw new Exception("Zoom-in limit failed");
+   for(int i=0;i<30;i++)QuestControls.Zoom(origin.transform,focus,-1);
+   if(Mathf.Abs(origin.transform.localScale.x-2)>.00001f)throw new Exception("Zoom-out limit failed");
+   QuestSlice.PlaceView(origin.transform,head.transform,Vector3.zero);
+   if(origin.transform.localScale!=Vector3.one)throw new Exception("Recenter did not reset zoom");
    InputSystem.RegisterLayout<OculusTouchControllerProfile.OculusTouchController>();
    device=InputSystem.AddDevice<OculusTouchControllerProfile.OculusTouchController>();
    InputSystem.SetDeviceUsage(device,UnityEngine.InputSystem.CommonUsages.LeftHand);
@@ -53,9 +68,13 @@ public static class QuestControlsChecks {
    var input=QuestControls.Read(0);
    if(!input.tracked||!input.grip||!input.trigger||!input.menu||input.stick.y<.9f)throw new Exception("Controller button/stick binding failed");
    if(Vector3.Distance(input.position,new Vector3(1,2,3))>.001f||Vector3.Distance(input.aimPosition,new Vector3(4,5,6))>.001f||Quaternion.Angle(input.aimRotation,Quaternion.Euler(0,45,0))>.01f)throw new Exception("Grip/aim poses not separate");
+   InputSystem.SetDeviceUsage(device,UnityEngine.InputSystem.CommonUsages.RightHand);
+   Set(device.GetChildControl<ButtonControl>("secondaryButton"),1f);
+   if(!QuestControls.Read(1).zoom)throw new Exception("B zoom modifier binding failed");
+   InputSystem.SetDeviceUsage(device,UnityEngine.InputSystem.CommonUsages.LeftHand);
    Set(device.GetChildControl<ButtonControl>("isTracked"),0f);InputSystem.Update();
    if(QuestControls.Read(0).grip)throw new Exception("Tracking loss left grip pressed");
-   Debug.Log("BWVR_CONTROLS_PASS: head-relative movement; drift deadzone; snap pivot/latch/rearm; elevation; grip/aim separation; carry/interact/menu/stick controls; tracking loss");
+   Debug.Log("BWVR_CONTROLS_PASS: head-relative movement; drift deadzone; snap pivot/latch/rearm; elevation; grip/aim separation; carry/interact/menu/stick controls; tracking loss; B zoom binding, focus stability, rotation, round trip, limits and reset");
   }finally{if(device!=null)InputSystem.RemoveDevice(device);UnityEngine.Object.DestroyImmediate(origin);}
  }
 }

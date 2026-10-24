@@ -10,7 +10,7 @@ using CommonUsages=UnityEngine.XR.CommonUsages;
 namespace BWVR {
 public sealed class QuestSlice:MonoBehaviour {
  IslandNavigation navigation; IslandTerrainData terrain; Collider groundCollider; const float Floor=.82f; SliceState state=new SliceState(); Camera eye; Transform rig,left,right,creature; Text status,creatureLabel; GameObject panel; Font font; GameArtCatalog art; OriginalCowMotion cowMotion; HumanoidMotion godMotion; HumanoidMotion[] humanoids=Array.Empty<HumanoidMotion>();
- readonly Transform[] aims=new Transform[2]; readonly QuestControls.Hand[] controllerHands=new QuestControls.Hand[2]; bool turnHeld,recenterLast;
+ readonly Transform[] aims=new Transform[2]; readonly QuestControls.Hand[] controllerHands=new QuestControls.Hand[2]; bool turnHeld,recenterLast,zoomHeld; Vector3 zoomFocus;
  readonly List<CarryItem> items=new List<CarryItem>(); readonly List<Transform> workers=new List<Transform>();
  readonly CarryItem[] held=new CarryItem[2]; readonly bool[] lastGrip=new bool[2],lastTrigger=new bool[2]; readonly LineRenderer[] rays=new LineRenderer[2];
  DroughtSignals signals;bool helpVisible,outcomeShown;string saveError; CreatureRoutine creatureRoutine; VillagerRoutine[] jobs; float clock,saveClock,creatureTrip; bool returning,menuLast,trackingConfigured,viewPlaced; string notice="Their creature is their god. Your touch guides its instincts.";
@@ -95,15 +95,20 @@ public sealed class QuestSlice:MonoBehaviour {
  void Button(string title,Vector3 position,Action action){var g=new GameObject(title,typeof(RectTransform),typeof(Image),typeof(BoxCollider),typeof(SpatialTarget));g.transform.SetParent(panel.transform,false);g.transform.localPosition=position;g.GetComponent<RectTransform>().sizeDelta=new Vector2(260,68);g.GetComponent<Image>().color=new Color(.13f,.28f,.29f);g.GetComponent<BoxCollider>().size=new Vector3(260,68,15);g.GetComponent<SpatialTarget>().invoke=action;Label("Caption",g.transform,Vector3.zero,new Vector2(250,65),1,24).text=title;}
  void Update(){if(eye==null)return;foreach(var motion in humanoids)motion.paused=state.paused||state.Finished;if(cowMotion!=null)cowMotion.paused=state.paused||state.Finished;clock+=Time.deltaTime;state.Step(Time.deltaTime);bool xr=XRSettings.isDeviceActive;
   if(xr){if(!trackingConfigured){var inputs=new List<XRInputSubsystem>();SubsystemManager.GetSubsystems(inputs);bool floor=false;foreach(var input in inputs)floor|=input.TrySetTrackingOriginMode(TrackingOriginModeFlags.Floor);if(!floor)rig.position+=Vector3.up*1.55f;trackingConfigured=true;}Pose(XRNode.Head,eye.transform);UpdateController(0,left);UpdateController(1,right);if(!viewPlaced){var head=InputDevices.GetDeviceAtXRNode(XRNode.Head);if(head.TryGetFeatureValue(CommonUsages.isTracked,out bool tracked)&&tracked)RecenterView();}
-   QuestControls.Move(rig,eye.transform,controllerHands[0].stick,controllerHands[1].stick,Time.deltaTime,ref turnHeld);
+   bool zoom=controllerHands[1].zoom;
+   if(zoom&&!zoomHeld)zoomFocus=ZoomFocus();
+   if(zoom&&held[0]==null&&held[1]==null){float value=controllerHands[1].stick.y;if(Mathf.Abs(value)>.2f)QuestControls.Zoom(rig,zoomFocus,value*Time.deltaTime);}
+   zoomHeld=zoom;
+   QuestControls.Move(rig,eye.transform,controllerHands[0].stick,zoom?Vector2.zero:controllerHands[1].stick,Time.deltaTime,ref turnHeld);
+   UpdateViewScale();
    if(controllerHands[0].recenter&&!recenterLast)RecenterView();recenterLast=controllerHands[0].recenter;
-   if(terrain!=null){float minimum=terrain.Project(eye.transform.position).y+.2f;float y=Mathf.Clamp(eye.transform.position.y,minimum,Floor+3);rig.position+=Vector3.up*(y-eye.transform.position.y);}
+   if(terrain!=null){float minimum=terrain.Project(eye.transform.position).y+.2f*rig.localScale.x;float y=Mathf.Clamp(eye.transform.position.y,minimum,Floor+3*rig.localScale.x);rig.position+=Vector3.up*(y-eye.transform.position.y);}
   }
   else Desktop();
   for(int i=0;i<2;i++){bool grip=controllerHands[i].grip,trigger=controllerHands[i].trigger;if(!xr){grip=i==1&&Keyboard.current!=null&&Keyboard.current.eKey.isPressed;trigger=i==1&&Keyboard.current!=null&&Keyboard.current.fKey.isPressed;}
-   var hand=i==0?left:right;var pointer=xr?aims[i]:hand;var ray=new Ray(pointer.position,pointer.forward);Physics.Raycast(ray,out var hit,8);rays[i].SetPosition(0,ray.origin);rays[i].SetPosition(1,hit.collider?hit.point:ray.GetPoint(2));rays[i].enabled=xr?controllerHands[i].tracked:i==1;
+   var hand=i==0?left:right;var pointer=xr?aims[i]:hand;var ray=new Ray(pointer.position,pointer.forward);Physics.Raycast(ray,out var hit,8*rig.localScale.x);rays[i].SetPosition(0,ray.origin);rays[i].SetPosition(1,hit.collider?hit.point:ray.GetPoint(2*rig.localScale.x));rays[i].enabled=xr?controllerHands[i].tracked:i==1;
    if(grip&&!lastGrip[i]&&hit.collider){var item=hit.collider.GetComponentInParent<CarryItem>();if(item!=null&&!item.held){held[i]=item;item.held=true;item.GetComponent<Collider>().enabled=false;notice="Release grip over the island to place. Water belongs in the blue cistern.";}}
-   if(held[i]!=null){if(xr&&!controllerHands[i].tracked){var item=held[i];held[i]=null;item.held=false;item.transform.position=item.home;item.GetComponent<Collider>().enabled=true;}else{held[i].transform.position=hand.position+hand.forward*.16f;if(!grip)Release(i,ray);}}
+   if(held[i]!=null){if(xr&&!controllerHands[i].tracked){var item=held[i];held[i]=null;item.held=false;item.transform.position=item.home;item.GetComponent<Collider>().enabled=true;}else{held[i].transform.position=hand.position+hand.forward*(.16f*rig.localScale.x);if(!grip)Release(i,ray);}}
    if(trigger&&!lastTrigger[i]&&hit.collider)hit.collider.GetComponentInParent<SpatialTarget>()?.Activate();lastGrip[i]=grip;lastTrigger[i]=trigger;
   }
   bool menu=controllerHands[0].menu;if(!xr)menu=Keyboard.current!=null&&Keyboard.current.tabKey.isPressed;if(menu&&!menuLast)panel.SetActive(!panel.activeSelf);menuLast=menu;
@@ -119,13 +124,23 @@ public sealed class QuestSlice:MonoBehaviour {
  public void RecenterView(){
   if(eye==null||rig==null)return;
   var focus=terrain!=null?terrain.Project(Vector3.zero):new Vector3(0,Floor,0);
-  PlaceView(rig,eye.transform,focus);
+  PlaceView(rig,eye.transform,focus);UpdateViewScale();
   viewPlaced=true;
  }
  public static void PlaceView(Transform origin,Transform head,Vector3 focus){
+  origin.localScale=Vector3.one;
   origin.rotation=Quaternion.Euler(0,-head.localEulerAngles.y,0);
   var desiredHead=focus+new Vector3(0,.55f,-.85f);
   origin.position=desiredHead-origin.rotation*head.localPosition;
+ }
+ Vector3 ZoomFocus(){
+  var ray=new Ray(eye.transform.position,eye.transform.forward);
+  if(groundCollider!=null&&groundCollider.Raycast(ray,out var hit,8*rig.localScale.x))return hit.point;
+  return terrain!=null?terrain.Project(Vector3.zero):new Vector3(0,Floor,0);
+ }
+ void UpdateViewScale(){
+  float scale=rig.localScale.x;eye.nearClipPlane=.03f*scale;
+  foreach(var line in rays){line.startWidth=.002f*scale;line.endWidth=.001f*scale;}
  }
  void UpdateController(int side,Transform hand){
   controllerHands[side]=QuestControls.Read(side);
@@ -134,10 +149,11 @@ public sealed class QuestSlice:MonoBehaviour {
   aims[side].SetLocalPositionAndRotation(input.aimPosition,input.aimRotation);
  }
  void Pose(XRNode node,Transform target){var d=InputDevices.GetDeviceAtXRNode(node);if(d.TryGetFeatureValue(CommonUsages.devicePosition,out Vector3 p))target.localPosition=p;if(d.TryGetFeatureValue(CommonUsages.deviceRotation,out Quaternion r))target.localRotation=r;}
- void Desktop(){var k=Keyboard.current;var m=Mouse.current;if(k==null||m==null)return;if(m.rightButton.isPressed){var delta=m.delta.ReadValue()*.12f;var e=eye.transform.localEulerAngles;float pitch=Mathf.DeltaAngle(0,e.x);eye.transform.localRotation=Quaternion.Euler(Mathf.Clamp(pitch-delta.y,-65,65),e.y+delta.x,0);}var movement=new Vector3((k.dKey.isPressed?1:0)-(k.aKey.isPressed?1:0),0,(k.wKey.isPressed?1:0)-(k.sKey.isPressed?1:0));rig.position+=Quaternion.Euler(0,eye.transform.eulerAngles.y,0)*movement*Time.deltaTime*.6f;right.position=eye.transform.position-eye.transform.up*.08f;right.rotation=eye.transform.rotation;}
+ void Desktop(){var k=Keyboard.current;var m=Mouse.current;if(k==null||m==null)return;if(m.rightButton.isPressed){var delta=m.delta.ReadValue()*.12f;var e=eye.transform.localEulerAngles;float pitch=Mathf.DeltaAngle(0,e.x);eye.transform.localRotation=Quaternion.Euler(Mathf.Clamp(pitch-delta.y,-65,65),e.y+delta.x,0);}var movement=new Vector3((k.dKey.isPressed?1:0)-(k.aKey.isPressed?1:0),0,(k.wKey.isPressed?1:0)-(k.sKey.isPressed?1:0));rig.position+=Quaternion.Euler(0,eye.transform.eulerAngles.y,0)*movement*Time.deltaTime*(.6f*rig.localScale.x);
+  if(held[0]==null&&held[1]==null&&Mathf.Abs(m.scroll.ReadValue().y)>.01f){QuestControls.Zoom(rig,ZoomFocus(),m.scroll.ReadValue().y*.0015f);UpdateViewScale();}right.position=eye.transform.position-eye.transform.up*.08f;right.rotation=eye.transform.rotation;}
  void Release(int i,Ray ray){var item=held[i];held[i]=null;item.held=false;item.GetComponent<Collider>().enabled=true;Vector3 point;
-  if(terrain!=null){if(!groundCollider.Raycast(ray,out var hit,8)||!terrain.Dry(hit.point)){item.transform.position=item.home;notice="Returned safely: place on dry, gentle ground.";return;}point=hit.point;}
-  else{var plane=new Plane(Vector3.up,new Vector3(0,Floor,0));if(!plane.Raycast(ray,out float distance)||distance>8){item.transform.position=item.home;return;}point=ray.GetPoint(distance);if(new Vector2(point.x,point.z).magnitude>.82f){item.transform.position=item.home;notice="Returned safely to the island.";return;}}
+  if(terrain!=null){if(!groundCollider.Raycast(ray,out var hit,8*rig.localScale.x)||!terrain.Dry(hit.point)){item.transform.position=item.home;notice="Returned safely: place on dry, gentle ground.";return;}point=hit.point;}
+  else{var plane=new Plane(Vector3.up,new Vector3(0,Floor,0));if(!plane.Raycast(ray,out float distance)||distance>8*rig.localScale.x){item.transform.position=item.home;return;}point=ray.GetPoint(distance);if(new Vector2(point.x,point.z).magnitude>.82f){item.transform.position=item.home;notice="Returned safely to the island.";return;}}
   if(item.kind==Offering.Villager){var walker=item.GetComponent<IslandNavigator>();if(walker!=null&&!walker.CanPlace(point,out point)){item.transform.position=item.home;notice="Returned safely: villagers need a clear walking space.";return;}walker?.ResetRoute();}
   item.transform.position=point+Vector3.up*(item.kind==Offering.Villager?0:Size(.04f,2));
   if(item.kind==Offering.Water&&Vector3.Distance(point,cistern)<Size(.18f,8)){DeliverWater();notice="Water delivered. Villagers celebrate their creature's gift.";item.transform.position=item.home;}

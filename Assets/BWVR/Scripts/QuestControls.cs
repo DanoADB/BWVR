@@ -7,7 +7,7 @@ namespace BWVR {
 // use the aim pose for selection rays instead of adding a guessed angle.
 public static class QuestControls {
  public struct Hand {
-  public bool tracked,grip,trigger,menu,recenter;
+  public bool tracked,grip,trigger,menu,recenter,zoom;
   public Vector2 stick;
   public Vector3 position,aimPosition;
   public Quaternion rotation,aimRotation;
@@ -25,10 +25,21 @@ public static class QuestControls {
    h.grip=controller.TryGetChildControl<ButtonControl>("gripPressed")?.isPressed??false;
    h.trigger=controller.TryGetChildControl<ButtonControl>("triggerPressed")?.isPressed??false;
    h.menu=side==0&&((controller.TryGetChildControl<ButtonControl>("primaryButton")?.isPressed??false)||(controller.TryGetChildControl<ButtonControl>("menu")?.isPressed??false));
+   h.zoom=side==1&&(controller.TryGetChildControl<ButtonControl>("secondaryButton")?.isPressed??false);
    h.recenter=side==0&&(controller.TryGetChildControl<ButtonControl>("secondaryButton")?.isPressed??false);
    return h;
   }
   return new Hand();
+ }
+ // Scale the tracked origin about a fixed world focus. Head rotation and FOV stay physical.
+ // A smaller virtual player makes the island larger; the focus stays in the same view direction.
+ public static void Zoom(Transform origin,Vector3 focus,float amount){
+  if(float.IsNaN(amount)||float.IsInfinity(amount))return;
+  float before=origin.localScale.x;
+  float after=Mathf.Clamp(before*Mathf.Exp(-Mathf.Clamp(amount,-1,1)),.125f,2f);
+  if(Mathf.Approximately(before,after))return;
+  origin.position=focus+(origin.position-focus)*(after/before);
+  origin.localScale=Vector3.one*after;
  }
  public static Vector2 DeadZone(Vector2 stick){
   float length=stick.magnitude;if(length<=.2f)return Vector2.zero;
@@ -39,12 +50,12 @@ public static class QuestControls {
   if(forward.sqrMagnitude<.01f)forward=origin.forward;
   var right=Vector3.Cross(Vector3.up,forward);
   var input=DeadZone(move);
-  origin.position+=(forward*input.y+right*input.x)*(.65f*Mathf.Min(delta,.05f));
+  origin.position+=(forward*input.y+right*input.x)*(.65f*origin.localScale.x*Mathf.Min(delta,.05f));
   if(Mathf.Abs(turn.x)<.25f)turnHeld=false;
   if(Mathf.Abs(turn.x)>.7f&&!turnHeld){origin.RotateAround(head.position,Vector3.up,Mathf.Sign(turn.x)*30);turnHeld=true;}
   // Vertical travel lets the unseen player inspect the tabletop at different heights.
   float vertical=Mathf.Abs(turn.y)>.3f?Mathf.Sign(turn.y)*(Mathf.Abs(turn.y)-.3f)/.7f:0;
-  origin.position+=Vector3.up*(vertical*.45f*Mathf.Min(delta,.05f));
+  origin.position+=Vector3.up*(vertical*.45f*origin.localScale.x*Mathf.Min(delta,.05f));
  }
 }
 }
