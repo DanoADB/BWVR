@@ -11,18 +11,22 @@ public sealed partial class SocialMemory {
 // Maintenance reuses the leisure motor and the same physical support/snap rules as creature play.
 public sealed partial class VillagerExploration {
  ConstructionSite repairSite;ConstructionBlock repairBlock;BuildRecipe repairRecipe;
- Vector3 repairPoint;Quaternion repairRotation;bool carryingRepair;
- int StructureBit(ConstructionSite site){if(construction==null||site==null)return 0;var clearing=site.GetComponentInParent<DiscoveryPoint>();int index=site.IsBridge?3:clearing!=null?clearing.id+1:construction.sites[0]==site?0:-1;return index>=0&&index<4?1<<(index*4+(int)site.Recipe):0;}
+ Vector3 repairPoint;Quaternion repairRotation;bool carryingRepair,buildingGathering;
+ int SiteSlot(ConstructionSite site){if(construction==null||site==null)return -1;var clearing=site.GetComponentInParent<DiscoveryPoint>();return site.IsBridge?3:clearing!=null?clearing.id+1:construction.sites[0]==site?0:-1;}
+ int StructureBit(ConstructionSite site){int index=SiteSlot(site);return index>=0&&index<4?1<<(index*4+(int)site.Recipe):0;}
  void RememberStructure(ConstructionSite site){social.Memory.usefulStructures|=StructureBit(site);}
  bool ChooseRepair(){if(construction==null)return false;foreach(var site in construction.sites.OrderBy(s=>(s.transform.position-transform.position).sqrMagnitude))if(TryRepair(site))return true;return false;}
  public bool TryRepair(ConstructionSite site){
   if(!CanStartStructure||construction==null||site==null||site.Paused||site.Locked||site.RecipeComplete||site.Snapped==0||site.Repairer!=null||site.Visitor!=null||site.Requester!=null||social.Memory.injury>0||social.RecentFright)return false;
   var god=construction.GetComponent<CreatureHybrid>();
   if(god.Season.paused||god.State.time<social.Memory.nextRepairAt||(social.Memory.usefulStructures&StructureBit(site))==0||site.Clock<site.LastCreatureBuildTime+20||god.GetComponent<CreatureCuriosity>().UsingConstruction(site)||site.blocks.Any(b=>b.Item.held||b.VillagerOwner!=null))return false;
+  return StartBlockPlacement(site,false);
+ }
+ bool StartBlockPlacement(ConstructionSite site,bool building){
   foreach(var block in site.blocks.Where(b=>!b.Attached).OrderBy(b=>(b.transform.position-transform.position).sqrMagnitude)){
    if(!site.TryPlan(block,out var point,out var facing)||!nav.world.Sample(block.transform.position,nav.profile,8,out var fetch)||!nav.world.Sample(site.WorkApproach(transform.position,point,site.unit*3),nav.profile,8,out var place)||!world.Reachable(transform.position,fetch,nav.profile)||!world.Reachable(fetch,place,nav.profile))continue;
-   repairSite=site;repairBlock=block;repairRecipe=site.Recipe;repairPoint=point;repairRotation=facing;site.Repairer=this;
-   routine.ResetTask();nav.ResetRoute();clock=elapsed=0;Current=Phase.RepairFetch;motion?.LookAt(block.transform);return true;
+   buildingGathering=building;repairSite=site;repairBlock=block;repairRecipe=site.Recipe;repairPoint=point;repairRotation=facing;site.Repairer=this;
+   routine.ResetTask();nav.ResetRoute();clock=elapsed=0;Current=Phase.RepairFetch;motion?.Signal(false);motion?.LookAt(block.transform);return true;
   }return false;
  }
  bool TickRepair(float dt){
@@ -43,7 +47,7 @@ public sealed partial class VillagerExploration {
    if(clock>=1.4f){
     motion?.Carry(null);motion?.PlaceAt(default,Quaternion.identity,0);carryingRepair=false;
     bool placed=site.Drop(block,repairPoint,repairRotation);
-    if(placed){social.Memory.repairs=Math.Min(1000000,social.Memory.repairs+1);var god=construction.GetComponent<CreatureHybrid>();god.Journal.Add(god.State.time,"villager repair",CreatureAction.ConstructionPlay,GetComponent<HybridTarget>().id,site.Recipe.ToString());}
+    if(placed){if(buildingGathering){social.Memory.builtPieces=Math.Min(1000000,social.Memory.builtPieces+1);if(site.RecipeComplete)social.Memory.gatheringsBuilt=Math.Min(1000000,social.Memory.gatheringsBuilt+1);}else social.Memory.repairs=Math.Min(1000000,social.Memory.repairs+1);var god=construction.GetComponent<CreatureHybrid>();god.Journal.Add(god.State.time,buildingGathering?"villager construction":"villager repair",CreatureAction.ConstructionPlay,GetComponent<HybridTarget>().id,site.Recipe.ToString());}
     ResetTask();if(placed){Current=Phase.Celebrate;motion?.React();}return Active;
    }
   }
@@ -56,7 +60,7 @@ public sealed partial class VillagerExploration {
   if(carryingRepair&&repairBlock!=null&&repairBlock.Item.held)repairSite.Drop(repairBlock,repairBlock.transform.position,repairBlock.transform.rotation);
   if(repairSite.Repairer==this)repairSite.Repairer=null;
   if(construction!=null)social.Memory.nextRepairAt=construction.GetComponent<CreatureHybrid>().State.time+30;
-  repairSite=null;repairBlock=null;carryingRepair=false;
+  repairSite=null;repairBlock=null;carryingRepair=buildingGathering=false;
  }
 }
 }

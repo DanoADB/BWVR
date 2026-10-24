@@ -55,3 +55,11 @@ Prioritize opportunities for villagers and the creature to interact and change t
 7. **Environmental opportunities:** weather, scarce resources and terrain create problems that existing objects and learned skills can solve in different ways.
 
 Use the creature-built arch as the first proving ground for stages 2–4: investigate, find a use, alter it, and react differently based on remembered encounters. Avoid a single scripted sequence presented as emergence. Autonomous settlement construction, technology, possession, general-purpose object recognition and the later stages above remain future work.
+
+## Implementation checkpoint — 2026-10-24
+
+Use this checkpoint before rereading the longer implementation history. Current foundations include contextual feedback/guidance, limited miracles, saved individual and peer relationships, creature/villager ball games, player throws and teachable fetch, bounded observation/practice, construction use and requests, and native physical tray/bridge repairs.
+
+The current independent-building step adds a need-driven cooperative three-piece gathering bench on existing construction sites. It is a first village crafting capability, not autonomous house placement or settlement growth. Villagers and the creature retain separate learning, ownership and contribution attribution.
+
+Remaining roadmap work still includes broader structure uses and shared ownership; learned skills and competing capabilities; persistent traditions beyond ball play; environmental problems/weather; autonomous houses and settlement expansion; technology discovery; rare costly possession; and headset readability, comfort, device performance and release validation. Water remains secondary in development focus. Consult PLAY_AND_VILLAGE_RESPONSE.md for the precise tested boundaries. The full roadmap is open-ended and is not a one-week completion commitment.

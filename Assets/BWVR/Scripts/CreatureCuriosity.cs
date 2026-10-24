@@ -22,7 +22,7 @@ public sealed class CreatureCuriosity:MonoBehaviour {
  public bool TryBegin(CreatureAffordance candidate){
   if(Current!=Phase.Rest||candidate==null||!candidate.Available||routine.Current!=CreatureRoutine.Task.SeekingWater)return false;
   if(!navigator.world.Sample(candidate.transform.position,navigator.profile,12,out _))return false;
-  if(candidate.GetComponent<ConstructionBlock>()!=null)constructionFocus=true;
+  var plannedBlock=candidate.GetComponent<ConstructionBlock>();if(plannedBlock!=null){if(GetComponent<CreatureConstructionLearning>()?.Memory.Knows(plannedBlock.Site.Recipe)==false)return false;constructionFocus=true;}
   if(candidate.host!=null&&!candidate.host.Accept(candidate))return false;
   var playerBall=candidate.GetComponent<BeachBall>();if(playerBall!=null)playerBall.JustFetched=false;routine.ResetTask();navigator.ResetRoute();target=candidate;fetching=candidate.GetComponent<BeachBall>()?.FetchReady==true;fetchTicket=fetching?candidate.GetComponent<BeachBall>().FetchTicket:0;askedPlaymate=false;inviteGestureUntil=0;elapsed=clock=0;Current=Phase.Approach;motion?.LookAt(target.transform);Affect=CreatureAffect.Mood.Curious;return true;
  }
