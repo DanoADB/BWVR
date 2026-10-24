@@ -44,8 +44,9 @@ public sealed class CreatureHybrid:MonoBehaviour {
   if(Season.paused||suspended||dt<=0||float.IsNaN(dt)||float.IsInfinity(dt))return;if(advanceClock)State.time=Mathf.Min(100000000,State.time+dt);
   if(State.guidance.status==GuidanceStatus.Active&&State.time>=State.guidance.expiresAt)Reject(GuidanceStatus.Expired,"Request expired");
   if(State.guidance.status==GuidanceStatus.Active&&Find(State.guidance.target)==null)Reject(GuidanceStatus.Abandoned,"Target unavailable");
+  if(State.guidance.status==GuidanceStatus.Active){var g=State.guidance;var target=Find(g.target);bool solved=(g.intention==GuidanceIntent.Protect&&target?.villager!=null&&target.villager.Memory.injury<=0)||(g.intention==GuidanceIntent.Help&&(g.target=="cistern"||g.target=="water")&&Season.water>=85);if(solved){if(Owner==ActionOwner.Observe&&State.intention.target==g.target)Interrupt("Problem no longer exists");Reject(GuidanceStatus.Abandoned,"Problem no longer exists");}}
   if(Owner!=ActionOwner.None&&State.time>State.intention.deadline)Interrupt("Action timed out");
-  if(!Season.Finished&&Season.water<18&&Owner==ActionOwner.Curiosity&&water.WaterAvailable)Interrupt("Critical water shortage supersedes play");
+  if(!Season.Finished&&Season.water<18&&(Owner==ActionOwner.Curiosity||Owner==ActionOwner.Observe)&&water.WaterAvailable)Interrupt("Critical water shortage supersedes leisure");
   if(Owner==ActionOwner.None&&State.time>=nextDecision){nextDecision=State.time+.5f;if(State.time>=nextPerception){Perceive();nextPerception=State.time+.25f;}
    CreatureCandidate choice=null;if(resume){resume=false;var prior=State.intention;foreach(var c in candidates)if(c.action==prior.action&&c.target==prior.target&&c.feasible&&prior.deadline>State.time){choice=c;c.timeout=Mathf.Max(1,prior.deadline-State.time);break;}State.intention.active=false;if(choice==null)Journal.Add(State.time,"resume abandoned",prior.action,prior.target,"Saved intention no longer feasible");}
    for(int tries=0;tries<4;tries++){if(choice==null)choice=CreatureDecisionModel.Select(candidates,State.seed,State.decisions);if(choice==null)break;var target=Find(choice.target);if(choice.action==CreatureAction.IdleOrObserve||CanReach(target)){BeginAction(choice,target);break;}choice.feasible=false;if(State.guidance.status==GuidanceStatus.Active&&State.guidance.target==choice.target)Reject(GuidanceStatus.Rejected,"Target unreachable");choice=null;}
@@ -73,7 +74,7 @@ public sealed class CreatureHybrid:MonoBehaviour {
   if(c.action==CreatureAction.WaterDelivery){Owner=ActionOwner.Water;water.ResetTask();}
   else if(c.action==CreatureAction.RespondToGuidance||c.action==CreatureAction.InvestigateObject){Owner=ActionOwner.Observe;observing=target;observeClock=0;nav.ResetRoute();motion?.LookAt(target.transform);}
   else {if(!curiosity.TryBegin(target.affordance)){nextPerception=0;return;}Owner=ActionOwner.Curiosity;}
-  State.intention=new CreatureIntention{active=true,action=c.action,situation=c.situation,target=c.target,startedAt=State.time,deadline=State.time+c.timeout};Explanation=c.Explain;Journal.Add(State.time,"start",c.action,c.target,c.expected);
+  State.intention=new CreatureIntention{active=true,action=c.action,situation=c.situation,target=c.target,startedAt=State.time,deadline=State.time+c.timeout};Explanation=c.action+": "+(c.urgency>1?"water shortage":c.guidance>0?"your cue":c.need>.75f?"hunger":c.novelty>.3f?"unfamiliar opportunity":"learned preference");Journal.Add(State.time,"start",c.action,c.target,c.Explain);
  }
  void CuriosityCompleted(CreatureAffordance target){if(!suppress&&Owner==ActionOwner.Curiosity)Complete();}
  void CuriosityFailed(string reason){if(!suppress&&Owner==ActionOwner.Curiosity)Interrupt(reason);}
@@ -85,6 +86,7 @@ public sealed class CreatureHybrid:MonoBehaviour {
   intent.active=false;Owner=ActionOwner.None;observing=null;motion?.LookAt(null);motion?.Activity(0);nav.ResetRoute();nextDecision=State.time+.5f;nextPerception=0;
  }
  public bool Feedback(bool positive){if(Season.paused||suspended)return false;bool learned=State.Reinforce(positive);curiosity.Feedback(positive,learned);Journal.Add(State.time,learned?"reinforced":"feedback without lesson",State.receipt.action,State.receipt.target,positive?"Praise":"Discourage");return learned;}
+ public void InvalidateLesson(string reason){State.receipt.eligible=false;curiosity.InvalidateFeedback();Journal.Add(State.time,"lesson cleared",State.receipt.action,State.receipt.target,reason);}
  public void Interrupt(string reason,bool keepIntention=false){if(season==null)return;var prior=State.intention;suppress=true;curiosity.ResetTask();water.ResetTask();suppress=false;motion?.LookAt(null);motion?.Activity(0);nav.ResetRoute();observing=null;Owner=ActionOwner.None;State.receipt.eligible=false;prior.active=keepIntention&&prior.active;resume=prior.active;Journal.Add(State.time,"interrupted",prior.action,prior.target,reason);Explanation=reason;nextDecision=State.time+.5f;nextPerception=0;}
  public void Suspend(bool value){if(value&&!suspended)Interrupt("Application suspended",true);suspended=value;}
  public void NewSeason(){Interrupt("New season");resume=false;nextDecision=nextPerception=0;foreach(var t in Targets)if(t.affordance!=null)t.affordance.cooldown=0;}
