@@ -1,0 +1,3 @@
+https://kenney.nl/assets/smoke-particles
+Downloaded 2026-10-24. Only PNG/White puff/whitePuff00.png included unchanged.
+Archive SHA256: 97a1d09c66e4fd6c247c8ea87f84c0cc59caaeceae19414c995afb1616a1e1c9

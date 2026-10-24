@@ -1,0 +1,7 @@
+Cloud by Quaternius
+CC0 1.0 Public Domain
+https://creativecommons.org/publicdomain/zero/1.0/
+Source: https://poly.pizza/m/KdFNOVn1Gf
+Downloaded 2026-10-24.
+Original glTF SHA256: 6e6d529a81c239f936f933f38ee3b529a418a3247deeaa122b9b313a5a8bc21d
+Converted to OBJ: node transform applied, centered, normalized to unit largest span.

@@ -18,7 +18,7 @@ public static class IslandEnvironment {
  }
  public static void Build(EnvironmentArt art,Transform parent,Renderer ground,IslandTerrainData terrain=null){
   var root=new GameObject("Quaternius CC0 island environment").transform;root.SetParent(parent,false);
-  if(terrain!=null&&terrain.HasPlacements){BuildOriginal(art,root,terrain);Understory(art,root,terrain);Surface(ground,terrain);Clouds(root);return;}
+  if(terrain!=null&&terrain.HasPlacements){BuildOriginal(art,root,terrain);Understory(art,root,terrain);Surface(ground,terrain);IslandAtmosphere.Build(root,terrain);return;}
   for(int i=0;i<4;i++)Home(art,root,new Vector3(-.5f+i*.28f,Floor,.48f),i%2==0?8:-8,1,"Modular village home "+(i+1));
   for(int i=0;i<11;i++){
    float angle=.12f+i*.53f;var at=new Vector3(Mathf.Cos(angle)*.75f,Floor,Mathf.Sin(angle)*.75f);
@@ -59,13 +59,7 @@ public static class IslandEnvironment {
   for(int y=0;y<128;y++)for(int x=0;x<128;x++){float noise=Mathf.PerlinNoise(x*.12f,y*.12f);texture.SetPixel(x,y,Color.Lerp(new Color(.31f,.40f,.15f),new Color(.56f,.62f,.29f),noise));}texture.Apply();
   var material=new Material(Shader.Find("BWVR/GameSurface"));material.mainTexture=texture;material.mainTextureScale=Vector2.one*5;ground.sharedMaterial=material;
   }
-  Clouds(root);
- }
- static void Clouds(Transform root){
-  var cloudMaterial=new Material(Shader.Find("BWVR/GameSurface"));cloudMaterial.color=new Color(.85f,.90f,.87f);
-  for(int i=0;i<6;i++)for(int puff=0;puff<3;puff++){
-   var cloud=GameObject.CreatePrimitive(PrimitiveType.Sphere);cloud.name="Soft horizon cloud";cloud.transform.SetParent(root,false);float a=i*1.05f;cloud.transform.localPosition=new Vector3(Mathf.Cos(a)*4+puff*.3f,2.6f+Mathf.Sin(i)*.25f,Mathf.Sin(a)*4);cloud.transform.localScale=new Vector3(.8f,.18f+puff*.03f,.4f);Object.Destroy(cloud.GetComponent<Collider>());cloud.GetComponent<Renderer>().sharedMaterial=cloudMaterial;
-  }
+  IslandAtmosphere.Build(root,terrain);
  }
  static void Surface(Renderer ground,IslandTerrainData terrain){var surface=Resources.Load<Material>("QuaterniusGround");if(surface!=null){var material=new Material(surface);material.SetFloat("_SeaLevel",terrain.SeaLevel);PaintBiomes(material,terrain);ground.sharedMaterial=material;}}
  static void PaintBiomes(Material material,IslandTerrainData terrain){

@@ -12,7 +12,7 @@ Free editions are sufficient for an initial comparison. Their Unity-ready Source
 
 ## Implemented art pass (2026-10-23)
 
-- 17 selected Nature/Village FBX models: four modular houses, mixed trees, bushes, grass, ferns, stone paths and rocks. Ground texture and simple horizon clouds are original procedural BWVR artwork.
+- 17 selected Nature/Village FBX models: four modular houses, mixed trees, bushes, grass, ferns, stone paths and rocks. Ground texture treatment is procedural BWVR artwork. Clouds now use a CC0 Quaternius mesh; localized mist uses a CC0 Kenney white-puff texture.
 - Three villagers use Universal Base Characters heads with Fantasy peasant/ranger outfits. The hidden base body is removed to avoid clipping. The free base edition contains superhero-proportioned male/female bases; heads are attached to the clothing's humanoid head bone.
 - Universal Animation Library Standard contributes 43 imported clips. Idle/walk and an interaction reaction are connected to gameplay through a shared humanoid controller. Root motion is disabled. Other imported actions, including pickup/spell clips, are not yet connected to physical carrying or miracles.
 - Puglin is the first local Bestiary creature trial. Its weapon is removed. QAL files and generated creature prefab stay under ignored Assets/LocalLicensedArt; public clones retain the existing cow/primitive fallback until the user imports their own Bestiary download. The source importer contains no Bestiary geometry or textures.
@@ -89,3 +89,11 @@ Building footprints, rocks, geological landmarks, the well and trunks create no-
 Creature and worker routines now follow complete routes using native NavMeshAgent movement in hidden routing proxies; visible feet follow the original terrain. Invalid/partial routes wait and retry once per simulated second, and moved targets trigger replanning. Interaction targets use nearby accessible approach points rather than requiring actors to stand inside a well or trunk. Original villager spawns inside a building are initially resolved to nearby walkable ground. Carried villagers stop walking; release rejects a blocked walking position and resets the route after a valid placement. The creature's intent label reports a blocked route.
 
 Editor validation: **BWVR → Verify navigation (Play mode)** checks three building detours, three trunk detours, ten water exclusions, ten steep-slope exclusions and an unreachable destination that leaves the actor stationary. Existing action checks also passed all five creature phases, a water delivery, all three worker jobs, pause and original placement/terrain tests. Separate checks confirmed blocked building interiors/drop positions and no movement while held. No links/jumping, dynamic scene rebaking or agent-to-agent crowd avoidance are enabled yet; the current navigation protects against static scenery and unsafe terrain. No Quest APK was built for this change.
+
+## Local atmosphere
+
+Six 480-triangle Quaternius clouds drift above the island (2,880 added mesh triangles). Three woodland fog pockets use Kenney whitePuff00, capped at four billboard particles each / twelve total quads, one shared 256px texture and one material. Fog casts no shadows and has no colliders. Candidate pockets exclude the starting village and nearby building/field/drinking sites. No volumetric raymarching, depth-texture sampling, real-time reflections or weather simulation is added.
+
+Clouds cast real directional-light shadows. IslandGround and GameSurface now receive the sun shadow map. Desktop uses soft shadows; Quest uses hard shadows to bound sampling cost, a single 1024px map, no cascades and 8m shadow distance. Quest frame rate has not yet been measured.
+
+Sources and licenses are checked into Assets/ThirdParty/Quaternius/Clouds and Assets/ThirdParty/Kenney/Smoke. BWVR > Import CC0 atmosphere artwork rebuilds the resource/material references. Original glTF was converted to normalized OBJ with its node transform applied.

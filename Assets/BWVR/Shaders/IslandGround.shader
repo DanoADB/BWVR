@@ -6,14 +6,16 @@ Shader "BWVR/IslandGround" {
  #pragma fragment frag
  #pragma multi_compile_instancing
  #pragma multi_compile_fog
+ #pragma multi_compile_fwdbase nolightmap nodirlightmap nodynlightmap novertexlight
  #include "UnityCG.cginc"
  #include "Lighting.cginc"
+ #include "AutoLight.cginc"
  sampler2D _Grass,_Rock,_Sand,_Detail,_Biome;float4 _BiomeRect;float _SeaLevel,_Drought,_CropHealth;
  float hash(float2 p){return frac(sin(dot(p,float2(127.1,311.7)))*43758.5453);}
  float noise2(float2 p){float2 a=floor(p),f=frac(p);f=f*f*(3-2*f);return lerp(lerp(hash(a),hash(a+float2(1,0)),f.x),lerp(hash(a+float2(0,1)),hash(a+1),f.x),f.y);}
  struct input {float4 vertex:POSITION;float3 normal:NORMAL;UNITY_VERTEX_INPUT_INSTANCE_ID};
- struct output {float4 pos:SV_POSITION;float3 world:TEXCOORD0;float3 normal:TEXCOORD1;UNITY_FOG_COORDS(2) UNITY_VERTEX_OUTPUT_STEREO};
- output vert(input v){output o;UNITY_SETUP_INSTANCE_ID(v);UNITY_INITIALIZE_OUTPUT(output,o);UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);o.pos=UnityObjectToClipPos(v.vertex);o.world=mul(unity_ObjectToWorld,v.vertex).xyz;o.normal=UnityObjectToWorldNormal(v.normal);UNITY_TRANSFER_FOG(o,o.pos);return o;}
+ struct output {float4 pos:SV_POSITION;float3 world:TEXCOORD0;float3 normal:TEXCOORD1;UNITY_FOG_COORDS(2) SHADOW_COORDS(3) UNITY_VERTEX_OUTPUT_STEREO};
+ output vert(input v){output o;UNITY_SETUP_INSTANCE_ID(v);UNITY_INITIALIZE_OUTPUT(output,o);UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);o.pos=UnityObjectToClipPos(v.vertex);o.world=mul(unity_ObjectToWorld,v.vertex).xyz;o.normal=UnityObjectToWorldNormal(v.normal);UNITY_TRANSFER_FOG(o,o.pos);TRANSFER_SHADOW(o);return o;}
  fixed4 frag(output i):SV_Target{UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(i);float3 n=normalize(i.normal);float broad=noise2(i.world.xz*3.3),patch=noise2(i.world.xz*19),grain=noise2(i.world.xz*145);
   float4 biome=tex2D(_Biome,(i.world.xz-_BiomeRect.xy)*_BiomeRect.zw);
   float3 palette=lerp(float3(.065,.16,.028),float3(.17,.25,.065),broad);
@@ -34,7 +36,7 @@ Shader "BWVR/IslandGround" {
   rock=lerp(rock*float3(.8,.86,.82),grass*.72,(1-steep)*patch*.4);
   sand*=lerp(float3(.52,.60,.58),float3(.92,.89,.73),smoothstep(.001,.007,height));
   float3 color=lerp(lerp(grass,rock,steep),sand,beach);
-  color*=max(.3,ShadeSH9(float4(n,1)))+_LightColor0.rgb*(.6*max(0,dot(n,normalize(_WorldSpaceLightPos0.xyz))));fixed4 result=fixed4(color,1);UNITY_APPLY_FOG(i.fogCoord,result);return result;
+  color*=max(.3,ShadeSH9(float4(n,1)))+_LightColor0.rgb*SHADOW_ATTENUATION(i)*(.6*max(0,dot(n,normalize(_WorldSpaceLightPos0.xyz))));fixed4 result=fixed4(color,1);UNITY_APPLY_FOG(i.fogCoord,result);return result;
  }
  ENDCG
  } }
