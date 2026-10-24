@@ -1,0 +1,37 @@
+using System;
+using System.Linq;
+using System.Reflection;
+using UnityEngine;
+using UnityEditor;
+namespace BWVR.Editor {
+public static class VillagerFriendshipChecks {
+ [MenuItem("BWVR/Verify villager peer memory")]
+ public static void Model(){var memory=new SocialMemory();for(int i=0;i<10;i++)memory.RememberPeer("friend",true,i*20);if(memory.PeerAppeal("friend")<=memory.PeerAppeal("stranger"))throw new Exception("No preference for a familiar friend");int count=memory.Peer("friend").good;if(memory.RememberPeer("friend",true,180)||memory.Peer("friend").good!=count)throw new Exception("Duplicate peer reward");memory.RememberPeer("friend",false,200);if(memory.PeerWilling("friend",250)||!memory.PeerWilling("friend",291))throw new Exception("Peer avoidance did not expire");var restored=JsonUtility.FromJson<SocialMemory>(JsonUtility.ToJson(memory));if(!restored.Valid()||restored.Peer("friend").bad!=1||!JsonUtility.FromJson<SocialMemory>("{}").Valid())throw new Exception("Peer save/legacy validation failed");restored.peers[0].affinity=float.NaN;if(restored.Valid())throw new Exception("Invalid peer memory accepted");Debug.Log("BWVR_PEER_MODEL_PASS: bounded familiar-partner preference, encounter deduplication, temporary avoidance, legacy/invalid save validation");}
+ [MenuItem("BWVR/Verify independent villager friendship play (Play mode)")]
+ public static void Verify(){
+  if(!EditorApplication.isPlaying)throw new Exception("Enter Play mode");Model();var ball=UnityEngine.Object.FindAnyObjectByType<BeachBall>();var god=ball.Playmate;var slice=UnityEngine.Object.FindAnyObjectByType<QuestSlice>();slice.SendMessage("OnApplicationPause",false);god.Interrupt("Peer QA");
+  var field=typeof(QuestSlice).GetField("state",BindingFlags.Instance|BindingFlags.NonPublic);var original=(SliceState)field.GetValue(slice);var test=new SliceState{water=100,crops=100,developmentFocus=true};test.Hybrid.time=200;field.SetValue(slice,test);
+  var people=slice.GetComponentsInChildren<VillagerExploration>();var positions=people.Select(p=>p.transform.position).ToArray();var godPosition=god.transform.position;var first=people[0];var friend=people[1];var third=people[2];var nav=first.GetComponent<IslandNavigator>();float scale=nav.world.Scale;
+  string A=first.GetComponent<HybridTarget>().id,B=friend.GetComponent<HybridTarget>().id;
+  void Reset(){foreach(var p in people){p.ResetTask();p.GetComponent<VillagerSocial>().ResetTask();p.GetComponent<VillagerBlockPlay>().ResetTask();p.GetComponent<CarryItem>().held=false;var m=p.GetComponent<VillagerSocial>().Memory;m.injury=0;m.trust=.1f;m.frights=1;m.lastFrightAt=test.Hybrid.time;m.nextPeerPlayAt=0;}ball.ReturnHome();}
+  bool Stage(){for(int i=0;i<16;i++){Reset();var d=Quaternion.Euler(0,i*22.5f,0)*Vector3.forward;var center=ball.transform.position;if(!nav.world.Sample(center-d*scale*6,nav.profile,2,out var a)||!nav.world.Sample(center+d*scale*20,nav.profile,2,out var b))continue;a=nav.world.ProjectFoot(a,nav.profile);b=nav.world.ProjectFoot(b,nav.profile);if(Mathf.Abs(b.y-(center.y-ball.Radius*scale))>scale*1.1f)continue;first.transform.position=a;friend.transform.position=b;third.transform.position=positions[2];foreach(var p in people)p.GetComponent<IslandNavigator>().ResetRoute();if(ball.TryPeerGame(first,friend))return true;}return false;}
+  void Step(){test.Hybrid.time+=.02f;first.Tick(.02f,false);friend.Tick(.02f,false);ball.Advance(.02f,false);}
+  try{
+   Reset();first.GetComponent<VillagerSocial>().Memory.Peer(B,true).affinity=.95f;third.transform.position=friend.transform.position;first.GetComponent<VillagerSocial>().Memory.Peer(third.GetComponent<HybridTarget>().id,true).affinity=.1f;if(first.PreferredPeer(ball)!=friend)throw new Exception("Villager ignored familiar friend among equal-distance options");third.transform.position=positions[2];
+   if(!Stage())throw new Exception("No native peer play fixture");if(ball.GetComponent<CreatureAffordance>().Available||god.GetComponent<CreatureCuriosity>().TryBegin(ball.GetComponent<CreatureAffordance>())||third.TryBall(ball))throw new Exception("Creature/third actor stole reserved peer ball");
+   var start=friend.transform.position;test.paused=true;friend.Tick(2,true);ball.Advance(2,true);if(friend.transform.position!=start||ball.RallyReceptions!=0)throw new Exception("Paused peer game advanced");test.paused=false;
+   for(int i=0;i<4000&&first.GetComponent<VillagerSocial>().Memory.peerGames==0;i++)Step();
+   if(first.GetComponent<VillagerSocial>().Memory.peerGames!=1||friend.GetComponent<VillagerSocial>().Memory.peerGames!=1||ball.RallyReceptions<4)throw new Exception("Native peer rally incomplete: receptions="+ball.RallyReceptions+", first="+first.Current+", friend="+friend.Current+", ready="+ball.PeerReady);
+   if(first.GetComponent<VillagerSocial>().Memory.Peer(B).good!=1||friend.GetComponent<VillagerSocial>().Memory.Peer(A)?.good!=1||test.WorldPlay.rallyReturns!=0||test.WorldPlay.throws!=0||test.WorldPlay.rallyFun!=0||test.Hybrid.bonds.Length!=0||first.GetComponent<VillagerSocial>().Memory.trust!=.1f)throw new Exception("Peer friendship credited creature or duplicated reward");
+   first.Tick(.02f,false);friend.Tick(.02f,false);if(ball.PeerGame||first.Active||friend.Active)throw new Exception("Completed peer game retained ownership");
+   if(!Stage())throw new Exception("Could not stage grab cancellation");friend.GetComponent<CarryItem>().held=true;friend.Tick(.02f,false);first.Tick(.02f,false);if(ball.PeerGame||first.Active)throw new Exception("Picking up peer did not cancel both roles");friend.GetComponent<CarryItem>().held=false;
+   if(!Stage())throw new Exception("Could not stage harm attribution");int kicks=test.WorldPlay.villagerKicks;for(int i=0;i<2000&&test.WorldPlay.villagerKicks==kicks;i++)Step();if(test.WorldPlay.villagerKicks==kicks)throw new Exception("No source-bearing villager pass");third.transform.position=ball.transform.position+Vector3.right*scale*2;
+   // Social-attribution boundary injection; native collision mechanics are covered by BeachBallChecks.
+   ball.Impact(third.GetComponent<PlayImpactTarget>(),24);var victim=third.GetComponent<VillagerSocial>().Memory;if(victim.Peer(A)?.bad!=1||victim.PeerWilling(A,test.Hybrid.time)||victim.trust!=.1f||test.Hybrid.bonds.Length!=0)throw new Exception("Harm attributed to wrong actor or no peer caution");
+   ball.ReturnHome();ball.Throw(Vector3.right,false,24);int bad=victim.Peer(A).bad;ball.Impact(third.GetComponent<PlayImpactTarget>(),24);if(victim.Peer(A).bad!=bad)throw new Exception("Player harm blamed on old peer kicker");
+   var save=JsonUtility.FromJson<SliceState>(JsonUtility.ToJson(test));if(!save.Valid()||save.Social(0).Peer(B).good!=1||save.Social(2).Peer(A).bad!=1)throw new Exception("Peer friendship/disagreement did not save");
+   Debug.Log("BWVR_PEER_PLAY_PASS: independently willing villagers despite creature fear, favorite peer selection, native four-reception rally, no creature reward, exclusive ownership, pause/grab cleanup, injected harm-source attribution and persistence");
+  }finally{god.Interrupt("Peer QA complete");for(int i=0;i<people.Length;i++){people[i].ResetTask();people[i].GetComponent<VillagerSocial>().ResetTask();people[i].GetComponent<CarryItem>().held=false;people[i].transform.position=positions[i];people[i].GetComponent<IslandNavigator>().ResetRoute();}god.transform.position=godPosition;god.GetComponent<IslandNavigator>().ResetRoute();field.SetValue(slice,original);ball.ResetWorld();}
+ }
+}
+}

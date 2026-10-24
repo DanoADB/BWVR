@@ -12,12 +12,13 @@ public sealed partial class VillagerExploration {
  }
  bool TickBall(float dt){
   elapsed+=dt;clock+=dt;var ball=playingBall;
-  if(ball==null||ball.Player!=this||!social.Willing||elapsed>150){ResetTask();return false;}
+  if(ball==null||!ball.OwnsPlayer(this)||(ball.PeerGame?social.Memory.injury>0:!social.Willing)||elapsed>150){ResetTask();return false;}
   motion?.LookAt(ball.transform);
-  if(!ball.CreatureTurn&&!ball.PassPending&&(ball.CreatureJoined||soloNudges==0)){motion?.Signal(false);if(ball.ApproachPass(nav,transform.lossyScale.y*1.6f,dt,false)&&clock>1){if((ball.CreatureJoined||!ball.Playmate.GetComponent<CreatureCuriosity>().HandlingBeachBall)&&ball.TryPass(false)){if(!ball.CreatureJoined)soloNudges++;clock=0;motion?.Activity(5);}else motion?.Signal(!ball.CreatureJoined,true,ball.Playmate.transform.position);}}
-  else {motion?.Activity(0);motion?.Signal(!ball.CreatureJoined,true,ball.Playmate.transform.position);}
+  bool peer=ball.PeerGame,side=peer&&ball.PeerPlayer==this;if(peer){if(ball.RallyReceptions>=4){ResetTask();return false;}if(!ball.PeerReady){if(side)ball.PreparePeer(dt);return true;}}
+  if(ball.CreatureTurn==side&&!ball.PassPending&&(ball.HasPartner||soloNudges==0)){motion?.Signal(false);if(ball.ApproachPass(nav,transform.lossyScale.y*1.6f,dt,side)&&clock>1){if((ball.HasPartner||!ball.Playmate.GetComponent<CreatureCuriosity>().HandlingBeachBall)&&ball.TryPass(side)){if(!ball.HasPartner)soloNudges++;clock=0;motion?.Activity(5);}else motion?.Signal(!ball.HasPartner,true,peer?(side?ball.Player.transform.position:ball.PeerPlayer.transform.position):ball.Playmate.transform.position);}}
+  else {motion?.Activity(0);motion?.Signal(!ball.HasPartner,true,peer?(side?ball.Player.transform.position:ball.PeerPlayer.transform.position):ball.Playmate.transform.position);}
   if(nav.Blocked&&elapsed>8){ResetTask();return false;}return true;
  }
- void ReleaseBall(){if(playingBall!=null&&playingBall.Player==this)playingBall.CancelRally();playingBall=null;motion?.Signal(false);}
+ void ReleaseBall(){if(playingBall!=null&&playingBall.OwnsPlayer(this))playingBall.CancelRally();playingBall=null;motion?.Signal(false);}
 }
 }

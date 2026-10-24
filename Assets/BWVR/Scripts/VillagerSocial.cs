@@ -1,14 +1,14 @@
 using System;
 using UnityEngine;
 namespace BWVR {
-[Serializable] public sealed class SocialMemory {
+[Serializable] public sealed partial class SocialMemory {
  public float trust=.45f,affinity=.5f,boldness=.5f;
  public float injury,lastAssistance,lastFrightAt=-100;
  public int greetings,rides,witnessed,disputes,discoveries,bridgeCrossings,sharedPlay,treatsOffered,missedInvitations,frights;
  public float nextInvitationAt,lastSharedAt;
  public int ballReturns,ballGames;
  public float restNeed=.5f,nextBuildingRequest;public int usedForms,constructionUses,buildRequests,buildDisappointments;
- public bool Valid()=>HybridState.Number(lastFrightAt,-100,100000000)&&Count(ballReturns)&&Count(ballGames)&&Unit(trust)&&Unit(affinity)&&Unit(boldness)&&Unit(injury)&&Unit(restNeed)&&HybridState.Number(nextBuildingRequest,0,100000300)&&usedForms>=0&&usedForms<=15&&Count(constructionUses)&&Count(buildRequests)&&Count(buildDisappointments)&&HybridState.Number(lastAssistance,0,100000000)&&HybridState.Number(nextInvitationAt,0,100000300)&&HybridState.Number(lastSharedAt,0,100000000)&&Count(greetings)&&Count(rides)&&Count(witnessed)&&Count(disputes)&&Count(discoveries)&&Count(bridgeCrossings)&&Count(sharedPlay)&&Count(treatsOffered)&&Count(missedInvitations)&&Count(frights);
+ public bool Valid()=>PeersValid()&&HybridState.Number(lastFrightAt,-100,100000000)&&Count(ballReturns)&&Count(ballGames)&&Unit(trust)&&Unit(affinity)&&Unit(boldness)&&Unit(injury)&&Unit(restNeed)&&HybridState.Number(nextBuildingRequest,0,100000300)&&usedForms>=0&&usedForms<=15&&Count(constructionUses)&&Count(buildRequests)&&Count(buildDisappointments)&&HybridState.Number(lastAssistance,0,100000000)&&HybridState.Number(nextInvitationAt,0,100000300)&&HybridState.Number(lastSharedAt,0,100000000)&&Count(greetings)&&Count(rides)&&Count(witnessed)&&Count(disputes)&&Count(discoveries)&&Count(bridgeCrossings)&&Count(sharedPlay)&&Count(treatsOffered)&&Count(missedInvitations)&&Count(frights);
  static bool Unit(float n)=>!float.IsNaN(n)&&!float.IsInfinity(n)&&n>=0&&n<=1;
  static bool Count(int n)=>n>=0&&n<=1000000;
 }

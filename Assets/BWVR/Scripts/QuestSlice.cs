@@ -81,7 +81,7 @@ public sealed class QuestSlice:MonoBehaviour {
   for(int i=0;i<jobs.Length;i++){jobs[i].gameObject.AddComponent<VillagerBlockPlay>().Initialize(construction,curiosity,i);jobs[i].gameObject.AddComponent<VillagerSocial>().Initialize(curiosity,i,()=>state);jobs[i].gameObject.AddComponent<VillagerExploration>().Initialize(discoveries,i);}
   hybrid=creature.gameObject.AddComponent<CreatureHybrid>();hybrid.Initialize(creatureRoutine,curiosity,godMotion,affordances,jobs,reservoir.gameObject,waterOffering,()=>state);
   foreach(var job in jobs)job.GetComponent<VillagerSocial>().ConfigureSharing(hybrid,affordances);
-  balls=GetComponentsInChildren<BeachBall>();foreach(var ball in balls)ball.Configure(hybrid,jobs);foreach(var job in jobs)job.GetComponent<VillagerExploration>().ConfigureBalls(balls);
+  balls=GetComponentsInChildren<BeachBall>();foreach(var ball in balls)ball.Configure(hybrid,jobs);foreach(var job in jobs)job.GetComponent<VillagerExploration>().ConfigureBalls(balls);foreach(var job in jobs)job.GetComponent<VillagerExploration>().ConfigurePeers(jobs.Select(j=>j.GetComponent<VillagerExploration>()).ToArray());
   miracles=DivineIntervention.Build(transform,hybrid,navigation,cistern,jobs,()=>state);
   learning=creature.gameObject.AddComponent<CreatureConstructionLearning>();learning.Initialize(hybrid,construction,discoveries,()=>state);
   foreach(var job in jobs)job.GetComponent<VillagerExploration>().ConfigureConstruction(learning);
