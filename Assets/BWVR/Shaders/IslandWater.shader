@@ -1,5 +1,5 @@
 Shader "BWVR/IslandWater" {
- Properties {_Shore("Shore distance",2D)="white"{} _ShoreRect("Shore coordinates",Vector)=(0,0,1,1) _TimeOffset("Wave time offset",Float)=0}
+ Properties {_Shore("Shore distance",2D)="white"{} _ShoreRect("Shore coordinates",Vector)=(0,0,1,1) _TimeOffset("Wave time offset",Float)=0 _WaveScale("Wave displacement scale",Float)=1}
  SubShader {Tags {"RenderType"="Opaque" "Queue"="Geometry"} Pass {Tags {"LightMode"="ForwardBase"}
  CGPROGRAM
  #pragma vertex vert
@@ -10,14 +10,14 @@ Shader "BWVR/IslandWater" {
  #include "UnityCG.cginc"
  #include "Lighting.cginc"
  #include "AutoLight.cginc"
- sampler2D _Shore;float4 _ShoreRect;float _TimeOffset;
+ sampler2D _Shore;float4 _ShoreRect;float _TimeOffset,_WaveScale;
  struct input {float4 vertex:POSITION;UNITY_VERTEX_INPUT_INSTANCE_ID};
  struct output {float4 pos:SV_POSITION;float3 world:TEXCOORD0;float3 normal:TEXCOORD1;UNITY_FOG_COORDS(2) SHADOW_COORDS(3) UNITY_VERTEX_OUTPUT_STEREO};
  output vert(input v){
   output o;UNITY_SETUP_INSTANCE_ID(v);UNITY_INITIALIZE_OUTPUT(output,o);UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
   float t=_Time.y+_TimeOffset;float3 world=mul(unity_ObjectToWorld,v.vertex).xyz;
   float a=dot(world.xz,float2(8,4))-t*.8;float b=dot(world.xz,float2(-5,11))+t*1.1;
-  v.vertex.y+=sin(a)*.0025+sin(b)*.0015;
+  v.vertex.y+=(sin(a)*.0025+sin(b)*.0015)*_WaveScale;
   o.pos=UnityObjectToClipPos(v.vertex);o.world=mul(unity_ObjectToWorld,v.vertex).xyz;
   o.normal=normalize(float3(-cos(a)*.02+cos(b)*.0075,1,-cos(a)*.01-cos(b)*.0165));
   UNITY_TRANSFER_FOG(o,o.pos);TRANSFER_SHADOW(o);return o;

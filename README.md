@@ -8,7 +8,7 @@ Future design: [gameplay direction](docs/GAMEPLAY_DIRECTION.md) — tools, toys 
 
 1. In Unity Hub, add this repository folder and open with **Unity 6000.6.7f1**.
 2. Allow the pinned packages to resolve. Open `Assets/BWVR/Scenes/FirstQuestSlice.unity`.
-3. Press Play. Without a headset, hold right mouse to look, use WASD to move, E to grab/release, F to select or encourage the creature, and Tab to toggle the sanctuary panel.
+3. Press Play. Without a headset, hold right mouse to look, use WASD to move, E to grab/release, F to select, 1/2 to praise/discourage while aiming at the creature, and Tab to toggle the sanctuary panel.
 
 The generated scene contains the BWVR bootstrap. It builds the island and spatial UI at runtime. To regenerate the scene and Quest settings, select **BWVR > Set up first Quest slice**. This replaces the prototype scene, so save custom scene work elsewhere first.
 
@@ -32,7 +32,8 @@ Reference: [Meta Link development workflow](https://developers.meta.com/vr/docum
 - Left stick: move forward/back/sideways relative to your head. Right stick left/right: 30-degree snap turn; center the stick before turning again. Right stick up/down: rise/lower above the tabletop.
 - Point a controller at a resource or villager. Hold the **right front/index trigger** or **left side grip** to carry; release while pointing onto the island to place. Rays use the OpenXR aim pose; held objects use the grip pose.
 - Release the blue water offering over the blue village cistern to deliver water.
-- Point at the creature and squeeze trigger to encourage care. Food placed near the creature also encourages it.
+- Aim at the creature and tap right A/B to praise/discourage its last eligible completed action. The front-trigger interaction also praises. Food satisfies hunger; it does not teach an unrelated action.
+- Carry one of the five small intention objects near the cistern and release while aiming at a world target: hands/drop for Help, shield for Protect, lens for Investigate, cloud for Rain, green sprig for Healing. Guidance is temporary influence; the creature chooses its response. Rain targets the water system; healing targets an injured villager (ankle wrap). Tools return to their home afterward. No new buttons are assigned.
 - Press X (or the left controller menu button) to show/hide the wrist sanctuary. Press Y to recenter the island ahead. Point and trigger to pause, save, resume or begin again.
 - Locomotion is user-controlled; no forced camera travel after the initial placement. The right stick changes viewing height, with ground clearance.
 
@@ -48,7 +49,11 @@ Android Build Support, SDK and NDK are available on the setup machine. Unity-pro
 
 ## First slice
 
-A three-minute dry season, tabletop village, three moving villagers, a placeholder creature, carryable offerings, encouragement, water delivery, a wrist sanctuary and local season save/resume. Saves preserve season resources and learned care; object placement and in-flight creature travel are not yet persistent. Reload restores paused. The prototype includes a local original-game-art importer for the cow, village, villagers, trees and grass. See [local artwork setup](docs/GAME_ART.md). Without a locally generated catalog it falls back to primitive art; copied artwork is excluded from Git.
+A three-minute dry season with one autonomous creature, three independent villagers, physical toys and construction, contextual teaching, indirect guidance and limited rain/healing miracles. The player remains unseen. The existing Quaternius/CC0 art catalogs provide the visible creature and settlement; the original terrain importer remains a local reference workflow. See [art setup](docs/GAME_ART.md).
+
+The creature's water, food, toy, social, observation and construction actions now share one utility comparison and one movement/carry owner. It can inspect tagged benches and a cairn, then try bench-like spans and towers on empty trays. A tagged shoreline gap provides one useful physical bridge opportunity: completed supports and span open native villager routes; dismantling closes them. This is a small authored pattern vocabulary, not general visual recognition or unrestricted architecture.
+
+Saves preserve resources, learned category/context preferences, relationships, injury, spiritual energy, guidance, a logical intention, discovery memories and physical construction. Reload resumes automatically and revalidates a saved intention from a safe action boundary; held objects and exact animation poses are not resumed. Loose tool positions and the transient 48-event journal are not saved. See [hybrid audit and validation](docs/HYBRID_IMPLEMENTATION_AUDIT.md).
 
 ## Development
 

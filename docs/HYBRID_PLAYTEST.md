@@ -1,0 +1,18 @@
+# Hybrid drought slice playtest
+
+Open FirstQuestSlice in Unity 6000.6.7f1. No APK is required for Editor/Quest Link testing. The wrist sanctuary starts closed. Use Help/details only when an explanation or energy number is needed.
+
+1. Begin a new season. Watch the village without intervening: the gatherer demonstrates an empty bucket, then returns to work; the farmer and forester continue independently. Repeated requests cannot indefinitely prevent a water delivery.
+2. Carry the hands/drop tool near the cistern. Release while pointing at the cistern or water gatherer. The creature acknowledges, but a Help cue is a 30-second outcome bias, not a guaranteed movement command. Very low water takes precedence over leisure.
+3. After useful creature water delivery, aim at the creature and tap A (desktop 1). Compare later choices in similar shortages. B/2 discourages instead. One completed action can receive one reinforcement within 12 simulation seconds. Pause and carrying block feedback.
+4. Try the shield on the wrapped forester: Protect means attending a vulnerable person in this slice. A healthy target has no credible vulnerability. Use the green healing tool to remove the injury for 25 energy. Healing changes no village resource and earns no creature teaching credit.
+5. Release the cloud tool over the cistern. Rain costs 35 energy and restores 22 water and 6 crops, capped at 100. The short local shower and water level show the result. A held input cannot repeatedly spend. Initial energy is 60, maximum 100, passive recovery 0.1/sec; beneficial creature social/water interactions add at most one energy per eight seconds.
+6. Use the lens on a village bench or the small discovery cairn. The creature can observe and remember these authored forms, then choose among arch, bench and tower patterns on empty construction trays. Existing work is not replaced. Praise/criticism of a confirmed brick placement also modifies that form's preference.
+7. Explore toward the shoreline gap with construction pieces on both banks. The lens can draw attention to it. After observation, the creature may build two supports and a span using its existing reach/carry/place behavior. A complete bridge creates a shorter real navigation route; villagers can investigate and cross independently. Pulling a support closes the route and recovers anyone over water to a safe bank. Other jobs also use the resulting native navigation geometry when it offers a shorter route.
+8. Pause during an action or shower. Save/reload. Energy, injury, preferences, observed forms, guidance and construction should remain; the creature revalidates its logical intention without restoring an unsafe held object. Beginning again clears the chapter memories and construction.
+
+## Development checks
+
+Editor menu checks: Hybrid decision model, Hybrid action coordination, Spiritual tools and miracles, Observed building patterns, Useful physical bridge. Existing controls, feedback, social, curiosity, nonverbal drought, construction, villager block play, discovery, terrain/action and navigation checks remain relevant. Use fresh Play mode when a check requires original actor positions or empty trays; tests that move actors can otherwise contaminate later fixtures. Back up the local season file before destructive QA.
+
+These checks establish logical behavior and native Editor physics/navigation with tolerances. They do not establish standalone Quest frame time, thermal behavior, physical-controller comfort or haptic feel. The five intention tools and inland crossing water are prototype visuals. There is no general object recognition, arbitrary bridge design, possession, combat, multiplayer or new civilization framework.

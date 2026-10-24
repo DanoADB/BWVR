@@ -93,6 +93,8 @@ public sealed class CreatureCuriosity:MonoBehaviour {
  public void RememberWaterDelivery(SliceState season){state=season;lastWater=true;lastSocial=false;feedbackWindow=12;}
  public void RememberObservation(SliceState season){state=season;feedbackWindow=0;}
  public void InvalidateFeedback(){feedbackWindow=0;}
+ // The coordinator's typed receipt is authoritative, including after reload.
+ internal void PrepareFeedback(ActionReceipt receipt,SliceState season,VillagerSocial friend){state=season;lastWater=receipt.action==CreatureAction.WaterDelivery;lastSocial=receipt.action==CreatureAction.SocialInteraction||(receipt.action==CreatureAction.RespondToGuidance&&friend!=null);lastFriend=lastSocial?friend:null;feedbackWindow=12;}
  public bool Feedback(bool positive,bool allowLearning=true){if(state==null||state.paused)return false;bool learned=allowLearning&&feedbackWindow>0;if(learned){float change=positive?.12f:-.12f;if(lastWater)state.care=Mathf.Clamp01(state.care+change);else if(lastSocial){state.socialPreference=Mathf.Clamp01(state.socialPreference+change);lastFriend?.Feedback(positive);}else state.playPreference=Mathf.Clamp01(state.playPreference+change);feedbackWindow=0;}reaction=2;emotion=5;feedbackMood=recentMood=positive?CreatureAffect.Mood.Happy:CreatureAffect.Mood.Sad;Affect=recentMood;return learned;}
  public void ResetTask(){Finish(false);lastFriend=null;lastWater=false;reaction=0;constructionFocus=false;cooldown=7;boredom=emotion=feedbackWindow=0;Affect=CreatureAffect.Mood.Calm;}
  void Finish(bool success){
