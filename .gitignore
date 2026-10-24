@@ -22,3 +22,8 @@ Assets/LocalGameAssets.meta
 
 Assets/LocalLicensedArt/
 Assets/LocalLicensedArt.meta
+
+Assets/LocalTerrain/
+Assets/LocalTerrain.meta
+
+__pycache__/

@@ -42,3 +42,15 @@ Animation correction: the initial controller accidentally referenced Unity's __p
 
 Creature actions now use an arrival-driven pickup/drink/carry/delivery routine, with visible carried water, humanoid hand IK, and UAL pickup/interaction/locomotion clips. Drinking and carrying are procedural hand poses over UAL, not dedicated clips in the free pack. Villagers travel to work, animate, carry supplies home, and deliver; water gathering and farming improve the village counters. Verified all five creature phases, one gift per completed delivery, pause, and completed jobs for all three workers in the running scene.
 
+
+## Land 1 terrain pass
+
+The first island now uses the owned Land1.lnd height field (100 source blocks), not a generated imitation. Coordinates use 10-unit cells and 0.67-unit altitude steps; X-major cell storage and original split flags are preserved. The dry-land extent is presented at 4.8m wide in VR, with the starting village near the original first town. Geometry is uniformly scaled; starter buildings and the hero remain deliberately exaggerated for tabletop interaction. This pass does not recreate every original town or mission placement.
+
+The geometry, height data and source file remain local under ignored Assets/LocalTerrain and .local. Only importer code, Quaternius ground material, shader and tests are pushed. The Quest build bundles the local terrain. Public clones without it retain the round-island fallback.
+
+To reproduce locally, run `python tools/prepare-island.py <extracted-game>/Data/Landscape/Land1.lnd`, then **BWVR > Import original first island terrain** in Edit mode. The terrain uses Quaternius Grass palette, Rocks_Diffuse and Rocks_Desert_Diffuse textures; no original terrain textures or original scenery models are imported. Original terrain format references were inspected in Shade/components/lnd/include/LNDFile.h and src/3D/Implementations/LandIsland.cpp. Source SHA-256: 82df97c1e8eefd69b076407e2c503ab794a7c1521ddc508b7f6064571b237094.
+
+The imported mesh has 44,400 vertices and 44,664 triangles. Scene placement samples the same split triangles as the collider; 48 dry-land probe comparisons differed by at most 0.000002m. Buildings and work sites choose nearby dry, gentle terrain. Object release uses the terrain collider and rejects water/steep ground. Pickup rays reach 8m across the expanded tabletop. The current actors still follow direct routes within the starter village; this is not whole-island obstacle-aware navigation.
+
+Validation: `python tools/test-island-export.py` checks X-major cell orientation, flags and malformed/truncated files using synthetic input. **BWVR > Verify actor actions and terrain (Play mode)** checks the real runtime creature/worker cycles, carried-resource hand reach, drinking reach, pause, exactly-once gift credit and terrain/collider agreement. Carry/drink hand poses are original procedural IK over UAL clips; no dedicated carry/drink clips are claimed to exist in the free library. Headset performance and comfort need hardware testing.

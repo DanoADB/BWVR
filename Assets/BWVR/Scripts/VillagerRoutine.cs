@@ -10,7 +10,7 @@ public sealed class VillagerRoutine:MonoBehaviour {
  public void ResetTask(){phase=0;timer=0;motion?.Activity(0);motion?.Carry(null);if(load!=null)load.gameObject.SetActive(false);}
  public void Tick(float dt,bool paused){if(paused||item.held||dt<=0)return;timer+=dt;
   if(phase==0){motion?.Activity(0);if(Move(work,dt)){phase=1;timer=0;motion?.Activity(role==Role.WaterGatherer?1:role==Role.Farmer?3:4);}}
-  else if(phase==1&&timer>3){phase=2;timer=0;load.gameObject.SetActive(true);motion?.Carry(load);motion?.Activity(0);}
+  else if(phase==1&&timer>(role==Role.Farmer?6:3)){phase=2;timer=0;load.gameObject.SetActive(true);motion?.Carry(load);motion?.Activity(0);}
   else if(phase==2&&Move(role==Role.WaterGatherer?store:item.home,dt)){phase=3;timer=0;motion?.Activity(5);}
   else if(phase==3&&timer>1.2f){completedJobs++;completed?.Invoke(role);ResetTask();}
  }

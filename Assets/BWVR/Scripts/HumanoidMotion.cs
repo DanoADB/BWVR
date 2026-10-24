@@ -8,7 +8,7 @@ public sealed class HumanoidMotion:MonoBehaviour {
   var item=GetComponent<CarryItem>();bool carried=item!=null&&item.held;
   delta.y=0;bool moving=delta.magnitude/Mathf.Max(Time.deltaTime,.000001f)>.005f;
   if(item!=null&&moving&&!carried&&!paused)transform.rotation=Quaternion.LookRotation(delta);
-  animator.speed=paused?0:1;animator.SetFloat("Speed",!paused&&!carried&&moving?1:0);animator.SetInteger("Activity",carried?0:activity);
+  animator.speed=paused?0:1;if(hands!=null)hands.paused=paused;animator.SetFloat("Speed",!paused&&!carried&&moving?1:0);animator.SetInteger("Activity",carried?0:activity);
  }
  public void Activity(int value){activity=value;}
  public void Carry(Transform resource,bool drink=false){if(hands!=null){hands.resource=resource;hands.drinking=drink;}}

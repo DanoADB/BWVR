@@ -10,7 +10,7 @@ public static class CharacterImporter {
  const string Library="Assets/ThirdParty/Quaternius/Animations/UAL1_Standard.fbx";
  static void Humanoid(string path){var importer=(ModelImporter)AssetImporter.GetAtPath(path);importer.animationType=ModelImporterAnimationType.Human;
   if(path.EndsWith("Female_Peasant.fbx")){var description=importer.humanDescription;var bones=description.human.Where(b=>b.humanName!="Head").ToList();bones.Add(new HumanBone{boneName="Head",humanName="Head",limit=new HumanLimit{useDefaultValues=true}});description.human=bones.ToArray();importer.humanDescription=description;}
-  if(path==Library){var clips=importer.defaultClipAnimations;foreach(var c in clips)c.loopTime=c.name.Contains("Loop");importer.clipAnimations=clips;}
+  if(path==Library){var clips=importer.defaultClipAnimations;foreach(var c in clips)c.loopTime=c.name.Contains("Loop")||c.name.EndsWith("Fixing_Kneeling");importer.clipAnimations=clips;}
   importer.SaveAndReimport();var avatar=AssetDatabase.LoadAllAssetsAtPath(path).OfType<Avatar>().FirstOrDefault();if(avatar==null||!avatar.isValid||!avatar.isHuman)throw new Exception("Invalid humanoid avatar: "+path);
  }
  static RuntimeAnimatorController Controller(){
@@ -37,7 +37,7 @@ public static class CharacterImporter {
   if(!controller.parameters.Any(p=>p.name=="Activity"))controller.AddParameter("Activity",AnimatorControllerParameterType.Int);
   var layers=controller.layers;layers[0].iKPass=true;controller.layers=layers;var machine=layers[0].stateMachine;
   var clips=AssetDatabase.LoadAllAssetsAtPath(Library).OfType<AnimationClip>().Where(c=>!c.name.StartsWith("__")).ToArray();
-  var names=new[]{"Pickup","Drinking reach","Tend crops","Gather wood","Deliver supplies"};var sources=new[]{"PickUp_Table","Interact","Fixing_Kneeling","Interact","Interact"};
+  var names=new[]{"Pickup","Drinking reach","Tend crops","Gather wood","Deliver supplies"};var sources=new[]{"PickUp_Table","Interact","Fixing_Kneeling","Push_Loop","Interact"};
   for(int i=0;i<names.Length;i++){
    var state=machine.states.Select(s=>s.state).FirstOrDefault(s=>s.name==names[i])??machine.AddState(names[i]);state.motion=clips.First(c=>c.name.EndsWith("|"+sources[i]));
    if(!machine.anyStateTransitions.Any(t=>t.destinationState==state)){var enter=machine.AddAnyStateTransition(state);enter.AddCondition(AnimatorConditionMode.Equals,i+1,"Activity");enter.canTransitionToSelf=false;enter.duration=.12f;}
