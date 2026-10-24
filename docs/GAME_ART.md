@@ -18,3 +18,5 @@ Vertices and normals reflect Z into the Unity coordinate system and triangle win
 ## Verification and limits
 
 Local checks cover nine prefab references, colliders, shader compilation, nineteen cow poses, complete skin weights, live frame advancement, water delivery and unsafe villager return. Desktop rendering was inspected. Headset appearance, GPU cost and controller ergonomics need Quest testing. This import does not yet provide original villager animation, creature carrying/drinking/casting clips, LODs or a full terrain mesh. Art placement is still the prototype layout.
+
+The local Android development APK was rebuilt successfully with the generated artwork (52,407,380 bytes). The build output remains local at `Builds/BWVR-Quest.apk`; this is build verification, not a headset performance result.
