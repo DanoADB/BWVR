@@ -101,3 +101,13 @@ Sources and licenses are checked into Assets/ThirdParty/Quaternius/Clouds and As
 ## Animated ocean
 
 Ocean uses one 64x64 grid plus an outer horizon ring (8,200 triangles), two shader wave directions, filtered fine ripples, a sun highlight and Fresnel sky tint. A 256px shore-distance map is generated once from the original terrain for shallow turquoise water and animated shoreline foam. Water receives cloud shadows, casts none, and has no collider, depth-copy, planar reflection or refraction pass. Runtime mesh/material/map are released when the scene ends. Render comparison verified wave animation (187,365 changed pixels) and shadow response (18,381 changed pixels) before the final horizon/filter refinement. Final shader and mesh budget passed; standalone Quest performance remains unmeasured.
+
+## House variants and fitted doors
+
+Residential houses use three deterministic modular designs chosen from the original placement line and town: warm plaster/terracotta roof, pale plaster/steep teal roof with dormer, and sage plaster/lower brown roof. Stone chimneys and fitted side windows add detail. Roof recoloring preserves texture luminance and tile geometry; timber retains its original palette. All keep the same 0.18 x 0.17 base plot and 0.195 base height. Root transforms retain the 1.1x house/actor multiplier; original positions and rotations remain unchanged.
+
+The old normalized door was independently sized to 0.05 x 0.09. The fitted leaf uses the original wall/door dimensional ratios plus a small hinge/handle-bounds correction and overlap, removing the visible gaps at the arch and sides.
+
+Five optional complete buildings from Quaternius's CC0 Medieval Village Pack were reviewed/imported (three houses, inn, blacksmith). Sources/licenses are in Assets/ThirdParty/Quaternius/MedievalBuildings; review prefabs/catalog are under Assets/BWVR/Buildings. They are outside Resources and not referenced by runtime scenery. Full models enlarged to realistic doorway scale blocked the preserved village routes, so they are reserved for future larger plots instead of replacing the active homes. BWVR > Import varied village buildings regenerates this review catalog.
+
+Validation: close-up visual review of all three active designs; runtime actor sizes/actions, original placement/terrain checks and obstacle navigation. Standalone Quest performance remains to be measured.

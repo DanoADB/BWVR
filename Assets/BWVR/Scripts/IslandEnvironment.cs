@@ -5,21 +5,41 @@ public static class IslandEnvironment {
  static GameObject Place(EnvironmentArt art,string key,Transform parent,Vector3 position,Vector3 size,float yaw=0){
   var prefab=art.Find(key);if(prefab==null)return null;var g=Object.Instantiate(prefab,parent);g.transform.localPosition=position;g.transform.localScale=size;g.transform.localRotation=Quaternion.Euler(0,yaw,0);return g;
  }
- static Transform Home(EnvironmentArt art,Transform parent,Vector3 at,float yaw,float scale,string name){
+ public static Transform Home(EnvironmentArt art,Transform parent,Vector3 at,float yaw,float scale,string name,int variant=0){
+  int style=Mathf.Abs(variant)%3;
+  float wallHeight=style==1?.105f:style==2?.13f:.12f;
+  float roofHeight=.195f-wallHeight;
   var house=new GameObject(name).transform;house.SetParent(parent,false);house.localPosition=at;house.localRotation=Quaternion.Euler(0,yaw,0);house.localScale=Vector3.one*(scale*QuestSlice.ActorScale);
-   Place(art,"Wall_Plaster_Door_Round",house,new Vector3(0,0,-.075f),new Vector3(.17f,.12f,.018f));
-   Place(art,"Door_1_Round",house,new Vector3(0,0,-.086f),new Vector3(.05f,.09f,.008f));
-   Place(art,"Wall_Plaster_Straight",house,new Vector3(0,0,.075f),new Vector3(.17f,.12f,.018f),180);
-   for(int side=-1;side<=1;side+=2)Place(art,"Wall_Plaster_Window_Thin_Round",house,new Vector3(side*.085f,0,0),new Vector3(.15f,.12f,.018f),side*90);
-   Place(art,"Roof_RoundTiles_4x4",house,new Vector3(0,.12f,0),new Vector3(.21f,.075f,.20f));
-   Place(art,"Roof_Front_Brick4",house,new Vector3(0,.12f,-.075f),new Vector3(.17f,.065f,.014f));
-   var box=house.gameObject.AddComponent<BoxCollider>();box.center=new Vector3(0,.09f,0);box.size=new Vector3(.18f,.18f,.17f);
+  var wallTint=new[]{new Color(1,.94f,.82f),new Color(.9f,.96f,1),new Color(.76f,.90f,.78f)}[style];
+  var roofTint=new[]{new Color(1.4f,.7f,.4f),new Color(.45f,1.05f,1.25f),new Color(.85f,.65f,.42f)}[style];
+  void Tint(GameObject g,Color color){if(g==null)return;foreach(var r in g.GetComponentsInChildren<Renderer>())for(int slot=0;slot<r.sharedMaterials.Length;slot++){var material=r.sharedMaterials[slot];if(!material.name.Contains("Plaster")&&!material.name.Contains("RoundTiles"))continue;var block=new MaterialPropertyBlock();block.SetColor("_Color",color);if(material.name.Contains("RoundTiles"))block.SetFloat("_Recolor",1);r.SetPropertyBlock(block,slot);}}
+  var front=Place(art,"Wall_Plaster_Door_Round",house,new Vector3(0,0,-.075f),new Vector3(.17f,wallHeight,.018f));Tint(front,wallTint);
+  // Apply the SAME authored wall-axis conversion to its matching door, rather than
+  // fitting the leaf independently. Small overlap compensates for hinge/handle bounds
+  // on the door mesh, so the wooden leaf fills the entire arched aperture.
+  var door=Place(art,"Door_1_Round",house,new Vector3(0,wallHeight*.0096f,-.086f),new Vector3(.17f*1.12f/2*1.15f,wallHeight*2.32f/3.12f*1.1f,.0054f));
+  door.name="Fitted round door - style "+style;
+  Tint(Place(art,"Wall_Plaster_Straight",house,new Vector3(0,0,.075f),new Vector3(.17f,wallHeight,.018f),180),wallTint);
+  for(int side=-1;side<=1;side+=2){
+   Tint(Place(art,"Wall_Plaster_Window_Thin_Round",house,new Vector3(side*.085f,0,0),new Vector3(.15f,wallHeight,.018f),side*90),wallTint);
+   Place(art,"Window_Thin_Round1",house,new Vector3(side*.096f,wallHeight*1.02f/3.12f,0),new Vector3(.15f*.88f/2,wallHeight*1.6f/3.12f,.015f),side*90);
+  }
+  Tint(Place(art,"Roof_RoundTiles_4x4",house,new Vector3(0,wallHeight,0),new Vector3(style==2?.22f:.21f,roofHeight,.20f)),roofTint);
+  Place(art,"Roof_Front_Brick4",house,new Vector3(0,wallHeight,-.075f),new Vector3(.17f,roofHeight,.014f));
+  if(style!=0){
+   var chimney=Place(art,"Rock_Medium_1",house,new Vector3(style==1?-.052f:.052f,.11f,.025f),new Vector3(.025f,.08f,.025f));chimney.name="Stone chimney";
+   Place(art,"Rock_Medium_1",house,new Vector3(style==1?-.052f:.052f,.18f,.025f),new Vector3(.033f,.012f,.033f));
+  }
+  if(style==1){
+   Place(art,"Window_Thin_Round1",house,new Vector3(0,wallHeight+.012f,-.095f),new Vector3(.025f,.032f,.009f));
+  }
+  var box=house.gameObject.AddComponent<BoxCollider>();box.center=new Vector3(0,.0975f,0);box.size=new Vector3(.18f,.195f,.17f);
   return house;
  }
  public static void Build(EnvironmentArt art,Transform parent,Renderer ground,IslandTerrainData terrain=null){
   var root=new GameObject("Quaternius CC0 island environment").transform;root.SetParent(parent,false);
   if(terrain!=null&&terrain.HasPlacements){BuildOriginal(art,root,terrain);Understory(art,root,terrain);Surface(ground,terrain);IslandAtmosphere.Build(root,terrain);return;}
-  for(int i=0;i<4;i++)Home(art,root,new Vector3(-.5f+i*.28f,Floor,.48f),i%2==0?8:-8,1,"Modular village home "+(i+1));
+  for(int i=0;i<4;i++)Home(art,root,new Vector3(-.5f+i*.28f,Floor,.48f),i%2==0?8:-8,1,"Modular village home "+(i+1),i);
   for(int i=0;i<11;i++){
    float angle=.12f+i*.53f;var at=new Vector3(Mathf.Cos(angle)*.75f,Floor,Mathf.Sin(angle)*.75f);
    if(at.z<-.45f&&Mathf.Abs(at.x)<.48f)continue;
@@ -100,7 +120,7 @@ public static class IslandEnvironment {
    if(p.kind is "drink" or "villager")continue;
    var at=terrain.PlacementPoint(p);var name="Original "+p.kind+" L"+p.line+" - "+p.type;Transform marker;
    if(p.kind=="building"&&!p.type.Contains("STORAGE_PIT")&&!p.type.Contains("GRAVEYARD")){
-    marker=Home(art,root,at,p.yaw,3.66f*terrain.scale*p.size/.195f,name);
+    marker=Home(art,root,at,p.yaw,3.66f*terrain.scale*p.size/.195f,name,p.line+p.town);
    }else{
     marker=new GameObject(name).transform;marker.SetParent(root,false);marker.localPosition=at;marker.localRotation=Quaternion.Euler(p.pitch,p.yaw,p.roll);
     float unit=terrain.scale*p.size;

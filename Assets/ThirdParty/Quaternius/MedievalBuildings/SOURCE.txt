@@ -1,0 +1,8 @@
+https://quaternius.com/packs/medievalvillage.html
+Downloaded 2026-10-24 from artist's Poly Pizza listings (original Drive downloads exceeded public quota).
+Conversions preserve authored proportions and colors; uniformly normalized to height 1. No textures required.
+House_A | https://poly.pizza/m/he3p42mUTH | CC0 | glTF SHA256 e3f48621763c1314e1f4f2a98ed6c61b76dfa436cdde263d1014a0404c1ba935
+House_B | https://poly.pizza/m/BH2XHWUNmF | CC0 | glTF SHA256 74d4c91022414875ec61ab80835705a9c0e9415aa0dd413fc8e83cbfd861a5c9
+House_C | https://poly.pizza/m/dcPho4SUA3 | CC0 | glTF SHA256 39b9d7d4c85e170f64d066a3f762ab88689a614c270e95c52927908fb52fa36a
+Blacksmith | https://poly.pizza/m/bV52eTG1Aj | CC0 | glTF SHA256 264fc6abe5be8c091a1c6f293dce9e8ae79b96b50ccec45f0a7fb12201db1d7c
+Inn | https://poly.pizza/m/x3ZcGn3jr4 | CC0 | glTF SHA256 106ac5aef624710d5a8e14ce076d73b4fd85312688cc80cebb6bd45cf61daefe

@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 03fbb0e988448ad45bfc913d4fb8cd72, type: 3}
+  m_Name: VillageBuildings
+  m_EditorClassIdentifier: Assembly-CSharp::BWVR.EnvironmentArt
+  models:
+  - {fileID: 3560701395162853703, guid: 8dc1c92552d10c249965b972cabb31ad, type: 3}
+  - {fileID: 7759045184096600314, guid: 2253789eed06d434f8e2d57fb3d1d384, type: 3}
+  - {fileID: 8205452342163108566, guid: 2dd9149f282570f41a9d0b42d63875d7, type: 3}
+  - {fileID: 4288660429960897341, guid: 3ecd4092888fd26479210855d1af20de, type: 3}
+  - {fileID: 4683124921726034194, guid: 8b840edc29c1b97498afee65ef5ebdba, type: 3}
