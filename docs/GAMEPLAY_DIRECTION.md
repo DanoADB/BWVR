@@ -41,3 +41,17 @@ The first implementation can use a small, inspectable set of needs, memories and
 Extend the drought chapter so villagers recognize a water shortage, choose a response, cooperate on a useful construction project and retain what they learned. The creature can learn to help through tools, toys and feedback, but villagers can also make progress independently. Add costly possession after the autonomous teaching loop works, so it supplements that loop rather than substitutes for it.
 
 This scenario is a proposed development test of the direction above. It is not a claim that autonomous construction, relationships, technology or possession are already implemented.
+
+## Emergence priorities (2026-10-24)
+
+Prioritize opportunities for villagers and the creature to interact and change through experience. More job types are not the immediate goal. Keep the broader ideas as a staged backlog:
+
+1. **Social foundation:** individual temperament, remembered encounters, villager-initiated attention, creature preferences and learning from nearby safe encounters. First implementation described in CREATURE_BEHAVIOR.md.
+2. **Shared play:** invite the creature to a ball, chime or construction site; reciprocal turns, encouragement and consent. Teach object-specific interests through repeated experiences.
+3. **Meaning from use:** recognize that the same blocks can become an arch, seat, shelter or obstacle. Villagers investigate and develop different uses; remember useful places rather than require a prescribed solution.
+4. **Relationships and disagreements:** friendship, attachments and shared ownership; watching, helping, protecting or dismantling follows each actor's experience. Expand creature-villager memory into villager-villager relationships.
+5. **Observation and habits:** imitation of successful actions, social transmission and persistent local traditions. Current nearby trust learning is only a small first step, not skill imitation.
+6. **Competing desires and capabilities:** balance safety, hunger, play, companionship and curiosity; playful practice develops skills. Interrupt and reconsider plans when circumstances change.
+7. **Environmental opportunities:** weather, scarce resources and terrain create problems that existing objects and learned skills can solve in different ways.
+
+Use the creature-built arch as the first proving ground for stages 2–4: investigate, find a use, alter it, and react differently based on remembered encounters. Avoid a single scripted sequence presented as emergence. Autonomous settlement construction, technology, possession, general-purpose object recognition and the later stages above remain future work.

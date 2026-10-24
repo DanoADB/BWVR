@@ -7,6 +7,7 @@ public sealed class CreatureCuriosity:MonoBehaviour {
  public int built{get;private set;}
  Vector3 buildPoint,buildApproach,buildStart;Quaternion buildRotation;
  bool constructionFocus;
+ VillagerSocial lastFriend;
  public Phase Current{get;private set;}public CreatureAffect.Mood Affect{get;private set;}
  public int played{get;private set;}public int friendsCarried{get;private set;}public CarryItem Holding=>owned;
  CreatureAffect.Mood recentMood=CreatureAffect.Mood.Happy;
@@ -38,7 +39,7 @@ public sealed class CreatureCuriosity:MonoBehaviour {
    if(navigator.MoveTo(target.transform.position,routine.speed,dt)){Current=Phase.Inspect;clock=0;motion?.Activity(6);}
    else if(navigator.Blocked){Affect=CreatureAffect.Mood.Sad;if(elapsed>5)Finish(false);}
   }else if(Current==Phase.Inspect){
-   if(clock>1.8f){owned=target.Item;original=owned.transform.position;originalRotation=owned.transform.rotation;owned.held=true;owned.GetComponent<Collider>().enabled=false;
+   if(clock>1.8f){var social=target.GetComponent<VillagerSocial>();if(social!=null&&!social.Willing){Finish(false);return false;}social?.ResetTask();owned=target.Item;original=owned.transform.position;originalRotation=owned.transform.rotation;owned.held=true;owned.GetComponent<Collider>().enabled=false;
     owned.GetComponent<ConstructionBlock>()?.Grab();
     owned.GetComponent<VillagerRoutine>()?.ResetTask();motion?.Activity(1);Current=Phase.Lift;clock=0;}
   }else if(Current==Phase.Lift){
@@ -70,7 +71,7 @@ public sealed class CreatureCuriosity:MonoBehaviour {
    else {motion?.Carry(owned.transform);motion?.Playful(clock);}
    if(clock>3.5f){Current=Phase.Place;clock=0;motion?.Carry(owned.transform);motion?.Activity(5);}
   }else if(Current==Phase.Place&&clock>1.1f){
-   if(target.kind==CreatureAffordance.Kind.Villager){friendsCarried++;lastSocial=true;}
+   if(target.kind==CreatureAffordance.Kind.Villager){friendsCarried++;lastSocial=true;lastFriend=target.GetComponent<VillagerSocial>();if(lastFriend!=null){lastFriend.RememberRide();foreach(var witness in lastFriend.transform.parent.GetComponentsInChildren<VillagerSocial>())if(witness!=lastFriend&&!witness.GetComponent<CarryItem>().held&&Vector3.Distance(witness.transform.position,transform.position)<navigator.world.Scale*22)witness.WitnessRide();}}
    else {played++;lastSocial=false;if(target.kind==CreatureAffordance.Kind.Food)state.hunger=.05f;}
    target.Discovered();boredom=0;emotion=5;feedbackWindow=12;Finish(true);
   }
@@ -78,13 +79,14 @@ public sealed class CreatureCuriosity:MonoBehaviour {
  }
  float Score(CreatureAffordance a){float novelty=1f/(1+a.discoveries*2);float distance=Vector3.Distance(transform.position,a.transform.position)/navigator.world.Scale;
   float drive=a.kind==CreatureAffordance.Kind.Food?state.hunger*2.5f:a.kind==CreatureAffordance.Kind.Villager?state.socialPreference:state.playPreference+.2f;
-  return novelty+drive-distance*.012f+(constructionFocus&&a.GetComponent<ConstructionBlock>()!=null?2.5f:0);
+  return novelty+drive-distance*.012f+(constructionFocus&&a.GetComponent<ConstructionBlock>()!=null?2.5f:0)+(a.GetComponent<VillagerSocial>()?.Attraction??0);
  }
  bool SafeLanding(Vector3 at,out Vector3 result){var friend=owned!=null?owned.GetComponent<IslandNavigator>():null;result=at;return friend!=null&&navigator.world.Sample(at,friend.profile,8,out result);}
  public void Offer(CreatureAffordance item){if(Current==Phase.Rest)TryBegin(item);}
- public void NoticeDisassembly(Transform villager){emotion=4;recentMood=CreatureAffect.Mood.Sad;Affect=recentMood;motion?.LookAt(villager);}
- public void Feedback(bool positive){if(state==null)return;if(feedbackWindow>0){float change=positive?.12f:-.12f;if(lastSocial)state.socialPreference=Mathf.Clamp01(state.socialPreference+change);else state.playPreference=Mathf.Clamp01(state.playPreference+change);feedbackWindow=0;}emotion=5;recentMood=positive?CreatureAffect.Mood.Happy:CreatureAffect.Mood.Sad;Affect=recentMood;}
- public void ResetTask(){Finish(false);constructionFocus=false;cooldown=7;boredom=emotion=feedbackWindow=0;Affect=CreatureAffect.Mood.Calm;}
+ public void NoticeGreeting(Transform villager){emotion=4;recentMood=CreatureAffect.Mood.Happy;Affect=recentMood;motion?.LookAt(villager);}
+ public void NoticeDisassembly(Transform villager){villager.GetComponent<VillagerSocial>()?.RememberDispute();emotion=4;recentMood=CreatureAffect.Mood.Sad;Affect=recentMood;motion?.LookAt(villager);}
+ public void Feedback(bool positive){if(state==null)return;if(feedbackWindow>0){float change=positive?.12f:-.12f;if(lastSocial){state.socialPreference=Mathf.Clamp01(state.socialPreference+change);lastFriend?.Feedback(positive);}else state.playPreference=Mathf.Clamp01(state.playPreference+change);feedbackWindow=0;}emotion=5;recentMood=positive?CreatureAffect.Mood.Happy:CreatureAffect.Mood.Sad;Affect=recentMood;}
+ public void ResetTask(){Finish(false);lastFriend=null;constructionFocus=false;cooldown=7;boredom=emotion=feedbackWindow=0;Affect=CreatureAffect.Mood.Calm;}
  void Finish(bool success){
   motion?.Carry(null);motion?.Playful(0);motion?.PlaceAt(default,Quaternion.identity,0);motion?.LookAt(null);motion?.Activity(0);navigator?.ResetRoute();
   if(owned!=null){var item=owned;var point=original;
