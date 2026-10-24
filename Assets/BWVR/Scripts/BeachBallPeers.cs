@@ -14,7 +14,7 @@ public sealed partial class BeachBall {
   for(int i=0;i<16;i++){var wanted=transform.position+Quaternion.Euler(0,i*22.5f,0)*Vector3.forward*nav.Scale*20;if(!nav.Sample(wanted,nav.villager,2,out var sample))continue;var at=nav.ProjectFoot(sample,nav.villager);if(Vector3.Dot(Flat(at-transform.position).normalized,Flat(first.transform.position-transform.position).normalized)>.3f||Mathf.Abs(at.y-ground)>nav.Scale*1.1f||!ClearLane(at))continue;float distance=(at-second.transform.position).sqrMagnitude;if(distance>=best)continue;best=distance;peerMeeting=at;found=true;}
   if(!found){CancelRally();return false;}
   first.BeginPeerBall(this);second.BeginPeerBall(this);first.GetComponent<VillagerSocial>().Memory.nextPeerPlayAt=second.GetComponent<VillagerSocial>().Memory.nextPeerPlayAt=time+90;
-  creature.Journal.Add(time,"villager invites friend",CreatureAction.IdleOrObserve,a,b);return true;
+  OfferSpectators();creature.Journal.Add(time,"villager invites friend",CreatureAction.IdleOrObserve,a,b);return true;
  }
  public bool PreparePeer(float dt){if(!PeerGame||creature.Season.paused)return false;if(PeerReady)return true;var walker=PeerPlayer.GetComponent<IslandNavigator>();if(walker.MoveTo(peerMeeting,PeerPlayer.transform.lossyScale.y*1.6f,dt)){PeerReady=true;rallyClock=0;PeerPlayer.GetComponent<HumanoidMotion>()?.React();}return PeerReady;}
  bool PeerHealthy=>PeerPlayer!=null&&!PeerPlayer.GetComponent<CarryItem>().held&&PeerPlayer.GetComponent<VillagerSocial>().Memory.injury<=0&&Player.GetComponent<VillagerSocial>().Memory.injury<=0;
