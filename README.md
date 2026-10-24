@@ -10,6 +10,8 @@ Future design: [gameplay direction](docs/GAMEPLAY_DIRECTION.md) — tools, toys 
 2. Allow the pinned packages to resolve. Open `Assets/BWVR/Scenes/FirstQuestSlice.unity`.
 3. Press Play. Without a headset, hold right mouse to look, use WASD to move, E to grab/release, F to select, 1/2 to praise/discourage while aiming at the creature, and Tab to toggle the sanctuary panel.
 
+**Current development default: exploration focus.** Drought drain and the season countdown are paused, empty-bucket requests are quiet, and the creature does not automatically choose water delivery. Villagers can still work in the background; an explicit Help cue can make water assistance available. Play, social contact, building, hunger, discovery, energy recovery and the simulation clock continue. To test the full drought again, turn off **Development Focus** on the scene's QuestSlice component. This development switch does not erase or reset the saved season, and does not add headset buttons or a permanent HUD.
+
 The generated scene contains the BWVR bootstrap. It builds the island and spatial UI at runtime. To regenerate the scene and Quest settings, select **BWVR > Set up first Quest slice**. This replaces the prototype scene, so save custom scene work elsewhere first.
 
 ## Quest Link: press Play in the headset
@@ -52,6 +54,8 @@ Android Build Support, SDK and NDK are available on the setup machine. Unity-pro
 A three-minute dry season with one autonomous creature, three independent villagers, physical toys and construction, contextual teaching, indirect guidance and limited rain/healing miracles. The player remains unseen. The existing Quaternius/CC0 art catalogs provide the visible creature and settlement; the original terrain importer remains a local reference workflow. See [art setup](docs/GAME_ART.md).
 
 The creature's water, food, toy, social, observation and construction actions now share one utility comparison and one movement/carry owner. It can inspect tagged benches and a cairn, then try bench-like spans and towers on empty trays. A tagged shoreline gap provides one useful physical bridge opportunity: completed supports and span open native villager routes; dismantling closes them. This is a small authored pattern vocabulary, not general visual recognition or unrestricted architecture.
+
+Villagers can also fetch an available toy or berry, carry it near the creature, set it down and invite a shared experience. The creature weighs that invitation against its other needs. Completed play or eating improves that individual relationship; ignored invitations cause a longer wait, without a trust penalty. Teaching after a shared action can reinforce the creature's preference toward its actual inviting partner. Reservations and carry cleanup protect player-held objects and other villagers' discoveries.
 
 Saves preserve resources, learned category/context preferences, relationships, injury, spiritual energy, guidance, a logical intention, discovery memories and physical construction. Reload resumes automatically and revalidates a saved intention from a safe action boundary; held objects and exact animation poses are not resumed. Loose tool positions and the transient 48-event journal are not saved. See [hybrid audit and validation](docs/HYBRID_IMPLEMENTATION_AUDIT.md).
 

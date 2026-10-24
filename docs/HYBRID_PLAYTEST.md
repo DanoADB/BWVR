@@ -2,6 +2,8 @@
 
 Open FirstQuestSlice in Unity 6000.6.7f1. No APK is required for Editor/Quest Link testing. The wrist sanctuary starts closed. Use Help/details only when an explanation or energy number is needed.
 
+Development currently defaults to **Exploration Focus** on QuestSlice. Leave it enabled to watch villagers bring toys and berries to the creature without drought interruptions. The creature may accept through its normal decision system; look for the villager's carry, placement, beckoning and watching gestures. For the drought sequence below, disable Development Focus first. Switching mode preserves the season; it does not restart the timer or replenish resources.
+
 1. Begin a new season. Watch the village without intervening: the gatherer demonstrates an empty bucket, then returns to work; the farmer and forester continue independently. Repeated requests cannot indefinitely prevent a water delivery.
 2. Carry the hands/drop tool near the cistern. Release while pointing at the cistern or water gatherer. The creature acknowledges, but a Help cue is a 30-second outcome bias, not a guaranteed movement command. Very low water takes precedence over leisure.
 3. After useful creature water delivery, aim at the creature and tap A (desktop 1). Compare later choices in similar shortages. B/2 discourages instead. One completed action can receive one reinforcement within 12 simulation seconds. Pause and carrying block feedback.
