@@ -10,7 +10,7 @@ using CommonUsages=UnityEngine.XR.CommonUsages;
 namespace BWVR {
 public sealed class QuestSlice:MonoBehaviour {
  IslandNavigation navigation; IslandTerrainData terrain; Collider groundCollider; const float Floor=.82f; SliceState state=new SliceState(); Camera eye; Transform rig,left,right,creature; Text status,creatureLabel; GameObject panel; Font font; GameArtCatalog art; OriginalCowMotion cowMotion; HumanoidMotion godMotion; HumanoidMotion[] humanoids=Array.Empty<HumanoidMotion>();
- readonly Transform[] aims=new Transform[2]; readonly QuestControls.Hand[] controllerHands=new QuestControls.Hand[2]; bool turnHeld,recenterLast,zoomHeld,rightZoomUsed; Vector3 zoomFocus;
+ readonly Transform[] aims=new Transform[2]; readonly QuestControls.Hand[] controllerHands=new QuestControls.Hand[2]; bool turnHeld,recenterLast,zoomHeld; Vector3 zoomFocus;
  readonly List<CarryItem> items=new List<CarryItem>(); readonly List<Transform> workers=new List<Transform>();
  readonly CarryItem[] held=new CarryItem[2]; readonly bool[] lastGrip=new bool[2],lastTrigger=new bool[2]; readonly LineRenderer[] rays=new LineRenderer[2];
  DroughtSignals signals;bool helpVisible,outcomeShown;string saveError; CreatureRoutine creatureRoutine; VillagerRoutine[] jobs; float clock,saveClock,creatureTrip; bool returning,menuLast,trackingConfigured,viewPlaced; string notice="Their creature is their god. Your touch guides its instincts.";
@@ -96,8 +96,7 @@ public sealed class QuestSlice:MonoBehaviour {
  void Update(){if(eye==null)return;foreach(var motion in humanoids)motion.paused=state.paused||state.Finished;if(cowMotion!=null)cowMotion.paused=state.paused||state.Finished;clock+=Time.deltaTime;state.Step(Time.deltaTime);bool xr=XRSettings.isDeviceActive;
   if(xr){if(!trackingConfigured){var inputs=new List<XRInputSubsystem>();SubsystemManager.GetSubsystems(inputs);bool floor=false;foreach(var input in inputs)floor|=input.TrySetTrackingOriginMode(TrackingOriginModeFlags.Floor);if(!floor)rig.position+=Vector3.up*1.55f;trackingConfigured=true;}Pose(XRNode.Head,eye.transform);UpdateController(0,left);UpdateController(1,right);if(!viewPlaced){var head=InputDevices.GetDeviceAtXRNode(XRNode.Head);if(head.TryGetFeatureValue(CommonUsages.isTracked,out bool tracked)&&tracked)RecenterView();}
    bool zoom=controllerHands[1].zoom;
-   if(zoom&&!zoomHeld){zoomFocus=ZoomFocus();rightZoomUsed=false;}
-   if(zoom&&Mathf.Abs(controllerHands[1].stick.y)>.2f)rightZoomUsed=true;
+   if(zoom&&!zoomHeld)zoomFocus=ZoomFocus();
    if(zoom&&held[0]==null&&held[1]==null){float value=controllerHands[1].stick.y;if(Mathf.Abs(value)>.2f)QuestControls.Zoom(rig,zoomFocus,value*Time.deltaTime);}
    zoomHeld=zoom;
    QuestControls.Move(rig,eye.transform,controllerHands[0].stick,zoom?Vector2.zero:controllerHands[1].stick,Time.deltaTime,ref turnHeld);
@@ -106,12 +105,12 @@ public sealed class QuestSlice:MonoBehaviour {
    if(terrain!=null){float minimum=terrain.Project(eye.transform.position).y+.2f*rig.localScale.x;float y=Mathf.Clamp(eye.transform.position.y,minimum,Floor+3*rig.localScale.x);rig.position+=Vector3.up*(y-eye.transform.position.y);}
   }
   else Desktop();
-  for(int i=0;i<2;i++){bool grip=controllerHands[i].grip,trigger=controllerHands[i].trigger;if(!xr){grip=i==1&&Keyboard.current!=null&&Keyboard.current.eKey.isPressed;trigger=i==1&&Keyboard.current!=null&&Keyboard.current.fKey.isPressed;}
+  for(int i=0;i<2;i++){bool grip=xr&&i==1?controllerHands[i].trigger:controllerHands[i].grip,trigger=controllerHands[i].trigger;if(!xr){grip=i==1&&Keyboard.current!=null&&Keyboard.current.eKey.isPressed;trigger=i==1&&Keyboard.current!=null&&Keyboard.current.fKey.isPressed;}
    var hand=i==0?left:right;var pointer=xr?aims[i]:hand;var ray=new Ray(pointer.position,pointer.forward);Physics.Raycast(ray,out var hit,8*rig.localScale.x);rays[i].SetPosition(0,ray.origin);rays[i].SetPosition(1,hit.collider?hit.point:ray.GetPoint(2*rig.localScale.x));rays[i].enabled=xr?controllerHands[i].tracked:i==1;
-   if(grip&&!lastGrip[i]&&hit.collider){var item=hit.collider.GetComponentInParent<CarryItem>();if(item!=null&&!item.held){held[i]=item;item.held=true;item.GetComponent<Collider>().enabled=false;notice="Release grip over the island to place. Water belongs in the blue cistern.";}}
+   if(grip&&!lastGrip[i]&&hit.collider){var item=hit.collider.GetComponentInParent<CarryItem>();if(item!=null&&!item.held){held[i]=item;item.held=true;item.GetComponent<Collider>().enabled=false;notice="Release the carry button over the island to place. Water belongs in the blue cistern.";}}
    if(held[i]!=null){if(xr&&!controllerHands[i].tracked){var item=held[i];held[i]=null;item.held=false;item.transform.position=item.home;item.GetComponent<Collider>().enabled=true;}else{held[i].transform.position=hand.position+hand.forward*(.16f*rig.localScale.x);if(!grip)Release(i,ray);}}
-   // Right trigger selects on release only if this hold was not a zoom gesture.
-   bool interact=xr&&i==1?!trigger&&lastTrigger[i]&&!rightZoomUsed:trigger&&!lastTrigger[i];
+   // Right side grip is reserved for zoom; the front trigger carries or interacts.
+   bool interact=trigger&&!lastTrigger[i]&&held[i]==null;
    if(interact&&hit.collider)hit.collider.GetComponentInParent<SpatialTarget>()?.Activate();lastGrip[i]=grip;lastTrigger[i]=trigger;
   }
   bool menu=controllerHands[0].menu;if(!xr)menu=Keyboard.current!=null&&Keyboard.current.tabKey.isPressed;if(menu&&!menuLast)panel.SetActive(!panel.activeSelf);menuLast=menu;
