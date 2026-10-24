@@ -23,6 +23,14 @@ Material:
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
+    - _Biome:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Detail:
+        m_Texture: {fileID: 2800000, guid: fe72ad5beef5175458d48d8b8e824115, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _Grass:
         m_Texture: {fileID: 2800000, guid: 7c46d7c8bb174b944b6bfd8d4ed6d7fc, type: 3}
         m_Scale: {x: 1, y: 1}
@@ -38,6 +46,7 @@ Material:
     m_Ints: []
     m_Floats:
     - _SeaLevel: 0.75
-    m_Colors: []
+    m_Colors:
+    - _BiomeRect: {r: 0, g: 0, b: 1, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

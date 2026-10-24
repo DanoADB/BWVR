@@ -18,7 +18,7 @@ public static class IslandEnvironment {
  }
  public static void Build(EnvironmentArt art,Transform parent,Renderer ground,IslandTerrainData terrain=null){
   var root=new GameObject("Quaternius CC0 island environment").transform;root.SetParent(parent,false);
-  if(terrain!=null&&terrain.HasPlacements){BuildOriginal(art,root,terrain);Surface(ground,terrain);Clouds(root);return;}
+  if(terrain!=null&&terrain.HasPlacements){BuildOriginal(art,root,terrain);Understory(art,root,terrain);Surface(ground,terrain);Clouds(root);return;}
   for(int i=0;i<4;i++)Home(art,root,new Vector3(-.5f+i*.28f,Floor,.48f),i%2==0?8:-8,1,"Modular village home "+(i+1));
   for(int i=0;i<11;i++){
    float angle=.12f+i*.53f;var at=new Vector3(Mathf.Cos(angle)*.75f,Floor,Mathf.Sin(angle)*.75f);
@@ -67,7 +67,39 @@ public static class IslandEnvironment {
    var cloud=GameObject.CreatePrimitive(PrimitiveType.Sphere);cloud.name="Soft horizon cloud";cloud.transform.SetParent(root,false);float a=i*1.05f;cloud.transform.localPosition=new Vector3(Mathf.Cos(a)*4+puff*.3f,2.6f+Mathf.Sin(i)*.25f,Mathf.Sin(a)*4);cloud.transform.localScale=new Vector3(.8f,.18f+puff*.03f,.4f);Object.Destroy(cloud.GetComponent<Collider>());cloud.GetComponent<Renderer>().sharedMaterial=cloudMaterial;
   }
  }
- static void Surface(Renderer ground,IslandTerrainData terrain){var surface=Resources.Load<Material>("QuaterniusGround");if(surface!=null){var material=new Material(surface);material.SetFloat("_SeaLevel",terrain.SeaLevel);ground.sharedMaterial=material;}}
+ static void Surface(Renderer ground,IslandTerrainData terrain){var surface=Resources.Load<Material>("QuaterniusGround");if(surface!=null){var material=new Material(surface);material.SetFloat("_SeaLevel",terrain.SeaLevel);PaintBiomes(material,terrain);ground.sharedMaterial=material;}}
+ static void PaintBiomes(Material material,IslandTerrainData terrain){
+  const int size=512;var pixels=new Color[size*size];
+  var min=terrain.World(terrain.bounds[0],terrain.bounds[1],0);var max=terrain.World(terrain.bounds[2],terrain.bounds[3],0);var span=max-min;
+  void Dab(Vector3 at,float radius,int channel,float strength){
+   float cx=(at.x-min.x)/span.x*(size-1),cy=(at.z-min.z)/span.z*(size-1),rx=radius/span.x*(size-1),ry=radius/span.z*(size-1);
+   for(int y=Mathf.Max(0,Mathf.FloorToInt(cy-ry));y<=Mathf.Min(size-1,Mathf.CeilToInt(cy+ry));y++)for(int x=Mathf.Max(0,Mathf.FloorToInt(cx-rx));x<=Mathf.Min(size-1,Mathf.CeilToInt(cx+rx));x++){
+    float d=new Vector2((x-cx)/rx,(y-cy)/ry).magnitude;var color=pixels[y*size+x];color[channel]=Mathf.Max(color[channel],(1-Mathf.SmoothStep(.25f,1,d))*strength);pixels[y*size+x]=color;
+   }
+  }
+  if(terrain.HasPlacements){
+   foreach(var p in terrain.placements){var at=terrain.PlacementPoint(p);
+    if(p.kind=="tree")Dab(at,terrain.scale*18,1,.8f);
+    if(p.kind=="field")Dab(at,terrain.scale*8,2,1);
+    if(p.kind!="building")continue;Dab(at,terrain.scale*8,0,.8f);
+    IslandPlacement centre=null;float closest=float.MaxValue;
+    foreach(var candidate in terrain.placements)if(candidate.kind=="building"&&candidate.town==p.town&&candidate.type.Contains("TOWN_CENTRE")){float d=Vector3.Distance(terrain.PlacementPoint(candidate),at);if(d<closest){closest=d;centre=candidate;}}
+    if(centre==null)continue;var end=terrain.PlacementPoint(centre);int steps=Mathf.CeilToInt(Vector3.Distance(at,end)/(terrain.scale*2));
+    for(int i=0;i<=steps;i++){var point=Vector3.Lerp(at,end,i/(float)Mathf.Max(1,steps));if(terrain.Dry(point))Dab(point,terrain.scale*3.5f,0,.85f);}
+   }
+  }
+  var texture=new Texture2D(size,size,TextureFormat.RGBA32,false,true){name="Island forest and village ground",wrapMode=TextureWrapMode.Clamp};texture.SetPixels(pixels);texture.Apply(false,true);material.SetTexture("_Biome",texture);material.SetVector("_BiomeRect",new Vector4(min.x,min.z,1/span.x,1/span.z));
+ }
+ static void Understory(EnvironmentArt art,Transform root,IslandTerrainData terrain){
+  var plants=new GameObject("Meadow and forest understory").transform;plants.SetParent(root,false);int count=0;
+  foreach(var p in terrain.placements){if(p.kind!="tree"||p.line%3!=0)continue;var centre=terrain.PlacementPoint(p);
+   for(int i=0;i<3;i++){float a=(p.line*137.5f+i*119)*Mathf.Deg2Rad;var at=centre+new Vector3(Mathf.Cos(a),0,Mathf.Sin(a))*terrain.scale*(5+i*3);if(!terrain.Dry(at))continue;
+    bool blocked=false;foreach(var building in terrain.placements)if(building.kind=="building"&&Vector3.Distance(at,terrain.PlacementPoint(building))<terrain.scale*7){blocked=true;break;}if(blocked)continue;
+    at=terrain.Project(at);string key=i==0?"Fern_1":p.line%5==0?"Bush_Common_Flowers":"Grass_Common_Short";var g=Place(art,key,plants,at,new Vector3(4,1.5f,4)*terrain.scale,a*Mathf.Rad2Deg);if(g!=null){AddVegetationLOD(g,true);count++;}
+   }
+  }
+  Debug.Log("BWVR_UNDERSTORY: "+count+" ground-cover clusters; original placements preserved");
+ }
  static void BuildOriginal(EnvironmentArt art,Transform root,IslandTerrainData terrain){
   int count=0;
   foreach(var p in terrain.placements){

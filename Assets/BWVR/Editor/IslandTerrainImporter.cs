@@ -25,7 +25,7 @@ public static class IslandTerrainImporter {
   var meshPath=Local+"/FirstIslandMesh.asset";var existing=AssetDatabase.LoadAssetAtPath<Mesh>(meshPath);if(existing==null)AssetDatabase.CreateAsset(mesh,meshPath);else{EditorUtility.CopySerialized(mesh,existing);UnityEngine.Object.DestroyImmediate(mesh);mesh=existing;}data.mesh=mesh;EditorUtility.SetDirty(data);
   const string matPath="Assets/BWVR/Environment/Resources/QuaterniusGround.mat";var material=AssetDatabase.LoadAssetAtPath<Material>(matPath);if(material==null){material=new Material(Shader.Find("BWVR/IslandGround"));AssetDatabase.CreateAsset(material,matPath);}material.shader=Shader.Find("BWVR/IslandGround");
   const string textures="Assets/ThirdParty/Quaternius/Nature/Textures/";
-  material.SetTexture("_Grass",AssetDatabase.LoadAssetAtPath<Texture2D>(textures+"Grass.png"));material.SetTexture("_Rock",AssetDatabase.LoadAssetAtPath<Texture2D>(textures+"Rocks_Diffuse.png"));material.SetTexture("_Sand",AssetDatabase.LoadAssetAtPath<Texture2D>(textures+"Rocks_Desert_Diffuse.png"));EditorUtility.SetDirty(material);AssetDatabase.SaveAssets();
+  material.SetTexture("_Detail",AssetDatabase.LoadAssetAtPath<Texture2D>(textures+"PathRocks_Diffuse.png"));material.SetTexture("_Grass",AssetDatabase.LoadAssetAtPath<Texture2D>(textures+"Grass.png"));material.SetTexture("_Rock",AssetDatabase.LoadAssetAtPath<Texture2D>(textures+"Rocks_Diffuse.png"));material.SetTexture("_Sand",AssetDatabase.LoadAssetAtPath<Texture2D>(textures+"Rocks_Desert_Diffuse.png"));EditorUtility.SetDirty(material);AssetDatabase.SaveAssets();
   Debug.Log("BWVR_LAND1_IMPORTED: "+vertices.Length+" vertices, "+triangles.Count/3+" triangles; 4.8m wide; source="+data.sourceHash);
  }
 }
