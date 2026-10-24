@@ -72,3 +72,5 @@ Unity setup and rules validation passed. Play Mode created and rendered the scen
 Creature–villager relationships now retain individual affection/confidence and recent frightening encounters. A creature that has enjoyed gentle rallies can invite an available playmate, favor familiar partners, and learn from correctly attributed partner feedback. See the remembered-playmates section in [play and village response](docs/PLAY_AND_VILLAGE_RESPONSE.md).
 
 Villagers also develop saved peer familiarity through independent two-villager beachball games. Preferred friends compete with distance and availability; witnessed harmful peer play causes individual caution toward its source. These relationships are separate from creature trust and worship.
+
+Nearby idle villagers can now watch visible ball exchanges, learn confidence from their outcomes, and become more inclined to try shared play. Practice is remembered separately from observation; a learner can later become another villager's example. Occlusion, facing, watching time, pause and carrying gate observation.
