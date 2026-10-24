@@ -1,0 +1,6 @@
+Village|MI_Brick|T_Brick_BaseColor.png
+Village|MI_RockTrim|T_RockTrim_BaseColor.png
+Village|MI_Plaster|T_Plaster_BaseColor.png
+Village|MI_WoodTrim_Wear|T_WoodTrim_BaseColor.png
+Village|MI_RoundTiles|T_RoundTiles_BaseColor.png
+Village|MI_WoodTrim|T_WoodTrim_BaseColor.png

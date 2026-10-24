@@ -19,3 +19,6 @@ build/
 .utmp/
 
 Assets/LocalGameAssets.meta
+
+Assets/LocalLicensedArt/
+Assets/LocalLicensedArt.meta

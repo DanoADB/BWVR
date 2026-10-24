@@ -1,0 +1,9 @@
+Nature|Leaves_TwistedTree|Leaves_TwistedTree_C.png
+Nature|Leaves_Pine|Leaf_Pine_C.png
+Nature|Bark_NormalTree|Bark_NormalTree.png
+Nature|Leaves|Leaves.png
+Nature|PathRocks|PathRocks_Diffuse.png
+Nature|Leaves_NormalTree|Leaves_NormalTree_C.png
+Nature|Flowers|Flowers.png
+Nature|Rocks|Rocks_Diffuse.png
+Nature|Grass|Grass.png
