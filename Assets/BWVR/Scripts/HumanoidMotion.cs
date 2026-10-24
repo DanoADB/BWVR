@@ -13,6 +13,7 @@ public sealed class HumanoidMotion:MonoBehaviour {
  public void Activity(int value){activity=value;}
  public void Carry(Transform resource,bool drink=false){if(hands!=null){hands.resource=resource;hands.drinking=drink;}}
  public void Playful(float clock){if(hands!=null)hands.displayTilt=Mathf.Sin(clock*3)*28;}
+ public void PlaceAt(Vector3 point,Quaternion rotation,float blend){if(hands!=null){hands.placementPoint=point;hands.placementRotation=rotation;hands.placementBlend=Mathf.Clamp01(blend);}}
  public void LookAt(Transform target){if(hands==null)return;var other=target!=null?target.GetComponentInChildren<Animator>():null;hands.lookTarget=other!=null&&other.isHuman?other.GetBoneTransform(HumanBodyBones.Head):target;}
  public void Signal(bool beckon,bool point=false,Vector3 target=default,float tilt=0){if(hands==null)return;hands.beckon=beckon;hands.indicating=point;hands.indicatedPoint=target;hands.displayTilt=tilt;}
  public void React(){if(animator!=null&&!paused&&activity==0)animator.SetTrigger("Warmth");}

@@ -3,12 +3,13 @@ namespace BWVR {
 // The free UAL has no carry/drink clip: preserve locomotion and solve the hands around the visible resource.
 public sealed class HumanoidHands:MonoBehaviour {
  public Transform actor,resource; public bool drinking,paused,beckon,indicating;public Transform lookTarget;public Vector3 indicatedPoint;public float displayTilt; Animator animator;float sip,gestureClock;
+ public Vector3 placementPoint;public Quaternion placementRotation;public float placementBlend;
  void Awake(){animator=GetComponent<Animator>();}
  void Update(){AdvancePose(Time.deltaTime);}
  public void AdvancePose(float dt){if(!paused){sip=Mathf.MoveTowards(sip,drinking&&resource!=null?1:0,Mathf.Max(0,dt)*3);gestureClock+=Mathf.Max(0,dt);}}
  Vector3 Goal(){float height=actor.lossyScale.y;var head=animator.GetBoneTransform(HumanBodyBones.Head);
   var item=resource!=null?resource.GetComponent<CarryItem>():null;bool friend=item!=null&&item.kind==Offering.Villager;
-  var carrying=actor.position+actor.up*height*(friend?.60f:.57f)+actor.forward*height*(friend?.36f:.23f);var mouth=head.position+actor.forward*height*.3f+actor.up*height*.1f;return Vector3.Lerp(carrying,mouth,sip);
+  var carrying=actor.position+actor.up*height*(friend?.60f:.57f)+actor.forward*height*(friend?.36f:.23f);var mouth=head.position+actor.forward*height*.3f+actor.up*height*.1f;return Vector3.Lerp(Vector3.Lerp(carrying,mouth,sip),placementPoint,placementBlend);
  }
  void OnAnimatorIK(int layer){
   animator.SetLookAtWeight(lookTarget!=null?.7f:0,.15f,.85f,.5f,.55f);if(lookTarget!=null)animator.SetLookAtPosition(lookTarget.position);
@@ -27,7 +28,7 @@ public sealed class HumanoidHands:MonoBehaviour {
    Reach(HumanBodyBones.LeftUpperArm,HumanBodyBones.LeftLowerArm,HumanBodyBones.LeftHand,goal-actor.right*spread);
    Reach(HumanBodyBones.RightUpperArm,HumanBodyBones.RightLowerArm,HumanBodyBones.RightHand,goal+actor.right*spread);
   }
-  resource.rotation=actor.rotation*Quaternion.Euler(-45*sip+displayTilt,0,0);resource.position=goal;if(resource.GetComponent<WaterVessel>()!=null)resource.position-=resource.up*resource.lossyScale.y*.85f;
+  resource.rotation=Quaternion.Slerp(actor.rotation*Quaternion.Euler(-45*sip+displayTilt,0,0),placementRotation,placementBlend);resource.position=goal;if(resource.GetComponent<WaterVessel>()!=null)resource.position-=resource.up*resource.lossyScale.y*.85f;
  }
  void Reach(HumanBodyBones upper,HumanBodyBones lower,HumanBodyBones hand,Vector3 goal){
   var shoulder=animator.GetBoneTransform(upper);var elbow=animator.GetBoneTransform(lower);var palm=animator.GetBoneTransform(hand);if(shoulder==null||elbow==null||palm==null)return;

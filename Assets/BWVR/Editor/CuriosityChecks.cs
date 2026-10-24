@@ -12,7 +12,7 @@ public static class CuriosityChecks {
   try{
    mind.ResetTask();routine.ResetTask();
    foreach(var kind in new[]{CreatureAffordance.Kind.Roll,CreatureAffordance.Kind.Turn,CreatureAffordance.Kind.Chime,CreatureAffordance.Kind.Food,CreatureAffordance.Kind.Villager}){
-    var target=objects.First(a=>a.kind==kind);target.cooldown=0;var original=target.transform.position;
+    var target=objects.First(a=>a.kind==kind&&(a.GetComponent<ConstructionBlock>()==null||a.GetComponent<ConstructionBlock>().CanBuild));target.cooldown=0;var original=target.transform.position;
     if(!nav.world.Sample(original,nav.profile,20,out var safe))throw new Exception("Unreachable affordance "+kind);
     mind.transform.position=nav.world.Terrain.Project(safe);nav.ResetRoute();mind.ResetTask();routine.ResetTask();
     int before=kind==CreatureAffordance.Kind.Villager?mind.friendsCarried:mind.played;bool carried=false;

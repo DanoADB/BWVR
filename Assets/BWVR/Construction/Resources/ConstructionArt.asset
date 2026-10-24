@@ -1,0 +1,17 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 03fbb0e988448ad45bfc913d4fb8cd72, type: 3}
+  m_Name: ConstructionArt
+  m_EditorClassIdentifier: Assembly-CSharp::BWVR.EnvironmentArt
+  models:
+  - {fileID: 5050205478248439400, guid: 7154ab5397db4104281e546f89b8ca38, type: 3}
+  - {fileID: 5194922754186315878, guid: 38eed65e57520bd409f5b7a85688e4ba, type: 3}
