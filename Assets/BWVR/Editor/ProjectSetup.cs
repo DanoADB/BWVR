@@ -44,7 +44,10 @@ public static class ProjectSetup {
   if(!XRPackageMetadataStore.AssignLoader(desktop.Manager,"UnityEngine.XR.OpenXR.OpenXRLoader",BuildTargetGroup.Standalone))throw new Exception("Desktop OpenXR loader assignment failed.");
   var xr=OpenXRSettings.GetSettingsForBuildTargetGroup(BuildTargetGroup.Standalone);
   if(xr==null)throw new Exception("Desktop OpenXR settings unavailable.");
-  xr.renderMode=OpenXRSettings.RenderMode.SinglePassInstanced;
+  // Desktop Link compatibility path verified on this project's built-in renderer.
+  PlayerSettings.SetUseDefaultGraphicsAPIs(BuildTarget.StandaloneWindows64,false);
+  PlayerSettings.SetGraphicsAPIs(BuildTarget.StandaloneWindows64,new[]{GraphicsDeviceType.Direct3D11});
+  xr.renderMode=OpenXRSettings.RenderMode.MultiPass;
   var touch=xr.GetFeature<OculusTouchControllerProfile>();
   if(touch==null)throw new Exception("Desktop Touch controller profile missing.");
   touch.enabled=true;

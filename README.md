@@ -16,7 +16,7 @@ The generated scene contains the BWVR bootstrap. It builds the island and spatia
 
 Install Meta Horizon Link on Windows and set it as the active OpenXR runtime in its Settings > General. Connect your Quest over USB or Air Link, then launch Quest Link inside the headset before pressing Play in Unity.
 
-BWVR configures the Standalone OpenXR loader, single-pass instanced rendering, and Touch / Touch Plus / Touch Pro controller profiles. Unity uses the Standalone XR settings for Editor Play mode even with Android as the active build target. Open the first slice scene and press Play; head and controller tracking use the same gameplay path as the Quest APK. The Android Meta Quest configuration remains separate.
+BWVR configures the Standalone OpenXR loader, DirectX 11 / multi-pass desktop rendering, and Touch / Touch Plus / Touch Pro controller profiles. Unity uses the Standalone XR settings for Editor Play mode even with Android as the active build target. Open the first slice scene and press Play; head and controller tracking use the same gameplay path as the Quest APK. The Android Meta Quest configuration remains separate (Vulkan / single-pass instanced). The desktop compatibility path avoids the sky-only output reproduced with the previous configuration. Changing desktop graphics API requires an Editor restart.
 
 **BWVR > Quest Link > Enable headset Play mode** reapplies these desktop settings without rebuilding the scene. **BWVR > Quest Link > Use desktop preview without headset** disables desktop XR initialization and keeps keyboard/mouse preview available; re-enable headset mode before the next Link session. Stop Play mode before changing modes, and restart Play after connecting Link.
 
