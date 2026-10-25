@@ -129,6 +129,7 @@ public sealed class ConstructionSite:MonoBehaviour {
   block.transform.SetPositionAndRotation(World(block.Body.position),transform.rotation*block.Body.rotation);Changed?.Invoke();return snap;
  }
  bool RayPoint(ConstructionBlock block,Ray ray,out Vector3 point){foreach(var hit in Physics.RaycastAll(ray,10).OrderBy(h=>h.distance))if(hit.collider!=block.GetComponent<Collider>()&&((hit.collider.GetComponent<ConstructionFoundation>()!=null&&hit.collider.transform.parent==transform)||hit.collider.GetComponent<ConstructionBlock>()?.Site==this)){point=hit.point+Vector3.up*unit*LayerHeight*.5f;return true;}point=World(block.spawn);return false;}
+ public bool PlacementPoint(ConstructionBlock block,Ray ray,out Vector3 point){if(!RayPoint(block,ray,out point))return false;if(FindSnap(block,point,transform.rotation,out var local,out _,out _))point=World(local);return true;}
  public bool DropRay(ConstructionBlock block,Ray ray){RayPoint(block,ray,out var point);return Drop(block,point,transform.rotation);}
  public void PreviewRay(ConstructionBlock block,Ray ray){if(RayPoint(block,ray,out var point)&&FindSnap(block,point,transform.rotation,out var local,out var rotation,out _))ShowPreview(block,World(local),transform.rotation*rotation);else preview.enabled=false;}
  public void ShowPreview(ConstructionBlock block,Vector3 point,Quaternion rotation){

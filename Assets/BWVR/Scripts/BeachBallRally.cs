@@ -54,7 +54,7 @@ public sealed partial class BeachBall {
   if(creature.Season.paused||!(Inviting||PeerGame)||PassPending||CreatureTurn!=fromCreature||fromCreature&&!HasPartner||Body.linearVelocity.magnitude>8||Harmful||fromCreature&&!PeerGame&&creature.State.time<creature.Season.WorldPlay.nextKick)return false;
   if(PeerGame&&!PeerReady)return false;var sender=fromCreature?(PeerGame?PeerPlayer.transform:creature.transform):Player.transform;var receiver=Receiver(fromCreature);float distance=Flat(receiver-transform.position).magnitude/nav.Scale;
   if(Flat(sender.position-transform.position).magnitude>nav.Scale*(Radius+2)||distance<10||distance>45||!ClearLane(receiver))return false;
-  var direction=Flat(receiver-transform.position).normalized;FinishExperience();Throw(direction,fromCreature&&!PeerGame,Mathf.Clamp(distance*.35f,4,6.5f));kicking=true;kickReward=.006f;
+  var direction=Flat(receiver-transform.position).normalized;if(fromCreature&&!PeerGame)direction=creature.Season.WorldPlay.GentleBall.Aim(direction,creature.State.seed,creature.Season.WorldPlay.kicks,StableId);FinishExperience();Throw(direction,fromCreature&&!PeerGame,Mathf.Clamp(distance*.35f,4,6.5f));kicking=true;kickReward=.006f;
   Body.linearVelocity=direction*Mathf.Clamp(distance*.35f,4,6.5f)+Vector3.up*.2f;
   if(PeerGame)lastPeerKicker=fromCreature?PeerPlayer:Player;
   if(fromCreature&&!PeerGame){var m=creature.Season.WorldPlay;m.kicks=Math.Min(1000000,m.kicks+1);m.nextKick=creature.State.time+1.2f;}
@@ -73,10 +73,11 @@ public sealed partial class BeachBall {
   FinishExperience();Body.linearVelocity=Vector3.zero;Body.angularVelocity*=.2f;PassPending=false;CreatureTurn=!passFromCreature;RallyReceptions++;if(RallyReceptions==4){NotifyObservers(true);PracticeParticipants();}if(RallyReceptions>=4&&!PeerGame)ConfirmedPartner=Player.GetComponent<HybridTarget>().id;
   if(PeerGame){CreditPeerReturn();return;}
   creature.GetComponent<CreatureCuriosity>().NoticeGreeting(Player.transform);Player.GetComponent<HumanoidMotion>()?.React();
+  if(passFromCreature)creature.Season.WorldPlay.GentleBall.Practice(creature.State.time);
   if(RallyReceptions>=2){
    var m=creature.Season.WorldPlay;m.rallyReturns=Math.Min(1000000,m.rallyReturns+1);m.rallyFun=Mathf.Clamp01(m.rallyFun+.06f);creature.State.Experience(RallyInterest,.04f);creature.State.Experience(StableId,.015f);
    var social=Player.GetComponent<VillagerSocial>().Memory;social.ballReturns=Math.Min(1000000,social.ballReturns+1);
-   if(RallyReceptions<=4){social.trust=Mathf.Clamp01(social.trust+.008f);social.affinity=Mathf.Clamp01(social.affinity+.012f);}
+   if(RallyReceptions<=4){social.trust=Mathf.Clamp01(social.trust+.008f+creature.Season.WorldPlay.GentleBall.control*.004f);social.affinity=Mathf.Clamp01(social.affinity+.012f);}
    if(RallyReceptions==2){social.ballGames=Math.Min(1000000,social.ballGames+1);creature.State.RememberBond(Player.GetComponent<HybridTarget>().id,true);}
    creature.Journal.Add(creature.State.time,"gentle rally is fun",CreatureAction.PlayWithToy,StableId,"Confirmed alternating return with "+Player.GetComponent<HybridTarget>().id);
   }
