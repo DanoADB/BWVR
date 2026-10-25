@@ -29,7 +29,7 @@ public sealed class HumanoidHands:MonoBehaviour {
    Reach(HumanBodyBones.LeftUpperArm,HumanBodyBones.LeftLowerArm,HumanBodyBones.LeftHand,goal-actor.right*spread);
    Reach(HumanBodyBones.RightUpperArm,HumanBodyBones.RightLowerArm,HumanBodyBones.RightHand,goal+actor.right*spread);
   }
-  resource.rotation=Quaternion.Slerp(actor.rotation*Quaternion.Euler(-45*sip+displayTilt,0,0),placementRotation,placementBlend);resource.position=goal;if(resource.GetComponent<WaterVessel>()!=null)resource.position-=resource.up*resource.lossyScale.y*.85f;
+  resource.rotation=Quaternion.Slerp(actor.rotation*Quaternion.Euler(-45*sip+displayTilt,0,0),placementRotation,placementBlend);resource.position=goal;if(resource.GetComponent<ThrowableTree>() is ThrowableTree tree)resource.position-=resource.up*tree.Height*tree.World.Unit*.35f;if(resource.GetComponent<WaterVessel>()!=null)resource.position-=resource.up*resource.lossyScale.y*.85f;
  }
  void Reach(HumanBodyBones upper,HumanBodyBones lower,HumanBodyBones hand,Vector3 goal){
   var shoulder=animator.GetBoneTransform(upper);var elbow=animator.GetBoneTransform(lower);var palm=animator.GetBoneTransform(hand);if(shoulder==null||elbow==null||palm==null)return;
