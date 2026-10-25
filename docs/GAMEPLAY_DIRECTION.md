@@ -104,3 +104,8 @@ Villagers should act on needs, available knowledge, safety and opportunities. St
 - Limit active forestry/farm sites and growth checks for Quest. Do not give every plant a Rigidbody or create an unlimited forest. New plots and saplings must respect reachable terrain, settlement access, existing structures and planting space.
 - Test independent gathering, cutting/replanting, resin regeneration, sowing/harvesting, storage capacity, consumption/spoilage, weather damage, canceled jobs, simultaneous claims and save/resume. Include an unattended-village run showing progress and bounded resource use.
 - Deliver in the order above, with small validated commits and pushes. The first implementation should prove wood/wheat collection and storage before expanding the crop catalog, resin recipes or seasons.
+
+
+## Households and covered storage — 2026-10-25
+
+Stores now expose physical capacity posts, uncovered overflow and up to three villager-built shelving expansions paid from timber. Exposed grain spoils; covered grain feeds adults and children. Existing peer relationships support shared-home visits, partnership and a bounded first family: up to three children inherit behavioral traits and stature, navigate near parents/home, and persist across reloads. Original three adult workers retain their existing roles. Full generational aging and additional freestanding storehouses remain later work. See HOUSEHOLDS_AND_STORAGE.md for tuning, boundaries and validation.

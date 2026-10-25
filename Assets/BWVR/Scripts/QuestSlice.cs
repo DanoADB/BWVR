@@ -16,7 +16,7 @@ public sealed class QuestSlice:MonoBehaviour {
  public bool developmentFocus=true;
  BeachBall[] balls=Array.Empty<BeachBall>();
  VillageTributes tributes;
- VillageResources resources;IslandWeather weather;TreePlayWorld treePlay;IslandNavigation navigation; IslandTerrainData terrain; Collider groundCollider; const float Floor=.82f; SliceState state=new SliceState(); Camera eye; Transform rig,left,right,creature; Text status,creatureLabel; GameObject panel; Font font; GameArtCatalog art; OriginalCowMotion cowMotion; HumanoidMotion godMotion; HumanoidMotion[] humanoids=Array.Empty<HumanoidMotion>();
+ VillageFamilies families;VillageResources resources;IslandWeather weather;TreePlayWorld treePlay;IslandNavigation navigation; IslandTerrainData terrain; Collider groundCollider; const float Floor=.82f; SliceState state=new SliceState(); Camera eye; Transform rig,left,right,creature; Text status,creatureLabel; GameObject panel; Font font; GameArtCatalog art; OriginalCowMotion cowMotion; HumanoidMotion godMotion; HumanoidMotion[] humanoids=Array.Empty<HumanoidMotion>();
  readonly Transform[] aims=new Transform[2]; readonly QuestControls.Hand[] controllerHands=new QuestControls.Hand[2]; bool turnHeld,recenterLast,zoomHeld; Vector3 zoomFocus;
  readonly List<CarryItem> items=new List<CarryItem>(); readonly List<Transform> workers=new List<Transform>();
  readonly ThrowMotion[] throwMotion={new ThrowMotion(),new ThrowMotion()};
@@ -91,6 +91,7 @@ public sealed class QuestSlice:MonoBehaviour {
   miracles=DivineIntervention.Build(transform,hybrid,navigation,cistern,jobs,()=>state);
   weather=IslandWeather.Build(transform,navigation,cistern,()=>state);
   resources=VillageResources.Build(transform,navigation,cistern,jobs,()=>state);
+  families=VillageFamilies.Build(transform,navigation,jobs,()=>state);
   learning=creature.gameObject.AddComponent<CreatureConstructionLearning>();learning.Initialize(hybrid,construction,discoveries,()=>state);
   foreach(var job in jobs)job.GetComponent<VillagerExploration>().ConfigureConstruction(learning);
   tributes=VillageTributes.Build(transform,hybrid,jobs,navigation,cistern);
@@ -107,7 +108,7 @@ public sealed class QuestSlice:MonoBehaviour {
   status=Label("Season and guidance",panel.transform,new Vector3(0,130,0),new Vector2(540,260),1,25);status.alignment=TextAnchor.UpperLeft;
   Button("Pause / resume",new Vector3(-140,-70,0),()=>{state.paused=!state.paused;notice=state.paused?"Season paused.":"Season resumed.";});
   Button("Save season",new Vector3(140,-70,0),Save);
-  Button("Begin again",new Vector3(-140,-160,0),()=>{foreach(var job in jobs)job.GetComponent<VillagerSocial>().ResetTask();state=new SliceState{developmentFocus=developmentFocus};hybrid?.NewSeason();miracles?.ResetWorld();creatureTrip=0;outcomeShown=false;signals.ResetRequests();curiosity?.ResetTask();construction?.ResetConstruction();discoveries?.ResetWorld();learning?.ResetWorld();foreach(var ball in balls)ball.ResetWorld();treePlay?.ResetWorld();weather?.ResetWorld();resources?.ResetWorld();tributes?.ResetWorld();creatureRoutine.ResetTask();foreach(var job in jobs){job.GetComponent<VillagerExploration>().ResetTask();job.GetComponent<VillagerSocial>().ResetTask();job.ResetTask();}notice="A new dry season begins.";});
+  Button("Begin again",new Vector3(-140,-160,0),()=>{foreach(var job in jobs)job.GetComponent<VillagerSocial>().ResetTask();state=new SliceState{developmentFocus=developmentFocus};hybrid?.NewSeason();miracles?.ResetWorld();creatureTrip=0;outcomeShown=false;signals.ResetRequests();curiosity?.ResetTask();construction?.ResetConstruction();discoveries?.ResetWorld();learning?.ResetWorld();foreach(var ball in balls)ball.ResetWorld();treePlay?.ResetWorld();weather?.ResetWorld();resources?.ResetWorld();families?.ResetWorld();tributes?.ResetWorld();creatureRoutine.ResetTask();foreach(var job in jobs){job.GetComponent<VillagerExploration>().ResetTask();job.GetComponent<VillagerSocial>().ResetTask();job.ResetTask();}notice="A new dry season begins.";});
   Button("Close",new Vector3(140,-160,0),()=>panel.SetActive(false));
   Button("Help / details",new Vector3(0,-240,0),()=>SetHelp(!helpVisible));
   panel.SetActive(false);
@@ -227,15 +228,19 @@ public sealed class QuestSlice:MonoBehaviour {
    state.developmentFocus=developmentFocus;
   if(dt<=0||float.IsNaN(dt)||float.IsInfinity(dt))return;bool paused=state.paused||applicationSuspended;
    if(construction!=null)construction.Paused=paused;if(learning!=null)foreach(var site in learning.sites)site.Paused=paused;discoveries?.Advance(dt,paused);
-  if(!paused){state.Hybrid.time=Mathf.Min(100000000,state.Hybrid.time+dt);state.Step(dt);learning?.Tick();tributes?.Tick(dt,false);AnimateVillage(dt);}resources?.Advance(dt,paused);weather?.Advance(dt,paused);foreach(var ball in balls)ball.Advance(dt,paused);treePlay?.Advance(dt,paused);miracles?.Tick(paused?0:dt,paused);signals.Tick(paused?0:dt,state);
+  if(!paused){state.Hybrid.time=Mathf.Min(100000000,state.Hybrid.time+dt);state.Step(dt);learning?.Tick();tributes?.Tick(dt,false);AnimateVillage(dt);}families?.Advance(dt,paused);resources?.Advance(dt,paused);weather?.Advance(dt,paused);foreach(var ball in balls)ball.Advance(dt,paused);treePlay?.Advance(dt,paused);miracles?.Tick(paused?0:dt,paused);signals.Tick(paused?0:dt,state);
  }
  void AnimateVillage(float dt){
   foreach(var job in jobs){var social=job.GetComponent<VillagerSocial>();var explore=job.GetComponent<VillagerExploration>();var play=job.GetComponent<VillagerBlockPlay>();
    social.Memory.restNeed=Mathf.Clamp01(social.Memory.restNeed+dt*.002f);
-   var gathering=job.GetComponent<VillagerResourceGathering>();if(gathering!=null&&gathering.Active){if(gathering.Tick(dt,false))continue;}
+   var gathering=job.GetComponent<VillagerResourceGathering>();
    bool urgent=!state.developmentFocus&&!state.Finished&&(job.role==VillagerRoutine.Role.WaterGatherer&&state.water<45);
-   if(urgent){if(social.Active)social.ResetTask();if(explore.Active)explore.ResetTask();if(play.Active)play.ResetTask();job.Tick(dt,false);continue;}
-   bool playing=social.Tick(dt,false);if(!playing)playing=explore.Tick(dt,false);if(!playing)playing=play.Tick(dt,false);if(!playing){if(job.role!=VillagerRoutine.Role.WaterGatherer&&gathering!=null)gathering.Tick(dt,false);else if(!state.Finished)job.Tick(dt,false);}
+   if(urgent){families?.Release(job);gathering?.Cancel();if(social.Active)social.ResetTask();if(explore.Active)explore.ResetTask();if(play.Active)play.ResetTask();job.Tick(dt,false);continue;}
+   if(families!=null&&families.TickAdult(job,dt))continue;
+   if(gathering!=null&&(gathering.Active||gathering.TryBuildStorage())){if(gathering.Tick(dt,false))continue;}
+   if(families!=null&&families.TickAdult(job,dt))continue;
+   if(gathering!=null&&job.role!=VillagerRoutine.Role.WaterGatherer&&resources.LowFood&&gathering.Tick(dt,false))continue;
+   bool playing=social.Tick(dt,false);if(!playing&&families!=null&&families.TickAdult(job,dt))continue;if(!playing)playing=explore.Tick(dt,false);if(!playing&&families!=null&&families.TickAdult(job,dt))continue;if(!playing)playing=play.Tick(dt,false);if(!playing&&families!=null&&families.TickAdult(job,dt))continue;if(!playing){if(job.role!=VillagerRoutine.Role.WaterGatherer&&gathering!=null)gathering.Tick(dt,false);else if(!state.Finished)job.Tick(dt,false);}
   }
   creatureRoutine.speed=(.07f+state.care*.08f)*(terrain!=null?.1f:1);hybrid.Tick(dt,false);
   creatureLabel.text="THEIR GOD · "+(helpVisible?hybrid.Explanation:creatureRoutine.Current.ToString().ToUpperInvariant());

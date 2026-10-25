@@ -18,7 +18,7 @@ public sealed class VillagerSocial:MonoBehaviour {
  public Phase Current{get;private set;}public bool Active=>Current!=Phase.Idle;
  public SocialMemory Memory=>season().Social(index);
  public bool RecentFright=>Memory.frights>0&&season().Hybrid.time-Memory.lastFrightAt<90;
- public bool Willing=>GetComponent<VillagerResourceGathering>()?.Active!=true&&Memory.trust>=.4f&&Memory.injury<=0&&!RecentFright;
+ public bool Willing=>GetComponentInParent<QuestSlice>()?.GetComponentInChildren<VillageFamilies>()?.Owns(GetComponent<VillagerRoutine>())!=true&&GetComponent<VillagerResourceGathering>()?.Active!=true&&Memory.trust>=.4f&&Memory.injury<=0&&!RecentFright;
  public float Attraction=>Memory.affinity*.65f+Memory.trust*.35f;
  CreatureCuriosity creature;IslandNavigator walker;HumanoidMotion motion;CarryItem item;VillagerRoutine routine;
  Func<SliceState> season;int index;float cooldown,clock,elapsed;
