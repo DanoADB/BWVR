@@ -27,14 +27,14 @@ public static class GorillaChecks {
   }finally{UnityEngine.Object.DestroyImmediate(root);}
   Debug.Log("BWVR_GORILLA_PASS: local humanoid prefab, normalized feet/height, authored in-place movement and facial feedback, retained pickup/drink/hand IK, Quest surface materials");
  }
- public static string Capture(){
+ public static string Capture(CreatureAffect.Mood? mood=null){
   var prefab=AssetDatabase.LoadAssetAtPath<GameObject>(AnimalFriendsImporter.Prefab);if(prefab==null)throw new Exception("Gorilla prefab missing");
   var preview=new PreviewRenderUtility();var model=UnityEngine.Object.Instantiate(prefab);Texture2D image=null;
   try{
-   preview.AddSingleGO(model);var a=model.GetComponentInChildren<Animator>();a.Rebind();a.Play("Idle and walk",0,0);a.Update(0);
+   preview.AddSingleGO(model);var a=model.GetComponentInChildren<Animator>();a.Rebind();a.Play("Idle and walk",0,0);a.Update(0);if(mood.HasValue)model.GetComponentInChildren<GorillaMoodFace>().ApplyMood(mood.Value,4);
    preview.camera.transform.position=new Vector3(1.4f,.8f,2.5f);preview.camera.transform.LookAt(new Vector3(0,.53f,0));preview.camera.orthographic=true;preview.camera.orthographicSize=.72f;preview.camera.nearClipPlane=.01f;preview.camera.farClipPlane=10;preview.camera.backgroundColor=new Color(.06f,.085f,.09f);preview.camera.clearFlags=CameraClearFlags.SolidColor;
    preview.lights[0].intensity=1.1f;preview.lights[0].transform.rotation=Quaternion.Euler(35,25,0);preview.lights[1].intensity=.7f;preview.ambientColor=new Color(.5f,.5f,.5f);
-   preview.BeginStaticPreview(new Rect(0,0,1000,1000));preview.camera.Render();image=preview.EndStaticPreview();Directory.CreateDirectory(".local/gorilla-preview");var path=Path.GetFullPath(".local/gorilla-preview/animal-friends-gorilla.png");File.WriteAllBytes(path,image.EncodeToPNG());return path;
+   preview.BeginStaticPreview(new Rect(0,0,1000,1000));preview.camera.Render();image=preview.EndStaticPreview();Directory.CreateDirectory(".local/gorilla-preview");var path=Path.GetFullPath(".local/gorilla-preview/animal-friends-gorilla"+(mood.HasValue?"-"+mood.Value:"")+".png");File.WriteAllBytes(path,image.EncodeToPNG());return path;
   }finally{if(image!=null)UnityEngine.Object.DestroyImmediate(image);preview.Cleanup();}
  }
 }

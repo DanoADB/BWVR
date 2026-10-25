@@ -50,6 +50,7 @@ public static class AnimalFriendsImporter {
     // Source color alpha stores gloss information, not holes in the fur.
     converted.mainTexture=material.mainTexture;converted.color=Color.white;converted.SetFloat("_Cutoff",material.name=="Eye Shine"?.2f:0);converted.enableInstancing=true;EditorUtility.SetDirty(converted);return converted;
    }).ToArray();
+   GorillaFaceImporter.Configure(model);
    CharacterImporter.Save(root,Prefab);root=null;
    EditorUtility.SetDirty(tree);EditorUtility.SetDirty(controller);AssetDatabase.SaveAssets();
    Debug.Log("BWVR_GORILLA_IMPORTED: humanoid, authored in-place walk/idle and facial success/failure; BWVR carry/drink IK; licensed artwork kept local");
