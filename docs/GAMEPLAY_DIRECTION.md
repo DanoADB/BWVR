@@ -141,3 +141,5 @@ Add an optional physical Book of Creation, accessible through the sanctuary and 
 ### Private spirit: first local appearance — 2026-10-25
 
 The original player-only spirit now perches by the left hand, with a sanctuary show/hide control and optional Help/details observations. It reads actual creature mood, reinforced-context count, population, weather and resource stocks without modifying save state or participating in actor perception/physics. Its card explicitly reports AI disconnected. Voice, connected agent tools, the source-development bridge and the full Book interface remain future work. See [spirit companion](SPIRIT_COMPANION.md) for implementation boundaries and the next delivery gates.
+
+Its presentation now follows the user's glowing-ball direction: slowly shifting color, breathing size and soft shape changes, with a halo, orbiting motes and summon shimmer. These are local visual effects, bounded to 59 particles, with no lights, collisions or actor perception. Pause/suspension freezes them; hiding clears them. No external character model or connected-agent behavior is introduced.

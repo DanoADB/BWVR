@@ -4,7 +4,7 @@ Design specification, 2026-10-25. The local presentation and read-only inspectio
 
 ## First local implementation
 
-`SpiritCompanion` builds an original teal-and-ivory floating seed with leaf fins and a shared low-resolution mesh/three unlit materials. It perches near the left hand, faces the player, scales with the viewing rig, and uses a head-adjacent fallback when the left controller loses tracking. It has no collider, Rigidbody, audio, light, affordance, carry item, actor target or navigation agent. It never enters creature or weather target registries. Idle animation stops during pause/suspension.
+`SpiritCompanion` now builds an original glowing orb, replacing the initial face-and-leaf seed at the user's request. It perches near the left hand, faces the player, scales with the viewing rig, and uses a head-adjacent fallback when the left controller loses tracking. It has no collider, Rigidbody, audio, light, affordance, carry item, actor target or navigation agent. It never enters creature or weather target registries. Idle animation stops during pause/suspension.
 
 Open the sanctuary with X/left menu (desktop Tab). **Spirit: show / hide** dismisses or summons it without a new controller binding. **Help / details** reveals a small collider-free observation card; normal play has no spirit text panel. Existing help, pause, save and restart controls remain available. The sanctuary still starts closed. Visibility is session-local; it is not saved as a new gameplay property.
 
@@ -18,7 +18,17 @@ Verified in Unity 6000.6.7f1 on 2026-10-25: both spirit checks passed, as did th
 
 ## Character
 
-An original small floating spirit with an ivory face, teal seed-shaped body and leaf fins is visible and audible only to the player. Its restrained poses express idle, listening, thinking, speaking, suggesting and acting. It rests beside the Book of Creation or at a comfortable world-space perch; summon/dismiss must not move the player's head or block the island. Use a lightweight mesh or billboard without a real-time light or particle swarm.
+### Living light presentation
+
+The orb uses one shared low-resolution sphere and an original texture-free unlit shader. A bright core, colored rim and subtle vertex deformation provide the visible glow without requiring bloom or scene lights. Slow breathing, stretching and smoothing change its silhouette. Local creature affect provides an ambient palette (teal/calm, blue/curious, green/happy, deep blue/sad, amber/hungry, violet/bored, pink/excited), with gentle variation within that palette. These are local mood reflections, not evidence of an AI connection.
+
+`SpiritEffects` adds three manually advanced local-space particle systems: a soft aura (maximum 3), orbiting motes (40), and a summon shimmer (16). The combined hard limit is 59 particles. The shader generates soft discs/star rays without texture downloads; effects have no collision, triggers, lights, shadows, trails or world-space leftovers. A summon emits a short shimmer; hiding clears it and all other particles. Pause/suspend freezes shape, color and particle time, and resuming continues without offline catch-up. Invalid deltas are ignored and large deltas bounded. Motion and effects scale with the player rig; all simulation and inspection ownership rules remain unchanged.
+
+No external character model is shipped in this version: the user chose an original glowing ball after the model search. The previously evaluated CC0 models remain outside the game assets.
+
+Verified 2026-10-25 in the Editor: the observation model and expanded spirit runtime checks pass, including color/shape variation, the combined cap, forty seconds of effect cycling after hide/show, clearing/restarting, invalid time, pause/suspend and unchanged season data. Both shaders compile without errors. A live emission problem found after the first test was fixed by explicitly accumulating emissions instead of relying on a paused native emitter. Subsequent live frames showed 32 particles, and particle time stayed frozen across actual rendered frames during suspension. The final scene advanced through frame 6,791 with zero current console errors/compilation failure; an isolated portrait render was inspected. The sphere is 1,280 triangles with bounds padded for deformation, and the three effects share two materials. The original save was restored after stopping Play. No APK or hardware performance test was run.
+
+An original small floating orb is visible only to the player. It changes color, size and shape gently, with a soft aura and sparse particles. Future listening, thinking, speaking, suggesting and acting states must reflect actual connection/tool state. It rests beside the Book of Creation or at a comfortable world-space perch; summon/dismiss must not move the player's head or block the island. Future voice is private to the player. Use a lightweight mesh with bounded effects and no real-time light.
 
 Exclude it from simulated perception, hearing, colliders, navigation and affordance registries. The creature and villagers never address it, attribute worship to it or learn from its presence. The creature remains their god. Normal simulation continues without the assistant.
 
