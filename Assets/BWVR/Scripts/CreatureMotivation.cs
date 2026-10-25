@@ -11,6 +11,8 @@ namespace BWVR {
  }
  public float Bias(CreatureAction action,float novelty,float hunger,bool shared){
   float value=action==CreatureAction.EatFood?Mathf.Lerp(-.85f,1.1f,hunger):0;
+  // A small baseline preference for building; satiation and learned interests still create variety.
+  if(action==CreatureAction.ConstructionPlay)value+=.08f;
   if(action==CreatureAction.PlayWithToy||action==CreatureAction.ConstructionPlay)value+=boredom*.55f;
   if(action==CreatureAction.InvestigateObject||action==CreatureAction.PlayWithToy||action==CreatureAction.ConstructionPlay)value+=curiosity*Mathf.Clamp01(novelty)*.8f;
   if(action==CreatureAction.SocialInteraction||shared)value+=companionship*.95f;
