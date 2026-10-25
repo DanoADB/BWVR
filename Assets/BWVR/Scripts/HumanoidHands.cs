@@ -2,7 +2,7 @@ using UnityEngine;
 namespace BWVR {
 // The free UAL has no carry/drink clip: preserve locomotion and solve the hands around the visible resource.
 public sealed class HumanoidHands:MonoBehaviour {
- public Transform actor,resource; public bool drinking,paused,beckon,indicating;public Transform lookTarget;public Vector3 indicatedPoint;public float displayTilt; Animator animator;float sip,gestureClock;
+ public Transform actor,resource,touchTarget; public bool drinking,paused,beckon,indicating;public Transform lookTarget;public Vector3 indicatedPoint;public float displayTilt; Animator animator;float sip,gestureClock;
  public Vector3 placementPoint;public Quaternion placementRotation;public float placementBlend;
  void Awake(){animator=GetComponent<Animator>();}
  void Update(){AdvancePose(Time.deltaTime);}
@@ -13,10 +13,11 @@ public sealed class HumanoidHands:MonoBehaviour {
  }
  void OnAnimatorIK(int layer){
   animator.SetLookAtWeight(lookTarget!=null?.7f:0,.15f,.85f,.5f,.55f);if(lookTarget!=null)animator.SetLookAtPosition(lookTarget.position);
-  bool carry=resource!=null&&actor!=null;animator.SetIKPositionWeight(AvatarIKGoal.LeftHand,carry?1:0);animator.SetIKPositionWeight(AvatarIKGoal.RightHand,carry||beckon||indicating?1:0);
+  bool carry=resource!=null&&actor!=null;animator.SetIKPositionWeight(AvatarIKGoal.LeftHand,carry?1:0);animator.SetIKPositionWeight(AvatarIKGoal.RightHand,carry||beckon||indicating||touchTarget!=null?1:0);
   if(actor==null)return;float height=actor.lossyScale.y;
   if(carry){var goal=Goal();float spread=height*.09f;animator.SetIKPosition(AvatarIKGoal.LeftHand,goal-actor.right*spread);animator.SetIKPosition(AvatarIKGoal.RightHand,goal+actor.right*spread);}
-  if(beckon){float wave=Mathf.Sin(gestureClock*7);animator.SetIKPosition(AvatarIKGoal.RightHand,actor.position+actor.up*height*(.8f+wave*.08f)+actor.right*height*.2f+actor.forward*height*(.2f+wave*.12f));}
+  if(!carry&&touchTarget!=null){animator.SetIKPosition(AvatarIKGoal.RightHand,touchTarget.position+touchTarget.up*touchTarget.lossyScale.y*.5f);}
+  else if(beckon){float wave=Mathf.Sin(gestureClock*7);animator.SetIKPosition(AvatarIKGoal.RightHand,actor.position+actor.up*height*(.8f+wave*.08f)+actor.right*height*.2f+actor.forward*height*(.2f+wave*.12f));}
   else if(indicating){var direction=indicatedPoint-actor.position;direction.y=0;if(direction.sqrMagnitude>1e-10f)animator.SetIKPosition(AvatarIKGoal.RightHand,actor.position+actor.up*height*.72f+direction.normalized*height*.5f);}
  }
  void LateUpdate(){if(resource==null||actor==null)return;var goal=Goal();

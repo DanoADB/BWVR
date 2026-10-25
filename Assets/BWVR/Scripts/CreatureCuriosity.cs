@@ -3,7 +3,7 @@ using UnityEngine;
 namespace BWVR {
 // A bounded curiosity loop yields to drought work and owns at most one carried object.
 public sealed class CreatureCuriosity:MonoBehaviour {
- public enum Phase { Rest,Approach,Inspect,Lift,Play,CarryFriend,Place,BuildApproach,BuildPlace,ThrowBall,WatchBall,RallyBall,FetchCarry,FetchPlace }
+ public enum Phase { Rest,Approach,Inspect,Lift,Play,CarryFriend,Place,BuildApproach,BuildPlace,ThrowBall,WatchBall,RallyBall,FetchCarry,FetchPlace,RhythmGame }
  public int built{get;private set;}
  Vector3 buildPoint,buildApproach,buildStart;Quaternion buildRotation;
  bool fetching;int fetchTicket;bool constructionFocus,askedPlaymate;float inviteGestureUntil;
@@ -23,6 +23,7 @@ public sealed class CreatureCuriosity:MonoBehaviour {
   if(Current!=Phase.Rest||candidate==null||!candidate.Available||routine.Current!=CreatureRoutine.Task.SeekingWater)return false;
   if(!navigator.world.Sample(candidate.transform.position,navigator.profile,12,out _))return false;
   var plannedBlock=candidate.GetComponent<ConstructionBlock>();if(plannedBlock!=null){if(GetComponent<CreatureConstructionLearning>()?.Memory.Knows(plannedBlock.Site.Recipe)==false)return false;constructionFocus=true;}
+  if(candidate.host==null)candidate.GetComponent<SharedRhythm>()?.ResetOffer();
   if(candidate.host!=null&&!candidate.host.Accept(candidate))return false;
   var playerBall=candidate.GetComponent<BeachBall>();if(playerBall!=null)playerBall.JustFetched=false;routine.ResetTask();navigator.ResetRoute();target=candidate;fetching=candidate.GetComponent<BeachBall>()?.FetchReady==true;fetchTicket=fetching?candidate.GetComponent<BeachBall>().FetchTicket:0;askedPlaymate=false;inviteGestureUntil=0;elapsed=clock=0;Current=Phase.Approach;motion?.LookAt(target.transform);Affect=CreatureAffect.Mood.Curious;return true;
  }
@@ -40,6 +41,7 @@ public sealed class CreatureCuriosity:MonoBehaviour {
   }
   elapsed+=dt;clock+=dt;
   if(target==null||(!owned&&target.Item.held)||elapsed>(target.GetComponentInParent<DiscoveryPoint>()!=null||target.GetComponent<VillageTributeProp>()!=null?120:fetching?120:target.GetComponent<BeachBall>()!=null?60:24)){Finish(false);return false;}
+  if(Current==Phase.RhythmGame){var rhythm=target.GetComponent<SharedRhythm>();int outcome=rhythm!=null?rhythm.Tick(dt):-1;Affect=CreatureAffect.Mood.Happy;if(outcome<0){Finish(false);return false;}if(outcome>0){played++;target.Discovered();lastWater=lastSocial=false;boredom=0;feedbackWindow=12;Finish(true);return false;}return true;}
   if(Current==Phase.RallyBall){var ball=target.GetComponent<BeachBall>();
    if(ball.Player==null||!ball.CreatureJoined){Finish(false);return false;}
    Affect=CreatureAffect.Mood.Happy;motion?.Signal(false);motion?.LookAt(ball.transform);
@@ -54,11 +56,11 @@ public sealed class CreatureCuriosity:MonoBehaviour {
     if(invited.MeetingPoint(out var meet)){if(navigator.MoveTo(meet,routine.speed,dt)&&invited.TryJoinCreature()){Current=Phase.RallyBall;clock=0;}return true;}
     Finish(false);return false;
    }
-   Affect=CreatureAffect.Mood.Curious;
-   if(navigator.MoveTo(target.transform.position,routine.speed,dt)){Current=Phase.Inspect;clock=0;motion?.Activity(6);}
+   Affect=CreatureAffect.Mood.Curious;var destination=target.transform.position;var rhythm=target.GetComponent<SharedRhythm>();if(target.host!=null&&rhythm!=null&&!rhythm.ApproachPoint(GetComponent<CreatureHybrid>(),out destination)){Finish(false);return false;}
+   if(navigator.MoveTo(destination,routine.speed,dt)){Current=Phase.Inspect;clock=0;motion?.Activity(6);}
    else if(navigator.Blocked){Affect=CreatureAffect.Mood.Sad;if(elapsed>5)Finish(false);}
   }else if(Current==Phase.Inspect){
-   if(clock>1.8f){if(fetching&&!target.GetComponent<BeachBall>().ClaimFetch(fetchTicket)){Finish(false);return false;}if(target.GetComponent<DiscoveryObject>()?.Owner!=null){Finish(false);return false;}var social=target.GetComponent<VillagerSocial>();if(social!=null&&!social.Willing){Finish(false);return false;}social?.ResetTask();owned=target.Item;original=owned.transform.position;originalRotation=owned.transform.rotation;owned.held=true;owned.GetComponent<Collider>().enabled=false;
+   if(clock>1.8f){var rhythm=target.GetComponent<SharedRhythm>();if(target.host!=null&&rhythm!=null){if(!rhythm.Begin(GetComponent<CreatureHybrid>())){Finish(false);return false;}Current=Phase.RhythmGame;clock=0;return true;}if(fetching&&!target.GetComponent<BeachBall>().ClaimFetch(fetchTicket)){Finish(false);return false;}if(target.GetComponent<DiscoveryObject>()?.Owner!=null){Finish(false);return false;}var social=target.GetComponent<VillagerSocial>();if(social!=null&&!social.Willing){Finish(false);return false;}social?.ResetTask();owned=target.Item;original=owned.transform.position;originalRotation=owned.transform.rotation;owned.held=true;owned.GetComponent<Collider>().enabled=false;
     owned.GetComponent<ConstructionBlock>()?.Grab();
     owned.GetComponent<VillagerRoutine>()?.ResetTask();motion?.Activity(1);Current=Phase.Lift;clock=0;}
   }else if(Current==Phase.Lift){
@@ -122,7 +124,8 @@ public sealed class CreatureCuriosity:MonoBehaviour {
  void Finish(bool success){
   var finished=target;if(fetching)finished?.GetComponent<BeachBall>()?.CancelFetch(fetchTicket);fetching=false;
   if(Current==Phase.RallyBall)finished?.GetComponent<BeachBall>()?.CancelRally();
-  motion?.Signal(false);motion?.Carry(null);motion?.Playful(0);motion?.PlaceAt(default,Quaternion.identity,0);motion?.LookAt(null);motion?.Activity(0);navigator?.ResetRoute();
+  if(!success)finished?.GetComponent<SharedRhythm>()?.Cancel();
+  motion?.Touch(null);motion?.Signal(false);motion?.Carry(null);motion?.Playful(0);motion?.PlaceAt(default,Quaternion.identity,0);motion?.LookAt(null);motion?.Activity(0);navigator?.ResetRoute();
   if(owned!=null){var item=owned;var point=original;
    var block=item.GetComponent<ConstructionBlock>();if(block!=null){block.Site.HidePreview();block.CancelHold();owned=null;}
    else {

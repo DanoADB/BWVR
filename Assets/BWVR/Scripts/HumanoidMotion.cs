@@ -11,6 +11,7 @@ public sealed class HumanoidMotion:MonoBehaviour {
   animator.speed=paused?0:1;if(hands!=null)hands.paused=paused;animator.SetFloat("Speed",!paused&&!carried&&moving?1:0);animator.SetInteger("Activity",carried?0:activity);
  }
  public void Activity(int value){activity=value;}
+ public void Touch(Transform target){if(hands!=null)hands.touchTarget=target;}
  public void Carry(Transform resource,bool drink=false){if(hands!=null){hands.resource=resource;hands.drinking=drink;}}
  public void Playful(float clock){if(hands!=null)hands.displayTilt=Mathf.Sin(clock*3)*28;}
  public void PlaceAt(Vector3 point,Quaternion rotation,float blend){if(hands!=null){hands.placementPoint=point;hands.placementRotation=rotation;hands.placementBlend=Mathf.Clamp01(blend);}}
