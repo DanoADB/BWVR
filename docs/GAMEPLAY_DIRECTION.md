@@ -80,7 +80,7 @@ Tree play now extends physical-world curiosity: the creature can uproot, carry a
 
 Construction toys now share one larger yard with 48 pieces/eight shapes rather than three small trays. Old assemblies and remembered use migrate into the common space; the functional creek bridge stays separate. See [shared construction yard](CONSTRUCTION_YARD.md) for tested scope and migration details.
 
-The weather/material foundation is now implemented; see [weather and material interactions](WEATHER_AND_MATERIALS.md). Next, extend villagers' independent decisions with a real resource loop. The wood/wheat gathering and storage foundation is now implemented; see [resource gathering](RESOURCE_GATHERING.md). Storage expansion and exposed-food spoilage are also implemented. Replanting depleted registered tree sites is now implemented; see REFORESTATION.md. New forest patches, renewable resin, growing/sowing crops, new farms, weather-driven food damage and seasons remain queued. Keep water secondary in development focus, preserve creature/villager play, and avoid replacing agency with permanent worker assignments or player command menus.
+The weather/material foundation is now implemented; see [weather and material interactions](WEATHER_AND_MATERIALS.md). Next, extend villagers' independent decisions with a real resource loop. The wood/wheat gathering and storage foundation is now implemented; see [resource gathering](RESOURCE_GATHERING.md). Storage expansion and exposed-food spoilage are also implemented. Replanting depleted registered tree sites is now implemented; see REFORESTATION.md. Renewable living-tree resin gathering and storage are now implemented; see RESIN_GATHERING.md. New forest patches, resin recipes, growing/sowing crops, new farms, weather-driven food damage and seasons remain queued. Keep water secondary in development focus, preserve creature/villager play, and avoid replacing agency with permanent worker assignments or player command menus.
 
 | Order | Capability | Playable outcome |
 | --- | --- | --- |
@@ -113,4 +113,9 @@ Stores now expose physical capacity posts, uncovered overflow and up to three vi
 
 ### Forestry renewal — 2026-10-25
 
-Depleted wood sites can now be replanted by villagers and visibly grow back into harvestable trees, using saved source state and existing navigation/action ownership. This closes the first renewable timber loop within the sixteen registered sites. Next in the queued resource sequence: renewable resin, followed by planted/growing crops and weather preparation.
+Depleted wood sites can now be replanted by villagers and visibly grow back into harvestable trees, using saved source state and existing navigation/action ownership. This closes the first renewable timber loop within the sixteen registered sites. Renewable resin now follows this step; next in the queued resource sequence are planted/growing crops and weather preparation.
+
+
+### Renewable resin — 2026-10-25
+
+Villagers gather small resin reserves from living trees, preserving their timber while resin slowly replenishes. Shared tree reservations prevent cutting, tapping and creature pickup from competing for one tree. Amber cups/jars and a store fullness post communicate the resource without new menus. Resin recipes remain later work; planted and growing wheat is the next food-security milestone.

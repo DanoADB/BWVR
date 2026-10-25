@@ -1,0 +1,15 @@
+using System.Linq;
+using UnityEngine;
+namespace BWVR {
+public sealed partial class VillageResources {
+ Material resinAmber;Transform resinFill;GameObject[] resinJars;
+ public bool ResinLiving(GatheringSource node){if(node==null||node.tree==null)return false;var wood=State.Find(node.tree.StableId);return wood!=null&&!wood.felled&&!wood.growing&&!node.tree.Item.held&&!node.tree.InFlight&&!node.tree.Uprooted&&Season.WorldPlay.Damage(node.tree.GetComponent<PlayImpactTarget>().id)<1&&Season.Weather.Find(node.tree.GetComponent<PlayImpactTarget>().id)?.burning!=true;}
+ public bool ResinReady(ThrowableTree tree)=>tree!=null&&(State.Find("resin-"+tree.StableId)?.remaining??0)>=2;
+ GameObject ResinJar(string name,Vector3 at){var root=new GameObject(name);root.transform.SetParent(transform,false);root.transform.position=at;var body=Part("Resin jar body",PrimitiveType.Cylinder,at+Vector3.up*Navigation.Scale*.45f,new Vector3(.9f,.45f,.9f),timber);body.transform.SetParent(root.transform,true);var top=Part("Amber resin",PrimitiveType.Sphere,at+Vector3.up*Navigation.Scale*.9f,new Vector3(.65f,.2f,.65f),resinAmber);top.transform.SetParent(root.transform,true);return root;}
+ void BuildResinStorage(){resinAmber=Material(new Color(.95f,.45f,.08f));float u=Navigation.Scale;Part("Resin capacity post",PrimitiveType.Cube,Store+new Vector3(0,2,-4.3f)*u,new Vector3(.8f,4,.5f),roof);resinFill=Part("Resin fullness",PrimitiveType.Cube,Store,Vector3.one,resinAmber).transform;resinJars=new GameObject[15];for(int i=0;i<resinJars.Length;i++)resinJars[i]=ResinJar("Stored resin jar "+i,Store+new Vector3(-3+(i%5)*1.5f,.3f+(i/5)*1.1f,2.8f)*u);}
+ void BuildResinSources(){foreach(var wood in sources.Where(s=>s.kind==VillageResource.Wood).ToArray()){var record=State.EnsureResin(wood.id);if(record==null)continue;var at=wood.at+new Vector3(0,1.5f,-wood.tree.Radius-.5f)*Navigation.Scale;var cup=ResinJar("Tree resin cup "+wood.id,at);wood.resin=new GatheringSource{id=record.id,kind=VillageResource.Resin,tree=wood.tree,at=at,approach=wood.approach,visual=cup.transform};sources.Add(wood.resin);}}
+ void AdvanceRenewables(float dt){foreach(var wood in sources){if(wood.kind!=VillageResource.Wood)continue;var record=State.Find(wood.id);if(record==null)continue;float wait=record.growing?(1-record.growth)*300:0;if(record.growing&&Safe(wood))State.Grow(wood.id,dt);if(wood.resin!=null)State.RenewResin(wood.resin.id,Mathf.Max(0,dt-wait),ResinLiving(wood.resin));}}
+ void RefreshResinStorage(){Fill(resinFill,State.resin/State.Limit(VillageResource.Resin),0);for(int i=0;i<resinJars.Length;i++)resinJars[i].SetActive(State.resin>i*2+.01f);}
+ void RefreshResinSource(GatheringSource node){var record=State.EnsureResin(node.tree.StableId);if(record==null)return;bool living=ResinLiving(node);node.visual.gameObject.SetActive(living);var top=node.visual.Find("Amber resin");float fill=record.remaining/4;top.localScale=new Vector3(.65f,.02f+.18f*fill,.65f)*Navigation.Scale;top.localPosition=Vector3.up*Navigation.Scale*(.72f+.18f*fill);}
+}
+}

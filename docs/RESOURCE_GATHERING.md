@@ -38,3 +38,5 @@ An isolated 240-second run through the normal village scheduler, starting withou
 The 2026-10-25 household/storage extension supersedes the fixed capacity and three-mouth limits described above: capacity grows through paid villager construction, exposed grain can spoil, and children also consume food. See HOUSEHOLDS_AND_STORAGE.md. The original source/cargo conservation rules remain in force.
 
 Replanting depleted registered tree sites and saved sapling growth are now implemented; see REFORESTATION.md. Each mature tree still offers a finite twelve-unit yield, renewed only after completed planting and growth.
+
+Renewable resin gathering is now implemented as a third distinct resource, linked to living wood trees. See RESIN_GATHERING.md for replenishment, reservations, capacity and persistence details.
