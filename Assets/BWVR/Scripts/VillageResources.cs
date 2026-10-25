@@ -1,0 +1,43 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
+using UnityEngine.AI;
+namespace BWVR {
+public sealed class GatheringSource {
+ public string id;public VillageResource kind;public Vector3 at,approach;public ThrowableTree tree;public Transform visual;public VillagerResourceGathering owner;
+}
+// Bounded supplies and native navigation, sharing the existing actor scheduler.
+public sealed partial class VillageResources:MonoBehaviour {
+ public readonly List<GatheringSource> sources=new List<GatheringSource>();public ResourceState State=>season().Resources;
+ public SliceState Season=>season();public IslandNavigation Navigation{get;private set;}public Vector3 Store{get;private set;}public Vector3 StoreApproach{get;private set;}
+ public VillagerResourceGathering[] Gatherers{get;private set;}Func<SliceState> season;IslandDiscoveries discoveries;Material timber,grain,roof;Transform[] woodView,wheatView;GameObject obstacle;float visualClock;
+ public static VillageResources Build(Transform parent,IslandNavigation nav,Vector3 village,VillagerRoutine[] villagers,Func<SliceState> current){var go=new GameObject("Village wood and wheat stores");go.transform.SetParent(parent,false);var world=go.AddComponent<VillageResources>();world.Initialize(nav,village,villagers,current);return world;}
+ void Initialize(IslandNavigation nav,Vector3 village,VillagerRoutine[] villagers,Func<SliceState> current){Navigation=nav;season=current;discoveries=nav.GetComponentInChildren<IslandDiscoveries>();
+  timber=Material(new Color(.47f,.26f,.1f));grain=Material(new Color(.9f,.68f,.23f));roof=Material(new Color(.28f,.36f,.27f));
+  for(int i=0;i<160;i++){float a=i*137.5f*Mathf.Deg2Rad;var wanted=village+new Vector3(Mathf.Cos(a),0,Mathf.Sin(a))*(18+i*.35f)*nav.Scale;if(!nav.Sample(wanted,nav.villager,1,out var at))continue;bool clear=true;foreach(var d in new[]{Vector3.left,Vector3.right,Vector3.forward,Vector3.back})if(!nav.Sample(at+d*nav.Scale*6,nav.villager,1,out var foot)||Mathf.Abs(foot.y-at.y)>nav.Scale){clear=false;break;}if(!clear)continue;var yard=nav.GetComponentsInChildren<ConstructionSite>().FirstOrDefault(s=>!s.IsBridge);if(yard!=null&&yard.Contains(yard.Local(at),7))continue;Store=nav.Terrain!=null?nav.Terrain.Project(at):at;break;}
+  if(Store==Vector3.zero)throw new InvalidOperationException("No reachable resource-store site");StoreApproach=Store+Vector3.back*nav.Scale*6;
+  if(!nav.Sample(StoreApproach,nav.villager,2,out var approach))throw new InvalidOperationException("No resource-store approach");StoreApproach=nav.ProjectFoot(approach,nav.villager);
+  BuildStore();
+  var trees=nav.GetComponentInChildren<TreePlayWorld>().Trees.OrderBy(t=>(t.Home-village).sqrMagnitude).ThenBy(t=>t.Line).ToArray();
+  foreach(var tree in trees){if(sources.Count(s=>s.kind==VillageResource.Wood)>=16)break;if(tree.Height>20||Vector3.Distance(tree.Home,village)>nav.Scale*190)continue;var at=tree.Home;if(!nav.Sample(at+Vector3.back*nav.Scale*5,nav.villager,3,out var foot)||!discoveries.Reachable(StoreApproach,foot,nav.villager))continue;var node=new GatheringSource{id=tree.StableId,kind=VillageResource.Wood,at=at,approach=nav.ProjectFoot(foot,nav.villager),tree=tree};sources.Add(node);State.Ensure(node.id,node.kind);node.visual=Part("Harvested tree stump",PrimitiveType.Cylinder,at+Vector3.up*nav.Scale*.25f,new Vector3(1.2f,.5f,1.2f),timber).transform;}
+  if(nav.Terrain!=null)foreach(var field in nav.Terrain.placements.Where(p=>p.kind=="field").OrderBy(p=>(nav.Terrain.PlacementPoint(p)-village).sqrMagnitude).ThenBy(p=>p.line).Take(8)){var at=nav.Terrain.PlacementPoint(field);if(!nav.Sample(at,nav.villager,8,out var foot)||!discoveries.Reachable(StoreApproach,foot,nav.villager))continue;var node=new GatheringSource{id="wheat-"+field.line,kind=VillageResource.Wheat,at=at,approach=nav.ProjectFoot(foot,nav.villager)};sources.Add(node);State.Ensure(node.id,node.kind);node.visual=WheatPatch(at).transform;}
+  Gatherers=new VillagerResourceGathering[villagers.Length];for(int i=0;i<villagers.Length;i++){Gatherers[i]=villagers[i].gameObject.AddComponent<VillagerResourceGathering>();Gatherers[i].Initialize(this,i);}ResetWorld();
+  Debug.Log("BWVR_RESOURCES_READY: "+sources.Count+" finite sources; wood/wheat store; three bounded cargo records");
+ }
+ Material Material(Color color){var material=new Material(Shader.Find("BWVR/GameSurface")){color=color,enableInstancing=true};material.SetFloat("_Cutoff",0);return material;}
+ GameObject Part(string name,PrimitiveType shape,Vector3 position,Vector3 size,Material material){var go=GameObject.CreatePrimitive(shape);go.name=name;go.transform.SetParent(transform,false);go.transform.position=position;go.transform.localScale=size*Navigation.Scale;go.GetComponent<Renderer>().sharedMaterial=material;var collider=go.GetComponent<Collider>();collider.enabled=false;Destroy(collider);return go;}
+ void BuildStore(){float u=Navigation.Scale;Part("Covered stores floor",PrimitiveType.Cube,Store,new Vector3(10,.5f,8),timber);Part("Rain cover",PrimitiveType.Cube,Store+Vector3.up*u*5,new Vector3(11,.5f,9),roof);foreach(int x in new[]{-1,1})foreach(int z in new[]{-1,1})Part("Store post",PrimitiveType.Cube,Store+new Vector3(x*4.5f,2.5f,z*3.5f)*u,new Vector3(.4f,5,.4f),timber);
+  woodView=new Transform[12];wheatView=new Transform[12];for(int i=0;i<12;i++){woodView[i]=Part("Stored timber",PrimitiveType.Cube,Store+new Vector3(-2+(i%2)*1.4f,.7f+(i/4)*.8f,-2+(i%4/2)*3)*u,new Vector3(1.1f,.7f,2.6f),timber).transform;wheatView[i]=Part("Stored grain sack",PrimitiveType.Sphere,Store+new Vector3(1.4f+(i%2)*1.5f,.8f+(i/4)*1.2f,-2+(i%4/2)*3)*u,new Vector3(1.3f,1.6f,1.5f),grain).transform;}
+  obstacle=new GameObject("Resource-store native navigation footprint");obstacle.transform.SetParent(transform,false);obstacle.transform.position=Navigation.ToNav(Store);var carve=obstacle.AddComponent<NavMeshObstacle>();carve.shape=NavMeshObstacleShape.Box;carve.size=new Vector3(10,6,8);carve.center=Vector3.up*3;carve.carving=true;carve.carveOnlyStationary=true;
+ }
+ public GameObject CreateLoad(VillageResource kind){return Part(kind==VillageResource.Wood?"Carried timber bundle":"Carried wheat sack",kind==VillageResource.Wood?PrimitiveType.Cube:PrimitiveType.Sphere,Store,kind==VillageResource.Wood?new Vector3(2,.8f,1):new Vector3(1.2f,1.4f,1.2f),kind==VillageResource.Wood?timber:grain);}
+ public float FreeSpace(VillageResource kind){float reserved=0;if(Gatherers!=null)foreach(var actor in Gatherers)if(actor.Active&&actor.Source.kind==kind)reserved+=actor.Reserved;return Mathf.Max(0,ResourceState.Capacity(kind)-State.Stock(kind)-reserved);}
+ public bool Available(GatheringSource source){var record=State.Find(source.id);if(record==null||record.remaining<=.01f||source.owner!=null||FreeSpace(source.kind)<.01f)return false;if(source.tree!=null){var tree=source.tree;if(tree.Item.held||tree.InFlight||tree.Uprooted||Season.WorldPlay.Damage(tree.GetComponent<PlayImpactTarget>().id)>=1||Season.Weather.Find(tree.GetComponent<PlayImpactTarget>().id)?.burning==true)return false;}return true;}
+ public bool Safe(GatheringSource source)=>source.tree==null||(!source.tree.Item.held&&!source.tree.Uprooted&&!source.tree.InFlight&&Season.WorldPlay.Damage(source.tree.GetComponent<PlayImpactTarget>().id)<1&&Season.Weather.Find(source.tree.GetComponent<PlayImpactTarget>().id)?.burning!=true);
+ public void Advance(float dt,bool paused){if(paused||dt<=0)return;State.Consume(dt,Gatherers.Length);visualClock-=dt;if(visualClock<=0){visualClock=.5f;Refresh();}}
+ public void Refresh(){for(int i=0;i<12;i++){woodView[i].gameObject.SetActive(State.wood>i*3+.01f);wheatView[i].gameObject.SetActive(State.wheat>i*4+.01f);}foreach(var node in sources){var record=State.Ensure(node.id,node.kind);if(record==null){node.visual.gameObject.SetActive(false);continue;}if(node.tree!=null){node.tree.SetHarvested(record.felled);node.visual.gameObject.SetActive(record.felled);}else{node.visual.localScale=new Vector3(1,.15f+record.remaining/12f*.85f,1)*Navigation.Scale;node.visual.gameObject.SetActive(true);}}}
+ public void ResetWorld(){if(Gatherers!=null)foreach(var actor in Gatherers)actor.Cancel();foreach(var source in sources){source.owner=null;if(source.tree!=null)source.tree.ResourceReserved=false;State.Ensure(source.id,source.kind);}for(int i=0;i<3;i++)State.Recover(i);Refresh();}
+ void OnDestroy(){foreach(var mesh in resourceMeshes)if(mesh!=null)Destroy(mesh);if(Gatherers!=null)foreach(var actor in Gatherers)if(actor!=null)actor.Cancel();if(timber!=null)Destroy(timber);if(grain!=null)Destroy(grain);if(roof!=null)Destroy(roof);if(obstacle!=null)Destroy(obstacle);}
+}
+}

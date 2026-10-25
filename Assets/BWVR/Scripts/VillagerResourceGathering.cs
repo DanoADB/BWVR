@@ -1,0 +1,29 @@
+using System.Linq;
+using UnityEngine;
+namespace BWVR {
+public sealed class VillagerResourceGathering:MonoBehaviour {
+ public enum Phase { Idle, Approach, Harvest, Carry, Deposit }
+ public Phase Current{get;private set;}public bool Active=>Current!=Phase.Idle;public GatheringSource Source{get;private set;}public float Reserved{get;private set;}public int deliveries{get;private set;}
+ VillageResources world;IslandNavigator nav;CarryItem actor;HumanoidMotion motion;VillagerRoutine routine;VillagerSocial social;VillagerExploration exploration;VillagerBlockPlay play;int identity;float clock,elapsed,cooldown;GameObject timber,grain,axe;
+ ResourceCargo Cargo=>world.State.cargo[identity];
+ public void Initialize(VillageResources resources,int index){world=resources;identity=index;nav=GetComponent<IslandNavigator>();actor=GetComponent<CarryItem>();motion=GetComponent<HumanoidMotion>();routine=GetComponent<VillagerRoutine>();social=GetComponent<VillagerSocial>();exploration=GetComponent<VillagerExploration>();play=GetComponent<VillagerBlockPlay>();timber=world.CreateLoad(VillageResource.Wood);grain=world.CreateLoad(VillageResource.Wheat);timber.SetActive(false);grain.SetActive(false);axe=world.CreateAxe();var animator=GetComponentInChildren<Animator>();var hand=animator!=null&&animator.isHuman?animator.GetBoneTransform(HumanBodyBones.RightHand):null;if(hand!=null){axe.transform.SetParent(hand,true);axe.transform.localPosition=Vector3.zero;axe.transform.localRotation=Quaternion.Euler(0,0,-10);}axe.SetActive(false);cooldown=2+index*2;}
+ bool Busy=>actor.held||social.Active||exploration.Active||play.Active||social.Memory.injury>.7f||social.RecentFright;
+ public bool TryBegin(GatheringSource source){if(world.Season.paused||Active||Busy||source==null||!world.Available(source)||!world.GetComponentInParent<QuestSlice>().GetComponentInChildren<IslandDiscoveries>().Reachable(transform.position,source.approach,nav.profile))return false;
+  float amount=Mathf.Min(3,world.State.Find(source.id).remaining,world.FreeSpace(source.kind));if(amount<=.01f)return false;Source=source;Reserved=amount;source.owner=this;if(source.tree!=null)source.tree.ResourceReserved=true;routine.ResetTask();nav.ResetRoute();motion?.LookAt(source.tree!=null?source.tree.transform:source.visual);clock=elapsed=0;Current=Phase.Approach;return true;
+ }
+ public bool Tick(float dt,bool paused){if(paused||dt<=0||float.IsNaN(dt)||float.IsInfinity(dt))return Active;if(Active&&(Busy||!world.Safe(Source))){Cancel();return false;}
+  if(!Active){cooldown=Mathf.Max(0,cooldown-dt);if(cooldown>0||Busy)return false;var choice=world.sources.Where(world.Available).Where(s=>world.State.Stock(s.kind)<(s.kind==VillageResource.Wood?18:18)).OrderByDescending(s=>{float need=1-world.State.Stock(s.kind)/18f;float familiar=(routine.role==VillagerRoutine.Role.Farmer&&s.kind==VillageResource.Wheat)||(routine.role==VillagerRoutine.Role.Forester&&s.kind==VillageResource.Wood)?.15f:0;float salvage=s.kind==VillageResource.Wood&&world.State.Find(s.id).felled?.2f:0;return need+familiar+salvage-Vector3.Distance(transform.position,s.approach)/(nav.world.Scale*500);}).FirstOrDefault();if(choice==null||!TryBegin(choice))cooldown=8;return Active;}
+  clock+=dt;elapsed+=dt;if(elapsed>150){Cancel();return false;}
+  if(Current==Phase.Approach){motion?.Activity(0);if(nav.MoveTo(Source.approach,transform.lossyScale.y*1.6f,dt)){Current=Phase.Harvest;clock=0;Face(Source.at);motion?.Activity(Source.kind==VillageResource.Wood?4:3);axe.SetActive(Source.kind==VillageResource.Wood&&!world.State.Find(Source.id).felled);}else if(nav.Blocked&&elapsed>5)Cancel();}
+  else if(Current==Phase.Harvest){Face(Source.at);if(clock>=(Source.kind==VillageResource.Wood&&!world.State.Find(Source.id).felled?8:5)){
+   axe.SetActive(false);var record=world.State.Find(Source.id);if(Source.tree!=null){record.felled=true;Source.tree.SetHarvested(true);}if(world.State.Harvest(identity,Source.id,Reserved)<=0){Cancel();return false;}var load=Source.kind==VillageResource.Wood?timber:grain;load.SetActive(true);load.transform.position=transform.position+Vector3.up*nav.world.Scale;motion?.Carry(load.transform);motion?.Activity(0);Current=Phase.Carry;clock=0;nav.ResetRoute();world.Refresh();
+  }}else if(Current==Phase.Carry){if(nav.MoveTo(world.StoreApproach,transform.lossyScale.y*1.4f,dt)){Current=Phase.Deposit;clock=0;motion?.Activity(5);}else if(nav.Blocked&&elapsed>5)Cancel();}
+  else if(Current==Phase.Deposit&&clock>=1.2f){float amount=world.State.Deposit(identity);if(amount>0)deliveries++;Cancel();cooldown=24+identity*4;world.Refresh();motion?.React();}
+  return Active;
+ }
+ void Face(Vector3 at){var direction=at-transform.position;direction.y=0;if(direction.sqrMagnitude>1e-10f)transform.rotation=Quaternion.LookRotation(direction);}
+ public void Cancel(){if(world==null)return;bool owned=Active;world.State.Recover(identity);if(Source!=null&&Source.owner==this){Source.owner=null;if(Source.tree!=null)Source.tree.ResourceReserved=false;}Source=null;Reserved=0;Current=Phase.Idle;clock=elapsed=0;cooldown=8;if(timber!=null)timber.SetActive(false);if(grain!=null)grain.SetActive(false);if(axe!=null)axe.SetActive(false);if(owned){motion?.Carry(null);motion?.LookAt(null);motion?.Activity(0);nav?.ResetRoute();routine?.ResetTask();}}
+ void OnDisable(){Cancel();}
+ void OnDestroy(){if(timber!=null)Destroy(timber);if(grain!=null)Destroy(grain);if(axe!=null)Destroy(axe);}
+}
+}

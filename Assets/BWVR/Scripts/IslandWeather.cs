@@ -38,7 +38,7 @@ public sealed class IslandWeather:MonoBehaviour {
   if(target.villager!=null){target.villager.Memory.injury=Mathf.Clamp01(target.villager.Memory.injury+.4f);target.villager.ReactToBall(transform,false);return true;}
   if(!Combustible(target)||BurningCount>=WeatherState.FireLimit)return true;var material=State.Touch(id);if(material==null)return true;material.heat=Mathf.Clamp(material.heat+2*(1-material.wetness*.7f),0,2);if(material.heat>=WeatherMaterialProperties.For(target.kind).ignition&&material.wetness<.65f&&material.fuel>0)material.burning=true;return true;
  }
- static bool Combustible(PlayImpactTarget target)=>target.kind=="tree"||target.kind=="building";
+ static bool Combustible(PlayImpactTarget target)=>(target.kind=="tree"&&target.GetComponent<ThrowableTree>()?.Harvested!=true)||target.kind=="building";
  public void SetWeather(IslandWeatherKind kind,float duration=60)=>State.Set(kind,duration);
  float WaveWidth=>Mathf.Max(nav.Scale*14,IslandOcean.GridSpacing*1.25f);
  public float WaveHeight(Vector3 at){if(State.kind!=IslandWeatherKind.TidalWave)return 0;float front=Mathf.Lerp(island.min.x-nav.Scale*40,island.max.x+nav.Scale*40,Mathf.Clamp01(State.phaseTime/24));float distance=(at.x-front)/WaveWidth;return Mathf.Exp(-distance*distance)*nav.Scale*8;}

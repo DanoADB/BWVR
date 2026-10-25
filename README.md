@@ -86,3 +86,5 @@ Villagers can now turn a request for a gathering place into cooperative construc
 The island now has interacting rain, wind, fog, lightning, fire and coastal storm waves. Weather and changed material state save with the season; rain cools burning fuel and downwind heat can spread fires. See [weather and material interactions](docs/WEATHER_AND_MATERIALS.md) for budgets, development controls and prototype limits.
 
 Construction toys now share one large yard with 48 pieces in eight shapes. Old tray assemblies migrate into it; the functional creek bridge remains separate. See [shared construction yard](docs/CONSTRUCTION_YARD.md).
+
+Villagers now cut finite timber sources, harvest existing wheat, carry reserved loads into a visible shared store, and consume stored food. See [resource gathering](docs/RESOURCE_GATHERING.md) for persistence rules and the remaining forestry/farming roadmap.

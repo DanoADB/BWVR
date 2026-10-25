@@ -18,14 +18,14 @@ public sealed class VillagerSocial:MonoBehaviour {
  public Phase Current{get;private set;}public bool Active=>Current!=Phase.Idle;
  public SocialMemory Memory=>season().Social(index);
  public bool RecentFright=>Memory.frights>0&&season().Hybrid.time-Memory.lastFrightAt<90;
- public bool Willing=>Memory.trust>=.4f&&Memory.injury<=0&&!RecentFright;
+ public bool Willing=>GetComponent<VillagerResourceGathering>()?.Active!=true&&Memory.trust>=.4f&&Memory.injury<=0&&!RecentFright;
  public float Attraction=>Memory.affinity*.65f+Memory.trust*.35f;
  CreatureCuriosity creature;IslandNavigator walker;HumanoidMotion motion;CarryItem item;VillagerRoutine routine;
  Func<SliceState> season;int index;float cooldown,clock,elapsed;
  CreatureHybrid hybrid;CreatureAffordance[] sharingObjects;Vector3 giftOrigin,meeting,offeringPoint;Quaternion giftRotation;bool ownsGift;
  public CreatureAffordance Offering{get;private set;}public bool Ready=>Current==Phase.PresentGift;public bool Sharing=>Current>=Phase.FetchGift&&Current<=Phase.WatchGift;
  Transform frightening;Vector3 retreat;
- public void ReactToBall(Transform ball,bool blameCreature){if(item.held)return;ResetTask();GetComponent<VillagerExploration>()?.ResetTask();GetComponent<VillagerBlockPlay>()?.ResetTask();routine.ResetTask();if(blameCreature){Memory.trust=Mathf.Clamp01(Memory.trust-.18f);Memory.affinity=Mathf.Clamp01(Memory.affinity-.06f);Memory.frights=Math.Min(1000000,Memory.frights+1);Memory.lastFrightAt=season().Hybrid.time;hybrid?.State.RememberBond(GetComponent<HybridTarget>().id,false);}frightening=ball;var away=transform.position-ball.position;away.y=0;if(away.sqrMagnitude<1e-10f)away=transform.right;retreat=transform.position+away.normalized*walker.world.Scale*5;walker.ResetRoute();Current=Phase.Recoil;clock=elapsed=0;motion?.Signal(false,true,ball.position,-20);motion?.LookAt(ball);}
+ public void ReactToBall(Transform ball,bool blameCreature){if(item.held)return;GetComponent<VillagerResourceGathering>()?.Cancel();ResetTask();GetComponent<VillagerExploration>()?.ResetTask();GetComponent<VillagerBlockPlay>()?.ResetTask();routine.ResetTask();if(blameCreature){Memory.trust=Mathf.Clamp01(Memory.trust-.18f);Memory.affinity=Mathf.Clamp01(Memory.affinity-.06f);Memory.frights=Math.Min(1000000,Memory.frights+1);Memory.lastFrightAt=season().Hybrid.time;hybrid?.State.RememberBond(GetComponent<HybridTarget>().id,false);}frightening=ball;var away=transform.position-ball.position;away.y=0;if(away.sqrMagnitude<1e-10f)away=transform.right;retreat=transform.position+away.normalized*walker.world.Scale*5;walker.ResetRoute();Current=Phase.Recoil;clock=elapsed=0;motion?.Signal(false,true,ball.position,-20);motion?.LookAt(ball);}
  public void ConfigureSharing(CreatureHybrid god,CreatureAffordance[] objects){hybrid=god;sharingObjects=objects;}
  bool Shareable(CreatureAffordance prop){if(prop==null||prop.host!=null||!prop.Available||prop.GetComponent<ConstructionBlock>()!=null||prop.GetComponent<BeachBall>()!=null||prop.kind==CreatureAffordance.Kind.Villager)return false;return prop.kind!=CreatureAffordance.Kind.Food||prop.GetComponent<DiscoveryObject>()?.treat==true;}
  public bool TryShare(CreatureAffordance prop){
