@@ -75,3 +75,30 @@ Villager-initiated beachball invitations now communicate through gaze, beckoning
 The next skill extension adds saved practiced block alignment and bounded boredom/curiosity/companionship, category satiation, urgent food reconsideration, and brief interest in visible player-placed objects. It reuses current motor/action ownership and training. Remaining skill work includes tool-specific capabilities and richer imitation; environmental challenges, traditions and independent settlement growth remain later milestones.
 
 Tree play now extends physical-world curiosity: the creature can uproot, carry and throw existing tree models, remember outcomes and respond to player feedback. Villagers can fear uprooting and react to impact damage. This is a bounded object interaction, not a forestry economy or unrestricted destruction system; persistent trunks and navigation changes are included.
+
+## Queued: autonomous resources, forestry and food security — 2026-10-25
+
+The weather/material foundation is now implemented; see [weather and material interactions](WEATHER_AND_MATERIALS.md). Next, extend villagers' independent decisions with a real resource loop. The following work is queued, not implemented. Keep water secondary in development focus, preserve creature/villager play, and avoid replacing agency with permanent worker assignments or player command menus.
+
+| Order | Capability | Playable outcome |
+| --- | --- | --- |
+| 1 | Shared inventories and physical stores | Track actual wood, resin and food quantities, carrying capacity, reservations and consumption. Villagers carry visible bundles/baskets to reachable stockpiles. Start with wood and wheat rather than implementing every resource at once. |
+| 2 | Forestry and reforestation | Villagers choose suitable mature trees, use cutting tools, produce finite wood and carry it home. They can also recover suitable fallen timber. Harvesting changes the existing tree/navigation state. Saplings grow into harvestable trees; villagers replant depleted areas and can establish new forest patches when wood is scarce. |
+| 3 | Resin gathering | Suitable living trees offer a renewable, slowly replenished resin yield, distinct from cutting them down. Gatherers choose between preserving a resin source and harvesting timber according to need. Reserve resin uses such as sealing, repairs or later crafting for a subsequent recipe pass. |
+| 4 | Farming and food variety | Wheat grows through planting, growth, ripening and harvesting rather than appearing from a completed work timer. Add a second food crop with a different growth/storage tradeoff after the wheat loop works. Villagers can prepare and plant new suitable farm plots when demand and available supplies justify expansion. |
+| 5 | Food security and bad-weather preparation | Villagers move harvests into covered stores/granaries, eat from actual stock and build a reserve based on population needs. Exposed food spoils faster or is damaged by rain/flooding; covered storage reduces loss but is finite. Low reserves prompt more growing/gathering, while approaching bad weather prompts sheltering supplies and harvesting ripe crops. |
+| 6 | Seasonal extension | Once storage and food consumption work, add seasons affecting crop growth, tree regeneration and reserve targets. Seasonal shortages should test preparations, rather than introduce a second disconnected economy. Full seasons remain future work. |
+
+### First proving loop
+
+A villager notices low wood or food, gathers a reachable resource, carries it to a store, and the village consumes or uses that stock. Another villager may replant a harvested tree or sow an eligible plot. When a storm approaches, villagers protect a harvest and later use stored food while outside work is unsafe. The creature can help move resources or protect a store, but the loop must also work without it or the player.
+
+Villagers should act on needs, available knowledge, safety and opportunities. Storage availability, food reserves, wood shortages and planting opportunities compete with social/play desires; this is not a return to water-job dominance. Communicate needs through empty baskets, carried tools, gestures, visible crop stages and store fullness, keeping normal play largely text-free. Villagers should only prepare for forecastable weather or observable warning cues, not secretly read future random weather rolls.
+
+### Integration and completion gates
+
+- Reuse the existing action/carry ownership, stable tree identities, navigation updates, relationships, weather/material state and season persistence. Reserve trees, plots and store capacity so two actors cannot claim the same yield. Player-held objects remain protected.
+- Save stocks, resource depletion/regrowth, planted plots, crop stages and bounded village needs. Pause and reload must not duplicate harvests or grant offline growth unexpectedly. Each harvested amount has one source and one destination; cancellation must release reservations without creating resources.
+- Limit active forestry/farm sites and growth checks for Quest. Do not give every plant a Rigidbody or create an unlimited forest. New plots and saplings must respect reachable terrain, settlement access, existing structures and planting space.
+- Test independent gathering, cutting/replanting, resin regeneration, sowing/harvesting, storage capacity, consumption/spoilage, weather damage, canceled jobs, simultaneous claims and save/resume. Include an unattended-village run showing progress and bounded resource use.
+- Deliver in the order above, with small validated commits and pushes. The first implementation should prove wood/wheat collection and storage before expanding the crop catalog, resin recipes or seasons.
