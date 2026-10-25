@@ -1,0 +1,44 @@
+using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
+using UnityEngine.SceneManagement;
+namespace BWVR {
+public enum ConstructionShape { Brick, Beam, Cube, Slab, Column, Ramp, Arch, Cylinder }
+public sealed partial class ConstructionSite {
+ public const int YardPieces=48;
+ public Vector2 HalfSize=>IsBridge?new Vector2(9,9):new Vector2(30,24);
+ public bool Contains(Vector3 at,float margin=0)=>Mathf.Abs(at.x)<=HalfSize.x+margin&&Mathf.Abs(at.z)<=HalfSize.y+margin;
+ IslandNavigator[] walkers=System.Array.Empty<IslandNavigator>();
+ void LateUpdate(){if(IsBridge||Paused)return;foreach(var walker in walkers){if(walker==null||walker.GetComponent<CarryItem>()?.held==true)continue;var at=Local(walker.transform.position);if(Contains(at)&&at.y<0&&at.y> -4){var position=walker.transform.position;position.y=transform.position.y;walker.transform.position=position;}}}
+ static bool FindYardPosition(IslandNavigation nav,Vector3 village,out Vector3 center){
+  var obstacles=nav.GetComponentsInChildren<IslandPlacementView>().Where(v=>v.kind=="tree"||v.kind=="building"||v.kind=="well"||v.kind=="field").Select(v=>TreePlayWorld.VisualBounds(v.gameObject)).ToArray();center=default;
+  for(int i=0;i<2048;i++){float angle=i*137.5f*Mathf.Deg2Rad;var wanted=village+new Vector3(Mathf.Cos(angle),0,Mathf.Sin(angle))*(55+i*.24f)*nav.Scale;if(!nav.Sample(wanted,nav.creature,2,out var at))continue;
+   bool blocked=obstacles.Any(b=>Mathf.Abs(b.center.x-at.x)<b.extents.x+nav.Scale*32&&Mathf.Abs(b.center.z-at.z)<b.extents.z+nav.Scale*26);if(blocked)continue;
+   float low=float.PositiveInfinity,high=float.NegativeInfinity;bool clear=true;for(int x=-30;x<=30&&clear;x+=10)for(int z=-24;z<=24;z+=8){var point=at+new Vector3(x,0,z)*nav.Scale;if(!nav.Sample(point,nav.villager,.75f,out var foot)||!nav.Sample(point,nav.creature,.75f,out _)||(nav.Terrain!=null&&!nav.Terrain.Dry(point,false))){clear=false;break;}low=Mathf.Min(low,foot.y);high=Mathf.Max(high,foot.y);if(high-low>nav.Scale*1.5f){clear=false;break;}}
+   if(clear){center=new Vector3(at.x,high+nav.Scale*.1f,at.z);return true;}
+  }return false;
+ }
+ readonly List<Mesh> pieceMeshes=new List<Mesh>();
+ public static ConstructionShape ShapeAt(int index)=>index<24?(index%8==6?ConstructionShape.Beam:ConstructionShape.Brick):(ConstructionShape)(2+(index-24)/4);
+ public static Vector3 Dimensions(ConstructionShape shape,float layer=1.2f){switch(shape){case ConstructionShape.Beam:return new Vector3(6,layer,2);case ConstructionShape.Cube:return new Vector3(2,layer*2,2);case ConstructionShape.Slab:return new Vector3(6,layer,4);case ConstructionShape.Column:return new Vector3(2,layer*4,2);case ConstructionShape.Ramp:return new Vector3(4,layer*2,2);case ConstructionShape.Arch:return new Vector3(6,layer*3,2);case ConstructionShape.Cylinder:return new Vector3(2,layer*2,2);default:return new Vector3(2,layer,2);}}
+ void CreatePieces(){
+  for(int i=0;i<(IsBridge?8:YardPieces);i++){
+   var shape=IsBridge?(i==6?ConstructionShape.Beam:ConstructionShape.Brick):ShapeAt(i);var dimensions=Dimensions(shape,LayerHeight);
+   var go=new GameObject(shape+" construction piece "+(i+1));go.transform.SetParent(transform,false);go.transform.localScale=Vector3.one*unit;
+   var proxy=new GameObject(go.name+" physics");SceneManager.MoveGameObjectToScene(proxy,simulationScene);
+   if(shape==ConstructionShape.Arch){AddBox(go,proxy,new Vector3(-2,0,0),new Vector3(2,dimensions.y,2),colors[i%colors.Length],false);AddBox(go,proxy,new Vector3(2,0,0),new Vector3(2,dimensions.y,2),colors[i%colors.Length],false);AddBox(go,proxy,new Vector3(0,dimensions.y*.5f-LayerHeight*.5f,0),new Vector3(2,LayerHeight,2),colors[i%colors.Length],false);var mesh=new Mesh{name="Open arch pickup mesh"};mesh.CombineMeshes(go.GetComponentsInChildren<MeshFilter>().Select(f=>new CombineInstance{mesh=f.sharedMesh,transform=Matrix4x4.TRS(f.transform.localPosition,f.transform.localRotation,f.transform.localScale)}).ToArray());pieceMeshes.Add(mesh);go.AddComponent<MeshCollider>().sharedMesh=mesh;}
+   else if(shape==ConstructionShape.Ramp){var mesh=RampMesh(dimensions);pieceMeshes.Add(mesh);go.AddComponent<MeshFilter>().sharedMesh=mesh;go.AddComponent<MeshRenderer>().sharedMaterial=colors[i%colors.Length];var pick=go.AddComponent<MeshCollider>();pick.sharedMesh=mesh;pick.convex=true;var physical=proxy.AddComponent<MeshCollider>();physical.sharedMesh=mesh;physical.convex=true;}
+   else if(shape==ConstructionShape.Cylinder){var visual=GameObject.CreatePrimitive(PrimitiveType.Cylinder);visual.transform.SetParent(go.transform,false);visual.transform.localScale=new Vector3(dimensions.x,dimensions.y*.5f,dimensions.z);visual.GetComponent<Renderer>().sharedMaterial=colors[i%colors.Length];var old=visual.GetComponent<Collider>();old.enabled=false;Destroy(old);var mesh=Instantiate(visual.GetComponent<MeshFilter>().sharedMesh);var vertices=mesh.vertices;for(int n=0;n<vertices.Length;n++)vertices[n]=Vector3.Scale(vertices[n],visual.transform.localScale);mesh.vertices=vertices;mesh.RecalculateBounds();pieceMeshes.Add(mesh);var pick=go.AddComponent<MeshCollider>();pick.sharedMesh=mesh;pick.convex=true;var physical=proxy.AddComponent<MeshCollider>();physical.sharedMesh=mesh;physical.convex=true;}
+   else AddBox(go,proxy,Vector3.zero,dimensions,colors[i%colors.Length]);
+   var item=go.AddComponent<CarryItem>();item.kind=Offering.Toy;var body=proxy.AddComponent<Rigidbody>();body.mass=.1f*dimensions.x*dimensions.y*dimensions.z/(4*LayerHeight);body.interpolation=RigidbodyInterpolation.None;body.collisionDetectionMode=CollisionDetectionMode.ContinuousDynamic;body.solverIterations=12;body.solverVelocityIterations=4;body.maxAngularVelocity=12;
+   Vector3 spawn;if(IsBridge)spawn=new Vector3(i%2==0?-5:5,.2f,-2+(i/2)*2);else if(i<8){spawn=new Vector3(-6+(i%3)*6,dimensions.y*.5f+.1f,-6+(i/3)*6);if(i==4)spawn=new Vector3(6,.7f,0);if(i==5)spawn=new Vector3(-6,.7f,6);if(i==6)spawn=new Vector3(0,.7f,6);if(i==7)spawn=new Vector3(6,.7f,6);}else {int slot=i-8;spawn=new Vector3((slot%2==0?-1:1)*(20+(slot%4/2)*6),dimensions.y*.5f+.1f,-18+(slot/4)*4);}
+   body.position=spawn;go.transform.position=World(spawn);item.home=go.transform.position;var block=go.AddComponent<ConstructionBlock>();block.Shape=shape;block.Initialize(this,body,dimensions);blocks.Add(block);go.AddComponent<CreatureAffordance>().kind=CreatureAffordance.Kind.Turn;
+   if(!IsBridge)HybridTarget.Bind(go,i<8?"object-"+(4+i):i<16?"object-"+(6+i):i<24?"object-"+(8+i):"yard-block-"+i,HybridTargetKind.Object);
+  }
+ }
+ void AddBox(GameObject visual,GameObject proxy,Vector3 center,Vector3 dimensions,Material material,bool pickup=true){var part=GameObject.CreatePrimitive(PrimitiveType.Cube);part.transform.SetParent(visual.transform,false);part.transform.localPosition=center;part.transform.localScale=dimensions;part.GetComponent<Renderer>().sharedMaterial=material;var old=part.GetComponent<Collider>();old.enabled=false;Destroy(old);if(pickup){var pick=visual.AddComponent<BoxCollider>();pick.center=center;pick.size=dimensions;pick.contactOffset=unit*.02f;}var physical=proxy.AddComponent<BoxCollider>();physical.center=center;physical.size=dimensions;physical.contactOffset=.005f;}
+ static Mesh RampMesh(Vector3 size){var mesh=new Mesh{name="Convex construction ramp"};var half=size*.5f;mesh.vertices=new[]{new Vector3(-half.x,-half.y,-half.z),new Vector3(half.x,-half.y,-half.z),new Vector3(half.x,half.y,-half.z),new Vector3(-half.x,-half.y,half.z),new Vector3(half.x,-half.y,half.z),new Vector3(half.x,half.y,half.z)};mesh.triangles=new[]{0,2,1,3,4,5,0,1,4,0,4,3,1,2,5,1,5,4,0,3,5,0,5,2};mesh.RecalculateNormals();mesh.RecalculateBounds();return mesh;}
+ bool CreativePlan(ConstructionBlock block,out Vector3 point,out Quaternion facing){facing=transform.rotation;point=default;if(IsBridge)return false;var pads=new[]{new Vector3(-10,0,-12),new Vector3(0,0,-12),new Vector3(10,0,-12),new Vector3(-10,0,0),new Vector3(10,0,0),new Vector3(-10,0,12),new Vector3(0,0,12),new Vector3(10,0,12)};for(int level=0;level<12;level++)foreach(var pad in pads){var p=pad+Vector3.up*(block.size.y*.5f+level*LayerHeight);if(Support(p,block,out _)&&Empty(block,p,Quaternion.identity)){point=World(p);return true;}}return false;}
+ public void ImportLegacyCache(int cache,ConstructionRecord[] records){if(IsBridge||cache<0||cache>1||records==null||records.Length!=8)return;if(!Valid(records))throw new System.ArgumentException("Invalid old construction cache");var merged=Capture();int start=8+cache*8;for(int i=0;i<8;i++){var old=records[i];if(old.support< -1)continue;merged[start+i]=new ConstructionRecord{position=old.position+new Vector3(cache==0?-10:10,0,10),rotation=old.rotation,support=old.support>=0?start+old.support:old.support,creatureBuilt=old.creatureBuilt};}Restore(merged);}
+}
+}

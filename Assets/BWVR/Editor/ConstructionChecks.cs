@@ -28,9 +28,9 @@ public static class ConstructionChecks {
     if(site.blocks.Count(b=>b.Item.held)>0)throw new Exception("Construction stranded a held piece");
    }
    var positions=site.blocks.Select(b=>b.Body.position).ToArray();for(int i=0;i<250;i++)site.Advance(.02f);
-   if(site.Snapped!=8||site.blocks.Select((b,i)=>Vector3.Distance(b.Body.position,positions[i])).Max()>.02f)throw new Exception("Finished arch unstable");
+   if(site.Snapped!=8||site.blocks.Select((b,i)=>b.Attached?Vector3.Distance(b.Body.position,positions[i]):0).Max()>.02f)throw new Exception("Finished arch unstable");
    season.construction=site.Capture();var restored=JsonUtility.FromJson<SliceState>(JsonUtility.ToJson(season));if(!restored.Valid())throw new Exception("Construction save rejected");site.Restore(restored.construction);for(int i=0;i<100;i++)site.Advance(.02f);
-   if(site.Snapped!=8||site.blocks.Select((b,i)=>Vector3.Distance(b.Body.position,positions[i])).Max()>.02f)throw new Exception("Restored assembly unstable");
+   if(site.Snapped!=8||site.blocks.Select((b,i)=>b.Attached?Vector3.Distance(b.Body.position,positions[i]):0).Max()>.02f)throw new Exception("Restored assembly unstable");
    restored.construction[0].support=0;if(restored.Valid())throw new Exception("Cyclic connection accepted in save data");
    site.Paused=true;loose.Body.AddForce(Vector3.right*10,ForceMode.Impulse);var still=loose.Body.position;site.Advance(.02f);if(loose.Body.position!=still)throw new Exception("Paused physics advanced");site.Paused=false;site.SelectRecipe(BuildRecipe.Arch);
    var probe=site.blocks[7];if(site.FindSnap(probe,site.World(new Vector3(-2,.6f,0)),site.transform.rotation,out _,out _,out _))throw new Exception("Occupied connection accepted");

@@ -12,12 +12,14 @@ public sealed class IslandDiscoveries:MonoBehaviour {
  public readonly List<DiscoveryPoint> points=new List<DiscoveryPoint>();
  Func<SliceState> season;Material[] materials;AudioClip reward;IslandNavigation nav;
  public DiscoveryRecord Memory(int id){var s=season();if(s.discoveries==null||s.discoveries.Length==0){s.discoveries=new DiscoveryRecord[6];for(int i=0;i<6;i++)s.discoveries[i]=new DiscoveryRecord();}return s.discoveries[id];}
- public static bool Valid(DiscoveryRecord[] records){if(records==null||records.Length==0)return true;if(records.Length!=6)return false;for(int i=0;i<6;i++){var r=records[i];if(r==null||r.visitors<0||r.visitors>15||float.IsNaN(r.restock)||float.IsInfinity(r.restock)||r.restock<0||r.restock>90||!ConstructionSite.Valid(r.blocks))return false;if(i>=2&&r.blocks!=null&&r.blocks.Length!=0)return false;}return true;}
+ public static bool Valid(DiscoveryRecord[] records){if(records==null||records.Length==0)return true;if(records.Length!=6)return false;for(int i=0;i<6;i++){var r=records[i];if(r==null||r.visitors<0||r.visitors>15||float.IsNaN(r.restock)||float.IsInfinity(r.restock)||r.restock<0||r.restock>90||!ConstructionSite.Valid(r.blocks)||(r.blocks!=null&&r.blocks.Length!=0&&r.blocks.Length!=8))return false;if(i>=2&&r.blocks!=null&&r.blocks.Length!=0)return false;}return true;}
  public static IslandDiscoveries Build(Transform parent,IslandNavigation navigation,Vector3 village,ConstructionSite original,Func<SliceState> current){
   var root=new GameObject("Island discovery clearings");root.transform.SetParent(parent,false);var world=root.AddComponent<IslandDiscoveries>();world.Initialize(navigation,village,original,current);return world;
  }
  void Initialize(IslandNavigation navigation,Vector3 village,ConstructionSite original,Func<SliceState> current){
   nav=navigation;season=current;
+  for(int cache=0;cache<2;cache++){original.ImportLegacyCache(cache,Memory(cache).blocks);Memory(cache).blocks=null;}
+  if(season().relationships!=null)foreach(var memory in season().relationships){if(memory==null)continue;memory.usefulStructures=(memory.usefulStructures&0xF000)|((memory.usefulStructures|(memory.usefulStructures>>4)|(memory.usefulStructures>>8))&15);if(memory.gatheringSite==1||memory.gatheringSite==2)memory.gatheringSite=0;}
   materials=new[]{new Color(.48f,.27f,.10f),new Color(.72f,.5f,.15f),new Color(.68f,.12f,.16f),new Color(.24f,.43f,.16f),new Color(.48f,.5f,.43f)}.Select(c=>{var m=new Material(Shader.Find("BWVR/GameSurface"));m.color=c;return m;}).ToArray();
   const int rate=22050;var samples=new float[rate/2];for(int i=0;i<samples.Length;i++){float t=i/(float)rate;samples[i]=Mathf.Sin(t*(t<.18f?660:880)*Mathf.PI*2)*Mathf.Exp(-t*7)*.16f;}reward=AudioClip.Create("Warm discovery notes",samples.Length,1,rate,false);reward.SetData(samples,0);
   for(int id=0;id<6;id++){
@@ -32,7 +34,6 @@ public sealed class IslandDiscoveries:MonoBehaviour {
    if(!placed){Debug.LogWarning("BWVR_DISCOVERY_SITE_SKIPPED: no reachable clearing for "+id);continue;}
    var root=new GameObject("Discovery clearing "+(id+1));root.transform.SetParent(transform,false);root.transform.position=nav.Terrain!=null?nav.Terrain.Project(at):at;
    var point=root.AddComponent<DiscoveryPoint>();point.Initialize(this,id,nav.Scale,reward);
-   if(id<2){point.construction=ConstructionSite.Build(root.transform,nav,at,true);if(point.construction==null){Destroy(root);continue;}var position=point.construction.transform.position;root.transform.position=position;point.construction.transform.localPosition=Vector3.zero;point.construction.Restore(Memory(id).blocks);}
    points.Add(point);
    for(int i=0;i<2;i++){
     Vector3 wanted=root.transform.position+new Vector3(i==0?-14:14,0,0)*nav.Scale;
@@ -54,6 +55,7 @@ public sealed class IslandDiscoveries:MonoBehaviour {
   var discovered=go.AddComponent<DiscoveryObject>();discovered.point=point;discovered.treat=treat;
   go.AddComponent<CreatureAffordance>().kind=treat?CreatureAffordance.Kind.Food:mallet?CreatureAffordance.Kind.Turn:CreatureAffordance.Kind.Chime;
   if(!treat&&!mallet){var audio=go.AddComponent<AudioSource>();audio.clip=reward;audio.playOnAwake=false;audio.spatialBlend=1;audio.minDistance=u*10;audio.maxDistance=u*100;audio.volume=.25f;}
+  HybridTarget.Bind(go,"object-"+(point.id==0?22+point.objects.Count:point.id==1?32+point.objects.Count:34+(point.id-2)*2+point.objects.Count),HybridTargetKind.Object);
   point.objects.Add(discovered);
  }
  public bool Reachable(Vector3 from,Vector3 to,IslandNavigation.Profile profile){if(!nav.Sample(from,profile,12,out var start))return false;var path=new NavMeshPath();return NavMesh.CalculatePath(nav.ToNav(start),nav.ToNav(to),new NavMeshQueryFilter{agentTypeID=profile.id,areaMask=1},path)&&path.status==NavMeshPathStatus.PathComplete;}

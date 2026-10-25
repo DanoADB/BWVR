@@ -84,3 +84,5 @@ Play fetch with the creature: hold the beachball with the right front trigger (o
 Villagers can now turn a request for a gathering place into cooperative construction: they take turns carrying and snapping a three-piece bench together on an existing building green, retain partial progress across saves, and use the result to rest. The creature can contribute once it knows the form. This is the first village crafting capability; autonomous house expansion remains later work.
 
 The island now has interacting rain, wind, fog, lightning, fire and coastal storm waves. Weather and changed material state save with the season; rain cools burning fuel and downwind heat can spread fires. See [weather and material interactions](docs/WEATHER_AND_MATERIALS.md) for budgets, development controls and prototype limits.
+
+Construction toys now share one large yard with 48 pieces in eight shapes. Old tray assemblies migrate into it; the functional creek bridge remains separate. See [shared construction yard](docs/CONSTRUCTION_YARD.md).

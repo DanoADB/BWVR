@@ -17,7 +17,7 @@ public sealed class CreaturePlayground:MonoBehaviour {
    var at=centre+new Vector3((i-1)*10,0,-12)*u;if(!nav.Sample(at,nav.creature,18,out var safe)){Debug.LogWarning("No safe creature toy site "+i);continue;}if(nav.Terrain!=null)safe=nav.Terrain.Project(safe);
    var toy=GameObject.CreatePrimitive(i==0?PrimitiveType.Sphere:PrimitiveType.Cube);toy.name=new[]{"Blue rolling ball","Amber turning blocks","Golden discovery chime"}[i];toy.transform.SetParent(transform,false);toy.transform.position=safe+Vector3.up*u*1.5f;toy.transform.localScale=Vector3.one*u*(i==2?2:3);toy.GetComponent<Renderer>().sharedMaterial=materials[i];
    var item=toy.AddComponent<CarryItem>();item.kind=Offering.Toy;item.home=toy.transform.position;
-   var affordance=toy.AddComponent<CreatureAffordance>();affordance.kind=(CreatureAffordance.Kind)i;
+   var affordance=toy.AddComponent<CreatureAffordance>();affordance.kind=(CreatureAffordance.Kind)i;HybridTarget.Bind(toy,i==0?"object-12":"object-13",HybridTargetKind.Object);
    if(i==0){toy.name="Large striped beachball";toy.AddComponent<BeachBall>().Initialize(nav);}
    if(i==1)for(int block=0;block<2;block++){var child=GameObject.CreatePrimitive(PrimitiveType.Cube);Destroy(child.GetComponent<Collider>());child.transform.SetParent(toy.transform,false);child.transform.localPosition=new Vector3((block==0?-.65f:.65f),.6f,0);child.transform.localScale=Vector3.one*.65f;child.GetComponent<Renderer>().sharedMaterial=materials[(block+2)%3];}
    if(i==2){

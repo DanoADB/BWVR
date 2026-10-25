@@ -78,6 +78,8 @@ Tree play now extends physical-world curiosity: the creature can uproot, carry a
 
 ## Queued: autonomous resources, forestry and food security — 2026-10-25
 
+Construction toys now share one larger yard with 48 pieces/eight shapes rather than three small trays. Old assemblies and remembered use migrate into the common space; the functional creek bridge stays separate. See [shared construction yard](CONSTRUCTION_YARD.md) for tested scope and migration details.
+
 The weather/material foundation is now implemented; see [weather and material interactions](WEATHER_AND_MATERIALS.md). Next, extend villagers' independent decisions with a real resource loop. The following work is queued, not implemented. Keep water secondary in development focus, preserve creature/villager play, and avoid replacing agency with permanent worker assignments or player command menus.
 
 | Order | Capability | Playable outcome |

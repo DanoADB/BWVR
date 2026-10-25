@@ -24,7 +24,7 @@ public sealed partial class VillagerExploration {
  }
  bool StartBlockPlacement(ConstructionSite site,bool building){
   foreach(var block in site.blocks.Where(b=>!b.Attached).OrderBy(b=>(b.transform.position-transform.position).sqrMagnitude)){
-   if(!site.TryPlan(block,out var point,out var facing)||!nav.world.Sample(block.transform.position,nav.profile,8,out var fetch)||!nav.world.Sample(site.WorkApproach(transform.position,point,site.unit*3),nav.profile,8,out var place)||!world.Reachable(transform.position,fetch,nav.profile)||!world.Reachable(fetch,place,nav.profile))continue;
+   if(!site.TryRecipePlan(block,out var point,out var facing)||!nav.world.Sample(block.transform.position,nav.profile,8,out var fetch)||!nav.world.Sample(site.WorkApproach(transform.position,point,site.unit*3),nav.profile,8,out var place)||!world.Reachable(transform.position,fetch,nav.profile)||!world.Reachable(fetch,place,nav.profile))continue;
    buildingGathering=building;repairSite=site;repairBlock=block;repairRecipe=site.Recipe;repairPoint=point;repairRotation=facing;site.Repairer=this;
    routine.ResetTask();nav.ResetRoute();clock=elapsed=0;Current=Phase.RepairFetch;motion?.Signal(false);motion?.LookAt(block.transform);return true;
   }return false;
@@ -36,11 +36,11 @@ public sealed partial class VillagerExploration {
   if(Current==Phase.RepairFetch){
    var approach=block.transform.position+(transform.position-block.transform.position).normalized*site.unit*1.9f;
    if(nav.MoveTo(approach,speed,dt)){
-    if(!site.TryPlan(block,out repairPoint,out repairRotation)){ResetTask();return false;}
+    if(!site.TryRecipePlan(block,out repairPoint,out repairRotation)){ResetTask();return false;}
     block.Item.held=true;carryingRepair=true;block.Grab();block.GetComponent<Collider>().enabled=false;motion?.Carry(block.transform);motion?.Activity(0);Current=Phase.RepairCarry;clock=0;nav.ResetRoute();
    }
   }else if(Current==Phase.RepairCarry){
-   if(!site.TryPlan(block,out repairPoint,out repairRotation)){ResetTask();return false;}
+   if(!site.TryRecipePlan(block,out repairPoint,out repairRotation)){ResetTask();return false;}
    if(nav.MoveTo(site.WorkApproach(transform.position,repairPoint,site.unit*3),speed,dt)){Current=Phase.RepairPlace;clock=0;motion?.Activity(4);}
   }else if(Current==Phase.RepairPlace){
    motion?.PlaceAt(repairPoint,repairRotation,clock/1.4f);
@@ -51,7 +51,7 @@ public sealed partial class VillagerExploration {
     ResetTask();if(placed){Current=Phase.Celebrate;motion?.React();}return Active;
    }
   }
-  var local=site.Local(transform.position);if(!site.IsBridge&&Mathf.Abs(local.x)<9&&Mathf.Abs(local.z)<9){var feet=transform.position;feet.y=Mathf.Max(feet.y,site.transform.position.y);transform.position=feet;}
+  var local=site.Local(transform.position);if(!site.IsBridge&&site.Contains(local)){var feet=transform.position;feet.y=Mathf.Max(feet.y,site.transform.position.y);transform.position=feet;}
   if(nav.Blocked&&elapsed>5)ResetTask();return Active;
  }
  void ReleaseRepair(){

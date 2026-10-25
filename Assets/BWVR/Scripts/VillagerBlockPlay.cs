@@ -45,7 +45,7 @@ public sealed class VillagerBlockPlay:MonoBehaviour {
   target.Body.WakeUp();target.Body.AddForce(delta.normalized*14-velocity*4,ForceMode.Acceleration);
  }
  bool Move(Vector3 point,float dt){motion?.Activity(0);bool arrived=navigator.MoveTo(point,transform.lossyScale.y*1.6f,dt);StandOnTray();return arrived;}
- void StandOnTray(){if(site==null)return;var at=site.Local(transform.position);if(Mathf.Abs(at.x)<9.4f&&Mathf.Abs(at.z)<9.4f){var point=transform.position;point.y=Mathf.Max(point.y,site.transform.position.y);transform.position=point;}}
+ void StandOnTray(){if(site==null)return;var at=site.Local(transform.position);if(site.Contains(at,.4f)){var point=transform.position;point.y=Mathf.Max(point.y,site.transform.position.y);transform.position=point;}}
  void LateUpdate(){if(actor!=null&&!actor.held&&site!=null&&!site.Paused)StandOnTray();}
  void Face(){if(target==null)return;var direction=target.transform.position-transform.position;direction.y=0;if(direction.sqrMagnitude>1e-10f)transform.rotation=Quaternion.LookRotation(direction);}
  public void ResetTask(){Stop();}

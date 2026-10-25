@@ -6,7 +6,7 @@ namespace BWVR {
  [System.Serializable] public sealed class ConstructionRecord {public Vector3 position;public Quaternion rotation;public int support=-2;public bool creatureBuilt;}
 // Simulate toy-scale pieces in a private metre-scale physics scene. The tabletop
 // conversion stays at its boundary; no global gravity/contact settings are changed.
-public sealed class ConstructionSite:MonoBehaviour {
+public sealed partial class ConstructionSite:MonoBehaviour {
  public readonly List<ConstructionBlock> blocks=new List<ConstructionBlock>();public float unit{get;private set;}
  public int Snapped=>blocks.Count(b=>b.Attached);public bool Paused;public int successfulSnaps{get;private set;}
  public float LastCreatureBuildTime{get;private set;}=float.NegativeInfinity;public float nextVillagerPlayAt;
@@ -15,31 +15,14 @@ public sealed class ConstructionSite:MonoBehaviour {
  public event System.Action Changed;
  public VillagerExploration Visitor,Requester,Repairer;
  BrickPlacement[] Pattern=>plan??(plan=ConstructionPatterns.Plan(Recipe,LayerHeight));
- bool Matches(ConstructionBlock block,BrickPlacement p)=>block.Attached&&!block.Item.held&&(block.size.x>3)==p.beam&&Vector3.Distance(block.Body.position,p.position)<.09f&&Quaternion.Angle(block.Body.rotation,Quaternion.identity)<4;
+ bool Matches(ConstructionBlock block,BrickPlacement p)=>block.Attached&&!block.Item.held&&block.RecipePiece&&(block.Shape==ConstructionShape.Beam)==p.beam&&Vector3.Distance(block.Body.position,p.position)<.09f&&Quaternion.Angle(block.Body.rotation,Quaternion.identity)<4;
  public bool RecipeComplete{get{foreach(var p in Pattern){bool found=false;foreach(var b in blocks)if(Matches(b,p)){found=true;break;}if(!found)return false;}return true;}}
  public bool SelectRecipe(BuildRecipe selected){if(IsBridge||Repairer!=null||selected==Recipe||Snapped>0||blocks.Any(b=>b.Item.held||b.VillagerOwner!=null))return false;Recipe=selected;return true;}
  Scene simulationScene;PhysicsScene physics;Material[] colors;Material outlineMaterial;LineRenderer preview;readonly Collider[] overlaps=new Collider[32];
  public static ConstructionSite Build(Transform parent,IslandNavigation nav,Vector3 village,bool requireOpen=false){
-  Vector3 centre=village+new Vector3(-20,0,-20)*nav.Scale;
-  var foliage=new List<Bounds>();if(requireOpen)foreach(var group in nav.GetComponentsInChildren<LODGroup>()){var visible=group.GetComponentsInChildren<Renderer>();if(visible.Length==0)continue;var bounds=visible[0].bounds;foreach(var r in visible)bounds.Encapsulate(r.bounds);foliage.Add(bounds);}
-  var lanes=requireOpen?nav.GetComponentInChildren<VillageSettlement>():null;
-  bool found=false;for(int i=0;i<(requireOpen?512:48);i++){
-   float angle=i*137.5f*Mathf.Deg2Rad;var at=village+new Vector3(Mathf.Cos(angle),0,Mathf.Sin(angle))*(24+i*(requireOpen?.6f:.35f))*nav.Scale;
-   if(!nav.Sample(at,nav.creature,3,out var safe))continue;
-   bool clear=true;for(int j=0;j<8;j++){float a=j*Mathf.PI/4;var edge=safe+new Vector3(Mathf.Cos(a),0,Mathf.Sin(a))*nav.Scale*11;
-    if(!nav.Sample(edge,nav.villager,1,out var point)||Mathf.Abs(point.y-safe.y)>nav.Scale*.7f){clear=false;break;}}
-   if(clear&&requireOpen){
-    for(int x=-8;x<=8&&clear;x+=4)for(int z=-8;z<=8;z+=4)if(!nav.Sample(safe+new Vector3(x,0,z)*nav.Scale,nav.villager,.6f,out _)){clear=false;break;}
-    foreach(var bounds in foliage)if(Mathf.Abs(bounds.center.x-safe.x)<bounds.extents.x+nav.Scale*10&&Mathf.Abs(bounds.center.z-safe.z)<bounds.extents.z+nav.Scale*10){clear=false;break;}
-    foreach(var other in nav.GetComponentsInChildren<ConstructionSite>())if(Vector3.Distance(other.transform.position,safe)<nav.Scale*32){clear=false;break;}
-    if(lanes!=null)foreach(var route in lanes.routes)for(int n=1;n<route.Length;n++){var a=route[n-1];var delta=route[n]-a;delta.y=0;var offset=safe-a;offset.y=0;float t=delta.sqrMagnitude>1e-10f?Mathf.Clamp01(Vector3.Dot(offset,delta)/delta.sqrMagnitude):0;if((offset-delta*t).sqrMagnitude<nav.Scale*nav.Scale*225){clear=false;break;}}
-   }
-   if(clear){centre=nav.Terrain!=null?nav.Terrain.Project(safe):safe;found=true;break;}
-  }
-  if(requireOpen&&!found){Debug.LogWarning("BWVR_DISCOVERY_TRAY_SKIPPED: no open flat construction clearing");return null;}
-  if(nav.Terrain!=null){float highest=nav.Terrain.Project(centre).y;for(int j=0;j<8;j++){float a=j*Mathf.PI/4;highest=Mathf.Max(highest,nav.Terrain.Project(centre+new Vector3(Mathf.Cos(a),0,Mathf.Sin(a))*nav.Scale*13).y);}centre.y=highest+nav.Scale*.1f;}
-  var root=new GameObject("Creature construction green");root.transform.SetParent(parent,false);root.transform.position=centre;
-  var site=root.AddComponent<ConstructionSite>();site.Initialize(nav.Scale);return site;
+  if(!FindYardPosition(nav,village,out var centre))throw new System.InvalidOperationException("No reachable open ground for the shared construction yard");
+  var root=new GameObject("Shared construction yard - 48 pieces");root.transform.SetParent(parent,false);root.transform.position=centre;
+  var site=root.AddComponent<ConstructionSite>();site.walkers=nav.GetComponentsInChildren<IslandNavigator>();site.Initialize(nav.Scale);return site;
  }
  public Vector3 World(Vector3 point)=>transform.TransformPoint(point*unit);
  public Vector3 Local(Vector3 point)=>transform.InverseTransformPoint(point)/unit;
@@ -47,33 +30,17 @@ public sealed class ConstructionSite:MonoBehaviour {
  public static ConstructionSite BuildBridge(Transform parent,Vector3 centre,Quaternion facing,float scale){var root=new GameObject("Creek bridge construction");root.transform.SetParent(parent,false);root.transform.SetPositionAndRotation(centre,facing);var site=root.AddComponent<ConstructionSite>();site.IsBridge=true;site.Recipe=BuildRecipe.Bridge;site.LayerHeight=.3f;site.Locked=true;site.Initialize(scale);return site;}
  void Initialize(float scale){
   unit=scale;simulationScene=SceneManager.CreateScene("BWVR toy physics "+System.Guid.NewGuid().ToString("N"),new CreateSceneParameters(LocalPhysicsMode.Physics3D));physics=simulationScene.GetPhysicsScene();
-  colors=new[]{new Color(.42f,.18f,.07f),new Color(.08f,.32f,.44f),new Color(.55f,.38f,.08f),new Color(.20f,.37f,.15f)}.Select(c=>{var m=new Material(Shader.Find("BWVR/GameSurface"));m.color=c;m.SetFloat("_Cutoff",0);return m;}).ToArray();
+  colors=new[]{new Color(.42f,.18f,.07f),new Color(.08f,.32f,.44f),new Color(.55f,.38f,.08f),new Color(.20f,.37f,.15f),new Color(.65f,.25f,.18f),new Color(.38f,.3f,.57f),new Color(.6f,.53f,.3f),new Color(.15f,.44f,.39f)}.Select(c=>{var m=new Material(Shader.Find("BWVR/GameSurface"));m.color=c;m.enableInstancing=true;m.SetFloat("_Cutoff",0);return m;}).ToArray();
   if(IsBridge){foreach(int side in new[]{-1,1}){Foundation(new Vector3(side*2,-.5f,0),new Vector3(2,1,2));Foundation(new Vector3(side*5,-.5f,1),new Vector3(4,1,10));}}
   else{
-  Foundation(new Vector3(0,-.5f,0),new Vector3(18,1,18));
+  Foundation(new Vector3(0,-.5f,0),new Vector3(HalfSize.x*2,1,HalfSize.y*2));
   // Low tray edges keep loose pieces within this bounded toy sandbox.
   foreach(int side in new[]{-1,1})foreach(bool horizontal in new[]{false,true}){
-   var position=horizontal?new Vector3(0,.35f,side*9):new Vector3(side*9,.35f,0);var dimensions=horizontal?new Vector3(18,1,.3f):new Vector3(.3f,1,18);
+   var position=horizontal?new Vector3(0,.35f,side*HalfSize.y):new Vector3(side*HalfSize.x,.35f,0);var dimensions=horizontal?new Vector3(HalfSize.x*2,1,.3f):new Vector3(.3f,1,HalfSize.y*2);
    StaticBox("Tray edge",position,dimensions);var rail=GameObject.CreatePrimitive(PrimitiveType.Cube);rail.name="Wooden toy tray rim";rail.transform.SetParent(transform,false);rail.transform.localPosition=position*unit;rail.transform.localScale=dimensions*unit;rail.GetComponent<Renderer>().sharedMaterial=colors[0];Destroy(rail.GetComponent<Collider>());
   }
   }
-  var art=Resources.Load<EnvironmentArt>("ConstructionArt");
-  for(int i=0;i<8;i++){
-   bool beam=i==6;var dimensions=new Vector3(beam?6:2,LayerHeight,2);var source=art!=null?art.Find(beam?"Beam":"Brick"):null;
-   var go=source!=null?Instantiate(source,transform):GameObject.CreatePrimitive(PrimitiveType.Cube);go.name=beam?"Long construction lintel":"Construction brick "+(i+1);go.transform.SetParent(transform,false);go.transform.localScale=Vector3.one*unit;
-   if(source==null){go.transform.localScale=dimensions*unit;Destroy(go.GetComponent<Collider>());}
-   foreach(var r in go.GetComponentsInChildren<Renderer>())r.sharedMaterial=colors[i%colors.Length];
-   if(source!=null)go.transform.localScale=new Vector3(1,LayerHeight/1.2f,1)*unit;
-   var box=go.GetComponent<BoxCollider>()??go.AddComponent<BoxCollider>();box.center=Vector3.zero;box.size=source!=null?new Vector3(dimensions.x,1.2f,dimensions.z):Vector3.one;box.contactOffset=unit*.02f;
-   var item=go.AddComponent<CarryItem>();item.kind=Offering.Toy;
-   var proxy=new GameObject(go.name+" physics");SceneManager.MoveGameObjectToScene(proxy,simulationScene);var collider=proxy.AddComponent<BoxCollider>();collider.size=dimensions;collider.contactOffset=.005f;
-   var body=proxy.AddComponent<Rigidbody>();body.mass=beam?.3f:.1f;body.interpolation=RigidbodyInterpolation.None;body.collisionDetectionMode=CollisionDetectionMode.ContinuousDynamic;body.solverIterations=12;body.solverVelocityIterations=4;body.maxAngularVelocity=12;
-   body.position=new Vector3(-6+(i%3)*6,.7f,-6+(i/3)*6);if(i==4)body.position=new Vector3(6,.7f,0);if(i==5)body.position=new Vector3(-6,.7f,6);if(beam)body.position=new Vector3(0,.7f,6);if(i==7)body.position=new Vector3(6,.7f,6);
-   if(IsBridge)body.position=new Vector3(i%2==0?-5:5,.2f,-2+(i/2)*2);
-   go.transform.position=World(body.position);item.home=go.transform.position;
-   var block=go.AddComponent<ConstructionBlock>();block.Initialize(this,body,dimensions);blocks.Add(block);
-   go.AddComponent<CreatureAffordance>().kind=CreatureAffordance.Kind.Turn;
-  }
+  CreatePieces();
   var p=new GameObject("Construction snap preview");p.transform.SetParent(transform,false);preview=p.AddComponent<LineRenderer>();preview.useWorldSpace=true;preview.positionCount=16;preview.startWidth=preview.endWidth=unit*.08f;preview.shadowCastingMode=UnityEngine.Rendering.ShadowCastingMode.Off;
   outlineMaterial=new Material(Resources.Load<Material>("ConstructionPreview"));preview.sharedMaterial=outlineMaterial;preview.enabled=false;
  }
@@ -87,7 +54,7 @@ public sealed class ConstructionSite:MonoBehaviour {
    else if(block.wasHeld){block.wasHeld=false;Drop(block,block.transform.position,block.transform.rotation);}}
   foreach(var block in blocks)if(block.VillagerOwner!=null)block.VillagerOwner.ApplyPhysicsPush();
   physics.Simulate(Mathf.Min(dt,.04f));
-  foreach(var block in blocks)if(!block.Item.held){if(block.Body.position.y< -3||block.Body.position.sqrMagnitude>1600)ReturnLoose(block);block.transform.SetPositionAndRotation(World(block.Body.position),transform.rotation*block.Body.rotation);}
+  foreach(var block in blocks)if(!block.Item.held){if(block.Body.position.y< -3||block.Body.position.sqrMagnitude>6400)ReturnLoose(block);block.transform.SetPositionAndRotation(World(block.Body.position),transform.rotation*block.Body.rotation);}
   Changed?.Invoke();
  }
  public void Detach(ConstructionBlock block){
@@ -101,13 +68,14 @@ public sealed class ConstructionSite:MonoBehaviour {
  bool Support(Vector3 point,ConstructionBlock block,out Rigidbody support,Quaternion rotation=default){support=null;if(Mathf.Abs(point.y-block.size.y*.5f)<.05f)return !IsBridge||(block.size.x<3&&Mathf.Abs(Mathf.Abs(point.x)-2)<.1f&&Mathf.Abs(point.z)<.1f);
   if(IsBridge&&block.size.x>3){if(Mathf.Abs(point.x)>.1f||Mathf.Abs(point.z)>.1f||Mathf.Abs(point.y-LayerHeight*1.5f)>.05f||blocks.Count(b=>b.Attached&&!b.Item.held&&b.size.x<3&&Mathf.Abs(b.Body.position.y-LayerHeight*.5f)<.05f&&Mathf.Abs(b.Body.position.z)<.1f&&Mathf.Abs(Mathf.Abs(b.Body.position.x)-2)<.1f)<2)return false;}
   if(rotation==default)rotation=Quaternion.identity;var x=rotation*new Vector3(block.size.x*.5f,0,0);var z=rotation*new Vector3(0,0,block.size.z*.5f);var half=new Vector3(Mathf.Abs(x.x)+Mathf.Abs(z.x),0,Mathf.Abs(x.z)+Mathf.Abs(z.z));
-  foreach(var other in blocks)if(other!=block&&!other.Item.held&&other.Attached&&Mathf.Abs(other.Body.position.y+(other.size.y+block.size.y)*.5f-point.y)<.04f){var bounds=other.Body.GetComponent<BoxCollider>().bounds;
+  foreach(var other in blocks)if(other.Shape!=ConstructionShape.Ramp&&other!=block&&!other.Item.held&&other.Attached&&Mathf.Abs(other.Body.position.y+(other.size.y+block.size.y)*.5f-point.y)<.04f){var bounds=other.PhysicsBounds;
    if(bounds.max.x>point.x-half.x+.25f&&bounds.min.x<point.x+half.x-.25f&&bounds.max.z>point.z-half.z+.25f&&bounds.min.z<point.z+half.z-.25f){support=other.Body;return true;}}
   return false;
  }
- public bool TryPlan(ConstructionBlock block,out Vector3 world,out Quaternion rotation){
-  if(Locked){world=default;rotation=transform.rotation;return false;}
-  foreach(var p in Pattern){if(p.beam!=(block.size.x>3))continue;
+ public bool TryPlan(ConstructionBlock block,out Vector3 world,out Quaternion rotation){if(TryRecipePlan(block,out world,out rotation))return true;if(block.RecipePiece&&!RecipeComplete)return false;return !Locked&&CreativePlan(block,out world,out rotation);}
+ public bool TryRecipePlan(ConstructionBlock block,out Vector3 world,out Quaternion rotation){
+  if(Locked||!block.RecipePiece){world=default;rotation=transform.rotation;return false;}
+  foreach(var p in Pattern){if(p.beam!=(block.Shape==ConstructionShape.Beam))continue;
    float pierHeight=LayerHeight*(Recipe==BuildRecipe.Arch?2.5f:.5f);
    if(p.beam&&Recipe!=BuildRecipe.Tower&&blocks.Count(b=>b.Attached&&Mathf.Abs(b.Body.position.y-pierHeight)<.1f&&Mathf.Abs(b.Body.position.z)<.1f&&Mathf.Abs(Mathf.Abs(b.Body.position.x)-2)<.1f)<2)continue;
    var point=p.position;
@@ -117,18 +85,20 @@ public sealed class ConstructionSite:MonoBehaviour {
  public bool FindSnap(ConstructionBlock block,Vector3 desired,Quaternion rotation,out Vector3 target,out Quaternion aligned,out Rigidbody support){
   var point=Local(desired);var localRotation=Quaternion.Inverse(transform.rotation)*rotation;aligned=Quaternion.Euler(0,Mathf.Round(localRotation.eulerAngles.y/90)*90,0);target=default;support=null;
   if(Quaternion.Angle(localRotation,aligned)>30)return false;float best=.85f*.85f;
-  for(int level=0;level<8;level++)for(int z=-6;z<=6;z+=2)for(int x=-6;x<=6;x+=2){var candidate=new Vector3(x,LayerHeight*.5f+level*LayerHeight,z);float distance=(candidate-point).sqrMagnitude;if(distance>best||!Support(candidate,block,out var under,aligned)||!Empty(block,candidate,aligned))continue;best=distance;target=candidate;support=under;}
+  float x=Mathf.Round(point.x/2)*2,z=Mathf.Round(point.z/2)*2;var rotated=aligned*block.size;float halfX=Mathf.Abs(rotated.x)*.5f,halfZ=Mathf.Abs(rotated.z)*.5f;
+  if(Mathf.Abs(x)+halfX>HalfSize.x-1||Mathf.Abs(z)+halfZ>HalfSize.y-1)return false;
+  for(int level=0;level<(IsBridge?8:24);level++){var candidate=new Vector3(x,block.size.y*.5f+level*LayerHeight,z);float distance=(candidate-point).sqrMagnitude;if(distance>best||!Support(candidate,block,out var under,aligned)||!Empty(block,candidate,aligned))continue;best=distance;target=candidate;support=under;}
   return best<.85f*.85f;
  }
  public bool Drop(ConstructionBlock block,Vector3 desired,Quaternion rotation,bool byCreature=false){
   block.Item.held=false;block.wasHeld=false;preview.enabled=false;
   bool snap=FindSnap(block,desired,rotation,out var at,out var facing,out var under);Detach(block);
   if(snap){Activate(block);block.Body.transform.SetPositionAndRotation(at,facing);block.Body.position=at;block.Body.rotation=facing;Connect(block,under);successfulSnaps++;}
-  else {var p=Local(desired);if(Mathf.Abs(p.x)>8||Mathf.Abs(p.z)>8||p.y<.6f)p=block.spawn;Activate(block);var q=Quaternion.Inverse(transform.rotation)*rotation;block.Body.transform.SetPositionAndRotation(p,q);block.Body.position=p;block.Body.rotation=q;}
+  else {var p=Local(desired);if(!Contains(p,-1)||p.y<block.size.y*.5f-.1f)p=block.spawn;Activate(block);var q=Quaternion.Inverse(transform.rotation)*rotation;block.Body.transform.SetPositionAndRotation(p,q);block.Body.position=p;block.Body.rotation=q;}
   block.creatureBuilt=snap&&byCreature;if(block.creatureBuilt)LastCreatureBuildTime=Clock;
   block.transform.SetPositionAndRotation(World(block.Body.position),transform.rotation*block.Body.rotation);Changed?.Invoke();return snap;
  }
- bool RayPoint(ConstructionBlock block,Ray ray,out Vector3 point){foreach(var hit in Physics.RaycastAll(ray,10).OrderBy(h=>h.distance))if(hit.collider!=block.GetComponent<Collider>()&&((hit.collider.GetComponent<ConstructionFoundation>()!=null&&hit.collider.transform.parent==transform)||hit.collider.GetComponent<ConstructionBlock>()?.Site==this)){point=hit.point+Vector3.up*unit*LayerHeight*.5f;return true;}point=World(block.spawn);return false;}
+ bool RayPoint(ConstructionBlock block,Ray ray,out Vector3 point){foreach(var hit in Physics.RaycastAll(ray,10).OrderBy(h=>h.distance))if(hit.collider.GetComponentInParent<ConstructionBlock>()!=block&&((hit.collider.GetComponent<ConstructionFoundation>()!=null&&hit.collider.transform.parent==transform)||hit.collider.GetComponent<ConstructionBlock>()?.Site==this)){point=hit.point+Vector3.up*unit*block.size.y*.5f;return true;}point=World(block.spawn);return false;}
  public bool PlacementPoint(ConstructionBlock block,Ray ray,out Vector3 point){if(!RayPoint(block,ray,out point))return false;if(FindSnap(block,point,transform.rotation,out var local,out _,out _))point=World(local);return true;}
  public bool DropRay(ConstructionBlock block,Ray ray){RayPoint(block,ray,out var point);return Drop(block,point,transform.rotation);}
  public void PreviewRay(ConstructionBlock block,Ray ray){if(RayPoint(block,ray,out var point)&&FindSnap(block,point,transform.rotation,out var local,out var rotation,out _))ShowPreview(block,World(local),transform.rotation*rotation);else preview.enabled=false;}
@@ -144,20 +114,20 @@ public sealed class ConstructionSite:MonoBehaviour {
   return new ConstructionRecord{position=held?b.spawn:b.Body.position,rotation=held?Quaternion.identity:b.Body.rotation,support=held||!b.Attached?-2:b.Connection.connectedBody==null?-1:blocks.FindIndex(p=>p.Body==b.Connection.connectedBody),creatureBuilt=!held&&b.creatureBuilt};
  }).ToArray();
  public static bool Valid(ConstructionRecord[] records){
-  if(records==null||records.Length==0)return true;if(records.Length!=8)return false;
-  for(int i=0;i<records.Length;i++){var r=records[i];if(r==null||r.support< -2||r.support>=8||!Finite(r.position.x)||!Finite(r.position.y)||!Finite(r.position.z)||r.position.sqrMagnitude>1600||!Finite(r.rotation.x)||!Finite(r.rotation.y)||!Finite(r.rotation.z)||!Finite(r.rotation.w))return false;
+  if(records==null||records.Length==0)return true;if(records.Length!=8&&records.Length!=YardPieces)return false;
+  for(int i=0;i<records.Length;i++){var r=records[i];if(r==null||r.support< -2||r.support>=records.Length||!Finite(r.position.x)||!Finite(r.position.y)||!Finite(r.position.z)||r.position.sqrMagnitude>6400||!Finite(r.rotation.x)||!Finite(r.rotation.y)||!Finite(r.rotation.z)||!Finite(r.rotation.w))return false;
    float norm=r.rotation.x*r.rotation.x+r.rotation.y*r.rotation.y+r.rotation.z*r.rotation.z+r.rotation.w*r.rotation.w;if(Mathf.Abs(norm-1)>.05f)return false;
    int parent=r.support;var visited=new HashSet<int>{i};while(parent>=0){if(parent>=records.Length||records[parent]==null||!visited.Add(parent))return false;parent=records[parent].support;}
   }return true;
  }
  static bool Finite(float f)=>!float.IsNaN(f)&&!float.IsInfinity(f);
  public void Restore(ConstructionRecord[] records){
-  if(records==null||records.Length==0)return;if(!Valid(records))throw new System.ArgumentException("Invalid saved construction");
+  if(records==null||records.Length==0)return;if(!Valid(records)||records.Length>blocks.Count)throw new System.ArgumentException("Invalid saved construction");
   ResetConstruction();
-  for(int i=0;i<blocks.Count;i++){var b=blocks[i];b.creatureBuilt=records[i].creatureBuilt;b.Body.transform.SetPositionAndRotation(records[i].position,records[i].rotation);b.Body.position=records[i].position;b.Body.rotation=records[i].rotation;b.transform.SetPositionAndRotation(World(b.Body.position),transform.rotation*b.Body.rotation);}
-  for(int i=0;i<blocks.Count;i++)if(records[i].support>= -1)Connect(blocks[i],records[i].support== -1?null:blocks[records[i].support].Body);
+  for(int i=0;i<records.Length;i++){var b=blocks[i];b.creatureBuilt=records[i].creatureBuilt;b.Body.transform.SetPositionAndRotation(records[i].position,records[i].rotation);b.Body.position=records[i].position;b.Body.rotation=records[i].rotation;b.transform.SetPositionAndRotation(World(b.Body.position),transform.rotation*b.Body.rotation);}
+  for(int i=0;i<records.Length;i++)if(records[i].support>= -1)Connect(blocks[i],records[i].support== -1?null:blocks[records[i].support].Body);
   if(records.Any(r=>r.creatureBuilt))LastCreatureBuildTime=Clock;
  }
- void OnDestroy(){if(colors!=null)foreach(var m in colors)Destroy(m);if(outlineMaterial!=null)Destroy(outlineMaterial);if(simulationScene.IsValid()&&simulationScene.isLoaded)SceneManager.UnloadSceneAsync(simulationScene);}
+ void OnDestroy(){foreach(var mesh in pieceMeshes)if(mesh!=null)Destroy(mesh);if(colors!=null)foreach(var m in colors)Destroy(m);if(outlineMaterial!=null)Destroy(outlineMaterial);if(simulationScene.IsValid()&&simulationScene.isLoaded)SceneManager.UnloadSceneAsync(simulationScene);}
 }
 }

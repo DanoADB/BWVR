@@ -21,7 +21,7 @@ public static class VillagerRepairChecks {
    site.Paused=false;site.ResetConstruction();site.Recipe=BuildRecipe.Bench;
    foreach(var p in ConstructionPatterns.Plan(site.Recipe)){var b=site.blocks.First(b=>!b.Attached&&(b.size.x>3)==p.beam);Require(site.Drop(b,site.World(p.position),site.transform.rotation,true),"Bench fixture did not snap");for(int i=0;i<5;i++)site.Advance(.02f);}
    Approach();Require(actor.TryStructure(site),"Could not use bench");Run();Require(memory.usefulStructures!=0&&memory.constructionUses==1,"Successful use did not remember this site/form");actor.ResetTask();
-   var beam=site.blocks.Single(b=>b.size.x>3);site.ReturnLoose(beam);Age();Approach();
+   var beam=site.blocks.First(b=>b.Shape==ConstructionShape.Beam&&b.Attached);site.ReturnLoose(beam);Age();Approach();
    int known=memory.usefulStructures;memory.usefulStructures=0;Require(!actor.TryRepair(site),"Unknown structure repaired");memory.usefulStructures=known;
    beam.Item.held=true;Require(!actor.TryRepair(site),"Player-held block stolen");beam.Item.held=false;
    float trustBefore=memory.trust;actor.Tick(36,false);Require(actor.Current==VillagerExploration.Phase.RepairFetch,"Idle villager did not autonomously choose known damaged bench");Require(!actors[1].TryRepair(site)&&site.Repairer==actor&&!beam.CanBuild,"Repair lease failed");
