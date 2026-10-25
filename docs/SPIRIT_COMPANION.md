@@ -1,6 +1,20 @@
 # Private spirit companion
 
-Design specification, 2026-10-25. The character, agent connection and voice bridge are planned, not implemented by this document.
+Design specification, 2026-10-25. The local presentation and read-only inspection foundation are now implemented as described below. The agent connection, voice, live world tools and development bridge remain planned.
+
+## First local implementation
+
+`SpiritCompanion` builds an original teal-and-ivory floating seed with leaf fins and a shared low-resolution mesh/three unlit materials. It perches near the left hand, faces the player, scales with the viewing rig, and uses a head-adjacent fallback when the left controller loses tracking. It has no collider, Rigidbody, audio, light, affordance, carry item, actor target or navigation agent. It never enters creature or weather target registries. Idle animation stops during pause/suspension.
+
+Open the sanctuary with X/left menu (desktop Tab). **Spirit: show / hide** dismisses or summons it without a new controller binding. **Help / details** reveals a small collider-free observation card; normal play has no spirit text panel. Existing help, pause, save and restart controls remain available. The sanctuary still starts closed. Visibility is session-local; it is not saved as a new gameplay property.
+
+`SpiritObservation` returns detached, read-only values for current creature mood, three original adults plus saved children, sampled learned-context count, current weather, sheltered wood/food/resin and exposed food. It reads optional fields directly instead of allocating lazy save state. Unknown optional data stays unknown. The learned-context count measures reinforced associations, not skill mastery, new inventions or discoveries. No historical totals, villager profiles or Book UI are claimed by this step.
+
+The card explicitly says **AI DISCONNECTED** and **Local observation only · no voice or world control**. No network calls, microphone capture, credentials, fabricated conversation or live-world edits are included. The presentation uses the existing sanctuary's font/UI convention; in-headset readability, placement and standalone performance still require device testing. The prototype is local single-player: player-only means actors cannot perceive it, not a tested multiplayer visibility protocol.
+
+Editor checks: `SpiritChecks.VerifyModel()` covers mutation-free legacy inspection, detached snapshots, real stock values and sampled-learning counts. `SpiritChecks.VerifyRuntime()` checks the slice integration, perception/physics exclusions, shaders/shadows, actual help readout, sanctuary toggle, pause/suspend and tracking-loss fallback.
+
+Verified in Unity 6000.6.7f1 on 2026-10-25: both spirit checks passed, as did the existing hybrid/resource/forestry/resin model checks, Quest controller checks and creature feedback check. The controller fixture required registering OpenXR's Haptic control layout in the offline test session; no controller bindings were changed. An initial spirit test searched the island for the sanctuary button, then was corrected to account for the separate XR rig root and passed. A replaced/new-season state was inspected without stale inventory references. Play mode advanced from frame 1 to 5,166, and the final live console reported no errors or compilation failure. A portrait render of the actual mesh/readout was inspected. Play mode was stopped and the original season file restored with a matching hash. No APK was built and no headset readability/performance claim is made.
 
 ## Character
 

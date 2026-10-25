@@ -137,3 +137,7 @@ Implementation sequence: finish renewable wheat, then establish a small fuel use
 ### Book of Creation — 2026-10-25
 
 Add an optional physical Book of Creation, accessible through the sanctuary and closed by default. It records creature learning/interests, individual villager profiles and measured skills, creations and contributors, food/resource accounting, separate creature and villager sentiment, and evidence-backed discoveries of playthrough-specific patterns. Keep normal play nonverbal; the book is an inspection/history interface rather than a command dashboard. See [Book of Creation](BOOK_OF_CREATION.md) for chapter contents, discovery evidence rules, integration and phased implementation. This interface is planned, not yet implemented. The first delivery uses existing state; richer discovery recognition follows persistent evidence instrumentation.
+
+### Private spirit: first local appearance — 2026-10-25
+
+The original player-only spirit now perches by the left hand, with a sanctuary show/hide control and optional Help/details observations. It reads actual creature mood, reinforced-context count, population, weather and resource stocks without modifying save state or participating in actor perception/physics. Its card explicitly reports AI disconnected. Voice, connected agent tools, the source-development bridge and the full Book interface remain future work. See [spirit companion](SPIRIT_COMPANION.md) for implementation boundaries and the next delivery gates.
