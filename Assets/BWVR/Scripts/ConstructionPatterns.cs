@@ -14,8 +14,9 @@ public static class ConstructionPatterns {
  }
 }
 [Serializable] public sealed class BuildingMemory {
+ public BuildingPractice practice;public BuildingPractice Practice=>practice??(practice=new BuildingPractice());
  public int observed=1,mainRecipe,lastSelected;public int[] cacheRecipes={0,0};public int[] completed=new int[4];public float[] preference={.5f,.5f,.5f,.5f};public ConstructionRecord[] bridge;
  public bool Knows(BuildRecipe recipe)=>(observed&(1<<(int)recipe))!=0;
- public bool Valid(){if(observed<0||observed>15||mainRecipe<0||mainRecipe>2||lastSelected<0||lastSelected>3||cacheRecipes==null||cacheRecipes.Length!=2||completed==null||completed.Length!=4||preference==null||preference.Length!=4||!ConstructionSite.Valid(bridge))return false;foreach(int r in cacheRecipes)if(r<0||r>2)return false;for(int i=0;i<4;i++)if(completed[i]<0||completed[i]>1000000||!HybridState.Number(preference[i],0,1))return false;return true;}
+ public bool Valid(){if((practice!=null&&!practice.Valid())||observed<0||observed>15||mainRecipe<0||mainRecipe>2||lastSelected<0||lastSelected>3||cacheRecipes==null||cacheRecipes.Length!=2||completed==null||completed.Length!=4||preference==null||preference.Length!=4||!ConstructionSite.Valid(bridge))return false;foreach(int r in cacheRecipes)if(r<0||r>2)return false;for(int i=0;i<4;i++)if(completed[i]<0||completed[i]>1000000||!HybridState.Number(preference[i],0,1))return false;return true;}
 }
 }

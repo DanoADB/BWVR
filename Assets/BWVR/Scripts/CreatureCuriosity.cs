@@ -6,7 +6,7 @@ public sealed class CreatureCuriosity:MonoBehaviour {
  public enum Phase { Rest,Approach,Inspect,Lift,Play,CarryFriend,Place,BuildApproach,BuildPlace,ThrowBall,WatchBall,RallyBall,FetchCarry,FetchPlace,RhythmGame }
  public int built{get;private set;}
  Vector3 buildPoint,buildApproach,buildStart;Quaternion buildRotation;
- bool fetching;int fetchTicket;bool constructionFocus,askedPlaymate;float inviteGestureUntil;
+ bool buildCorrection;public int alignmentCorrections{get;private set;}bool fetching;int fetchTicket;bool constructionFocus,askedPlaymate;float inviteGestureUntil;
  VillagerSocial lastFriend;
  public Phase Current{get;private set;}CreatureAffect.Mood affect,feedbackMood;float reaction;bool lastWater;
  public CreatureAffect.Mood Affect{get=>reaction>0?feedbackMood:affect;private set=>affect=value;}
@@ -31,7 +31,7 @@ public sealed class CreatureCuriosity:MonoBehaviour {
   state=season;if(dt<=0||state.paused)return Current!=Phase.Rest;reaction=Mathf.Max(0,reaction-dt);
   state.hunger=Mathf.Clamp01(state.hunger+dt*.0035f);boredom+=dt;emotion=Mathf.Max(0,emotion-dt);feedbackWindow=Mathf.Max(0,feedbackWindow-dt);
   if(Current==Phase.Rest){
-   Affect=state.hunger>.67f?CreatureAffect.Mood.Hungry:emotion>0?recentMood:boredom>32?CreatureAffect.Mood.Bored:CreatureAffect.Mood.Calm;
+   Affect=state.hunger>.67f?CreatureAffect.Mood.Hungry:emotion>0?recentMood:state.Hybrid.Motivation.boredom>.65f?CreatureAffect.Mood.Bored:state.Hybrid.Motivation.curiosity>.7f?CreatureAffect.Mood.Curious:CreatureAffect.Mood.Calm;
    cooldown-=dt;
    if(allowChoice&&cooldown<=0&&(state.Finished||state.water>=35)&&routine.Current==CreatureRoutine.Task.SeekingWater){
     var choice=affordances.Where(a=>a!=null&&a.Available).OrderByDescending(Score).FirstOrDefault();
@@ -83,10 +83,10 @@ public sealed class CreatureCuriosity:MonoBehaviour {
    if(navigator.MoveTo(landing,routine.speed*.75f,dt)){Current=Phase.Place;clock=0;motion?.Activity(5);}
   }else if(Current==Phase.BuildApproach){
    Affect=CreatureAffect.Mood.Curious;var block=owned.GetComponent<ConstructionBlock>();block.Site.ShowPreview(block,buildPoint,buildRotation);
-   if(navigator.MoveTo(buildApproach,routine.speed,dt)){buildStart=owned.transform.position;Current=Phase.BuildPlace;clock=0;motion?.Activity(5);}
+   if(navigator.MoveTo(buildApproach,routine.speed,dt)){buildStart=owned.transform.position;buildCorrection=state.Building.Practice.NeedsCorrection(state.Hybrid.seed,state.Building.Practice.placements);Current=Phase.BuildPlace;clock=0;motion?.Activity(5);}
   }else if(Current==Phase.BuildPlace){
-   Affect=CreatureAffect.Mood.Excited;float blend=Mathf.SmoothStep(0,1,clock/1.3f);motion?.PlaceAt(buildPoint,buildRotation,blend);owned.transform.SetPositionAndRotation(Vector3.Lerp(buildStart,buildPoint,blend),Quaternion.Slerp(originalRotation,buildRotation,blend));
-   if(clock>=1.4f){var block=owned.GetComponent<ConstructionBlock>();if(!block.Site.Drop(block,buildPoint,buildRotation,true)){Finish(false);return false;}lastWater=false;built++;played++;target.Discovered();NoticeDiscovery(target.GetComponentInParent<DiscoveryPoint>());boredom=0;feedbackWindow=12;lastSocial=false;owned=null;Finish(true);}
+   var skill=state.Building.Practice;float duration=skill.PlacementSeconds+(buildCorrection?.8f:0);Affect=buildCorrection&&clock>=skill.PlacementSeconds?CreatureAffect.Mood.Curious:CreatureAffect.Mood.Excited;float blend=Mathf.SmoothStep(0,1,clock/skill.PlacementSeconds);var aim=buildPoint+target.GetComponent<ConstructionBlock>().Site.transform.rotation*skill.Offset(clock,buildCorrection)*navigator.world.Scale;motion?.PlaceAt(aim,buildRotation,blend);owned.transform.SetPositionAndRotation(Vector3.Lerp(buildStart,aim,blend),Quaternion.Slerp(originalRotation,buildRotation,blend));
+   if(clock>=duration){var block=owned.GetComponent<ConstructionBlock>();if(!block.Site.Drop(block,buildPoint,buildRotation,true)){Finish(false);return false;}skill.Confirm(buildCorrection);if(buildCorrection)alignmentCorrections++;lastWater=false;built++;played++;target.Discovered();NoticeDiscovery(target.GetComponentInParent<DiscoveryPoint>());boredom=0;feedbackWindow=12;lastSocial=false;owned=null;Finish(true);}
   }else if(Current==Phase.FetchCarry){var ball=target.GetComponent<BeachBall>();if(!ball.OwnsFetch(fetchTicket)){Finish(false);return false;}Affect=CreatureAffect.Mood.Happy;if(navigator.MoveTo(ball.FetchHome,routine.speed*.8f,dt)){Current=Phase.FetchPlace;clock=0;motion?.Activity(5);}}
   else if(Current==Phase.FetchPlace){var ball=target.GetComponent<BeachBall>();motion?.PlaceAt(ball.FetchHome,Quaternion.identity,Mathf.Clamp01(clock));if(clock>1.1f){motion?.Carry(null);if(!ball.CompleteFetch(fetchTicket)){Finish(false);return false;}owned=null;played++;target.Discovered();lastWater=lastSocial=false;feedbackWindow=12;boredom=0;Finish(true);}}
   else if(Current==Phase.ThrowBall){Affect=CreatureAffect.Mood.Excited;var ball=target.GetComponent<BeachBall>();var direction=ball.Direction(transform);transform.rotation=Quaternion.RotateTowards(transform.rotation,Quaternion.LookRotation(direction),dt*240);var release=transform.position+direction*navigator.world.Scale*8+Vector3.up*navigator.world.Scale*9;motion?.PlaceAt(release,Quaternion.identity,Mathf.Clamp01(clock/.8f));if(clock>.9f){owned.transform.position=release;motion?.Carry(null);motion?.PlaceAt(default,Quaternion.identity,0);ball.Throw(direction);owned=null;Current=Phase.WatchBall;clock=0;motion?.Activity(6);}}
@@ -112,6 +112,7 @@ public sealed class CreatureCuriosity:MonoBehaviour {
  public void Offer(CreatureAffordance item){var hybrid=GetComponent<CreatureHybrid>();if(hybrid!=null){hybrid.Guide(GuidanceIntent.Investigate,item!=null?item.GetComponent<HybridTarget>():null);return;}if(Current==Phase.Rest)TryBegin(item);}
  public void NoticeDiscovery(DiscoveryPoint point){if(point==null||state==null||!point.Discover(0))return;state.creatureDiscoveries=Mathf.Min(6,state.creatureDiscoveries+1);state.playPreference=Mathf.Clamp01(state.playPreference+.025f);reaction=2;feedbackMood=recentMood=CreatureAffect.Mood.Happy;emotion=5;motion?.React();}
  public void NoticeGreeting(Transform villager){emotion=4;recentMood=CreatureAffect.Mood.Happy;Affect=recentMood;motion?.LookAt(villager);}
+ public void NoticeAttention(){reaction=1.5f;feedbackMood=CreatureAffect.Mood.Curious;}
  public void NoticeDisassembly(Transform villager){villager.GetComponent<VillagerSocial>()?.RememberDispute();emotion=4;recentMood=CreatureAffect.Mood.Sad;Affect=recentMood;motion?.LookAt(villager);}
  public void NoticeBadPlay(Transform harmed){reaction=3;feedbackMood=recentMood=CreatureAffect.Mood.Sad;emotion=5;motion?.LookAt(harmed);}
  public void RememberWaterDelivery(SliceState season){state=season;lastWater=true;lastSocial=false;feedbackWindow=12;}

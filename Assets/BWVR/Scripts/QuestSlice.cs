@@ -84,6 +84,7 @@ public sealed class QuestSlice:MonoBehaviour {
   curiosity=creature.gameObject.AddComponent<CreatureCuriosity>();curiosity.Initialize(creatureRoutine,godMotion,affordances);
   for(int i=0;i<jobs.Length;i++){jobs[i].gameObject.AddComponent<VillagerBlockPlay>().Initialize(construction,curiosity,i);jobs[i].gameObject.AddComponent<VillagerSocial>().Initialize(curiosity,i,()=>state);jobs[i].gameObject.AddComponent<VillagerExploration>().Initialize(discoveries,i);}
   hybrid=creature.gameObject.AddComponent<CreatureHybrid>();hybrid.Initialize(creatureRoutine,curiosity,godMotion,affordances,jobs,reservoir.gameObject,waterOffering,()=>state);
+  for(int i=0;i<items.Count;i++)if(items[i].GetComponent<HybridTarget>()==null)hybrid.Register(HybridTarget.Bind(items[i].gameObject,"resource-"+i,HybridTargetKind.Object));
   foreach(var job in jobs)job.GetComponent<VillagerSocial>().ConfigureSharing(hybrid,affordances);
   balls=GetComponentsInChildren<BeachBall>();foreach(var ball in balls)ball.Configure(hybrid,jobs);foreach(var job in jobs)job.GetComponent<VillagerExploration>().ConfigureBalls(balls);foreach(var job in jobs)job.GetComponent<VillagerExploration>().ConfigurePeers(jobs.Select(j=>j.GetComponent<VillagerExploration>()).ToArray());
   miracles=DivineIntervention.Build(transform,hybrid,navigation,cistern,jobs,()=>state);
@@ -187,14 +188,15 @@ public sealed class QuestSlice:MonoBehaviour {
   if(item.kind==Offering.Creature){item.home=item.transform.position;hybrid.Interrupt("Picked up by the player");}
   throwMotion[side].Reset();held[side]=item;item.held=true;item.GetComponent<Collider>().enabled=false;item.GetComponent<ConstructionBlock>()?.Grab();notice="Release the carry button over clear ground to place.";return true;
  }
- void Release(int i,Ray ray){var item=held[i];var toss=throwMotion[i].Velocity;if(!XRSettings.isDeviceActive&&Keyboard.current!=null&&Keyboard.current.spaceKey.isPressed)toss=ray.direction*(.5f*rig.localScale.x);throwMotion[i].Reset();held[i]=null;item.held=false;item.GetComponent<Collider>().enabled=true;var tool=item.GetComponent<DivineTool>();if(tool!=null){UseSpiritualTool(tool,ray);return;}var ball=item.GetComponent<BeachBall>();if(ball!=null&&!state.paused&&toss.magnitude>.12f*rig.localScale.x&&ball.PlayerToss(toss,rig.localScale.x)){notice="Tossed. The play circle marks its return spot.";return;}var block=item.GetComponent<ConstructionBlock>();if(block!=null){notice=block.Site.DropRay(block,ray)?"Blocks snapped together.":"Loose block released on the construction green.";return;}Vector3 point;
+ void Release(int i,Ray ray){var item=held[i];var toss=throwMotion[i].Velocity;if(!XRSettings.isDeviceActive&&Keyboard.current!=null&&Keyboard.current.spaceKey.isPressed)toss=ray.direction*(.5f*rig.localScale.x);throwMotion[i].Reset();held[i]=null;item.held=false;item.GetComponent<Collider>().enabled=true;var tool=item.GetComponent<DivineTool>();if(tool!=null){UseSpiritualTool(tool,ray);return;}var ball=item.GetComponent<BeachBall>();if(ball!=null&&!state.paused&&toss.magnitude>.12f*rig.localScale.x&&ball.PlayerToss(toss,rig.localScale.x)){notice="Tossed. The play circle marks its return spot.";return;}var block=item.GetComponent<ConstructionBlock>();if(block!=null){notice=block.Site.DropRay(block,ray)?"Blocks snapped together.":"Loose block released on the construction green.";hybrid.NoticePlaced(item);return;}Vector3 point;
   if(!TryDropPoint(item,ray,out point)){item.transform.position=item.home;notice="Returned safely: place on dry, clear walking ground.";return;}
   if(item.kind==Offering.Villager||item.kind==Offering.Creature)item.GetComponent<IslandNavigator>()?.ResetRoute();
   if(item.GetComponent<SharedRhythm>()!=null)item.transform.rotation=Quaternion.Euler(0,item.transform.eulerAngles.y,0);
   item.transform.position=point+Vector3.up*(item.kind==Offering.Villager||item.kind==Offering.Creature?0:item.GetComponent<SharedRhythm>()!=null?item.transform.lossyScale.y*.5f:Size(.04f,2));
   if(item.kind==Offering.Water&&Vector3.Distance(point,cistern)<Size(.18f,8)){DeliverWater();notice="Water delivered. Villagers celebrate their creature's gift.";item.transform.position=item.home;}
-  else if(item.kind==Offering.Food&&Vector3.Distance(point,creature.position)<Size(.2f,8)){state.hunger=.05f;var found=item.GetComponent<DiscoveryObject>();if(found!=null){curiosity.NoticeDiscovery(found.point);found.Eat();}notice="The creature accepts your offering.";item.transform.position=item.home;}
+  else if(item.kind==Offering.Food&&Vector3.Distance(point,creature.position)<Size(.2f,8)){notice="Food offered. The creature can choose to investigate and eat.";}
   else {if(item.kind==Offering.Villager)item.home=item.transform.position;notice="Placed on the island.";}
+  hybrid.NoticePlaced(item);
  }
  bool TryDropPoint(CarryItem item,Ray ray,out Vector3 point){
   point=ray.GetPoint(2*rig.localScale.x);
