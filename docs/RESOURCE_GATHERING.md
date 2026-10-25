@@ -40,3 +40,7 @@ The 2026-10-25 household/storage extension supersedes the fixed capacity and thr
 Replanting depleted registered tree sites and saved sapling growth are now implemented; see REFORESTATION.md. Each mature tree still offers a finite twelve-unit yield, renewed only after completed planting and growth.
 
 Renewable resin gathering is now implemented as a third distinct resource, linked to living wood trees. See RESIN_GATHERING.md for replenishment, reservations, capacity and persistence details.
+
+## Planned wood uses
+
+Wood will support fuel, housing construction/repair, and varied inventions made autonomously by villagers and the creature. These uses must share counted stock and project reservations, with needs, learned interests and available materials shaping decisions. Current timber spending covers storage shelving; fuel, resource-funded houses and inventive material-funded projects remain queued. See the wood uses and creative construction section in GAMEPLAY_DIRECTION.md.

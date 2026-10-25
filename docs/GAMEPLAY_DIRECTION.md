@@ -119,3 +119,17 @@ Depleted wood sites can now be replanted by villagers and visibly grow back into
 ### Renewable resin — 2026-10-25
 
 Villagers gather small resin reserves from living trees, preserving their timber while resin slowly replenishes. Shared tree reservations prevent cutting, tapping and creature pickup from competing for one tree. Amber cups/jars and a store fullness post communicate the resource without new menus. Resin recipes remain later work; planted and growing wheat is the next food-security milestone.
+
+### Wood uses and creative construction — 2026-10-25
+
+Wood is a shared material for three complementary purposes:
+
+- **Fuel:** fires provide warmth and eventually cooking or processing. Fuel must be consumed from real stock over simulation time; weather and safety influence whether a fire is useful. Keep accidental fire and deliberate fuel use distinct.
+- **Housing:** villagers use timber to construct, expand and repair homes as household needs grow. Existing paid storage shelving is the current resource-spending foundation; resource-funded autonomous houses remain future work.
+- **Creative construction:** villagers and the creature can envision and attempt new objects or structures, including playful inventions and useful experiments. Choose bounded combinations of known parts and affordances, varied by temperament, experience, observed examples and local needs. Randomness supplies variety; feasibility, material budgets and physical usefulness constrain the result. Do not limit invention to a fixed house-building loop or require player commands.
+
+These uses compete with one another and with preserving living resin trees. Essential shelter and a modest fuel reserve should remain possible without consuming every plank on discretionary experiments. Reserve materials when committing a project, charge them exactly once as construction progresses, and recover only legitimately unused material on cancellation. Persist bounded project plans, progress and remembered outcomes; protect player-held parts and existing action ownership.
+
+Show intentions through carried materials, laid-out parts, gestures and visible construction. Let villagers use, admire, fear, repair or dismantle results, and let those outcomes shape later choices. Creature learning and individual villager preferences should produce different inventions rather than an unlimited random-prop generator.
+
+Implementation sequence: finish renewable wheat, then establish a small fuel use and a shared material-funded project contract; extend that contract to housing and creative projects. Existing reusable toy blocks remain available while material accounting is introduced deliberately. Fuel, timber-funded houses and inventive material-funded construction are planned capabilities, not implemented by this design update.
