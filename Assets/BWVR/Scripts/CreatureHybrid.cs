@@ -43,6 +43,7 @@ public sealed class CreatureHybrid:MonoBehaviour {
  }
  void Reject(GuidanceStatus status,string reason){var g=State.guidance;g.status=status;g.reason=reason;Explanation=reason;Journal.Add(State.time,"guidance "+status,CreatureAction.RespondToGuidance,g.target,reason);}
  public void Tick(float dt,bool advanceClock=true){
+  if(GetComponent<CarryItem>()?.held==true)return;
   if(Season.paused||suspended||dt<=0||float.IsNaN(dt)||float.IsInfinity(dt))return;if(advanceClock)State.time=Mathf.Min(100000000,State.time+dt);
   if(State.guidance.status==GuidanceStatus.Active&&State.time>=State.guidance.expiresAt)Reject(GuidanceStatus.Expired,"Request expired");
   if(State.guidance.status==GuidanceStatus.Active&&Find(State.guidance.target)==null)Reject(GuidanceStatus.Abandoned,"Target unavailable");

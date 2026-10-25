@@ -5,9 +5,9 @@ public sealed class HumanoidMotion:MonoBehaviour {
  public bool paused; Animator animator; HumanoidHands hands; Vector3 previous; int activity;
  void Awake(){animator=GetComponentInChildren<Animator>();previous=transform.position;if(animator!=null){hands=animator.GetComponent<HumanoidHands>();if(hands!=null)hands.actor=transform;}}
  void LateUpdate(){if(animator==null)return;var delta=transform.position-previous;previous=transform.position;
-  var item=GetComponent<CarryItem>();bool carried=item!=null&&item.held;
+  var item=GetComponentInParent<CarryItem>();bool carried=item!=null&&item.held;
   delta.y=0;bool moving=delta.magnitude/Mathf.Max(Time.deltaTime,.000001f)>transform.lossyScale.y*.05f;
-  if(item!=null&&moving&&!carried&&!paused&&delta.sqrMagnitude>1e-12f)transform.rotation=Quaternion.LookRotation(delta);
+  if(item!=null&&item.kind!=Offering.Creature&&moving&&!carried&&!paused&&delta.sqrMagnitude>1e-12f)transform.rotation=Quaternion.LookRotation(delta);
   animator.speed=paused?0:1;if(hands!=null)hands.paused=paused;animator.SetFloat("Speed",!paused&&!carried&&moving?1:0);animator.SetInteger("Activity",carried?0:activity);
  }
  public void Activity(int value){activity=value;}

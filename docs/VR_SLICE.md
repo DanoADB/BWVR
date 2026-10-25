@@ -52,6 +52,8 @@ BWVR > Validate Quest controls checks simulated OpenXR inputs, distinct grip/aim
 
 Zoom: hold the right side trigger (grip) and move the right stick up/down for 0.5x–8x world magnification. A fixed gaze/terrain focus is chosen when the right side trigger is pressed. Scale and position change together around that focus, keeping the tracked head rotation and FOV untouched. Y recenters at 1x. Movement speed, selection range, carry offset, near clip and ray thickness follow player scale. Zoom is suppressed while carrying; the mouse wheel supports desktop inspection. Physical headset comfort remains to be confirmed.
 
+The creature can also be picked up: aim at it, hold the right front/index trigger to carry, then release over dry, clear walking ground. Its current activity is interrupted without a training reward; autonomy resumes after placement. Invalid drops or lost tracking return it to its pickup position. It cannot be thrown, and being carried does not kick the beachball. Desktop E provides the same pickup/release for testing.
+
 The right side trigger is reserved for zoom. The right front/index trigger picks up and carries resources while held, drops on release, or interacts with non-carryable targets on press. Left side grip still carries; left front trigger interacts. Zoom does not start a pickup.
 
 ## Environment art pass — October 25, 2026
