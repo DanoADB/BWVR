@@ -64,7 +64,7 @@ public sealed class QuestSlice:MonoBehaviour {
   Item("Food offering",Offering.Food,Ground(Landmark("field",Site(new Vector3(.18f,Floor,.35f)),p=>p.town==0))+Vector3.up*Size(.04f,2),PrimitiveType.Sphere,new Color(.95f,.66f,.18f),Size(.065f,1.2f));
   Item("Wood offering",Offering.Wood,Ground(Landmark("tree",Site(new Vector3(-.5f,Floor,-.22f))))+Vector3.up*Size(.04f,2),PrimitiveType.Cube,new Color(.5f,.3f,.16f),Size(.07f,1.2f));
   creature=new GameObject("The village's god").transform;creature.SetParent(transform,false);creature.localScale=Vector3.one*ActorScale;creature.position=Ground(Site(new Vector3(0,Floor,-.12f)));
-  var god=Resources.Load<GameObject>("BWVRGod/Puglin");if(god!=null){var instance=Instantiate(god,creature);instance.transform.localPosition=Vector3.zero;instance.transform.localScale=Vector3.one*Size(.34f,13.9236f);Destroy(instance.GetComponent<Collider>());godMotion=instance.GetComponent<HumanoidMotion>();}
+  var god=Resources.Load<GameObject>("BWVRGod/Gorilla")??Resources.Load<GameObject>("BWVRGod/Puglin");if(god!=null){var instance=Instantiate(god,creature);instance.transform.localPosition=Vector3.zero;instance.transform.localScale=Vector3.one*Size(.34f,13.9236f);Destroy(instance.GetComponent<Collider>());godMotion=instance.GetComponent<HumanoidMotion>();}
   if(god==null&&Original("cow",Vector3.zero,Size(.34f,13.9236f),creature)==null){
   Shape("Creature body",PrimitiveType.Capsule,new Vector3(0,.13f,0),new Vector3(.15f,.17f,.14f),Color.white,creature);
   Shape("Creature head",PrimitiveType.Sphere,new Vector3(0,.27f,-.015f),new Vector3(.13f,.12f,.11f),new Color(.9f,.85f,.73f),creature);
@@ -90,7 +90,7 @@ public sealed class QuestSlice:MonoBehaviour {
   foreach(var affordance in affordances){var cue=affordance.gameObject.AddComponent<SpatialTarget>();var offered=affordance;cue.invoke=()=>curiosity.Offer(offered);}
   creature.gameObject.AddComponent<CreatureAffect>().Initialize(curiosity,terrain!=null?terrain.scale:.025f);
   signals=gameObject.AddComponent<DroughtSignals>();signals.Initialize(reservoir,ground.sharedMaterial,jobs,creatureRoutine);
-  Debug.Log("BWVR_ART_ACTIVE: environment="+(environment!=null)+", Puglin="+(god!=null)+", original fallback="+(art!=null));
+  Debug.Log("BWVR_ART_ACTIVE: environment="+(environment!=null)+", creature="+(god!=null?god.name:"original/prototype fallback")+", original fallback="+(art!=null));
   var target=creature.gameObject.AddComponent<SpatialTarget>();target.invoke=()=>GiveFeedback(true);var box=creature.gameObject.AddComponent<BoxCollider>();box.center=new Vector3(0,Size(.18f,7),0);box.size=new Vector3(Size(.2f,8),Size(.4f,15),Size(.2f,8));
   creatureLabel=Label("Creature intent",creature,new Vector3(0,Size(.44f,17),0),new Vector2(420,70),terrain!=null?.00007f:.0007f,22);creatureLabel.text="THEIR GOD · WATCHING";creatureLabel.gameObject.SetActive(false);
   panel=new GameObject("Wrist sanctuary");panel.transform.SetParent(left,false);panel.transform.localPosition=new Vector3(0,.13f,.12f);panel.transform.localRotation=Quaternion.Euler(25,0,0);
@@ -218,7 +218,7 @@ public sealed class QuestSlice:MonoBehaviour {
  }
  public bool GiveFeedback(bool positive){
   if(state.paused||curiosity==null||held[0]!=null||held[1]!=null||Time.unscaledTime<feedbackReady)return false;
-  feedbackReady=Time.unscaledTime+.5f;bool learned=hybrid!=null?hybrid.Feedback(positive):curiosity.Feedback(positive);if(positive)godMotion?.React();
+  feedbackReady=Time.unscaledTime+.5f;bool learned=hybrid!=null?hybrid.Feedback(positive):curiosity.Feedback(positive);godMotion?.Feedback(positive);
   if(XRSettings.isDeviceActive)InputDevices.GetDeviceAtXRNode(XRNode.RightHand).SendHapticImpulse(0,positive?.25f:.55f,.08f);
   notice=learned?(positive?"That action encouraged.":"That action discouraged."):"The creature feels your presence. No recent action to teach.";return true;
  }

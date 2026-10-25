@@ -17,5 +17,10 @@ public sealed class HumanoidMotion:MonoBehaviour {
  public void LookAt(Transform target){if(hands==null)return;var other=target!=null?target.GetComponentInChildren<Animator>():null;hands.lookTarget=other!=null&&other.isHuman?other.GetBoneTransform(HumanBodyBones.Head):target;}
  public void Signal(bool beckon,bool point=false,Vector3 target=default,float tilt=0){if(hands==null)return;hands.beckon=beckon;hands.indicating=point;hands.indicatedPoint=target;hands.displayTilt=tilt;}
  public void React(){if(animator!=null&&!paused&&activity==0)animator.SetTrigger("Warmth");}
+ public void Feedback(bool positive){
+  if(animator==null||paused||activity!=0||(hands!=null&&hands.resource!=null))return;
+  if(positive){foreach(var parameter in animator.parameters)if(parameter.name=="Unease")animator.ResetTrigger("Unease");React();}
+  else foreach(var parameter in animator.parameters)if(parameter.name=="Unease"&&parameter.type==AnimatorControllerParameterType.Trigger){animator.ResetTrigger("Warmth");animator.SetTrigger("Unease");break;}
+ }
 }
 }

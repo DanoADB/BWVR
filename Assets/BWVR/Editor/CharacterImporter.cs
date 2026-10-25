@@ -45,7 +45,7 @@ public static class CharacterImporter {
   }
   EditorUtility.SetDirty(controller);
  }
- static void Save(GameObject root,string path){
+ internal static void Save(GameObject root,string path){
   var renderers=root.GetComponentsInChildren<Renderer>();var bounds=renderers[0].bounds;foreach(var r in renderers)bounds.Encapsulate(r.bounds);
   var content=new GameObject("Unit-height artwork").transform;content.SetParent(root.transform,false);foreach(var child in root.transform.Cast<Transform>().Where(t=>t!=content).ToArray())child.SetParent(content,true);
   foreach(Transform child in content)child.position-=new Vector3(bounds.center.x,bounds.min.y,bounds.center.z);content.localScale=Vector3.one/Mathf.Max(bounds.size.y,.01f);

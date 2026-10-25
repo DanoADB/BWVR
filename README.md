@@ -51,7 +51,9 @@ Android Build Support, SDK and NDK are available on the setup machine. Unity-pro
 
 ## First slice
 
-A three-minute dry season with one autonomous creature, three independent villagers, physical toys and construction, contextual teaching, indirect guidance and limited rain/healing miracles. The player remains unseen. The existing Quaternius/CC0 art catalogs provide the visible creature and settlement; the original terrain importer remains a local reference workflow. See [art setup](docs/GAME_ART.md).
+The purchased Animal Friends gorilla is the preferred local creature when imported. See [gorilla setup](docs/ANIMAL_FRIENDS.md). Purchased artwork stays out of the public repository; the import tools and runtime integration are tracked.
+
+A three-minute dry season with one autonomous creature, three independent villagers, physical toys and construction, contextual teaching, indirect guidance and limited rain/healing miracles. The player remains unseen. Quaternius art catalogs provide the settlement and villagers; imported local creature artwork supplies the god. The original terrain importer remains a local reference workflow. See [art setup](docs/GAME_ART.md).
 
 The creature's water, food, toy, social, observation and construction actions now share one utility comparison and one movement/carry owner. It can inspect tagged benches and a cairn, then try bench-like spans and towers on empty trays. A tagged shoreline gap provides one useful physical bridge opportunity: completed supports and span open native villager routes; dismantling closes them. This is a small authored pattern vocabulary, not general visual recognition or unrestricted architecture.
 
