@@ -21,7 +21,7 @@ Shader "BWVR/IslandGround" {
   float3 palette=lerp(float3(.13,.25,.075),float3(.29,.38,.13),broad);
   float dry=smoothstep(.52,.8,noise2(i.world.xz*7+17))*(1-biome.g*.75);
   float3 grass=lerp(palette,float3(.43,.34,.15),dry*lerp(.2,.9,_Drought))*( .87+patch*.2+grain*.12);
-  
+
   grass=lerp(grass,grass*float3(.72,.90,.82),biome.g*.55);
   float3 detail=tex2D(_Detail,i.world.xz*85).rgb;
   float3 soil=float3(.26,.18,.095)*(.7+detail.r*.65);
