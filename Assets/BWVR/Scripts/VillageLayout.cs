@@ -25,7 +25,7 @@ public sealed class VillageLayout {
    towns.TryGetValue(p.town,out int number);towns[p.town]=number+1;
    string key=number==4?"Inn":number==7?"Blacksmith":new[]{"House_A","House_B","House_C"}[number%3];
    var prefab=buildings.Find(key);if(prefab==null)throw new Exception("Missing medieval building "+key);
-   float scale=3.66f*data.scale*p.size/.195f*QuestSlice.ActorScale;
+   float scale=3.66f*data.scale*p.size/.195f*QuestSlice.BuildingScale;
    var box=prefab.GetComponent<BoxCollider>();float radius=new Vector2(box.size.x,box.size.z).magnitude*.5f*scale;
    var preferred=data.PlacementPoint(p);Vector3 selected=default;bool found=false;
    // Staggered rings give organic spacing while leaving service corridors open.

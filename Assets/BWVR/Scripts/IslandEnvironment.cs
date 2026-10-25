@@ -9,7 +9,7 @@ public static class IslandEnvironment {
   int style=Mathf.Abs(variant)%3;
   float wallHeight=style==1?.105f:style==2?.13f:.12f;
   float roofHeight=.195f-wallHeight;
-  var house=new GameObject(name).transform;house.SetParent(parent,false);house.localPosition=at;house.localRotation=Quaternion.Euler(0,yaw,0);house.localScale=Vector3.one*(scale*QuestSlice.ActorScale);
+  var house=new GameObject(name).transform;house.SetParent(parent,false);house.localPosition=at;house.localRotation=Quaternion.Euler(0,yaw,0);house.localScale=Vector3.one*(scale*QuestSlice.BuildingScale);
   var wallTint=new[]{new Color(1,.94f,.82f),new Color(.9f,.96f,1),new Color(.76f,.90f,.78f)}[style];
   var roofTint=new[]{new Color(1.4f,.7f,.4f),new Color(.45f,1.05f,1.25f),new Color(.85f,.65f,.42f)}[style];
   void Tint(GameObject g,Color color){if(g==null)return;foreach(var r in g.GetComponentsInChildren<Renderer>())for(int slot=0;slot<r.sharedMaterials.Length;slot++){var material=r.sharedMaterials[slot];if(!material.name.Contains("Plaster")&&!material.name.Contains("RoundTiles"))continue;var block=new MaterialPropertyBlock();block.SetColor("_Color",color);if(material.name.Contains("RoundTiles"))block.SetFloat("_Recolor",1);r.SetPropertyBlock(block,slot);}}

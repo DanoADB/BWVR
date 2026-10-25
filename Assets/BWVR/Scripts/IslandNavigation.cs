@@ -40,7 +40,7 @@ public sealed class IslandNavigation:MonoBehaviour {
   else foreach(var box in GetComponentsInChildren<BoxCollider>())if((box.name.StartsWith("Modular village home")||box.name.Contains("Tree")||box.name.Contains("Pine")))Box(sources,box.transform.TransformPoint(box.center),Vector3.Scale(box.size,box.transform.lossyScale),box.transform.rotation);
   var watch=System.Diagnostics.Stopwatch.StartNew();
   baseSources=sources;
-  villager=Bake("Villager",.4f*QuestSlice.ActorScale,(terrain!=null?1.661f:1.7f)*QuestSlice.ActorScale,.2f,sources);
+  villager=Bake("Villager",.4f*QuestSlice.VillagerScale,(terrain!=null?1.661f:1.7f)*QuestSlice.VillagerScale,.2f,sources);
   creature=Bake("Creature",(terrain!=null?2.2f:1.1f)*QuestSlice.ActorScale,(terrain!=null?13.9236f:6.8f)*QuestSlice.ActorScale,.6f,sources);
   Debug.Log("BWVR_NAV_READY: two profiles, "+obstacleCount+" obstacles; bake "+watch.ElapsedMilliseconds+"ms");
  }
