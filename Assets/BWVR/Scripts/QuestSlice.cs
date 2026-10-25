@@ -36,10 +36,10 @@ public sealed class QuestSlice:MonoBehaviour {
  float Size(float previous,float originalUnits)=>terrain==null?previous:originalUnits*terrain.scale;
  void Build(){
   well=Site(well);cistern=Site(cistern);
-  RenderSettings.ambientLight=new Color(.56f,.65f,.65f);RenderSettings.fog=true;RenderSettings.fogColor=new Color(.035f,.075f,.085f);RenderSettings.fogDensity=.025f;
-  var sun=new GameObject("Warm morning sun").AddComponent<Light>();sun.type=LightType.Directional;sun.intensity=1.1f;sun.transform.rotation=Quaternion.Euler(40,-35,0);
+  RenderSettings.ambientMode=UnityEngine.Rendering.AmbientMode.Trilight;RenderSettings.ambientSkyColor=new Color(.58f,.69f,.79f);RenderSettings.ambientEquatorColor=new Color(.43f,.48f,.43f);RenderSettings.ambientGroundColor=new Color(.25f,.27f,.21f);RenderSettings.fog=true;RenderSettings.fogMode=FogMode.ExponentialSquared;RenderSettings.fogColor=new Color(.54f,.68f,.73f);RenderSettings.fogDensity=.065f;
+  var sun=new GameObject("Warm morning sun").AddComponent<Light>();sun.type=LightType.Directional;sun.color=new Color(1,.91f,.77f);sun.intensity=1.05f;sun.transform.rotation=Quaternion.Euler(44,-35,0);
   rig=new GameObject("XR Origin - seated or standing").transform;rig.position=new Vector3(0,0,-1.2f);
-  var cam=new GameObject("Head");cam.tag="MainCamera";cam.transform.SetParent(rig,false);eye=cam.AddComponent<Camera>();eye.nearClipPlane=.03f;eye.farClipPlane=40;eye.backgroundColor=new Color(.48f,.70f,.77f);eye.clearFlags=CameraClearFlags.SolidColor;cam.AddComponent<AudioListener>();eye.transform.localPosition=new Vector3(0,1.55f,0);
+  var cam=new GameObject("Head");cam.tag="MainCamera";cam.transform.SetParent(rig,false);eye=cam.AddComponent<Camera>();eye.nearClipPlane=.03f;eye.farClipPlane=40;eye.backgroundColor=RenderSettings.fogColor;eye.clearFlags=CameraClearFlags.SolidColor;cam.AddComponent<AudioListener>();eye.transform.localPosition=new Vector3(0,1.55f,0);
   left=Controller("Left hand",0);right=Controller("Right hand",1);
   Shape("Quiet horizon",PrimitiveType.Plane,new Vector3(0,-.03f,0),new Vector3(3,1,3),new Color(.035f,.075f,.085f));
   Renderer ground;

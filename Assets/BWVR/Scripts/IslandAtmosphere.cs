@@ -45,7 +45,7 @@ public sealed class IslandAtmosphere:MonoBehaviour {
   QualitySettings.shadows=Application.isMobilePlatform?ShadowQuality.HardOnly:ShadowQuality.All;
   QualitySettings.shadowResolution=ShadowResolution.Medium;QualitySettings.shadowCascades=0;QualitySettings.shadowDistance=8;
   foreach(var light in FindObjectsByType<Light>(FindObjectsSortMode.None))if(light.type==LightType.Directional){
-   light.shadows=Application.isMobilePlatform?LightShadows.Hard:LightShadows.Soft;light.shadowStrength=.45f;light.shadowBias=.02f;light.shadowNormalBias=.02f;
+   light.shadows=Application.isMobilePlatform?LightShadows.Hard:LightShadows.Soft;light.shadowStrength=.62f;light.shadowBias=.008f;light.shadowNormalBias=.004f;
    light.shadowCustomResolution=1024;break;
   }
   Debug.Log("BWVR_ATMOSPHERE_READY: "+CloudCount+" shadow-casting clouds, "+FogCount+" fog pockets, max "+(FogCount*ParticlesPerPocket)+" fog quads");

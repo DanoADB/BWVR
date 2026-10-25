@@ -18,25 +18,26 @@ Shader "BWVR/IslandGround" {
  output vert(input v){output o;UNITY_SETUP_INSTANCE_ID(v);UNITY_INITIALIZE_OUTPUT(output,o);UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);o.pos=UnityObjectToClipPos(v.vertex);o.world=mul(unity_ObjectToWorld,v.vertex).xyz;o.normal=UnityObjectToWorldNormal(v.normal);UNITY_TRANSFER_FOG(o,o.pos);TRANSFER_SHADOW(o);return o;}
  fixed4 frag(output i):SV_Target{UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(i);float3 n=normalize(i.normal);float broad=noise2(i.world.xz*3.3),patch=noise2(i.world.xz*19),grain=noise2(i.world.xz*145);
   float4 biome=tex2D(_Biome,(i.world.xz-_BiomeRect.xy)*_BiomeRect.zw);
-  float3 palette=lerp(float3(.065,.16,.028),float3(.17,.25,.065),broad);
+  float3 palette=lerp(float3(.13,.25,.075),float3(.29,.38,.13),broad);
   float dry=smoothstep(.52,.8,noise2(i.world.xz*7+17))*(1-biome.g*.75);
-  float3 grass=lerp(palette,float3(.33,.24,.085),dry*lerp(.2,.9,_Drought))*( .87+patch*.2+grain*.12);
-  grass=lerp(grass,grass*float3(.65,.83,.74),biome.g*.65);
+  float3 grass=lerp(palette,float3(.43,.34,.15),dry*lerp(.2,.9,_Drought))*( .87+patch*.2+grain*.12);
+  
+  grass=lerp(grass,grass*float3(.72,.90,.82),biome.g*.55);
   float3 detail=tex2D(_Detail,i.world.xz*85).rgb;
-  float3 soil=float3(.16,.09,.035)*(.7+detail.r*.65);
+  float3 soil=float3(.26,.18,.095)*(.7+detail.r*.65);
   grass=lerp(grass,soil,saturate(biome.r*.82));
   float furrow=smoothstep(.25,.65,sin(i.world.x*2200)*.5+.5);
   float3 crops=lerp(float3(.10,.075,.02),lerp(float3(.34,.19,.045),float3(.11,.27,.04),_CropHealth),furrow);
   grass=lerp(grass,crops,biome.b*.8);
   float3 weights=pow(abs(n),4);weights/=max(.0001,weights.x+weights.y+weights.z);
   float3 rock=tex2D(_Rock,i.world.yz*9).rgb*weights.x+tex2D(_Rock,i.world.xz*9).rgb*weights.y+tex2D(_Rock,i.world.xy*9).rgb*weights.z;
-  float3 sand=tex2D(_Sand,i.world.xz*7).rgb*float3(1,.95,.83);
+  float3 sand=tex2D(_Sand,i.world.xz*7).rgb*float3(1,.94,.80);
   float height=i.world.y-_SeaLevel;
-  float beach=1-smoothstep(.001,.010+patch*.005,height);float steep=smoothstep(.12,.48,1-n.y);
+  float beach=1-smoothstep(.001,.010+patch*.005,height);float steep=smoothstep(.16,.52,1-n.y);
   rock=lerp(rock*float3(.8,.86,.82),grass*.72,(1-steep)*patch*.4);
   sand*=lerp(float3(.52,.60,.58),float3(.92,.89,.73),smoothstep(.001,.007,height));
   float3 color=lerp(lerp(grass,rock,steep),sand,beach);
-  color*=max(.3,ShadeSH9(float4(n,1)))+_LightColor0.rgb*SHADOW_ATTENUATION(i)*(.6*max(0,dot(n,normalize(_WorldSpaceLightPos0.xyz))));fixed4 result=fixed4(color,1);UNITY_APPLY_FOG(i.fogCoord,result);return result;
+  color*=max(.18,ShadeSH9(float4(n,1)))+_LightColor0.rgb*SHADOW_ATTENUATION(i)*(.72*saturate(dot(n,normalize(_WorldSpaceLightPos0.xyz))*.8+.2));fixed4 result=fixed4(color,1);UNITY_APPLY_FOG(i.fogCoord,result);return result;
  }
  ENDCG
  } }

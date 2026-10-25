@@ -82,7 +82,8 @@ public static class IslandEnvironment {
   IslandAtmosphere.Build(root,terrain);
  }
  static void Surface(Renderer ground,IslandTerrainData terrain,Transform layout){var surface=Resources.Load<Material>("QuaterniusGround");if(surface!=null){var material=new Material(surface);material.SetFloat("_SeaLevel",terrain.SeaLevel);PaintBiomes(material,terrain,layout);ground.sharedMaterial=material;}}
- static void PaintBiomes(Material material,IslandTerrainData terrain,Transform layout){
+ public static void PaintSettlementGround(Transform world,IslandTerrainData terrain,System.Collections.Generic.List<Vector3[]> lanes){var ground=world.Find("Land 1 - original island geometry")?.GetComponent<Renderer>();if(ground!=null&&ground.sharedMaterial.shader.name=="BWVR/IslandGround")PaintBiomes(ground.sharedMaterial,terrain,world,lanes);}
+ static void PaintBiomes(Material material,IslandTerrainData terrain,Transform layout,System.Collections.Generic.List<Vector3[]> lanes=null){
   const int size=512;var pixels=new Color[size*size];
   var min=terrain.World(terrain.bounds[0],terrain.bounds[1],0);var max=terrain.World(terrain.bounds[2],terrain.bounds[3],0);var span=max-min;
   void Dab(Vector3 at,float radius,int channel,float strength){
@@ -99,12 +100,13 @@ public static class IslandEnvironment {
     if(p.kind=="tree")Dab(at,terrain.scale*18,1,.8f);
     if(p.kind=="field")Dab(at,terrain.scale*8,2,1);
     if(p.kind!="building")continue;Dab(at,terrain.scale*8,0,.8f);
-    IslandPlacement centre=null;float closest=float.MaxValue;
-    foreach(var candidate in terrain.placements)if(candidate.kind=="building"&&candidate.town==p.town&&candidate.type.Contains("TOWN_CENTRE")){float d=Vector3.Distance(terrain.PlacementPoint(candidate),at);if(d<closest){closest=d;centre=candidate;}}
-    if(centre==null)continue;var end=Position(centre);int steps=Mathf.CeilToInt(Vector3.Distance(at,end)/(terrain.scale*2));
-    for(int i=0;i<=steps;i++){var point=Vector3.Lerp(at,end,i/(float)Mathf.Max(1,steps));if(terrain.Dry(point))Dab(point,terrain.scale*3.5f,0,.85f);}
    }
   }
+  if(lanes!=null)foreach(var lane in lanes)for(int segment=1;segment<lane.Length;segment++){
+   var a=lane[segment-1];var b=lane[segment];int steps=Mathf.Max(1,Mathf.CeilToInt(Vector3.Distance(a,b)/(terrain.scale*2)));
+   for(int i=0;i<=steps;i++)Dab(Vector3.Lerp(a,b,i/(float)steps),terrain.scale*4.5f,0,.65f);
+  }
+  var previous=material.GetTexture("_Biome");if(previous!=null&&previous.name=="Island forest and village ground")Object.Destroy(previous);
   var texture=new Texture2D(size,size,TextureFormat.RGBA32,false,true){name="Island forest and village ground",wrapMode=TextureWrapMode.Clamp};texture.SetPixels(pixels);texture.Apply(false,true);material.SetTexture("_Biome",texture);material.SetVector("_BiomeRect",new Vector4(min.x,min.z,1/span.x,1/span.z));
  }
  static void Understory(EnvironmentArt art,Transform root,IslandTerrainData terrain){
@@ -118,6 +120,15 @@ public static class IslandEnvironment {
   }
   Debug.Log("BWVR_UNDERSTORY: "+count+" ground-cover clusters; original placements preserved");
  }
+ static void StyleHome(Transform house,int variant){
+  var roofs=new[]{new Color(.62f,.30f,.17f),new Color(.25f,.40f,.42f),new Color(.46f,.34f,.23f)};
+  foreach(var renderer in house.GetComponentsInChildren<Renderer>())for(int i=0;i<renderer.sharedMaterials.Length;i++){
+   var material=renderer.sharedMaterials[i];if(material==null||!material.HasProperty("_Color"))continue;
+   bool roof=material.name.IndexOf("Roof",System.StringComparison.OrdinalIgnoreCase)>=0;
+   var color=roof?Color.Lerp(material.color,roofs[Mathf.Abs(variant)%roofs.Length],.48f):Color.Lerp(material.color,new Color(.87f,.80f,.65f),.08f);
+   var block=new MaterialPropertyBlock();renderer.GetPropertyBlock(block,i);block.SetColor("_Color",color);renderer.SetPropertyBlock(block,i);
+  }
+ }
  static void BuildOriginal(EnvironmentArt art,Transform root,IslandTerrainData terrain){
   var buildings=Resources.Load<EnvironmentArt>("VillageBuildings");
   var layout=buildings!=null?new VillageLayout(terrain,buildings):null;
@@ -128,7 +139,7 @@ public static class IslandEnvironment {
    if(p.kind=="building"&&!p.type.Contains("STORAGE_PIT")&&!p.type.Contains("GRAVEYARD")){
     if(layout!=null){
      var plot=layout.plots[p.line];marker=Object.Instantiate(buildings.Find(plot.model),root).transform;
-     marker.name="Medieval "+plot.model+" L"+p.line;marker.localPosition=plot.position;marker.localRotation=Quaternion.Euler(0,plot.yaw,0);marker.localScale=Vector3.one*plot.scale;
+     StyleHome(marker,p.line);marker.name="Medieval "+plot.model+" L"+p.line;marker.localPosition=plot.position;marker.localRotation=Quaternion.Euler(0,plot.yaw,0);marker.localScale=Vector3.one*plot.scale;
     }else marker=Home(art,root,at,p.yaw,3.66f*terrain.scale*p.size/.195f,name,p.line+p.town);
    }else{
     marker=new GameObject(name).transform;marker.SetParent(root,false);marker.localPosition=at;marker.localRotation=Quaternion.Euler(p.pitch,p.yaw,p.roll);
