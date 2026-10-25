@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEngine.Rendering;
 namespace BWVR {
 public sealed class IslandOcean:MonoBehaviour {
- public const int Resolution=64;
+ public const int Resolution=64;public const float GridSpacing=14f/Resolution;
  Mesh mesh;Texture2D shore;Material material;
  public static void Build(Transform parent,IslandTerrainData terrain){
   var go=new GameObject("Living ocean - animated waves and shore foam");go.transform.SetParent(parent,false);
@@ -19,7 +19,7 @@ public sealed class IslandOcean:MonoBehaviour {
   int[] corners={0,Resolution*(Resolution+1),Resolution*(Resolution+1)+Resolution,Resolution};
   for(int i=0;i<4;i++){var inner=vertices[corners[i]];vertices[firstOuter+i]=new Vector3(Mathf.Sign(inner.x)*60,0,Mathf.Sign(inner.z)*60);}
   for(int i=0;i<4;i++){int next=(i+1)%4;triangles[n++]=corners[i];triangles[n++]=firstOuter+i;triangles[n++]=firstOuter+next;triangles[n++]=corners[i];triangles[n++]=firstOuter+next;triangles[n++]=corners[next];}
-  mesh=new Mesh{name="Ocean 64x64 shared grid"};mesh.vertices=vertices;mesh.triangles=triangles;mesh.RecalculateNormals();mesh.bounds=new Bounds(Vector3.zero,new Vector3(120,.1f,120));
+  mesh=new Mesh{name="Ocean 64x64 shared grid"};mesh.vertices=vertices;mesh.triangles=triangles;mesh.RecalculateNormals();mesh.bounds=new Bounds(Vector3.zero,new Vector3(120,2,120));
   gameObject.AddComponent<MeshFilter>().sharedMesh=mesh;
   var source=Resources.Load<Material>("IslandOcean");
   if(source==null)throw new System.Exception("Import ocean material before playing");
@@ -40,6 +40,7 @@ public sealed class IslandOcean:MonoBehaviour {
   shore=new Texture2D(size,size,TextureFormat.RGBA32,false,true){name="Baked island shore distance",wrapMode=TextureWrapMode.Clamp,filterMode=FilterMode.Bilinear};
   shore.SetPixels(pixels);shore.Apply(false,true);material.SetTexture("_Shore",shore);material.SetVector("_ShoreRect",new Vector4(min.x,min.z,1/span.x,1/span.z));
  }
+ public void SetWeather(float time,float wind,float front,float height,float width){if(material==null)return;material.SetFloat("_WeatherDriven",1);material.SetFloat("_WeatherTime",time);material.SetFloat("_WaveScale",1+wind*3);material.SetVector("_Surge",new Vector4(front,height,Mathf.Max(.0001f,width),0));}
  void OnDestroy(){if(mesh!=null)Destroy(mesh);if(shore!=null)Destroy(shore);if(material!=null)Destroy(material);}
 }
 }

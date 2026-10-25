@@ -8,7 +8,10 @@ public sealed class IslandAtmosphere:MonoBehaviour {
  public int CloudCount=>clouds.Count;
  public int FogCount {get;private set;}
  public const int CloudLimit=6,FogLimit=3,ParticlesPerPocket=4;
- float elapsed;
+ readonly List<ParticleSystem> mistSystems=new List<ParticleSystem>();
+ float elapsed;bool weatherDriven;
+ public void SetWeather(float time,Vector3 wind,bool paused){weatherDriven=true;elapsed=time;MoveClouds(wind);foreach(var mist in mistSystems){if(paused){if(mist.isPlaying)mist.Pause();}else if(!mist.isPlaying)mist.Play();}}
+ void MoveClouds(Vector3 wind){for(int i=0;i<clouds.Count;i++)clouds[i].localPosition=homes[i]+new Vector3(Mathf.Sin(elapsed*(.018f+wind.magnitude*.025f)+i)*.12f,Mathf.Sin(elapsed*.012f+i)*.008f,Mathf.Cos(elapsed*.015f+i)*.06f);}
  public static void Build(Transform parent,IslandTerrainData terrain){
   var art=Resources.Load<IslandAtmosphereArt>("IslandAtmosphere");
   if(art==null){Debug.LogWarning("BWVR_ATMOSPHERE_MISSING: import CC0 atmosphere artwork");return;}
@@ -61,11 +64,10 @@ public sealed class IslandAtmosphere:MonoBehaviour {
   var color=ps.colorOverLifetime;color.enabled=true;
   var gradient=new Gradient();gradient.SetKeys(new[]{new GradientColorKey(Color.white,0),new GradientColorKey(Color.white,1)},new[]{new GradientAlphaKey(0,0),new GradientAlphaKey(1,.2f),new GradientAlphaKey(1,.8f),new GradientAlphaKey(0,1)});color.color=gradient;
   var r=ps.GetComponent<ParticleSystemRenderer>();r.sharedMaterial=material;r.renderMode=ParticleSystemRenderMode.Billboard;r.shadowCastingMode=ShadowCastingMode.Off;r.receiveShadows=false;r.maxParticleSize=.12f;
-  ps.Play();FogCount++;
+  ps.Play();mistSystems.Add(ps);FogCount++;
  }
  void Update(){
-  elapsed+=Time.deltaTime;
-  for(int i=0;i<clouds.Count;i++)clouds[i].localPosition=homes[i]+new Vector3(Mathf.Sin(elapsed*.018f+i)*.07f,Mathf.Sin(elapsed*.012f+i)*.008f,Mathf.Cos(elapsed*.015f+i)*.035f);
+  if(weatherDriven)return;elapsed+=Time.deltaTime;MoveClouds(Vector3.zero);
  }
 }
 }
