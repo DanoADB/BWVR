@@ -41,6 +41,8 @@ Reference: [Meta Link development workflow](https://developers.meta.com/vr/docum
 
 Routine labels and meters are hidden by default. Open the wrist sanctuary (left menu / desktop Tab) and choose **Help / details** for controls, resource numbers and the optional creature intent caption. The world communicates drought through water levels, bucket demonstrations, gestures and ground/crop color. The wrist sanctuary starts closed, including restored seasons, which resume automatically. Open it with X / left menu / desktop Tab.
 
+**Summonable god tools:** turn the underside of the left wrist toward you while looking at it, or open X → God tools. Desktop: T. Select with the right front trigger (desktop F), release, then aim and press again to cast or place a guidance sign. Clear sign/dismiss are in the palette; desktop Escape cancels the selected tool. See [god tools](docs/GOD_TOOLS.md) for targets, costs and validation. The wrist gesture still needs hardware confirmation.
+
 Controllers are the first input target. Tracked-hand gestures are not implemented yet.
 
 ## Quest build

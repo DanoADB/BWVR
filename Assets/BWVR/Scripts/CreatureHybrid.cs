@@ -47,16 +47,24 @@ public sealed class CreatureHybrid:MonoBehaviour {
  }
  public bool CanReach(HybridTarget target){if(target==null||!target.gameObject.activeInHierarchy)return false;return CanReach(target.transform.position);}
  public bool CanReach(Vector3 at){if(!nav.world.Sample(transform.position,nav.profile,12,out var start)||!nav.world.Sample(at,nav.profile,12,out var end))return false;var path=new NavMeshPath();return NavMesh.CalculatePath(nav.world.ToNav(start),nav.world.ToNav(end),new NavMeshQueryFilter{agentTypeID=nav.profile.id,areaMask=1},path)&&path.status==NavMeshPathStatus.PathComplete;}
+ // Preview checks never replace a live suggestion or spend a learning receipt.
+ public bool CanGuide(GuidanceIntent intent,HybridTarget target,out string reason){
+  reason="";
+  if(Season.paused||suspended){reason="Paused";return false;}
+  if(target==null||!target.gameObject.activeInHierarchy){reason="Target unavailable";return false;}
+  if(!Season.developmentFocus&&Owner==ActionOwner.Water&&Season.water<25&&intent!=GuidanceIntent.Help){reason="Occupied with urgent water assistance";return false;}
+  if(target.GetComponent<CarryItem>()?.held==true){reason="Target unavailable while carried";return false;}
+  if(intent==GuidanceIntent.Protect&&(target.villager==null||target.villager.Memory.injury<=0)){reason="No credible vulnerability to protect";return false;}
+  if(intent==GuidanceIntent.Help&&target.kind==HybridTargetKind.Object&&target.villager==null){reason="No relevant help capability";return false;}
+  if(!CanReach(target)){reason="Target unreachable";return false;}
+  if(intent==GuidanceIntent.Help&&(target.kind==HybridTargetKind.Cistern||target.kind==HybridTargetKind.Water)&&Season.water>=85){reason="Water problem no longer exists";return false;}
+  return true;
+ }
+ public void CancelGuidance(string reason){if(State.guidance.status!=GuidanceStatus.Active)return;if(Owner==ActionOwner.Observe&&State.intention.target==State.guidance.target)Interrupt(reason);Reject(GuidanceStatus.Abandoned,reason);}
  public bool Guide(GuidanceIntent intent,HybridTarget target){
   if(Season.paused||suspended)return false;var g=State.guidance;if(g.status==GuidanceStatus.Active){Journal.Add(State.time,"guidance superseded",CreatureAction.RespondToGuidance,g.target,"New request");if(Owner==ActionOwner.Observe)Interrupt("Guidance superseded");}
   g=State.guidance=new GuidanceState{intention=intent,target=target!=null?target.id:"",requestedAt=State.time,expiresAt=State.time+30,status=GuidanceStatus.Active};
-  if(target==null){Reject(GuidanceStatus.Rejected,"Target unavailable");return false;}
-  if(!Season.developmentFocus&&Owner==ActionOwner.Water&&Season.water<25&&intent!=GuidanceIntent.Help){Reject(GuidanceStatus.Rejected,"Occupied with urgent water assistance");return false;}
-  if(target.GetComponent<CarryItem>()?.held==true){Reject(GuidanceStatus.Rejected,"Target unavailable while carried");return false;}
-  if(intent==GuidanceIntent.Protect&&(target.villager==null||target.villager.Memory.injury<=0)){Reject(GuidanceStatus.Rejected,"No credible vulnerability to protect");return false;}
-  if(intent==GuidanceIntent.Help&&target.kind==HybridTargetKind.Object&&target.villager==null){Reject(GuidanceStatus.Rejected,"No relevant help capability");return false;}
-  if(!CanReach(target)){Reject(GuidanceStatus.Rejected,"Target unreachable");return false;}
-  if(intent==GuidanceIntent.Help&&(target.kind==HybridTargetKind.Cistern||target.kind==HybridTargetKind.Water)&&Season.water>=85){Reject(GuidanceStatus.Rejected,"Water problem no longer exists");return false;}
+  if(!CanGuide(intent,target,out var reason)){Reject(GuidanceStatus.Rejected,reason);return false;}
   motion?.LookAt(target.transform);curiosity.NoticeGreeting(target.transform);Journal.Add(State.time,"guidance",CreatureAction.RespondToGuidance,g.target,intent.ToString());nextPerception=nextDecision=0;return true;
  }
  void Reject(GuidanceStatus status,string reason){var g=State.guidance;g.status=status;g.reason=reason;Explanation=reason;Journal.Add(State.time,"guidance "+status,CreatureAction.RespondToGuidance,g.target,reason);}

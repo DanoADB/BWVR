@@ -33,6 +33,17 @@ public sealed class DivineIntervention:MonoBehaviour {
  GameObject Part(Transform parent,PrimitiveType shape,Vector3 position,Vector3 size,int color){var go=GameObject.CreatePrimitive(shape);go.transform.SetParent(parent,false);go.transform.localPosition=position;go.transform.localScale=size;go.GetComponent<Renderer>().sharedMaterial=materials[color];var collider=go.GetComponent<Collider>();collider.enabled=false;Destroy(collider);return go;}
  ParticleSystem Particles(string label,Vector3 position,Color color,bool isRain){var go=new GameObject(label);go.transform.SetParent(transform,false);go.transform.position=position;var ps=go.AddComponent<ParticleSystem>();ps.Stop(true,ParticleSystemStopBehavior.StopEmittingAndClear);var main=ps.main;main.playOnAwake=false;main.loop=isRain;main.duration=6;main.simulationSpace=ParticleSystemSimulationSpace.World;main.startLifetime=isRain?1:.7f;main.startSpeed=0;main.startSize=nav.Scale*(isRain?.16f:.4f);main.startColor=color;main.maxParticles=120;var emission=ps.emission;emission.rateOverTime=isRain?60:0;var shape=ps.shape;shape.shapeType=ParticleSystemShapeType.Box;shape.scale=new Vector3(isRain?20:3,1,isRain?20:3)*nav.Scale;var velocity=ps.velocityOverLifetime;velocity.enabled=true;velocity.space=ParticleSystemSimulationSpace.World;velocity.y=new ParticleSystem.MinMaxCurve(nav.Scale*(isRain?-25:3));var renderer=go.GetComponent<ParticleSystemRenderer>();renderer.sharedMaterial=particleMaterial;if(isRain){renderer.renderMode=ParticleSystemRenderMode.Stretch;renderer.lengthScale=4;renderer.velocityScale=0;}return ps;}
  void InitializeState(){if(!State.energyInitialized){if(State.time==0)State.energy=Mathf.Clamp(tuning.initial,0,Mathf.Clamp(tuning.maximum,1,100));State.energyInitialized=true;}if(!State.injuryIntroduced){if(tuning.initialMinorInjury&&villagers.Length>2)villagers[2].GetComponent<VillagerSocial>().Memory.injury=.35f;State.injuryIntroduced=true;}Season.RememberOutcome();}
+ public bool CanUse(SpiritualTool kind,HybridTarget target,out string reason){
+  reason="";if(Season.paused||Suspended){reason="Paused";return false;}
+  if(!Enum.IsDefined(typeof(SpiritualTool),kind)){reason="Unknown tool";return false;}
+  if(kind<=SpiritualTool.Investigate)return creature.CanGuide((GuidanceIntent)kind,target,out reason);
+  if(State.time<State.nextMiracleAt){reason="Wait for the previous gesture";return false;}
+  float cost=Mathf.Clamp(kind==SpiritualTool.Rain?tuning.rainCost:tuning.healingCost,1,100);
+  if(float.IsNaN(cost)){reason="Invalid miracle tuning";return false;}if(State.energy<cost){reason="Not enough spiritual energy";return false;}
+  if(kind==SpiritualTool.Rain&&(target==null||(target.kind!=HybridTargetKind.Cistern&&target.kind!=HybridTargetKind.Water))){reason="Aim rain at the cistern or water offering";return false;}
+  if(kind==SpiritualTool.Heal&&(target?.villager==null||target.villager.Memory.injury<=0||target.GetComponent<CarryItem>()?.held==true)){reason="Aim at an injured villager";return false;}
+  return true;
+ }
  public bool TryUse(SpiritualTool kind,HybridTarget target){
   if(Season.paused||Suspended){LastReason="Paused";return false;}
   if(!Enum.IsDefined(typeof(SpiritualTool),kind)){LastReason="Unknown tool";return false;}if((int)kind<=(int)SpiritualTool.Investigate){bool accepted=creature.Guide((GuidanceIntent)kind,target);LastReason=accepted?"":State.guidance.reason;return accepted;}

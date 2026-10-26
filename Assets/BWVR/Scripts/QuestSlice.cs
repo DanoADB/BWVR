@@ -16,7 +16,7 @@ public sealed class QuestSlice:MonoBehaviour {
  [Tooltip("Pause drought pressure and keep water assistance in the background while developing interactions.")]
  public bool developmentFocus=true;
  BeachBall[] balls=Array.Empty<BeachBall>();
- VillageTributes tributes;SpiritCompanion spirit;
+ VillageTributes tributes;SpiritCompanion spirit;GodToolPalette godTools;bool toolsKeyLast;
  VillageFamilies families;VillageResources resources;IslandWeather weather;TreePlayWorld treePlay;IslandNavigation navigation; IslandTerrainData terrain; Collider groundCollider; const float Floor=.82f; SliceState state=new SliceState(); Camera eye; Transform rig,left,right,creature; Text status,creatureLabel; GameObject panel; Font font; GameArtCatalog art; OriginalCowMotion cowMotion; HumanoidMotion godMotion; HumanoidMotion[] humanoids=Array.Empty<HumanoidMotion>();
  readonly Transform[] aims=new Transform[2]; readonly QuestControls.Hand[] controllerHands=new QuestControls.Hand[2]; bool turnHeld,recenterLast,zoomHeld; Vector3 zoomFocus;
  readonly List<CarryItem> items=new List<CarryItem>(); readonly List<Transform> workers=new List<Transform>();
@@ -104,7 +104,7 @@ public sealed class QuestSlice:MonoBehaviour {
   var target=creature.gameObject.AddComponent<SpatialTarget>();target.invoke=()=>GiveFeedback(true);var box=creature.gameObject.AddComponent<BoxCollider>();box.center=new Vector3(0,Size(.18f,7),0);box.size=new Vector3(Size(.2f,8),Size(.4f,15),Size(.2f,8));
   creatureLabel=Label("Creature intent",creature,new Vector3(0,Size(.44f,17),0),new Vector2(420,70),terrain!=null?.00007f:.0007f,22);creatureLabel.text="THEIR GOD · WATCHING";creatureLabel.gameObject.SetActive(false);
   panel=new GameObject("Wrist sanctuary");panel.transform.SetParent(left,false);panel.transform.localPosition=new Vector3(0,.13f,.12f);panel.transform.localRotation=Quaternion.Euler(25,0,0);
-  var canvas=panel.AddComponent<Canvas>();canvas.renderMode=RenderMode.WorldSpace;var rect=panel.GetComponent<RectTransform>();rect.sizeDelta=new Vector2(600,560);panel.transform.localScale=Vector3.one*.0008f;
+  var canvas=panel.AddComponent<Canvas>();canvas.renderMode=RenderMode.WorldSpace;var rect=panel.GetComponent<RectTransform>();rect.sizeDelta=new Vector2(600,740);panel.transform.localScale=Vector3.one*.0008f;
   var bg=new GameObject("Obsidian panel",typeof(RectTransform),typeof(Image));bg.transform.SetParent(panel.transform,false);bg.GetComponent<RectTransform>().sizeDelta=rect.sizeDelta;bg.GetComponent<Image>().color=new Color(.035f,.095f,.11f,.96f);
   status=Label("Season and guidance",panel.transform,new Vector3(0,130,0),new Vector2(540,260),1,25);status.alignment=TextAnchor.UpperLeft;
   Button("Pause / resume",new Vector3(-140,-70,0),()=>{state.paused=!state.paused;notice=state.paused?"Season paused.":"Season resumed.";});
@@ -114,6 +114,8 @@ public sealed class QuestSlice:MonoBehaviour {
   spirit=SpiritCompanion.Build(transform,left,eye,rig,()=>state,()=>curiosity.Affect,font);
   Button("Help / details",new Vector3(-140,-240,0),()=>SetHelp(!helpVisible));
   Button("Spirit: show / hide",new Vector3(140,-240,0),()=>spirit.SetVisible(!spirit.Visible));
+  godTools=GodToolPalette.Build(transform,left,right,rig,eye,font,miracles,hybrid,navigation,groundCollider??ground.GetComponent<Collider>(),(accepted,message)=>{notice=message;if(XRSettings.isDeviceActive)InputDevices.GetDeviceAtXRNode(XRNode.RightHand).SendHapticImpulse(0,accepted?.25f:.08f,.08f);});
+  Button("God tools",new Vector3(0,-320,0),()=>{panel.SetActive(false);godTools.Toggle();});
   panel.SetActive(false);
   if(!XRSettings.isDeviceActive){eye.transform.localRotation=Quaternion.Euler(25,0,0);left.localPosition=new Vector3(-.6f,1.15f,1.05f);left.localRotation=Quaternion.Euler(0,0,0);panel.transform.localRotation=Quaternion.identity;}
  }
@@ -139,12 +141,20 @@ public sealed class QuestSlice:MonoBehaviour {
    if(terrain!=null){float minimum=terrain.Project(eye.transform.position).y+.2f*rig.localScale.x;float y=Mathf.Clamp(eye.transform.position.y,minimum,Floor+3*rig.localScale.x);rig.position+=Vector3.up*(y-eye.transform.position.y);}
   }
   else Desktop();
+  bool toolsKey=!xr&&Keyboard.current!=null&&Keyboard.current.tKey.isPressed;
+  if(toolsKey&&!toolsKeyLast&&held[0]==null&&held[1]==null){panel.SetActive(false);godTools.Toggle();}toolsKeyLast=toolsKey;
+  if(!xr&&Keyboard.current!=null&&Keyboard.current.escapeKey.isPressed&&godTools.ClaimsInput)godTools.Cancel();
+  bool carryBusy=held[0]!=null||held[1]!=null;
+  godTools.Wrist(Time.unscaledDeltaTime,xr,controllerHands[0].tracked,!controllerHands[1].tracked||carryBusy||zoomHeld||panel.activeSelf||state.paused);
+  var toolPointer=xr?aims[1]:right;bool toolPressed=xr?controllerHands[1].trigger:Keyboard.current!=null&&Keyboard.current.fKey.isPressed;
+  bool toolsOwnInput=godTools.Process(new Ray(toolPointer.position,toolPointer.forward),toolPressed,!xr||controllerHands[1].tracked,carryBusy||panel.activeSelf||state.paused||zoomHeld,Time.unscaledDeltaTime,xr);
   bool praise=xr?controllerHands[1].praise:Keyboard.current!=null&&Keyboard.current.digit1Key.isPressed;
   bool discourage=xr?controllerHands[1].discourage:Keyboard.current!=null&&Keyboard.current.digit2Key.isPressed;
-  if(praise!=discourage&&((praise&&!praiseLast)||(discourage&&!discourageLast))){var pointer=xr?aims[1]:right;if((!xr||controllerHands[1].tracked)&&Physics.Raycast(pointer.position,pointer.forward,out var feedbackHit,8*rig.localScale.x)&&feedbackHit.collider.GetComponentInParent<CreatureCuriosity>()==curiosity)GiveFeedback(praise);}
+  if(!toolsOwnInput&&praise!=discourage&&((praise&&!praiseLast)||(discourage&&!discourageLast))){var pointer=xr?aims[1]:right;if((!xr||controllerHands[1].tracked)&&Physics.Raycast(pointer.position,pointer.forward,out var feedbackHit,8*rig.localScale.x)&&feedbackHit.collider.GetComponentInParent<CreatureCuriosity>()==curiosity)GiveFeedback(praise);}
   praiseLast=praise;discourageLast=discourage;
   for(int i=0;i<2;i++){bool grip=xr&&i==1?controllerHands[i].trigger:controllerHands[i].grip,trigger=controllerHands[i].trigger;if(!xr){grip=i==1&&Keyboard.current!=null&&Keyboard.current.eKey.isPressed;trigger=i==1&&Keyboard.current!=null&&Keyboard.current.fKey.isPressed;}
    var hand=i==0?left:right;var pointer=xr?aims[i]:hand;var ray=new Ray(pointer.position,pointer.forward);Physics.Raycast(ray,out var hit,8*rig.localScale.x);rays[i].SetPosition(0,ray.origin);rays[i].SetPosition(1,hit.collider?hit.point:ray.GetPoint(2*rig.localScale.x));rays[i].enabled=xr?controllerHands[i].tracked:i==1;
+   if(toolsOwnInput&&held[i]==null){pickupHands[i].gameObject.SetActive(false);if(i==1&&godTools.Selected.HasValue)rays[i].SetPosition(1,godTools.PreviewPoint);lastGrip[i]=grip;lastTrigger[i]=trigger;continue;}
    if(grip&&!lastGrip[i]&&hit.collider)TryGrab(i,hit.collider.GetComponentInParent<CarryItem>());
    if(held[i]!=null){if(xr&&!controllerHands[i].tracked){var item=held[i];held[i]=null;item.held=false;item.transform.position=item.home;item.GetComponent<Collider>().enabled=true;}else{held[i].transform.position=hand.position+hand.forward*(.16f*rig.localScale.x);throwMotion[i].Sample(held[i].transform.position,Time.unscaledTime,rig.localScale.x);var block=held[i].GetComponent<ConstructionBlock>();if(block!=null)block.Site.PreviewRay(block,ray);if(!grip)Release(i,ray);}}
    UpdatePickupHand(i,ray,hit,xr?controllerHands[i].tracked:i==1);
@@ -152,7 +162,7 @@ public sealed class QuestSlice:MonoBehaviour {
    bool interact=trigger&&!lastTrigger[i]&&held[i]==null;
    if(interact&&hit.collider)hit.collider.GetComponentInParent<SpatialTarget>()?.Activate();lastGrip[i]=grip;lastTrigger[i]=trigger;
   }
-  bool menu=controllerHands[0].menu;if(!xr)menu=Keyboard.current!=null&&Keyboard.current.tabKey.isPressed;if(menu&&!menuLast)panel.SetActive(!panel.activeSelf);menuLast=menu;
+  bool menu=controllerHands[0].menu;if(!xr)menu=Keyboard.current!=null&&Keyboard.current.tabKey.isPressed;if(menu&&!menuLast){godTools.Cancel();panel.SetActive(!panel.activeSelf);}menuLast=menu;
   Simulate(Time.deltaTime);if(!developmentFocus&&state.Finished&&!outcomeShown){outcomeShown=true;panel.SetActive(true);}
   spirit.HandTracked=!xr||controllerHands[0].tracked;
   status.text=SanctuaryText(xr);
@@ -192,7 +202,7 @@ public sealed class QuestSlice:MonoBehaviour {
  void Desktop(){var k=Keyboard.current;var m=Mouse.current;if(k==null||m==null)return;if(m.rightButton.isPressed){var delta=m.delta.ReadValue()*.12f;var e=eye.transform.localEulerAngles;float pitch=Mathf.DeltaAngle(0,e.x);eye.transform.localRotation=Quaternion.Euler(Mathf.Clamp(pitch-delta.y,-65,65),e.y+delta.x,0);}var movement=new Vector3((k.dKey.isPressed?1:0)-(k.aKey.isPressed?1:0),0,(k.wKey.isPressed?1:0)-(k.sKey.isPressed?1:0));rig.position+=Quaternion.Euler(0,eye.transform.eulerAngles.y,0)*movement*Time.deltaTime*(.6f*rig.localScale.x);
   if(held[0]==null&&held[1]==null&&Mathf.Abs(m.scroll.ReadValue().y)>.01f){QuestControls.Zoom(rig,ZoomFocus(),m.scroll.ReadValue().y*.0015f);UpdateViewScale();}right.position=eye.transform.position-eye.transform.up*.08f;right.rotation=eye.transform.rotation;}
  bool TryGrab(int side,CarryItem item){
-  if(item==null||!item.CanGrab||held[side]!=null||(item.kind==Offering.Creature&&side!=1))return false;
+  if(godTools!=null&&godTools.ClaimsInput)return false;if(item==null||!item.CanGrab||held[side]!=null||(item.kind==Offering.Creature&&side!=1))return false;
   if(item.kind==Offering.Creature){item.home=item.transform.position;hybrid.Interrupt("Picked up by the player");}
   throwMotion[side].Reset();held[side]=item;item.held=true;item.GetComponent<Collider>().enabled=false;item.GetComponent<ConstructionBlock>()?.Grab();notice="Release the carry button over clear ground to place.";return true;
  }
@@ -266,7 +276,7 @@ public sealed class QuestSlice:MonoBehaviour {
  void DeliverWater(){int before=state.gifts;state.Deliver();if(state.gifts>before)signals?.WaterArrived();}
  void Save(){try{if(construction!=null)state.construction=construction.Capture();discoveries?.Capture();learning?.Capture();File.WriteAllText(SavePath+".tmp",JsonUtility.ToJson(state,true));File.Copy(SavePath+".tmp",SavePath,true);saveError=null;notice="Season saved on this device.";}catch(Exception e){saveError="Save failed. Please try again.";notice="Could not save: "+e.Message;if(panel!=null)panel.SetActive(true);Debug.LogError("BWVR_SAVE_FAILED: "+e.Message);}}
  void Load(){if(!File.Exists(SavePath))return;try{var s=JsonUtility.FromJson<SliceState>(File.ReadAllText(SavePath));if(s==null||!s.Valid())throw new Exception("Invalid season data");state=s;state.paused=false;notice="Season restored.";}catch(Exception){saveError="Saved season unavailable. A fresh season is ready.";notice=saveError;}}
- void OnApplicationPause(bool paused){applicationSuspended=paused;if(spirit!=null)spirit.Suspended=paused;if(miracles!=null){miracles.Suspended=paused;miracles.Tick(0,paused||state.paused);}hybrid?.Suspend(paused);foreach(var motion in humanoids)if(motion!=null)motion.paused=paused||state.paused;if(cowMotion!=null)cowMotion.paused=paused||state.paused;if(paused){if(jobs!=null)foreach(var job in jobs)job.GetComponent<VillagerSocial>().ResetTask();if(construction!=null)construction.Paused=true;if(learning!=null)foreach(var site in learning.sites)site.Paused=true;discoveries?.Advance(0,true);for(int i=0;i<2;i++)if(held[i]!=null){held[i].transform.position=held[i].home;held[i].held=false;held[i].GetComponent<Collider>().enabled=true;held[i]=null;}Save();}}
+ void OnApplicationPause(bool paused){applicationSuspended=paused;if(paused)godTools?.Cancel();if(spirit!=null)spirit.Suspended=paused;if(miracles!=null){miracles.Suspended=paused;miracles.Tick(0,paused||state.paused);}hybrid?.Suspend(paused);foreach(var motion in humanoids)if(motion!=null)motion.paused=paused||state.paused;if(cowMotion!=null)cowMotion.paused=paused||state.paused;if(paused){if(jobs!=null)foreach(var job in jobs)job.GetComponent<VillagerSocial>().ResetTask();if(construction!=null)construction.Paused=true;if(learning!=null)foreach(var site in learning.sites)site.Paused=true;discoveries?.Advance(0,true);for(int i=0;i<2;i++)if(held[i]!=null){held[i].transform.position=held[i].home;held[i].held=false;held[i].GetComponent<Collider>().enabled=true;held[i]=null;}Save();}}
  void OnApplicationQuit(){Save();}
 }
 }

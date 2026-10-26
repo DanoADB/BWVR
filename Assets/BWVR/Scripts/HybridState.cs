@@ -10,6 +10,7 @@ public enum GuidanceStatus {None,Active,Completed,Rejected,Expired,Superseded,Ab
 }
 [Serializable] public sealed class GuidanceState {
  public GuidanceIntent intention;public string target="";public float requestedAt,expiresAt;public GuidanceStatus status;public string reason="";
+ public bool playerSign;public Vector3 spot;
 }
 [Serializable] public sealed class ActionReceipt {
  public CreatureAction action;public CreatureSituation situation;public string target="",partner="";public float completedAt;public bool eligible,consumed;
@@ -38,7 +39,7 @@ public enum GuidanceStatus {None,Active,Completed,Rejected,Expired,Superseded,Ab
   if((motivation!=null&&!motivation.Valid())||!BondsValid()||!Number(time,0,100000000)||!Number(energy,0,100)||!Number(lastBenefit,-100,100000000)||!Number(rainRemaining,0,6)||!Number(nextMiracleAt,0,100000001)||decisions<0||decisions>100000000||guidance==null||intention==null||receipt==null||associations==null||associations.Length>24||cooldowns==null||cooldowns.Length>128)return false;
   var ids=new System.Collections.Generic.HashSet<string>();foreach(var c in cooldowns)if(c==null||!Text(c.target)||!ids.Add(c.target)||!Number(c.until,0,100000180))return false;
   if(interests==null||interests.Length>128)return false;ids.Clear();foreach(var value in interests)if(value==null||!Text(value.target)||!ids.Add(value.target)||!Number(value.appeal,0,1)||!Number(value.lastUsed,0,time)||value.experiences<0||value.experiences>1000000)return false;
-  if(!Enum.IsDefined(typeof(GuidanceIntent),guidance.intention)||!Enum.IsDefined(typeof(GuidanceStatus),guidance.status)||!Text(guidance.target)||!Text(guidance.reason)||!Number(guidance.requestedAt,0,time)||!Number(guidance.expiresAt,0,100000060))return false;
+  if(!Enum.IsDefined(typeof(GuidanceIntent),guidance.intention)||!Enum.IsDefined(typeof(GuidanceStatus),guidance.status)||!Text(guidance.target)||!Text(guidance.reason)||!Number(guidance.requestedAt,0,time)||!Number(guidance.expiresAt,0,100000060)||!Number(guidance.spot.x,-10000,10000)||!Number(guidance.spot.y,-10000,10000)||!Number(guidance.spot.z,-10000,10000))return false;
   if(!Enum.IsDefined(typeof(CreatureAction),intention.action)||!Enum.IsDefined(typeof(CreatureSituation),intention.situation)||!Text(intention.target)||!Text(intention.partner)||!Number(intention.startedAt,0,time)||!Number(intention.deadline,0,100000300))return false;
   if(!Enum.IsDefined(typeof(CreatureAction),receipt.action)||!Enum.IsDefined(typeof(CreatureSituation),receipt.situation)||!Text(receipt.target)||!Text(receipt.partner)||!Number(receipt.completedAt,0,time)||receipt.constructionRecipe< -1||receipt.constructionRecipe>3||((receipt.fetched||receipt.gentleRally||receipt.rhythmGame)&&receipt.action!=CreatureAction.PlayWithToy)||(receipt.fetched&&receipt.gentleRally)||(receipt.rhythmGame&&(receipt.fetched||receipt.gentleRally)))return false;
   var keys=new System.Collections.Generic.HashSet<int>();foreach(var a in associations)if(a==null||!Enum.IsDefined(typeof(CreatureSituation),a.situation)||!Enum.IsDefined(typeof(CreatureAction),a.action)||!Number(a.preference,0,1)||!Number(a.reinforcedAt,0,time)||a.samples<0||a.samples>1000000||!keys.Add((int)a.situation*16+(int)a.action))return false;return true;

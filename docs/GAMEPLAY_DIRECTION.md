@@ -208,3 +208,12 @@ Preserve the first six identities and migrate both three- and six-adult saves.
 Count up to fifteen residents including the existing child cap, retain one
 background water routine, and keep personal cargo, learning, discovery and social
 records independent. See EXPANDED_POPULATION.md for current counts and validation.
+
+### Player interaction priority — summonable god tools, 2026-10-26
+
+The user has prioritized hands-on player activity over further food-security work.
+A hidden wrist palette now summons the existing rain/healing tools and places one
+Help/Protect/Investigate sign. Ground investigation adds a reachable location as a
+suggestion, preserving creature autonomy. Selection and use are separate presses;
+previews, energy costs, safe input ownership and sign persistence support repeatable
+experimentation. See GOD_TOOLS.md. Terrain editing and the Book remain future work.

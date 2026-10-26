@@ -110,3 +110,13 @@ old/new saves and hardware readability/reach/frame time. Guidance must remain a
 bias rather than overriding creature learning; miracles charge exactly once;
 terrain edits are atomic; Book views show actual state. No runtime feature is
 claimed by adding this roadmap document.
+
+## First delivery — 2026-10-26
+
+The hidden palette, intentional wrist reveal, sanctuary/desktop fallback, exclusive
+selection/use context, physical tool view, validity preview, energy display,
+rain/healing adapters and one persistent guidance sign are implemented. See
+[GOD_TOOLS.md](GOD_TOOLS.md) for actual controls, supported targets and verification.
+This supersedes the planned status for those features only. Terrain brushes, Book,
+AI/voice, multiple signs and physical wrist-comfort validation remain outstanding.
+The user explicitly moved interactive player functionality ahead of food tuning.
