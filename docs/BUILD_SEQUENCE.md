@@ -30,6 +30,16 @@ Current implementation order, 2026-10-26. Implements [ROADMAP.md](ROADMAP.md). T
 
 **Depends on:** S0. **Research:** R4, R11.
 
+## S1A — Establish the island's soundscape
+
+**Deliver in three increments:** environmental ambience first, contextual sounds second, then a soft, lilting instrumental background melody. Begin with ocean/surf, breeze and leaves, sparse birds, and weather-appropriate rain. Add nearby footsteps, pickup/drop, block contacts/snaps, ball taps/bounces, water, harvesting and restrained creature/villager reactions driven by actual events. Music should feel warm, curious and spacious, with gentle acoustic/plucked or woodwind colors, long quiet gaps and smooth transitions. No lyrics or imitation of Black & White's score. See [AUDIO_DIRECTION.md](AUDIO_DIRECTION.md).
+
+**Integration:** audit existing AudioSources/clips/listener first. Use a small central playback/mix service over confirmed interaction/animation/material events, bounded pooled emitters and separate ambience/effects/music controls. These are presentation cues, not a new AI hearing system. Keep important sounds paired with visual cues; music yields to interactions and weather warnings.
+
+**Gate:** ambience loops without obvious seams; weather transitions crossfade; canceled actions/reloads/held input do not replay one-shots. Footsteps follow grounded movement, contacts are thresholded/cooldown-limited, distant crowds cannot overwhelm the mix, and sounds do not multiply with every object. Verify listener-relative direction and comfortable distance behavior throughout zoom; pause/suspend/resume causes no burst or stale loops. Music can be independently reduced/muted and never obscures useful cues. Record asset licenses and measure active voices/memory on Quest before declaring device readiness.
+
+**Depends on:** S0 and S1 event audit; implement before S2 and carry the soundscape into S4. Missing audio must not block simulation. **Research:** supports R4, R10, R11.
+
 ## S2 — Turn tools into world interactions
 
 **Deliver in two increments:** first a bounded ground-target rain brush, then a lightweight directional wind fan. Rain uses the same wetness/cooling rules as weather and affects only implemented local crop/material properties. Wind applies capped force to supported loose objects and visible foliage/particles. Preserve existing cistern rain's explicit accounting; do not grant global water/crop bonuses for every brush patch.
@@ -38,7 +48,7 @@ Current implementation order, 2026-10-26. Implements [ROADMAP.md](ROADMAP.md). T
 
 **Gate:** the same object responds consistently to natural and player-made rain; wet fuel is harder to ignite according to implemented material rules. Wind cannot steal held/reserved objects or generate uncontrolled impulses. Pause, insufficient energy, tracking loss and release stop effects/spending. Verify clear budgets, finite resource deltas and save behavior. Add local rain presentation and accessible shape cues as well as color.
 
-**Depends on:** S1. **Research:** R1, R2.
+**Depends on:** S1, with S1A audio foundation delivered first. **Research:** R1, R2.
 
 ## S3 — Give placement and construction practical meaning
 
@@ -128,7 +138,7 @@ Current implementation order, 2026-10-26. Implements [ROADMAP.md](ROADMAP.md). T
 
 ## How to choose the next task
 
-1. Follow the earliest unfinished dependency for the active milestone; default now is S0 → S1 → S2 → S3 → S4.
+1. Follow the earliest unfinished dependency for the active milestone; default now is S0 → S1 → S1A (ambience → contextual sounds → gentle music) → S2 → S3 → S4.
 2. Write the small user-visible outcome, source integration points and acceptance check before coding. Do not implement an entire stage in one uncontrolled change.
 3. Verify affected behavior plus necessary regressions, inspect actual presentation, preserve the user's save, commit and push. Record limitations in the feature document and update this roadmap's status when a stage passes.
 4. At S4 and S7, use playtests to choose depth versus breadth. Reorder later work explicitly based on results; do not silently treat research suggestions as completed features.

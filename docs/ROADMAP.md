@@ -24,6 +24,7 @@ Research supplies design hypotheses, not proof that copying a feature will repro
 | Weather/materials | Foundation: rain, fog, wind, storms, lightning/fire and coastal waves | Autonomous responses, meaningful protection and recovery |
 | Technology | Foundation: personally learned axe/hoe designs, paid crafting and nearby observation | Tool experimentation, shared techniques and local traditions |
 | History/explanation | Foundation: optional intent details and transient bounded journal | Persistent evidence ledger and physical Book of Creation |
+| Audio | Planned dedicated soundscape; existing source/clip coverage must be audited before implementation | S1A: environmental ambience, contextual sounds, then soft lilting instrumental music |
 | Release | Editor checks and previous APK workflow exist | Current Quest Pro/3 comfort, performance and release validation |
 
 See the feature documents for exact limits: [tools](GOD_TOOLS.md), [creature](CREATURE_BEHAVIOR.md), [play](PLAY_AND_VILLAGE_RESPONSE.md), [construction](CONSTRUCTION_YARD.md), [materials](WEATHER_AND_MATERIALS.md), [technology](TOOLS_AND_TECHNOLOGY.md), [population](EXPANDED_POPULATION.md) and [Book](BOOK_OF_CREATION.md).
@@ -50,12 +51,17 @@ All eleven research recommendations are included below. These extend existing sy
 
 Villagers and creature can already share a bench and toys. Extend this into a place worth changing: villagers visit to rest or play; the player can arrange objects, improve shade/shelter and offer tools; the creature can investigate, play, build, help or decline. Weather reveals which arrangements work. Villagers use, improve, avoid or repair the result according to experience, and their return visits reflect relationships and memories.
 
-Prove more than one workable intervention and an unattended path to progress. The player must have something enjoyable to do immediately, not wait for a job loop or read a command panel. Deliver S1–S4 as the first integrated milestone, then deepen it through S5–S7. A dry spell can remain a test condition without restoring water-job dominance.
+Prove more than one workable intervention and an unattended path to progress. The player must have something enjoyable to do immediately, not wait for a job loop or read a command panel. Deliver S1–S4, including early audio stage S1A, as the first integrated milestone, then deepen it through S5–S7. A dry spell can remain a test condition without restoring water-job dominance.
+
+## Early audio priority
+
+After the baseline and event/attention audit, build environmental ambience, then context sounds, then a soft, lilting background melody, before expanding the god tools. Ocean, wind, foliage, sparse wildlife and changing weather establish place; nearby actions and restrained actor reactions explain what is happening. Gentle instrumental music should leave room for silence and never mask meaningful cues. Keep music, ambience and effects independently adjustable. Audio reinforces visual communication rather than becoming mandatory for play. See [audio direction](AUDIO_DIRECTION.md) for scope, licensing and Quest constraints; none of this entry claims implemented audio.
 
 ## Broader backlog retained
 
 | Capability | Order / boundary |
 | --- | --- |
+| Environmental, contextual and musical audio | S1A first pass; extend with tools in S2, shared activity in S4, weather in S6 and polish/device validation in S12 |
 | Local weather, fire response and shelter | S6; real material/resource consequences, bounded effects and recovery |
 | Terrain shaping and further miracles | S8; geometry, collision, navigation, grounding and persistence must agree |
 | Wood fuel, cooking and resin recipes | S9; spend actual stock, use existing material rules, no disconnected economy |
