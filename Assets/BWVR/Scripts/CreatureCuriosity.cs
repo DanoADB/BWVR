@@ -77,7 +77,7 @@ public sealed class CreatureCuriosity:MonoBehaviour {
      if(!SafeLanding(transform.position+away,out landing)&&!SafeLanding(original,out landing)){Finish(false);return false;}
      Current=Phase.CarryFriend;
     }else if(target.GetComponent<ThrowableTree>()!=null){Current=Phase.ThrowTree;}else if(target.GetComponent<BeachBall>()!=null){Current=fetching?Phase.FetchCarry:Phase.ThrowBall;}
-    else {Current=Phase.Play;var sound=target.GetComponent<AudioSource>();if(sound!=null)sound.Play();}
+    else {Current=Phase.Play;var sound=target.GetComponent<AudioSource>();if(IslandAudio.Current!=null){if(sound!=null)IslandAudio.Cue(IslandSound.Chime,target.transform.position,target.GetEntityId().GetHashCode());}else if(sound!=null)sound.Play();}
    }
   }else if(Current==Phase.CarryFriend){
    Affect=CreatureAffect.Mood.Happy;

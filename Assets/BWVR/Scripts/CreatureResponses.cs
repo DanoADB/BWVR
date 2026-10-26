@@ -23,6 +23,7 @@ public sealed partial class CreatureHybrid {
  }
  void Respond(CreatureResponse kind,HybridTarget target,string reason,bool mustSee=false,bool positive=true,EvidenceSource source=EvidenceSource.Autonomous){
   if(Season.paused||suspended||GetComponent<CarryItem>()?.held==true||(mustSee&&!CanSeeCue(target)))return;
+  if(kind==CreatureResponse.Noticed||kind==CreatureResponse.Chosen||kind==CreatureResponse.Unavailable||kind==CreatureResponse.Completed)IslandAudio.Cue(kind==CreatureResponse.Unavailable||kind==CreatureResponse.Completed&&!positive?IslandSound.Uneasy:kind==CreatureResponse.Noticed?IslandSound.Notice:IslandSound.Content,transform.position,GetEntityId().GetHashCode());
   Response=kind;ResponseTarget=target!=null?target.id:"";ResponseReason=reason;responseStarted=State.time;responsePositive=positive;
   responseUntil=State.time+(kind==CreatureResponse.Noticed?1.2f:1.5f);responseLook=CanSeeCue(target)?target:null;
   if(kind==CreatureResponse.Noticed)curiosity.NoticeResponse(CreatureAffect.Mood.Curious,1.2f);

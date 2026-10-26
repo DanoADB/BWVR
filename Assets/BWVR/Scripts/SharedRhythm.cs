@@ -36,7 +36,8 @@ public sealed class SharedRhythm:MonoBehaviour {
  void Tap(HumanoidMotion performer,int note){
   hostMotion?.Touch(null);guestMotion?.Touch(null);hostMotion?.Activity(0);guestMotion?.Activity(0);
   performer?.LookAt(transform);performer?.Signal(false);performer?.Activity(performer==guestMotion?3:5);performer?.Touch(transform.Find(note==0?"Low chime bar":"High chime bar")??transform);
-  if(sound!=null&&sound.clip!=null){sound.pitch=note==0?1:1.25f;sound.Play();}
+  if(IslandAudio.Current!=null)IslandAudio.Cue(IslandSound.Chime,transform.position,GetEntityId().GetHashCode(),1,note==0?1:1.25f);
+  else if(sound!=null&&sound.clip!=null){sound.pitch=note==0?1:1.25f;sound.Play();}
   if(visual!=null){visual.GetPropertyBlock(pulse);pulse.SetColor("_Color",Color.Lerp(visual.sharedMaterial.color,Color.white,.4f));visual.SetPropertyBlock(pulse);}flash=.24f;
  }
  void Fade(float dt){if(flash<=0)return;flash=Mathf.Max(0,flash-dt);if(flash<=0){visual?.SetPropertyBlock(original);if(!Active){hostMotion?.Touch(null);hostMotion?.Activity(0);if(creature!=null)hostMotion?.LookAt(creature.transform);hostMotion?.Signal(true,true,transform.position);}}}

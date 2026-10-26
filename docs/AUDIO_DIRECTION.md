@@ -1,6 +1,6 @@
 # Audio direction
 
-Roadmap addition, 2026-10-26. Planned work, not an implementation or asset-acquisition report. The user requested environmental and contextual sounds first, with a soft, lilting background melody. Deliver this as S1A in [BUILD_SEQUENCE.md](BUILD_SEQUENCE.md), before the expanded god tools. Audit existing clips, sources and listeners before introducing new playback machinery.
+Roadmap direction, 2026-10-26. Environmental/contextual first-pass implementation now exists; see [ISLAND_AUDIO.md](ISLAND_AUDIO.md) for coverage and verification limits. Music and hardware audition remain pending. The user requested environmental and contextual sounds first, with a soft, lilting background melody. Deliver this as S1A in [BUILD_SEQUENCE.md](BUILD_SEQUENCE.md), before the expanded god tools. Audit existing clips, sources and listeners before introducing new playback machinery.
 
 ## 1. Environmental ambience
 
@@ -40,6 +40,6 @@ Begin with one understated calm theme and clean fades. Let silence and ambience 
 
 ## Asset sourcing and completion
 
-Prefer original, CC0 or appropriately licensed free audio. Record source URL, author, exact license, modification and required attribution for each imported asset. Confirm redistribution terms for the actual files; “free download” alone is insufficient. Keep purchased/restricted source files out of the public repository unless their license explicitly permits that distribution. No assets have been selected or downloaded by this plan.
+Prefer original, CC0 or appropriately licensed free audio. Record source URL, author, exact license, modification and required attribution for each imported asset. Confirm redistribution terms for the actual files; “free download” alone is insufficient. Keep purchased/restricted source files out of the public repository unless their license explicitly permits that distribution. The current implementation uses 18 original procedural sound sketches with a CC0 audio dedication; no third-party sound files were downloaded.
 
 Deliver ambience, context effects and music as separate auditionable increments. Validate real event timing, loops/crossfades, mute/mix controls, zoom, pause/resume, cancellation and bounded voices. Listen in the rendered scene and report what was actually heard; a screenshot or compilation check cannot verify sound. Extend coverage with later roadmap features, and close hardware comfort/performance checks at S12.

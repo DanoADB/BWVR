@@ -32,7 +32,7 @@ public sealed partial class ConstructionSite {
    else AddBox(go,proxy,Vector3.zero,dimensions,colors[i%colors.Length]);
    var item=go.AddComponent<CarryItem>();item.kind=Offering.Toy;var body=proxy.AddComponent<Rigidbody>();body.mass=.1f*dimensions.x*dimensions.y*dimensions.z/(4*LayerHeight);body.interpolation=RigidbodyInterpolation.None;body.collisionDetectionMode=CollisionDetectionMode.ContinuousDynamic;body.solverIterations=12;body.solverVelocityIterations=4;body.maxAngularVelocity=12;
    Vector3 spawn;if(IsBridge)spawn=new Vector3(i%2==0?-5:5,.2f,-2+(i/2)*2);else if(i<8){spawn=new Vector3(-6+(i%3)*6,dimensions.y*.5f+.1f,-6+(i/3)*6);if(i==4)spawn=new Vector3(6,.7f,0);if(i==5)spawn=new Vector3(-6,.7f,6);if(i==6)spawn=new Vector3(0,.7f,6);if(i==7)spawn=new Vector3(6,.7f,6);}else {int slot=i-8;spawn=new Vector3((slot%2==0?-1:1)*(20+(slot%4/2)*6),dimensions.y*.5f+.1f,-18+(slot/4)*4);}
-   body.position=spawn;go.transform.position=World(spawn);item.home=go.transform.position;var block=go.AddComponent<ConstructionBlock>();block.Shape=shape;block.Initialize(this,body,dimensions);blocks.Add(block);go.AddComponent<CreatureAffordance>().kind=CreatureAffordance.Kind.Turn;
+   body.position=spawn;go.transform.position=World(spawn);item.home=go.transform.position;var block=go.AddComponent<ConstructionBlock>();block.Shape=shape;block.Initialize(this,body,dimensions);proxy.AddComponent<ConstructionAudioContact>().block=block;blocks.Add(block);go.AddComponent<CreatureAffordance>().kind=CreatureAffordance.Kind.Turn;
    if(!IsBridge)HybridTarget.Bind(go,i<8?"object-"+(4+i):i<16?"object-"+(6+i):i<24?"object-"+(8+i):"yard-block-"+i,HybridTargetKind.Object);
   }
  }

@@ -20,7 +20,7 @@ Current implementation order, 2026-10-26. Implements [ROADMAP.md](ROADMAP.md). T
 
 **Gate:** current project compiles; baseline pickup/drop, pause/resume, saving, autonomy and tool release/rearm work. Classify failures as product defects or demonstrated test-fixture defects with evidence. Preserve a known-good save and record starting population/weather/seed. No priority changes to water merely to make a test pass.
 
-**Depends on:** existing implementation. **S1 Editor implementation:** delivered; see [CREATURE_RESPONSES.md](CREATURE_RESPONSES.md). Headset readability remains a release check. Next implementation stage: S1A.
+**Depends on:** existing implementation. **S1 Editor implementation:** delivered; see [CREATURE_RESPONSES.md](CREATURE_RESPONSES.md). Headset readability remains a release check. S1A ambience/context foundation is delivered for Editor testing; next increment: background melody.
 
 ## S1 — Make attention and consequences readable
 
@@ -33,6 +33,8 @@ Current implementation order, 2026-10-26. Implements [ROADMAP.md](ROADMAP.md). T
 **Depends on:** S0. **Research:** R4, R11.
 
 ## S1A — Establish the island's soundscape
+
+**Status:** environmental/contextual first pass delivered and Editor signal/event checks passed. See [ISLAND_AUDIO.md](ISLAND_AUDIO.md). Background melody, subjective mix audition and Quest profiling remain pending.
 
 **Deliver in three increments:** environmental ambience first, contextual sounds second, then a soft, lilting instrumental background melody. Begin with ocean/surf, breeze and leaves, sparse birds, and weather-appropriate rain. Add nearby footsteps, pickup/drop, block contacts/snaps, ball taps/bounces, water, harvesting and restrained creature/villager reactions driven by actual events. Music should feel warm, curious and spacious, with gentle acoustic/plucked or woodwind colors, long quiet gaps and smooth transitions. No lyrics or imitation of Black & White's score. See [AUDIO_DIRECTION.md](AUDIO_DIRECTION.md).
 

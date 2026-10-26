@@ -8,7 +8,7 @@ using UnityEngine.XR;
 using UnityEngine.InputSystem;
 using CommonUsages=UnityEngine.XR.CommonUsages;
 namespace BWVR {
-public sealed class QuestSlice:MonoBehaviour {
+public sealed partial class QuestSlice:MonoBehaviour {
  public const float ActorScale=1.1f;
  // Readability boost applies to villagers only; navigation uses this same scale.
  public const float VillagerScale=ActorScale*1.15f*1.5f;
@@ -18,6 +18,7 @@ public sealed class QuestSlice:MonoBehaviour {
  [Tooltip("In exploration development focus, pause automatic food work and meal consumption to observe other behaviors. Turn off to restore the food economy.")]
  public bool observeWithoutFoodWork=true;
  BeachBall[] balls=Array.Empty<BeachBall>();
+ IslandAudio soundscape;GameObject audioSettings;
  VillageTributes tributes;SpiritCompanion spirit;GodToolPalette godTools;bool toolsKeyLast;
  VillageFamilies families;VillageResources resources;IslandWeather weather;TreePlayWorld treePlay;IslandNavigation navigation; IslandTerrainData terrain; Collider groundCollider; const float Floor=.82f; SliceState state=new SliceState(); Camera eye; Transform rig,left,right,creature; Text status,creatureLabel; GameObject panel; Font font; GameArtCatalog art; OriginalCowMotion cowMotion; HumanoidMotion godMotion; HumanoidMotion[] humanoids=Array.Empty<HumanoidMotion>();
  readonly Transform[] aims=new Transform[2]; readonly QuestControls.Hand[] controllerHands=new QuestControls.Hand[2]; bool turnHeld,recenterLast,zoomHeld; Vector3 zoomFocus;
@@ -117,7 +118,9 @@ public sealed class QuestSlice:MonoBehaviour {
   Button("Help / details",new Vector3(-140,-240,0),()=>SetHelp(!helpVisible));
   Button("Spirit: show / hide",new Vector3(140,-240,0),()=>spirit.SetVisible(!spirit.Visible));
   godTools=GodToolPalette.Build(transform,left,right,rig,eye,font,miracles,hybrid,navigation,groundCollider??ground.GetComponent<Collider>(),(accepted,message)=>{notice=message;if(XRSettings.isDeviceActive)InputDevices.GetDeviceAtXRNode(XRNode.RightHand).SendHapticImpulse(0,accepted?.25f:.08f,.08f);});
-  Button("God tools",new Vector3(0,-320,0),()=>{panel.SetActive(false);godTools.Toggle();});
+  soundscape=IslandAudio.Build(transform,navigation,eye.transform,rig,()=>state);
+  Button("Sound",new Vector3(140,-320,0),()=>ShowAudioSettings(true));BuildAudioSettings();
+  Button("God tools",new Vector3(-140,-320,0),()=>{panel.SetActive(false);godTools.Toggle();});
   panel.SetActive(false);
   if(!XRSettings.isDeviceActive){eye.transform.localRotation=Quaternion.Euler(25,0,0);left.localPosition=new Vector3(-.6f,1.15f,1.05f);left.localRotation=Quaternion.Euler(0,0,0);panel.transform.localRotation=Quaternion.identity;}
  }
@@ -130,7 +133,7 @@ public sealed class QuestSlice:MonoBehaviour {
  Transform Controller(string name,int side){var g=new GameObject(name);g.transform.SetParent(rig,false);aims[side]=new GameObject(name+" aim").transform;aims[side].SetParent(rig,false);Shape("Controller presence",PrimitiveType.Sphere,Vector3.zero,Vector3.one*.035f,new Color(.85f,.72f,.42f),g.transform);var line=g.AddComponent<LineRenderer>();line.positionCount=2;line.startWidth=.002f;line.endWidth=.001f;line.material=new Material(Shader.Find("Sprites/Default"));line.startColor=line.endColor=new Color(.6f,.85f,.8f,.7f);rays[side]=line;pickupHands[side]=PickupHand.Create(transform,side);return g.transform;}
  CarryItem Item(string name,Offering kind,Vector3 at,PrimitiveType primitive,Color color,float size){var modern=kind==Offering.Villager?Resources.Load<GameObject>("Villagers/Villager"+VillagePopulation.Model(items.Count)):null;GameObject fitted=null;if(modern!=null){fitted=Instantiate(modern,transform);fitted.transform.position=Ground(at);fitted.transform.localScale=Vector3.one*Size(.085f,1.661f);}var original=fitted??(kind==Offering.Villager?Original(items.Count%2==0?"woman":"man",Ground(at),Size(.07f,1.661f)):null);var g=original??Shape(name,primitive,at,Vector3.one*size,color);if(kind==Offering.Villager)g.transform.localScale*=VillagerScale;var item=g.AddComponent<CarryItem>();item.kind=kind;item.home=g.transform.position;items.Add(item);return item;}
  Text Label(string name,Transform parent,Vector3 position,Vector2 size,float scale,int fontSize){var g=new GameObject(name,typeof(RectTransform));g.transform.SetParent(parent,false);g.transform.localPosition=position;g.transform.localScale=Vector3.one*scale;if(!parent.GetComponentInParent<Canvas>()){var c=g.AddComponent<Canvas>();c.renderMode=RenderMode.WorldSpace;}var t=g.AddComponent<Text>();t.font=font;t.fontSize=fontSize;t.color=new Color(.94f,.9f,.74f);t.alignment=TextAnchor.MiddleCenter;t.horizontalOverflow=HorizontalWrapMode.Wrap;g.GetComponent<RectTransform>().sizeDelta=size;return t;}
- void Button(string title,Vector3 position,Action action){var g=new GameObject(title,typeof(RectTransform),typeof(Image),typeof(BoxCollider),typeof(SpatialTarget));g.transform.SetParent(panel.transform,false);g.transform.localPosition=position;g.GetComponent<RectTransform>().sizeDelta=new Vector2(260,68);g.GetComponent<Image>().color=new Color(.13f,.28f,.29f);g.GetComponent<BoxCollider>().size=new Vector3(260,68,15);g.GetComponent<SpatialTarget>().invoke=action;Label("Caption",g.transform,Vector3.zero,new Vector2(250,65),1,24).text=title;}
+ GameObject Button(string title,Vector3 position,Action action,Transform parent=null){var g=new GameObject(title,typeof(RectTransform),typeof(Image),typeof(BoxCollider),typeof(SpatialTarget));g.transform.SetParent(parent??panel.transform,false);g.transform.localPosition=position;g.GetComponent<RectTransform>().sizeDelta=new Vector2(260,68);g.GetComponent<Image>().color=new Color(.13f,.28f,.29f);g.GetComponent<BoxCollider>().size=new Vector3(260,68,15);g.GetComponent<SpatialTarget>().invoke=action;Label("Caption",g.transform,Vector3.zero,new Vector2(250,65),1,24).text=title;return g;}
  void Update(){if(eye==null||applicationSuspended)return;foreach(var motion in humanoids)if(motion!=null)motion.paused=state.paused||(state.Finished&&motion.GetComponent<CarryItem>()!=null&&motion.GetComponent<CarryItem>().kind!=Offering.Creature&&!(motion.GetComponent<VillagerBlockPlay>()?.Active??false)&&!(motion.GetComponent<VillagerSocial>()?.Active??false)&&!(motion.GetComponent<VillagerExploration>()?.Active??false)&&!(motion.GetComponent<VillagerResourceGathering>()?.Active??false));if(cowMotion!=null)cowMotion.paused=state.paused;clock+=Time.deltaTime;bool xr=XRSettings.isDeviceActive;
   if(xr){if(!trackingConfigured){var inputs=new List<XRInputSubsystem>();SubsystemManager.GetSubsystems(inputs);bool floor=false;foreach(var input in inputs)floor|=input.TrySetTrackingOriginMode(TrackingOriginModeFlags.Floor);if(!floor)rig.position+=Vector3.up*1.55f;trackingConfigured=true;}Pose(XRNode.Head,eye.transform);UpdateController(0,left);UpdateController(1,right);if(!viewPlaced){var head=InputDevices.GetDeviceAtXRNode(XRNode.Head);if(head.TryGetFeatureValue(CommonUsages.isTracked,out bool tracked)&&tracked)RecenterView();}
    bool zoom=controllerHands[1].zoom;
@@ -206,12 +209,13 @@ public sealed class QuestSlice:MonoBehaviour {
  bool TryGrab(int side,CarryItem item){
   if(godTools!=null&&godTools.ClaimsInput)return false;if(item==null||!item.gameObject.activeInHierarchy||!item.CanGrab||held[side]!=null||(item.kind==Offering.Creature&&side!=1))return false;
   if(item.kind==Offering.Creature){item.home=item.transform.position;hybrid.Interrupt("Picked up by the player");}
-  throwMotion[side].Reset();held[side]=item;item.held=true;item.GetComponent<Collider>().enabled=false;item.GetComponent<ConstructionBlock>()?.Grab();notice="Release the carry button over clear ground to place.";return true;
+  throwMotion[side].Reset();held[side]=item;item.held=true;item.GetComponent<Collider>().enabled=false;item.GetComponent<ConstructionBlock>()?.Grab();IslandAudio.Cue(IslandSound.Grasp,item.transform.position,item.GetEntityId().GetHashCode());notice="Release the carry button over clear ground to place.";return true;
  }
  void Release(int i,Ray ray){var item=held[i];var toss=throwMotion[i].Velocity;if(!XRSettings.isDeviceActive&&Keyboard.current!=null&&Keyboard.current.spaceKey.isPressed)toss=ray.direction*(.5f*rig.localScale.x);throwMotion[i].Reset();held[i]=null;item.held=false;item.GetComponent<Collider>().enabled=true;var tool=item.GetComponent<DivineTool>();if(tool!=null){UseSpiritualTool(tool,ray);return;}var ball=item.GetComponent<BeachBall>();if(ball!=null&&!state.paused&&toss.magnitude>.12f*rig.localScale.x&&ball.PlayerToss(toss,rig.localScale.x)){notice="Tossed. The play circle marks its return spot.";return;}var block=item.GetComponent<ConstructionBlock>();if(block!=null){notice=block.Site.DropRay(block,ray)?"Blocks snapped together.":"Loose block released on the construction green.";hybrid.NoticePlaced(item);return;}Vector3 point;
   if(!TryDropPoint(item,ray,out point)){item.transform.position=item.home;notice="Returned safely: place on dry, clear walking ground.";return;}
   if(item.kind==Offering.Villager||item.kind==Offering.Creature)item.GetComponent<IslandNavigator>()?.ResetRoute();
   if(item.GetComponent<SharedRhythm>()!=null)item.transform.rotation=Quaternion.Euler(0,item.transform.eulerAngles.y,0);
+  IslandAudio.Cue(IslandSound.Place,point,item.GetEntityId().GetHashCode());
   item.transform.position=point+Vector3.up*(item.kind==Offering.Villager||item.kind==Offering.Creature?0:item.GetComponent<SharedRhythm>()!=null?item.transform.lossyScale.y*.5f:Size(.04f,2));
   if(item.kind==Offering.Water&&Vector3.Distance(point,cistern)<Size(.18f,8)){DeliverWater();notice="Water delivered. Villagers celebrate their creature's gift.";item.transform.position=item.home;}
   else if(item.kind==Offering.Food&&Vector3.Distance(point,creature.position)<Size(.2f,8)){notice="Food offered. The creature can choose to investigate and eat.";}
@@ -242,9 +246,9 @@ public sealed class QuestSlice:MonoBehaviour {
  Vector3 Ground(Vector3 at){if(terrain!=null)return terrain.Project(at);at.y=Floor;return at;}
  public void Simulate(float dt){
    state.developmentFocus=developmentFocus;state.observeWithoutFoodWork=developmentFocus&&observeWithoutFoodWork;
-  if(dt<=0||float.IsNaN(dt)||float.IsInfinity(dt))return;bool paused=state.paused||applicationSuspended;
+  if(dt<=0||float.IsNaN(dt)||float.IsInfinity(dt))return;bool paused=state.paused||applicationSuspended;soundscape?.SetFrozen(paused);
    if(construction!=null)construction.Paused=paused;if(learning!=null)foreach(var site in learning.sites)site.Paused=paused;discoveries?.Advance(dt,paused);
-  if(!paused){state.Hybrid.time=Mathf.Min(100000000,state.Hybrid.time+dt);state.Step(dt);learning?.Tick();tributes?.Tick(dt,false);AnimateVillage(dt);}families?.Advance(dt,paused);resources?.Advance(dt,paused);weather?.Advance(dt,paused);foreach(var ball in balls)ball.Advance(dt,paused);treePlay?.Advance(dt,paused);miracles?.Tick(paused?0:dt,paused);signals.Tick(paused?0:dt,state);
+  if(!paused){state.Hybrid.time=Mathf.Min(100000000,state.Hybrid.time+dt);state.Step(dt);learning?.Tick();tributes?.Tick(dt,false);AnimateVillage(dt);}families?.Advance(dt,paused);resources?.Advance(dt,paused);weather?.Advance(dt,paused);foreach(var ball in balls)ball.Advance(dt,paused);treePlay?.Advance(dt,paused);miracles?.Tick(paused?0:dt,paused);signals.Tick(paused?0:dt,state);soundscape?.Advance(dt,paused);
  }
  void AnimateVillage(float dt){
   foreach(var job in jobs){var social=job.GetComponent<VillagerSocial>();var explore=job.GetComponent<VillagerExploration>();var play=job.GetComponent<VillagerBlockPlay>();
@@ -279,7 +283,7 @@ public sealed class QuestSlice:MonoBehaviour {
  void DeliverWater(){int before=state.gifts;state.Deliver();if(state.gifts>before)signals?.WaterArrived();}
  void Save(){try{if(construction!=null)state.construction=construction.Capture();discoveries?.Capture();learning?.Capture();File.WriteAllText(SavePath+".tmp",JsonUtility.ToJson(state,true));File.Copy(SavePath+".tmp",SavePath,true);saveError=null;notice="Season saved on this device.";}catch(Exception e){saveError="Save failed. Please try again.";notice="Could not save: "+e.Message;if(panel!=null)panel.SetActive(true);Debug.LogError("BWVR_SAVE_FAILED: "+e.Message);}}
  void Load(){if(!File.Exists(SavePath))return;try{var s=JsonUtility.FromJson<SliceState>(File.ReadAllText(SavePath));if(s==null||!s.Valid())throw new Exception("Invalid season data");state=s;state.paused=false;notice="Season restored.";}catch(Exception){saveError="Saved season unavailable. A fresh season is ready.";notice=saveError;}}
- void OnApplicationPause(bool paused){applicationSuspended=paused;if(paused)godTools?.Cancel();if(spirit!=null)spirit.Suspended=paused;if(miracles!=null){miracles.Suspended=paused;miracles.Tick(0,paused||state.paused);}hybrid?.Suspend(paused);foreach(var motion in humanoids)if(motion!=null)motion.paused=paused||state.paused;if(cowMotion!=null)cowMotion.paused=paused||state.paused;if(paused){if(jobs!=null)foreach(var job in jobs)job.GetComponent<VillagerSocial>().ResetTask();if(construction!=null)construction.Paused=true;if(learning!=null)foreach(var site in learning.sites)site.Paused=true;discoveries?.Advance(0,true);for(int i=0;i<2;i++)if(held[i]!=null){held[i].transform.position=held[i].home;held[i].held=false;held[i].GetComponent<Collider>().enabled=true;held[i]=null;}Save();}}
+ void OnApplicationPause(bool paused){applicationSuspended=paused;soundscape?.Suspend(paused);if(paused)godTools?.Cancel();if(spirit!=null)spirit.Suspended=paused;if(miracles!=null){miracles.Suspended=paused;miracles.Tick(0,paused||state.paused);}hybrid?.Suspend(paused);foreach(var motion in humanoids)if(motion!=null)motion.paused=paused||state.paused;if(cowMotion!=null)cowMotion.paused=paused||state.paused;if(paused){if(jobs!=null)foreach(var job in jobs)job.GetComponent<VillagerSocial>().ResetTask();if(construction!=null)construction.Paused=true;if(learning!=null)foreach(var site in learning.sites)site.Paused=true;discoveries?.Advance(0,true);for(int i=0;i<2;i++)if(held[i]!=null){held[i].transform.position=held[i].home;held[i].held=false;held[i].GetComponent<Collider>().enabled=true;held[i]=null;}Save();}}
  void OnApplicationQuit(){Save();}
 }
 }

@@ -1,0 +1,128 @@
+{
+  "surf": {
+    "seconds": 16.0,
+    "peak": 0.68,
+    "rms": 0.10950779194814099,
+    "boundaryDelta": 0.05203594119058828,
+    "loop": true
+  },
+  "wind": {
+    "seconds": 12.0,
+    "peak": 0.68,
+    "rms": 0.1257480583057105,
+    "boundaryDelta": 0.07565697751648584,
+    "loop": true
+  },
+  "rain": {
+    "seconds": 12.0,
+    "peak": 0.68,
+    "rms": 0.3273443774352858,
+    "boundaryDelta": 0.01433324630297031,
+    "loop": true
+  },
+  "step": {
+    "seconds": 0.18,
+    "peak": 0.68,
+    "rms": 0.09630623933219405,
+    "boundaryDelta": 0.0,
+    "loop": false
+  },
+  "grasp": {
+    "seconds": 0.12997732426303854,
+    "peak": 0.68,
+    "rms": 0.1115561836401041,
+    "boundaryDelta": 0.0,
+    "loop": false
+  },
+  "place": {
+    "seconds": 0.22997732426303855,
+    "peak": 0.68,
+    "rms": 0.09519760367660764,
+    "boundaryDelta": 0.0,
+    "loop": false
+  },
+  "snap": {
+    "seconds": 0.3,
+    "peak": 0.68,
+    "rms": 0.11343713501879076,
+    "boundaryDelta": 0.0,
+    "loop": false
+  },
+  "ball": {
+    "seconds": 0.28,
+    "peak": 0.68,
+    "rms": 0.0957339911248976,
+    "boundaryDelta": 0.0,
+    "loop": false
+  },
+  "pour": {
+    "seconds": 0.8499773242630385,
+    "peak": 0.68,
+    "rms": 0.08634797477865624,
+    "boundaryDelta": 0.0,
+    "loop": false
+  },
+  "harvest": {
+    "seconds": 0.24,
+    "peak": 0.68,
+    "rms": 0.08978617482963275,
+    "boundaryDelta": 0.0,
+    "loop": false
+  },
+  "notice": {
+    "seconds": 0.34997732426303857,
+    "peak": 0.68,
+    "rms": 0.15095566502956959,
+    "boundaryDelta": 0.0,
+    "loop": false
+  },
+  "content": {
+    "seconds": 0.6,
+    "peak": 0.68,
+    "rms": 0.1457828966688698,
+    "boundaryDelta": 0.0,
+    "loop": false
+  },
+  "uneasy": {
+    "seconds": 0.48,
+    "peak": 0.68,
+    "rms": 0.13232707978090136,
+    "boundaryDelta": 0.0,
+    "loop": false
+  },
+  "miracle": {
+    "seconds": 1.2,
+    "peak": 0.68,
+    "rms": 0.12921713414776204,
+    "boundaryDelta": 0.0,
+    "loop": false
+  },
+  "discovery": {
+    "seconds": 0.8,
+    "peak": 0.68,
+    "rms": 0.1360382748125588,
+    "boundaryDelta": 0.0,
+    "loop": false
+  },
+  "chime": {
+    "seconds": 0.6,
+    "peak": 0.68,
+    "rms": 0.13651432213421888,
+    "boundaryDelta": 0.0,
+    "loop": false
+  },
+  "bird": {
+    "seconds": 0.8499773242630385,
+    "peak": 0.68,
+    "rms": 0.11327832213957202,
+    "boundaryDelta": 0.0,
+    "loop": false
+  },
+  "thunder": {
+    "seconds": 2.6,
+    "peak": 0.68,
+    "rms": 0.07298817316271751,
+    "boundaryDelta": 0.0,
+    "loop": false
+  }
+}

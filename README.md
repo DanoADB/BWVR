@@ -97,3 +97,5 @@ Construction toys now share one large yard with 48 pieces in eight shapes. Old t
 Villagers now cut finite timber sources, harvest existing wheat, carry reserved loads into a visible shared store, and consume stored food. See [resource gathering](docs/RESOURCE_GATHERING.md) for persistence rules and the remaining forestry/farming roadmap.
 
 Exploration observation can temporarily pause villager food work and meal consumption without changing stored supplies. Children are larger and use normal pickup/drop. See [village observation](docs/VILLAGE_OBSERVATION.md).
+
+The island now has quiet surf/wind/rain, sparse birds and pooled interaction sounds. Open the wrist sanctuary → **Sound** for device-local master/ambience/effects levels. These are original sound sketches; background music and Quest listening/profiling remain next. See [island audio](docs/ISLAND_AUDIO.md).

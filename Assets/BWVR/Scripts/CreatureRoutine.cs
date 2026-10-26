@@ -23,7 +23,7 @@ public sealed class CreatureRoutine:MonoBehaviour {
    case Task.Carry:
     if(Move(cistern,dt))Change(Task.Deliver,5);break;
    case Task.Deliver:
-    if(timer>=1.1f){ReturnWater();deliveries++;delivered?.Invoke();Change(Task.SeekingWater,0);Completed?.Invoke();}break;
+    if(timer>=1.1f){IslandAudio.Cue(IslandSound.Pour,cistern,GetEntityId().GetHashCode());ReturnWater();deliveries++;delivered?.Invoke();Change(Task.SeekingWater,0);Completed?.Invoke();}break;
   }
  }
  bool Move(Vector3 target,float dt){if(navigator!=null)return navigator.MoveTo(target,speed,dt);var flat=target-transform.position;flat.y=0;if(flat.magnitude<speed*.55f)return true;

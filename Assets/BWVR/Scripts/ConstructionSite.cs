@@ -96,7 +96,7 @@ public sealed partial class ConstructionSite:MonoBehaviour {
   if(snap){Activate(block);block.Body.transform.SetPositionAndRotation(at,facing);block.Body.position=at;block.Body.rotation=facing;Connect(block,under);successfulSnaps++;}
   else {var p=Local(desired);if(!Contains(p,-1)||p.y<block.size.y*.5f-.1f)p=block.spawn;Activate(block);var q=Quaternion.Inverse(transform.rotation)*rotation;block.Body.transform.SetPositionAndRotation(p,q);block.Body.position=p;block.Body.rotation=q;}
   block.creatureBuilt=snap&&byCreature;if(block.creatureBuilt)LastCreatureBuildTime=Clock;
-  block.transform.SetPositionAndRotation(World(block.Body.position),transform.rotation*block.Body.rotation);Changed?.Invoke();return snap;
+  block.transform.SetPositionAndRotation(World(block.Body.position),transform.rotation*block.Body.rotation);if(snap)IslandAudio.Cue(IslandSound.Snap,block.transform.position,block.GetEntityId().GetHashCode());Changed?.Invoke();return snap;
  }
  bool RayPoint(ConstructionBlock block,Ray ray,out Vector3 point){foreach(var hit in Physics.RaycastAll(ray,10).OrderBy(h=>h.distance))if(hit.collider.GetComponentInParent<ConstructionBlock>()!=block&&((hit.collider.GetComponent<ConstructionFoundation>()!=null&&hit.collider.transform.parent==transform)||hit.collider.GetComponent<ConstructionBlock>()?.Site==this)){point=hit.point+Vector3.up*unit*block.size.y*.5f;return true;}point=World(block.spawn);return false;}
  public bool PlacementPoint(ConstructionBlock block,Ray ray,out Vector3 point){if(!RayPoint(block,ray,out point))return false;if(FindSnap(block,point,transform.rotation,out var local,out _,out _))point=World(local);return true;}

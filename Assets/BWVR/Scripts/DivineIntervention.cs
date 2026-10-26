@@ -51,7 +51,7 @@ public sealed class DivineIntervention:MonoBehaviour {
   if(State.energy<cost){LastReason="Not enough spiritual energy";return false;}
   if(kind==SpiritualTool.Rain&&(target==null||(target.kind!=HybridTargetKind.Cistern&&target.kind!=HybridTargetKind.Water))){LastReason="Rain belongs over the village water system";return false;}
   if(kind==SpiritualTool.Heal&&(target?.villager==null||target.villager.Memory.injury<=0||target.GetComponent<CarryItem>()?.held==true)){LastReason="No available injured villager";return false;}
-  State.energy-=cost;State.nextMiracleAt=State.time+.5f;creature.InvalidateLesson("Player miracle is not creature work");
+  IslandAudio.Cue(IslandSound.Miracle,target.transform.position,GetEntityId().GetHashCode());State.energy-=cost;State.nextMiracleAt=State.time+.5f;creature.InvalidateLesson("Player miracle is not creature work");
   if(kind==SpiritualTool.Rain){Season.RememberOutcome();Season.water=Mathf.Clamp(Season.water+tuning.rainWater,0,100);Season.crops=Mathf.Clamp(Season.crops+tuning.rainCrops,0,100);State.rainRemaining=6;rain.Play();foreach(var v in villagers)v.Celebrate(creature.transform);}
   else {target.villager.Memory.injury=0;target.GetComponent<HumanoidMotion>()?.React();healing.transform.position=target.transform.position+Vector3.up*nav.Scale;healing.Play();healing.Emit(16);}
   if(creature.CanSeeCue(target))creature.GetComponent<CreatureCuriosity>().NoticeGreeting(target.transform);creature.Journal.Add(State.time,"miracle",CreatureAction.IdleOrObserve,target.id,kind+" cost "+cost);State.Evidence.Add(State.time,EvidenceKind.Miracle,EvidenceSource.PlayerMiracle,CreatureAction.IdleOrObserve,target.id,kind+" cost "+cost);LastReason="";RefreshConditions();return true;
