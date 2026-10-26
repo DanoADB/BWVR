@@ -1,0 +1,11 @@
+{
+  "title": "Papers",
+  "author": "Pavel Kutejnikov",
+  "page": "https://opengameart.org/content/papers",
+  "download": "https://opengameart.org/sites/default/files/papers.7z",
+  "license": "CC0 1.0",
+  "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+  "sourceFile": "01_papers.png",
+  "sha256": "2214b8c2da06f3879ec502bd582a7831abb6654999471d1fd6cdd8960344f9d6",
+  "modifications": "Cropped blank open scroll from lower left; resized in three vertical bands to keep painted curls outside controls. Original sheet retained unchanged."
+}
