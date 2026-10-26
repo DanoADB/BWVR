@@ -58,6 +58,8 @@ Current implementation order, 2026-10-26. Implements [ROADMAP.md](ROADMAP.md). T
 
 ## S3 — Give placement and construction practical meaning
 
+**Status:** useful geometry-based shelters implemented as the first increment; see [USEFUL_SHELTERS.md](USEFUL_SHELTERS.md) for scope and verification. Physical planting remains the next S3 increment.
+
 **Deliver:** one lightweight shade/shelter construction option using existing pieces, plus a physical planting interaction at bounded eligible sites. Objects must provide a real measured benefit such as cover, comfortable rest or safer storage; validate that benefit independently of a named recipe. Different supported arrangements may provide it. Planting spends a real seed/plant resource and uses saved growth; it does not create free unlimited forests.
 
 **Integration:** construction snapping/use, geometry/material cover checks, existing farming/reforestation and navigation. Prototype clear safe placement and bracing before adding piece catalogs.
