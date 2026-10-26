@@ -151,3 +151,7 @@ The user has deferred further companion work in favor of earlier roadmap items. 
 ### Population-aware food reserves — 2026-10-25
 
 The next food-security step adds an early reserve goal, limited idle-adult food priority, emergency assistance and a physical readiness post. Villagers count real covered grain, incoming trips and reserved seed; they stop prioritizing reserves when enough is stored/promised. See FOOD_RESERVES.md. New farms, crop variety and observable bad-weather preparation remain queued; the companion stays deferred.
+
+### Farm expansion and planting ahead — 2026-10-25
+
+Idle villagers can prepare up to four saved new farm plots using timber and then sow them using real grain. Future harvest availability now influences planting before an emergency, including when covered reserves are already healthy. Existing eight fields, finite harvest accounting, growth limits and water's secondary development role remain. See FARM_EXPANSION.md for costs, site selection, persistence and validation. Crop variety and observable bad-weather preparation remain queued.

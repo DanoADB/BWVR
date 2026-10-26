@@ -24,9 +24,10 @@ public sealed partial class VillageResources {
 public sealed partial class VillagerResourceGathering {
  // Reserve work competes for idle adults, never interrupts an owned activity.
  public bool TryFoodReserve(){
-  if(world==null||world.Season.paused||Active||Busy||!world.NeedsFoodReserve)return false;
+  if(world==null||world.Season.paused||Active||Busy)return false;
   int workers=world.Gatherers.Count(a=>a.Active&&(a.Source?.kind==VillageResource.Wheat));
   if(workers>=(world.FoodEmergency?2:1))return false;
+  if(TryFoodProduction())return true;if(!world.NeedsFoodReserve)return false;
   float incoming=world.Gatherers.Where(a=>a.Active&&a.Source?.kind==VillageResource.Wheat&&!a.Sowing).Sum(a=>a.Reserved);
   if(world.MealGrain+incoming>=world.FoodReserveTarget)return false;
   var field=world.sources.Where(s=>s.kind==VillageResource.Wheat&&world.Available(s)).OrderBy(s=>(s.approach-transform.position).sqrMagnitude).FirstOrDefault();

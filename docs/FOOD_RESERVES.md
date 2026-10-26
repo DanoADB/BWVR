@@ -19,3 +19,5 @@ A one-hour unattended clear-weather run from 18 grain/18 timber finished with va
 The live scene advanced past frame 8300 with zero current console errors (two warnings). The original player save is preserved through a pre-test backup. No APK or physical headset validation was requested.
 
 Close-up empty/ready renders were visually inspected: the post shows a short red fill versus a full green fill. The first preview camera was obscured by terrain and was raised for verification. The original player save was restored and hash-verified after the final preview.
+
+Farm expansion and look-ahead planting now extend this reserve system; see FARM_EXPANSION.md. Bounded new plots do not imply that every weather/population scenario is balanced.
