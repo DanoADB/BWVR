@@ -1,5 +1,7 @@
 # Gameplay direction
 
+Current delivery priorities and status are consolidated in [ROADMAP.md](ROADMAP.md), with ordered implementation gates in [BUILD_SEQUENCE.md](BUILD_SEQUENCE.md). The dated notes below preserve design history; later implementation checkpoints supersede earlier planned-status wording.
+
 Recorded from the user's design notes on 2026-10-23. These are future gameplay requirements, not a description of implemented systems. They guide later changes to the first slice.
 
 ## Core direction

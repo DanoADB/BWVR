@@ -4,6 +4,8 @@ A standalone Quest god-game prototype: the player is unseen, the creature is wor
 
 Future design: [gameplay direction](docs/GAMEPLAY_DIRECTION.md) — tools, toys and feedback, rare costly possession, and villagers who build, form relationships and develop technology independently.
 
+Current priorities and implementation status: [roadmap](docs/ROADMAP.md). Follow the [build sequence](docs/BUILD_SEQUENCE.md) for staged delivery and validation, starting with readable creature responses and richer physical tools, then a shared gathering-place slice.
+
 ## Open and play
 
 1. In Unity Hub, add this repository folder and open with **Unity 6000.6.7f1**.
