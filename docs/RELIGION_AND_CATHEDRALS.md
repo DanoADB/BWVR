@@ -1,6 +1,6 @@
 # Religion, worship and fanaticism
 
-Faith is an individual saved value, independent of affection/trust. Religion now has a bounded, saved village pressure model. This increment implements worship behavior and recovery; the five cathedral building models and their construction/upgrades are still pending.
+Faith is an individual saved value, independent of affection/trust. Religion now has a bounded, saved village pressure model. Worship behavior, recovery and a five-stage CC0 cathedral construction loop are implemented. Quest presentation and long-running balance remain playtests.
 
 ## Behavior
 
@@ -20,22 +20,26 @@ Insufficient majority also lowers pressure. Food shortage (when food observation
 
 Fanaticism ends at twelve pressure points. A saved sixty-second cooldown prevents immediate relapse, then ordinary ritual schedules resume. Repeated fanaticism remains possible if high belief continues without a balancing activity. Faith is not forcibly erased. This is initial tuning, not a balanced religion economy.
 
-## Persistence and future cathedral
+## Cathedral construction and persistence
 
-Save pressure, fanatic status, episode/recovery counts, cooldown and each adult's ritual schedule/time. Transient paths and hand poses restart safely; no physics replay. All timers use simulation time and explicit pause/application suspension. Historical saves without religion fields remain valid.
+Twenty sustained simulation seconds of mean village faith at 0.35 / 0.45 / 0.55 / 0.65 / 0.75 authorize the next stage: shrine, chapel, village church, Gothic church, grand cathedral. Lost qualifying faith reduces the unfinished qualification timer. An authorized project and completed levels remain when faith falls; fanaticism suspends productive labor rather than demolishing buildings.
 
-Planned cathedral progression: shrine, chapel, village church, Gothic church, grand cathedral. Visible construction should require village materials and labor. A cathedral's completed level should not shrink when fanaticism subsides. Candidate CC0 sources are listed below; they have not been imported or performance-validated:
+Each stage costs 6 / 12 / 18 / 24 / 32 unreserved timber and 20 / 40 / 65 / 90 / 120 worker seconds. At most two available adults build. They walk to existing storage, collect up to three paid timber, carry it to the forecourt and work with the existing animation. Delivered timber is visible in piles. Reserved farm/tool materials cannot be spent on the cathedral. No free resource or learning receipt is generated. The player's Wood gifts can support the supply chain.
 
-1. Kay Lousberg shrine — https://poly.pizza/m/tFxdxO5clk
-2. CreativeTrio church — https://poly.pizza/m/GHzPfvoyzX
-3. Daniel Andersson medieval church — https://opengameart.org/content/medieval-church
-4. loafbrr Gothic-Like Structures (three assembled churches) — https://loafbrr.itch.io/gothic-like-structures
-5. Zuendholz cathedral (old/unfinished; compatibility work needed) — https://blendswap.com/blend/1863
+Timber in transit is saved by stable adult identity, alongside on-site stock, labor, stage, authorization, qualification and plot. Interrupted builders retain that paid cargo and resume carrying it later; reload clears transient paths and visual carry ownership. Ordinary worship waits for a busy builder; fanaticism cancels building before taking ownership. Player pickup, injury and fright stop work. All progress respects simulation pause and suspension. Historical saves without cathedral data remain valid.
 
-Preferred consistent upper-stage source: SigilsVault Modular Cathedral Kit, CC0, 40+ low-poly pieces — https://sigilsvault.itch.io/modular-cathedral-kit . Building staged prefabs from this kit is future work, not five ready imported upgrades.
+A bounded startup search selects clear reachable land, rejecting existing navigation exclusions, steep ground, the construction yard, resource/crop patches and occupied settlement props. The visible foundation fits the current authorized/completed stage. The final footprint is reserved once construction starts, with navigation carving and safe route recovery, so later upgrades cannot engulf actors. Buildings have physical box colliders and a fixed exterior forecourt; interiors are not traversable gameplay spaces. Worship gathers outside that forecourt, still facing the creature god. The optional Help view reports building progress; no normal-play construction menu is added.
+
+## Open artwork
+
+All five buildings are BWVR assemblies of **Kevin Barany / SigilsVault's Modular Cathedral Kit v1.0**, CC0: https://sigilsvault.itch.io/modular-cathedral-kit . The downloaded kit includes an explicit CC0 license; its original license/readme and the used GLBs with SHA-256 hashes are preserved under `ArtSources/Cathedrals`. Earlier candidate lists were research, not imported assets.
+
+`tools/prepare-cathedrals.py` assembles the source pieces with Blender; **BWVR → Import cathedral stages** creates combined Unity meshes, shared materials and runtime prefabs. A common scale preserves door proportions across upgrades. Stone/roof, stained windows and timber doors use three shared 512px atlases. Each active building has at most three renderers. Triangle counts are 798 / 1,973 / 5,581 / 8,999 / 14,943. Only the completed level is visible; no interior lights, real-time reflection probes or per-window particles are added. These are content budgets, not a measured headset frame rate.
 
 ## Verification
 
 Editor model and runtime checks cover sustained consensus, hysteresis/recovery, cooldown, finite values, legacy saves, cleanup, player pickup, prayer poses, pause and serialized state. Live results are recorded after the final run. Headset presentation and long-running balance remain playtests.
 
 2026-10-26 Editor results: nine checks passed (religion model/runtime, provisions, hybrid model/runtime, development focus, creature carry, feedback and god tools). After the body sight-point and prayer-height corrections, religion model/runtime, provisions and creature carrying passed again. A separate full-scheduler fixture stopped work for eleven adults and demonstrated recovery with four actual line-of-sight witnesses to an accepted creature toy activity. The corrected hands-together pose was rendered from the live rig at frame 8332, after staging at frame 7266; staging was restored at frame 12703. The sight test aims at the observed actor collider center and ignores only that actor/self colliders, retaining other occlusion. This is Editor/staged validation, not a headset or long-running balance claim.
+
+2026-10-26 cathedral results: model progression and runtime construction checks passed, as did religion, provisions, creature carrying, feedback and development focus (seven relevant checks across the run). The combined pickup check initially encountered the preceding provision fixture's deliberate input release gate; it passed after an explicit released-input frame, along with feedback/focus. Cathedral model/runtime and religion passed again after the final foundation/site changes. Rendered all five prefabs and the staged in-world shrine. A live, unteleported builder run advanced from frame 5228 to 17883 and completed the paid shrine at 122.5 simulation seconds, including a delayed builder returning from a household activity. The final presentation fixture verified clearance from registered resource patches and was restored at frame 4281. Original season JSON was restored with matching SHA-256, and standalone/Android XR startup settings restored to true. No APK or headset performance test was performed.

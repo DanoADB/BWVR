@@ -1,0 +1,51 @@
+{
+  "source": "https://sigilsvault.itch.io/modular-cathedral-kit",
+  "license": "CC0-1.0",
+  "author": "Kevin Barany / SigilsVault",
+  "files": {
+    "pedestal_01.glb": "84fe469a34cab6f364816e4e6547ba6e9feaf75ed735f34f05493db11ae283f9",
+    "altar_01.glb": "9f7cb2101021657da89bad6ae44b37f9b5db732b9e0510ccf21f276f5889c6dc",
+    "column_small_01.glb": "49a81b1367667d5b65b871470a941e32857bf846d006df08067ccc28075eb1c0",
+    "rooftop_01.glb": "dfe94c9fde1d2c894be818f783ff4b02728d9b146af9b3caa4d3836e199ec0df",
+    "doorway_01.glb": "ed2d6e07d2fe3bde628caaccd0c0c78403fbfc4a69ebab91f6fd7eed702702f4",
+    "wall_window_01.glb": "d2ce4f5b338201d7e178d3ff0fcbb61b71c50e63d42ebfab05697f93eaf436bd",
+    "wall_window_large_01.glb": "7be5176af68e5101b01cab18561ad26f1151210883b4fdc503c745880d4c2c35",
+    "floor_01.glb": "42d175edc273154d52510f0decd5bbed62a9715808e8c8ffb8aee316838c4a89",
+    "door_01.glb": "2141a93c46eaf410251601fb1d6ca5120356a436da73e77e632422d1640b889b",
+    "wall_rose_window_01.glb": "90733bbfe545d79d728c5f50b00d2673a43c20bb23edf15f4ca5e08311bd5977",
+    "tower_base_01.glb": "22e19131716ab23d73e02d0848fe55838b17bf4cb36ac04eff1e98edf218e7af",
+    "tower_cap_01.glb": "c1e271328a3b8d480a6dc62fab0395b7c646c3e4faf63e708bcf1caf3dc31523",
+    "flying_buttress_01.glb": "e91565210a23d60fca86bf78d852d8e945716b3a802115fd74b869fc1f05a706",
+    "sanctum_base_01.glb": "b0f4bd05d54676637c5c109fba29546c55a69b4a98acbc8b9a83355dc684689d",
+    "sanctum_upper_01.glb": "dbd84a5ab5f0d673d14983d46b8dc66dae707ae3fe01b4658a76ec649e8df69d",
+    "sanctum_roof_01.glb": "7b0e2bad392ff2e073b49e9dde7cd7ae20446e72919a2b0ccbbb95a1c3bec38f",
+    "spire_01.glb": "56ed4a1bbfc952ede65257678c40db86e4cee308f0954f11e2a3aed569690d48"
+  },
+  "stages": [
+    {
+      "stage": 1,
+      "name": "Shrine",
+      "triangles": 798
+    },
+    {
+      "stage": 2,
+      "name": "Chapel",
+      "triangles": 1973
+    },
+    {
+      "stage": 3,
+      "name": "VillageChurch",
+      "triangles": 5581
+    },
+    {
+      "stage": 4,
+      "name": "GothicChurch",
+      "triangles": 8999
+    },
+    {
+      "stage": 5,
+      "name": "GrandCathedral",
+      "triangles": 14943
+    }
+  ]
+}

@@ -12,7 +12,7 @@ Research supplies design hypotheses, not proof that copying a feature will repro
 
 ## Current baseline
 
-The S0 checkpoint is recorded in [BASELINE_CHECKPOINT.md](BASELINE_CHECKPOINT.md). S1 attention/evidence, S1A audio/music and S2 physical rain/fan tools have Editor-tested foundations. S3 now adds geometry-based useful shelters and finite player crop planting. The tool palette also adds open icon art, direct held world actions and Food/Wood gifts with witnessed religious memory; see [provisions](PLAYER_PROVISIONS.md). Religion/worship now has a scheduler-integrated foundation; see [religion and cathedrals](RELIGION_AND_CATHEDRALS.md). Five cathedral stages are planned, with models/imports and construction still pending. Next implementation stage: S4 shared gathering place, incorporating religious use. Hardware feel/performance remains pending.
+The S0 checkpoint is recorded in [BASELINE_CHECKPOINT.md](BASELINE_CHECKPOINT.md). S1 attention/evidence, S1A audio/music and S2 physical rain/fan tools have Editor-tested foundations. S3 now adds geometry-based useful shelters and finite player crop planting. The tool palette also adds open icon art, direct held world actions and Food/Wood gifts with witnessed religious memory; see [provisions](PLAYER_PROVISIONS.md). Religion/worship now has a scheduler-integrated foundation; see [religion and cathedrals](RELIGION_AND_CATHEDRALS.md). Five CC0 cathedral assemblies now have faith authorization, paid timber transport, bounded builders and persistent upgrades. Next implementation stage: S4 shared gathering place, incorporating religious use. Hardware feel/performance remains pending.
 
 “Foundation” means a bounded implementation exists, not feature completeness or verified standalone Quest performance. Verification results and limits are recorded in the feature documents.
 
@@ -21,7 +21,7 @@ The S0 checkpoint is recorded in [BASELINE_CHECKPOINT.md](BASELINE_CHECKPOINT.md
 | Player tools | Foundation: wrist palette, paid cistern rain, targeted healing, one saved player-issued guidance sign, local rain brush, directional wind fan and finite seed tool; old intention props hidden | Shared gathering-place slice (S4) |
 | Creature autonomy | Foundation: utility selection, exclusive action owner, contextual training, needs/favorites/practice | Perceived opportunities, short reusable plans, richer learning |
 | Shared activities | Foundation: ball, fetch, chime, bench visits and cooperative construction | A gathering place with several uses and changing social meaning |
-| Religion | Foundation: witnessed gifts increase saved faith; bounded rituals, collective fanaticism and recovery | Five-stage cathedral construction, tuned faith economy and richer worship presentation |
+| Religion | Foundation: witnessed gifts increase saved faith; bounded rituals, collective fanaticism/recovery and five-stage paid cathedral projects | Tune cathedral/faith economy and richer worship presentation |
 | Village agency | Foundation: twelve adults, individual memories, gathering, farming, storage, equipment and limited households | Need-driven projects, broader cooperation and settlement growth |
 | Construction | Foundation: shared 48-piece yard, bounded authored forms, bridge use/repair and geometry-based useful shelters | Shared gathering-place uses and new projects |
 | Weather/materials | Foundation: rain, fog, wind, storms, lightning/fire and coastal waves | Autonomous responses, meaningful protection and recovery |
