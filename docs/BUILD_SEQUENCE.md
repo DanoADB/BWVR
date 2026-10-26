@@ -20,7 +20,7 @@ Current implementation order, 2026-10-26. Implements [ROADMAP.md](ROADMAP.md). T
 
 **Gate:** current project compiles; baseline pickup/drop, pause/resume, saving, autonomy and tool release/rearm work. Classify failures as product defects or demonstrated test-fixture defects with evidence. Preserve a known-good save and record starting population/weather/seed. No priority changes to water merely to make a test pass.
 
-**Depends on:** existing implementation. **S1 Editor implementation:** delivered; see [CREATURE_RESPONSES.md](CREATURE_RESPONSES.md). Headset readability remains a release check. S1A ambience/context foundation is delivered for Editor testing; the background-melody increment passed Editor behavior/output checks. S2 rain/fan tools are delivered for Editor testing. Next stage: S3 useful shelter and planting.
+**Depends on:** existing implementation. **S1 Editor implementation:** delivered; see [CREATURE_RESPONSES.md](CREATURE_RESPONSES.md). Headset readability remains a release check. S1A ambience/context foundation is delivered for Editor testing; the background-melody increment passed Editor behavior/output checks. S2 rain/fan tools and S3 useful shelters/player planting are delivered for Editor testing. Next stage: S4 shared gathering place.
 
 ## S1 — Make attention and consequences readable
 
@@ -58,7 +58,7 @@ Current implementation order, 2026-10-26. Implements [ROADMAP.md](ROADMAP.md). T
 
 ## S3 — Give placement and construction practical meaning
 
-**Status:** useful geometry-based shelters implemented as the first increment; see [USEFUL_SHELTERS.md](USEFUL_SHELTERS.md) for scope and verification. Physical planting remains the next S3 increment.
+**Status:** useful geometry-based shelters and finite player crop planting are implemented; see [USEFUL_SHELTERS.md](USEFUL_SHELTERS.md) and [PLAYER_PLANTING.md](PLAYER_PLANTING.md) for scope and verification. Next: S4 shared gathering place; Quest validation remains pending.
 
 **Deliver:** one lightweight shade/shelter construction option using existing pieces, plus a physical planting interaction at bounded eligible sites. Objects must provide a real measured benefit such as cover, comfortable rest or safer storage; validate that benefit independently of a named recipe. Different supported arrangements may provide it. Planting spends a real seed/plant resource and uses saved growth; it does not create free unlimited forests.
 

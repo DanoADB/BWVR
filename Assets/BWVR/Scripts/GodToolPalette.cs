@@ -4,8 +4,8 @@ using UnityEngine;
 using UnityEngine.Rendering;
 namespace BWVR {
 // A private, bounded tool context. No tool preview participates in actor perception.
-public sealed class GodToolPalette:MonoBehaviour {
- public const int ToolCount=7;
+public sealed partial class GodToolPalette:MonoBehaviour {
+ public const int ToolCount=8;
  public WorldBrush Brush{get;private set;}
  public const string SpotId="player-guidance-spot";
  public bool Open{get;private set;}public SpiritualTool? Selected{get;private set;}
@@ -46,21 +46,22 @@ public sealed class GodToolPalette:MonoBehaviour {
   previewMaterial=new Material(Shader.Find("BWVR/GameSurface")){color=new Color(.4f,1,.8f)};
   preview=new GameObject("Tool target ring");preview.transform.SetParent(transform,false);var ring=preview.AddComponent<LineRenderer>();ring.sharedMaterial=previewMaterial;ring.useWorldSpace=false;ring.loop=true;ring.positionCount=40;ring.widthMultiplier=nav.Scale*.35f;ring.shadowCastingMode=ShadowCastingMode.Off;
   for(int i=0;i<40;i++){float a=i*Mathf.PI/20;ring.SetPosition(i,new Vector3(Mathf.Cos(a),.25f,Mathf.Sin(a))*nav.Scale*5);}
-  preview.SetActive(false);view.SetActive(false);RestoreSign();
+  preview.SetActive(false);view.SetActive(false);BuildSeedTargets();RestoreSign();
  }
  UnityEngine.UI.Image Panel(string name,Transform parent,Vector2 size,Vector2 at,Color color){var g=new GameObject(name,typeof(RectTransform),typeof(UnityEngine.UI.Image));g.transform.SetParent(parent,false);var image=g.GetComponent<UnityEngine.UI.Image>();image.color=color;image.rectTransform.sizeDelta=size;image.rectTransform.anchoredPosition=at;return image;}
  UnityEngine.UI.Text Text(string name,Transform parent,Vector2 at,Vector2 size,int pixels){var g=new GameObject(name,typeof(RectTransform),typeof(UnityEngine.UI.Text));g.transform.SetParent(parent,false);var text=g.GetComponent<UnityEngine.UI.Text>();text.font=font;text.fontSize=pixels;text.alignment=TextAnchor.MiddleCenter;text.color=new Color(.96f,.91f,.74f);text.raycastTarget=false;text.rectTransform.sizeDelta=size;text.rectTransform.anchoredPosition=at;return text;}
  // Copy only mesh views: no CarryItem, colliders, scripts or private material copies.
- static string Title(SpiritualTool kind)=>kind==SpiritualTool.RainBrush?"Rain brush":kind==SpiritualTool.WindFan?"Wind fan":kind.ToString();
+ static string Title(SpiritualTool kind)=>kind==SpiritualTool.PlantSeeds?"Plant seeds":kind==SpiritualTool.RainBrush?"Rain brush":kind==SpiritualTool.WindFan?"Wind fan":kind.ToString();
  GameObject Symbol(SpiritualTool kind,Transform parent){
+  if(kind==SpiritualTool.PlantSeeds)return SeedSymbol(parent);
   if(kind==SpiritualTool.WindFan){var fan=new GameObject("Wind fan pictogram");fan.transform.SetParent(parent,false);var paint=miracles.tools.Find(t=>t.kind==SpiritualTool.Protect).GetComponentInChildren<MeshRenderer>(true).sharedMaterial;for(int i=-1;i<=2;i++){var blade=GameObject.CreatePrimitive(PrimitiveType.Cube);blade.transform.SetParent(fan.transform,false);blade.transform.localPosition=i==2?new Vector3(0,-.7f,0):new Vector3(i*.6f,.6f,0);blade.transform.localRotation=Quaternion.Euler(0,0,i==2?0:-i*35);blade.transform.localScale=i==2?new Vector3(.35f,1.5f,.3f):new Vector3(.7f,1.6f,.3f);blade.GetComponent<Renderer>().sharedMaterial=paint;var c=blade.GetComponent<Collider>();c.enabled=false;Destroy(c);}return fan;}
 
   if(kind==SpiritualTool.RainBrush){var brush=Symbol(SpiritualTool.Rain,parent);brush.name="Rain brush pictogram";var paint=miracles.tools.Find(t=>t.kind==SpiritualTool.Rain).GetComponentInChildren<MeshRenderer>(true).sharedMaterial;for(int i=-1;i<=1;i++){var bristle=GameObject.CreatePrimitive(PrimitiveType.Cube);bristle.transform.SetParent(brush.transform,false);bristle.transform.localPosition=new Vector3(i*.5f,-1.5f,0);bristle.transform.localScale=new Vector3(.3f,.9f,.3f);bristle.GetComponent<Renderer>().sharedMaterial=paint;var c=bristle.GetComponent<Collider>();c.enabled=false;Destroy(c);}return brush;}
   var root=new GameObject(kind+" pictogram");root.transform.SetParent(parent,false);var source=miracles.tools.Find(t=>t.kind==kind);if(source==null)return root;foreach(var r in source.GetComponentsInChildren<MeshRenderer>(true)){var filter=r.GetComponent<MeshFilter>();if(filter==null)continue;var g=new GameObject(r.name,typeof(MeshFilter),typeof(MeshRenderer));g.transform.SetParent(root.transform,false);g.transform.localPosition=source.transform.InverseTransformPoint(r.transform.position);g.transform.localRotation=Quaternion.Inverse(source.transform.rotation)*r.transform.rotation;g.transform.localScale=new Vector3(r.transform.lossyScale.x/source.transform.lossyScale.x,r.transform.lossyScale.y/source.transform.lossyScale.y,r.transform.lossyScale.z/source.transform.lossyScale.z);g.GetComponent<MeshFilter>().sharedMesh=filter.sharedMesh;var clone=g.GetComponent<MeshRenderer>();clone.sharedMaterials=r.sharedMaterials;clone.shadowCastingMode=ShadowCastingMode.Off;clone.receiveShadows=false;}return root;}
- public void Toggle(){Brush.Stop();if(Open){Cancel();return;}if(Season.paused||miracles.Suspended)return;Selected=null;if(wand!=null)wand.SetActive(false);preview.SetActive(false);hint.gameObject.SetActive(false);Open=true;releaseGate=true;gestureOpen=false;desktopAnchor=rig.InverseTransformPoint(eye.transform.position+eye.transform.forward*.55f*rig.localScale.x);desktopRotation=Quaternion.Inverse(rig.rotation)*eye.transform.rotation;view.SetActive(true);}
- public void Select(SpiritualTool tool){if(Season.paused||miracles.Suspended||!Enum.IsDefined(typeof(SpiritualTool),tool))return;Brush.Stop();Selected=tool;Open=false;view.SetActive(false);releaseGate=true;previewTimer=0;ShowWand(tool);}
+ public void Toggle(){SeedVisibility(false);Brush.Stop();if(Open){Cancel();return;}if(Season.paused||miracles.Suspended)return;Selected=null;if(wand!=null)wand.SetActive(false);preview.SetActive(false);hint.gameObject.SetActive(false);Open=true;releaseGate=true;gestureOpen=false;desktopAnchor=rig.InverseTransformPoint(eye.transform.position+eye.transform.forward*.55f*rig.localScale.x);desktopRotation=Quaternion.Inverse(rig.rotation)*eye.transform.rotation;view.SetActive(true);}
+ public void Select(SpiritualTool tool){if(Season.paused||miracles.Suspended||!Enum.IsDefined(typeof(SpiritualTool),tool))return;Brush.Stop();SeedVisibility(tool==SpiritualTool.PlantSeeds);Selected=tool;Open=false;view.SetActive(false);releaseGate=true;previewTimer=0;ShowWand(tool);}
  void ShowWand(SpiritualTool tool){if(wandKind==(int)tool&&wand!=null){wand.SetActive(true);return;}if(wand!=null)Destroy(wand);wand=Symbol(tool,transform);wandKind=(int)tool;}
- public void Cancel(){Brush?.Stop();Open=false;Selected=null;releaseGate=true;dwell=0;gestureOpen=false;if(view!=null)view.SetActive(false);if(wand!=null)wand.SetActive(false);if(preview!=null)preview.SetActive(false);if(hint!=null)hint.gameObject.SetActive(false);PreviewValid=false;}
+ public void Cancel(){SeedVisibility(false);Brush?.Stop();Open=false;Selected=null;releaseGate=true;dwell=0;gestureOpen=false;if(view!=null)view.SetActive(false);if(wand!=null)wand.SetActive(false);if(preview!=null)preview.SetActive(false);if(hint!=null)hint.gameObject.SetActive(false);PreviewValid=false;}
  public void ClearSign(){if(Season.Hybrid.guidance.playerSign)creature.CancelGuidance("Sign removed by the player");sign.SetActive(false);}
  public void RestoreSign(){var g=Season.Hybrid.guidance;if(!g.playerSign||g.status!=GuidanceStatus.Active)return;if(g.target==SpotId){if(nav.Terrain!=null&&!nav.Terrain.Dry(g.spot)||!creature.CanReach(g.spot)){creature.CancelGuidance("Saved sign is unreachable");return;}spot.transform.position=g.spot;}RefreshSign();}
  void RefreshSign(){var g=Season.Hybrid.guidance;bool visible=g.playerSign&&g.status==GuidanceStatus.Active&&Season.Hybrid.time<g.expiresAt;sign.SetActive(visible);if(!visible)return;sign.transform.position=g.spot;var forward=Vector3.ProjectOnPlane(eye.transform.position-sign.transform.position,Vector3.up);if(forward.sqrMagnitude>1e-8f)sign.transform.rotation=Quaternion.LookRotation(-forward);for(int i=0;i<3;i++)glyphs[i].SetActive(i==(int)g.intention);}
@@ -83,10 +84,12 @@ public sealed class GodToolPalette:MonoBehaviour {
   previewTimer-=dt;if(previewTimer<=0||edge){previewTimer=.1f;Aim(ray);}
   if(Selected==SpiritualTool.RainBrush){if(pressed&&!releaseGate&&Brush.PulseReady)Aim(ray);bool applied=Brush.ProcessRain(PreviewPoint,pressed&&!releaseGate,dt,PreviewValid);if(applied)Uses++;hint.text="Rain brush · "+(Brush.Active?"Painting · 4 energy/s":PreviewValid?"Hold trigger · 4 energy/s":Reason);return true;}
   if(Selected==SpiritualTool.WindFan){if(pressed&&!releaseGate&&Brush.PulseReady)Aim(ray);bool applied=Brush.ProcessWind(PreviewPoint,fanDirection,pressed&&!releaseGate,dt,PreviewValid);if(applied)Uses++;hint.text="Wind fan · "+(Brush.Active?"Fanning · 6 energy/s":PreviewValid?"Hold trigger · 6 energy/s":Reason);return true;}
+  if(Selected==SpiritualTool.PlantSeeds){RefreshSeedTargets(dt);hint.text="Plant seeds · "+(PreviewValid?PlantCostHint():Reason);if(edge){bool accepted=PreviewValid&&PlantAt(PreviewPoint);releaseGate=true;if(!accepted)feedback?.Invoke(false,Reason);}return true;}
   hint.text=Selected+" · "+(PreviewValid?"Trigger to use":Reason);if(edge){bool accepted=PreviewValid&&Apply(Selected.Value,aimed,PreviewPoint);releaseGate=true;if(!accepted)feedback?.Invoke(false,Reason);}
   return true;
  }
  void Aim(Ray ray){
+  if(Selected==SpiritualTool.PlantSeeds){AimPlanting(ray);return;}
   if(Selected==SpiritualTool.RainBrush||Selected==SpiritualTool.WindFan){bool hitGround=ground.Raycast(ray,out var hit,8*rig.localScale.x);PreviewPoint=hitGround?hit.point:ray.GetPoint(2*rig.localScale.x);string brushReason="Aim at island ground";fanDirection=Vector3.ProjectOnPlane(ray.direction,Vector3.up);if(fanDirection.sqrMagnitude<.0001f)fanDirection=Vector3.ProjectOnPlane(eye.transform.forward,Vector3.up);fanDirection.Normalize();PreviewValid=hitGround&&(Selected==SpiritualTool.RainBrush?Brush.CanRain(PreviewPoint,out brushReason):Brush.CanWind(PreviewPoint,fanDirection,out brushReason));Reason=brushReason;preview.SetActive(hitGround);preview.transform.position=PreviewPoint;PreviewShape(PreviewValid,12);if(PreviewValid&&Selected==SpiritualTool.WindFan)FanPreview();previewMaterial.color=PreviewValid?new Color(.4f,1,.8f):new Color(1,.25f,.18f);return;}
   PreviewShape(true,5);aimed=null;PreviewPoint=ray.GetPoint(2*rig.localScale.x);bool groundHit=false;
   foreach(var hit in Physics.RaycastAll(ray,8*rig.localScale.x).OrderBy(h=>h.distance)){if(hit.collider.GetComponentInParent<GodToolPalette>()==this||hit.collider.GetComponentInParent<DivineTool>()!=null)continue;PreviewPoint=hit.point;aimed=hit.collider.GetComponentInParent<HybridTarget>();groundHit=hit.collider==ground;break;}
@@ -94,6 +97,7 @@ public sealed class GodToolPalette:MonoBehaviour {
   PreviewValid=miracles.CanUse(Selected.Value,aimed,out var reason);Reason=reason;preview.SetActive(true);preview.transform.position=aimed?.villager!=null?aimed.transform.position:PreviewPoint;previewMaterial.color=PreviewValid?new Color(.4f,1,.8f):new Color(1,.25f,.18f);
  }
  public bool Apply(SpiritualTool tool,HybridTarget target,Vector3 point){
+  if(tool==SpiritualTool.PlantSeeds)return PlantAt(point);
   if(tool==SpiritualTool.RainBrush||tool==SpiritualTool.WindFan){Reason="Hold the brush trigger over ground";return false;}
   if(!HybridState.Number(point.x,-10000,10000)||!HybridState.Number(point.y,-10000,10000)||!HybridState.Number(point.z,-10000,10000)){Reason="Invalid placement";return false;}if(!miracles.CanUse(tool,target,out var reason)){Reason=reason;return false;}
   if(target==probe){spot.transform.position=point;target=spot;}
@@ -103,7 +107,7 @@ public sealed class GodToolPalette:MonoBehaviour {
  }
  void FanPreview(){var line=preview.GetComponent<LineRenderer>();line.loop=false;line.positionCount=7;var rotation=Quaternion.LookRotation(fanDirection);var p=new[]{Vector3.zero,new Vector3(0,0,22),new Vector3(-3,0,18),new Vector3(0,0,22),new Vector3(3,0,18),new Vector3(0,0,22),Vector3.zero};for(int i=0;i<7;i++)line.SetPosition(i,(rotation*p[i]+Vector3.up*.25f)*nav.Scale);}
  void PreviewShape(bool valid,float radius){var line=preview.GetComponent<LineRenderer>();line.loop=valid;line.positionCount=valid?40:4;if(valid){for(int i=0;i<40;i++){float a=i*Mathf.PI/20;line.SetPosition(i,new Vector3(Mathf.Cos(a),.25f,Mathf.Sin(a))*nav.Scale*radius);}}else{var p=new[]{new Vector3(-1,.25f,-1),new Vector3(1,.25f,1),new Vector3(-1,.25f,1),new Vector3(1,.25f,-1)};for(int i=0;i<4;i++)line.SetPosition(i,p[i]*nav.Scale*radius*.6f);}}
- void OnDisable(){Brush?.Stop();}
+ void OnDisable(){SeedVisibility(false);Brush?.Stop();}
  void OnDestroy(){if(previewMaterial!=null)Destroy(previewMaterial);}
 }
 }

@@ -24,6 +24,6 @@ A completed sheltered rest reduces rest need by 0.45 plus up to 0.20 extra relie
 
 `ShelterChecks.VerifyModel` checks measured dry/rain rest relief, bounded saved experience and legacy social memory. `VerifyRuntime` stages two arrangements, checks held/support/headroom/obstruction failures, native navigation, visitor ownership, pause, completion/removal and restored geometry. On 2026-10-26 the memory checks passed; the corrected runtime fixture body passed through the live Editor evaluator at frame 8661 after releasing its stale resource-job lease. The test used native villager navigation and existing construction physics. Construction-use, miracle, rain-brush, wind-fan, god-tools and farming-model regression checks all passed at frame 10823. A temporary camera rendered the column/slab canopy and confirmed useful cover at frame 12538. Final scripts compiled with zero reported errors. Play mode was stopped, XR automatic startup restored for Standalone and Android, and the original on-disk season restored with matching SHA256 hashes. Quest comfort and device performance require a headset playtest.
 
-## Remaining S3 work
+## S3 planting increment
 
-Physical planting from a real bounded seed/plant supply at eligible existing plots, with safe preview, exactly-once resource payment and saved growth. Autonomous food gathering and water remain deprioritized while these interactions are developed.
+Player crop planting is implemented in the existing god-tool palette with bounded eligible fields, exact seed/timber payment and saved growth; see [PLAYER_PLANTING.md](PLAYER_PLANTING.md). Autonomous food gathering and water remain deprioritized. The next stage is S4: the shared gathering-place slice.

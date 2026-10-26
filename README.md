@@ -18,6 +18,8 @@ The generated scene contains the BWVR bootstrap. It builds the island and spatia
 
 **Creature responses:** a visible nearby placement or suggestion can get a curious glance; choosing a suggested activity gets a brief nod, while continuing other work gets a brief sideways response. Completion and failure have separate affect. These cues preserve autonomy and player teaching. A bounded saved outcome history supplies the future Book of Creation; see [responses and evidence](docs/CREATURE_RESPONSES.md).
 
+**Player planting:** open God tools → Plant seeds. Aim at an empty field outline and press the tool trigger (desktop F), then release. Prepared fields use one seed from stores; new fields also use two timber. See [planting](docs/PLAYER_PLANTING.md). Temporary outlines disappear when you dismiss the tool.
+
 ## Quest Link: press Play in the headset
 
 Install Meta Horizon Link on Windows and set it as the active OpenXR runtime in its Settings > General. Connect your Quest over USB or Air Link, then launch Quest Link inside the headset before pressing Play in Unity.

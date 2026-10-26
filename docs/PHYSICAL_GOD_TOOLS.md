@@ -33,3 +33,7 @@ The final console inspection reported no current compilation/gameplay errors and
 ## Unlimited energy for testing
 
 `DivineTuning.unlimitedEnergy` defaults to true for the current testing phase, including existing saves and player builds. Rain, healing, the rain brush and wind fan bypass affordability and spend zero energy. The palette shows **Energy unlimited**. Stored balances stay finite and keep the existing recovery rules; no save migration or infinite numeric values are used. Target validation, pause, reservations, gesture cooldowns and stroke limits still apply. Disable this one switch to resume the existing economy. Economy validation checks explicitly disable it and restore the prior setting afterward.
+
+## S3 palette extension
+
+The palette now contains eight tools: the seed pouch joins the fan on the third row. [Player planting](PLAYER_PLANTING.md) spends real seed and, for new fields, timber; unlimited spiritual energy does not bypass those material costs. S3 shelters and player crop planting are implemented for Editor testing. The next stage is S4 shared gathering place. Earlier validation above records the seven-tool S2 checkpoint.

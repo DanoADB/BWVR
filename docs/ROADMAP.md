@@ -12,17 +12,17 @@ Research supplies design hypotheses, not proof that copying a feature will repro
 
 ## Current baseline
 
-The S0 checkpoint is recorded in [BASELINE_CHECKPOINT.md](BASELINE_CHECKPOINT.md). S1 attention/evidence, S1A audio/music and S2 physical rain/fan tools have Editor-tested foundations. Next implementation stage: S3 useful shelter and planting. Hardware feel/performance remains pending.
+The S0 checkpoint is recorded in [BASELINE_CHECKPOINT.md](BASELINE_CHECKPOINT.md). S1 attention/evidence, S1A audio/music and S2 physical rain/fan tools have Editor-tested foundations. S3 now adds geometry-based useful shelters and finite player crop planting. Next implementation stage: S4 shared gathering place. Hardware feel/performance remains pending.
 
 “Foundation” means a bounded implementation exists, not feature completeness or verified standalone Quest performance. Verification results and limits are recorded in the feature documents.
 
 | Area | Current status | Next extension |
 | --- | --- | --- |
-| Player tools | Foundation: wrist palette, paid cistern rain, targeted healing, one saved player-issued guidance sign, local rain brush and directional wind fan; old intention props hidden | Useful shelters and bounded planting (S3) |
+| Player tools | Foundation: wrist palette, paid cistern rain, targeted healing, one saved player-issued guidance sign, local rain brush, directional wind fan and finite seed tool; old intention props hidden | Shared gathering-place slice (S4) |
 | Creature autonomy | Foundation: utility selection, exclusive action owner, contextual training, needs/favorites/practice | Perceived opportunities, short reusable plans, richer learning |
 | Shared activities | Foundation: ball, fetch, chime, bench visits and cooperative construction | A gathering place with several uses and changing social meaning |
 | Village agency | Foundation: twelve adults, individual memories, gathering, farming, storage, equipment and limited households | Need-driven projects, broader cooperation and settlement growth |
-| Construction | Foundation: shared 48-piece yard, bounded authored forms, bridge use/repair | Recognize useful outcomes beyond recipe identity, shelters and new projects |
+| Construction | Foundation: shared 48-piece yard, bounded authored forms, bridge use/repair and geometry-based useful shelters | Shared gathering-place uses and new projects |
 | Weather/materials | Foundation: rain, fog, wind, storms, lightning/fire and coastal waves | Autonomous responses, meaningful protection and recovery |
 | Technology | Foundation: personally learned axe/hoe designs, paid crafting and nearby observation | Tool experimentation, shared techniques and local traditions |
 | History/explanation | Foundation: optional intent details, responses and a saved 96-event outcome ledger | Broader village evidence, discovery recognition and physical Book of Creation |
