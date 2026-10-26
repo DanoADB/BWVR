@@ -46,6 +46,8 @@ Current implementation order, 2026-10-26. Implements [ROADMAP.md](ROADMAP.md). T
 
 ## S2 — Turn tools into world interactions
 
+**Rain increment:** implemented and Editor-checked; see [PHYSICAL_GOD_TOOLS.md](PHYSICAL_GOD_TOOLS.md). Wind fan is next.
+
 **Deliver in two increments:** first a bounded ground-target rain brush, then a lightweight directional wind fan. Rain uses the same wetness/cooling rules as weather and affects only implemented local crop/material properties. Wind applies capped force to supported loose objects and visible foliage/particles. Preserve existing cistern rain's explicit accounting; do not grant global water/crop bonuses for every brush patch.
 
 **Integration:** god palette, DivineIntervention, weather/material registry, physical toys and resource/crop state. Decide energy cost/rate, stroke limits and recoverability before enabling continuous use. Revalidate at application and charge only accepted effects. Preview must not mutate the world.

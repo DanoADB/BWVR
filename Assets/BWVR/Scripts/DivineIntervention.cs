@@ -35,6 +35,7 @@ public sealed class DivineIntervention:MonoBehaviour {
  public bool CanUse(SpiritualTool kind,HybridTarget target,out string reason){
   reason="";if(Season.paused||Suspended){reason="Paused";return false;}
   if(!Enum.IsDefined(typeof(SpiritualTool),kind)){reason="Unknown tool";return false;}
+  if(kind>SpiritualTool.Heal){reason="Use the physical brush";return false;}
   if(kind<=SpiritualTool.Investigate)return creature.CanGuide((GuidanceIntent)kind,target,out reason);
   if(State.time<State.nextMiracleAt){reason="Wait for the previous gesture";return false;}
   float cost=Mathf.Clamp(kind==SpiritualTool.Rain?tuning.rainCost:tuning.healingCost,1,100);
@@ -45,7 +46,7 @@ public sealed class DivineIntervention:MonoBehaviour {
  }
  public bool TryUse(SpiritualTool kind,HybridTarget target){
   if(Season.paused||Suspended){LastReason="Paused";return false;}
-  if(!Enum.IsDefined(typeof(SpiritualTool),kind)){LastReason="Unknown tool";return false;}if((int)kind<=(int)SpiritualTool.Investigate){bool accepted=creature.Guide((GuidanceIntent)kind,target);LastReason=accepted?"":State.guidance.reason;return accepted;}
+  if(!Enum.IsDefined(typeof(SpiritualTool),kind)){LastReason="Unknown tool";return false;}if(kind>SpiritualTool.Heal){LastReason="Use the physical brush";return false;}if((int)kind<=(int)SpiritualTool.Investigate){bool accepted=creature.Guide((GuidanceIntent)kind,target);LastReason=accepted?"":State.guidance.reason;return accepted;}
   if(State.time<State.nextMiracleAt){LastReason="Wait for the previous gesture";return false;}
   float cost=Mathf.Clamp(kind==SpiritualTool.Rain?tuning.rainCost:tuning.healingCost,1,100);if(float.IsNaN(cost)){LastReason="Invalid miracle tuning";return false;}
   if(State.energy<cost){LastReason="Not enough spiritual energy";return false;}

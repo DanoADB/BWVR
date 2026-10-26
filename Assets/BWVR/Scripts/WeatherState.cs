@@ -8,14 +8,14 @@ public readonly struct WeatherMaterialProperties {
  public static WeatherMaterialProperties For(string kind)=>kind=="building"?new WeatherMaterialProperties(1.6f,.01f,1.2f):new WeatherMaterialProperties(.8f,.018f,1);
 }
 // Sparse changed materials, not a Rigidbody or a saved record for every tree.
-[Serializable] public sealed class WeatherMaterial {
+[Serializable] public sealed partial class WeatherMaterial {
  public string id;public float wetness,heat,fuel=1;public int wave=-1;public bool burning;
  public static float HeatReceived(float distance,float downwind,float wind,float wetness,float capacity)=>(.12f+wind*Mathf.Clamp01(downwind)*.2f)*Mathf.Clamp01(1-distance/12)*(1-wetness)/capacity;
  public bool Valid()=>!string.IsNullOrEmpty(id)&&id.Length<=160&&HybridState.Number(wetness,0,1)&&HybridState.Number(heat,0,2)&&HybridState.Number(fuel,0,1)&&wave>=-1;
  public void Step(float rain,float wind,float dt)=>Step(rain,wind,dt,WeatherMaterialProperties.For("tree"));
  public void Step(float rain,float wind,float dt,WeatherMaterialProperties properties){
-  wetness=Mathf.Clamp01(wetness+dt*(rain*.22f-(1-rain)*(.007f+wind*.012f)));
-  if(burning){heat=Mathf.Clamp(heat+dt*(.12f*(1-wetness)-rain*.6f-wetness*.16f)/properties.heatCapacity,0,2);fuel=Mathf.Max(0,fuel-dt*properties.burnRate*(1-wetness));if(heat<.25f||fuel<=0)burning=false;}
+  wetness=Mathf.Clamp01(wetness+dt*(rain*RainWetting-(1-rain)*(.007f+wind*.012f)));
+  if(burning){heat=Mathf.Clamp(heat+dt*(.12f*(1-wetness)-rain*RainCooling-wetness*.16f)/properties.heatCapacity,0,2);fuel=Mathf.Max(0,fuel-dt*properties.burnRate*(1-wetness));if(heat<.25f||fuel<=0)burning=false;}
   else {heat=Mathf.Max(0,heat-dt*(.035f+wetness*.2f)/properties.heatCapacity);if(heat>=properties.ignition&&wetness<.65f&&fuel>0)burning=true;}
  }
 }

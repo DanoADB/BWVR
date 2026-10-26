@@ -15,7 +15,7 @@ public sealed partial class VillageResources {
   var plots=sources.Where(s=>s.kind==VillageResource.Wheat&&(!s.expansion||State.Find(s.id)?.farmPrepared==true)).Select(s=>new Bounds(s.at+Vector3.up*Navigation.Scale*3,new Vector3(5,8,5)*Navigation.Scale)).ToArray();
   foreach(Transform plant in meadow){if(!plant.gameObject.activeSelf||plant.GetComponentsInChildren<Collider>().Length>0)continue;var bounds=TreePlayWorld.VisualBounds(plant.gameObject);foreach(var plot in plots)if(plot.Intersects(bounds)){plant.gameObject.SetActive(false);break;}}
  }
- void AdvanceCrops(float dt){foreach(var node in sources)if(node.kind==VillageResource.Wheat&&Safe(node))State.Grow(node.id,dt);}
+ void AdvanceCrops(float dt){foreach(var node in sources)if(node.kind==VillageResource.Wheat&&Safe(node))State.Grow(node.id,dt*(1+Season.Weather.rain*.25f));}
  void RefreshWheat(GatheringSource node,ResourceSource record){
   if(node.expansion){node.sapling.gameObject.SetActive(record.farmPrepared);if(!record.farmPrepared){node.visual.gameObject.SetActive(false);return;}}
   if(cropTint==null)cropTint=new MaterialPropertyBlock();

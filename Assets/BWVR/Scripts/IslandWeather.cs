@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityEngine.Rendering;
 namespace BWVR {
 // One-Hz thermal/fuel model; existing private PhysX scenes retain projectile ownership.
-public sealed class IslandWeather:MonoBehaviour {
+public sealed partial class IslandWeather:MonoBehaviour {
  public bool automatic=true;
  public WeatherState State=>season().Weather;
  public int BurningCount=>State.materials.Count(m=>m.burning);
