@@ -32,3 +32,40 @@ In an unattended one-hour clear-weather run from 18 grain/18 timber, two village
 Observer acknowledgment gestures are limited to idle villagers so knowledge transmission cannot replace an active carrying animation. The working implement is hidden immediately when the worker switches to carrying harvested cargo. No APK or physical headset validation was requested.
 
 The final native tool checks passed after the carrying-animation safeguards. Staged working-pose previews of the hoe and bound axe were inspected. The live scene advanced to frame 2209 with zero current console errors and two warnings. The original player save was restored and hash-verified after testing.
+
+### Learning from useful work — 2026-10-26
+
+An idle adult can learn a tool design by watching a successful equipped harvest
+or living-tree felling nearby. The observer must face the worker, have a clear
+navigation sight segment and be within 18 game units. Held, busy, frightened,
+injured or water-signalling observers do not participate; food emergencies also
+suppress optional observation. The acknowledgment uses the existing timed gaze
+and celebration gesture, without a new menu, task or movement owner.
+
+The successful physical work is the evidence, even if its cargo is later lost;
+independent practice still requires a confirmed delivery. Observation grants
+knowledge only, never owned equipment, practice counts, resources or a creature
+training event. Existing saved saw/known fields preserve the lesson. Basic tools,
+salvaged timber and resin tapping do not teach upgraded capabilities. Repeated
+observations of an already known design have no additional effect.
+
+### Villager state icons — 2026-10-26
+
+The three autonomous adult villagers now have world-space state symbols, matching
+the creature's nonverbal presentation. Learning (lightbulb) follows confirmed
+insights/observations; affection (heart) follows greetings, shared play, rides
+or received reassurance; anger follows a recorded dispute. These last four
+simulation seconds. Injury (cross), recent fear (startled face) and severe
+village meal shortage (food) recur for four seconds every fourteen seconds.
+Hunger is a shared food-availability warning, not a new individual hunger model.
+Priority is injury, fear, anger, hunger, learning, affection. Pause freezes timing.
+Icons use a single shared generated atlas, no text, raycasters, physics or actor
+perception, and release their shared assets when the last icon is destroyed.
+Children do not yet have independent social/need memories or these state icons.
+
+Validation: ToolTechnologyChecks (including actual equipped harvest observation,
+paused/held/turned-away exclusions and saved knowledge), VillagerAffectChecks
+(state precedence, adult attachment, noninteractive world-space hierarchy) and
+FoodReserveChecks passed in Unity Play mode. A staged learning-icon screenshot
+was visually inspected. The live frame counter advanced from 4930 to 4976.
+This has not been validated in a physical headset.
