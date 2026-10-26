@@ -61,3 +61,7 @@ physical book, alongside the sanctuary. The Book remains read-only and closed by
 default; opening it does not implicitly pause. Coordinate selection, placement,
 closing and controller ownership with [summonable tools](SUMMONABLE_TOOLS.md).
 Neither the palette integration nor the Book shell is implemented by this plan.
+
+## S1 evidence foundation (2026-10-26)
+
+The optional saved OutcomeLedger now retains 96 recent creature/guidance/miracle records with attribution and bounded season counters. This supplements the transient journal; it is not yet the Book UI, complete village history, discovery detection or proof of emergence. Legacy saves have no backfilled history. See [CREATURE_RESPONSES.md](CREATURE_RESPONSES.md).

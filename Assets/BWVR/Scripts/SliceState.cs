@@ -5,6 +5,7 @@ namespace BWVR {
  public int version=1; public float seconds=180, water=52, crops=66, trust=20, care=0.25f; public int gifts; public bool paused;
  public float hunger=.15f,playPreference=.5f,socialPreference=.5f;
  [NonSerialized]public bool developmentFocus;
+ [NonSerialized]public bool observeWithoutFoodWork;
  public ConstructionRecord[] construction;
  public SocialMemory[] relationships;
  public DiscoveryRecord[] discoveries;public int creatureDiscoveries;

@@ -23,11 +23,16 @@ public static class HybridChecks {
   if(!EditorApplication.isPlaying)throw new Exception("Enter Play mode first");
   var slice=UnityEngine.Object.FindAnyObjectByType<QuestSlice>();var hybrid=UnityEngine.Object.FindAnyObjectByType<CreatureHybrid>();var mind=hybrid.GetComponent<CreatureCuriosity>();var water=hybrid.GetComponent<CreatureRoutine>();var field=typeof(QuestSlice).GetField("state",System.Reflection.BindingFlags.NonPublic|System.Reflection.BindingFlags.Instance);var original=(SliceState)field.GetValue(slice);
   bool focus=slice.developmentFocus;slice.developmentFocus=false;hybrid.Interrupt("QA setup");var test=new SliceState{water=14,hunger=.1f};field.SetValue(slice,test);
+  var traffic=slice.GetComponentsInChildren<VillagerRoutine>();var trafficHeld=Array.ConvertAll(traffic,v=>v.GetComponent<CarryItem>().held);
   try{
+   // This phase ticks only the creature. Exclude frozen NPC bodies, then restore
+   // them before testing village autonomy; live traffic is a separate integration test.
+   foreach(var v in traffic)v.GetComponent<CarryItem>().held=true;
    hybrid.NewSeason();int before=water.deliveries;hybrid.Tick(.5f);if(hybrid.Owner!=CreatureHybrid.ActionOwner.Water||mind.Current!=CreatureCuriosity.Phase.Rest)throw new Exception("Critical shortage did not grant exclusive water ownership");
    if(hybrid.Guide(GuidanceIntent.Investigate,hybrid.Targets.Find(t=>t.affordance!=null&&t.affordance.kind==CreatureAffordance.Kind.Roll))||test.Hybrid.guidance.status!=GuidanceStatus.Rejected)throw new Exception("Urgent ownership did not explain rejected distraction");
    for(int i=0;i<2000&&water.deliveries==before;i++)hybrid.Tick(.1f);
    if(water.deliveries!=before+1||test.gifts!=1||test.Hybrid.receipt.action!=CreatureAction.WaterDelivery||test.Hybrid.receipt.situation!=CreatureSituation.WaterShortage)throw new Exception("Confirmed water receipt or outcome missing");
+   for(int i=0;i<traffic.Length;i++)traffic[i].GetComponent<CarryItem>().held=trafficHeld[i];
    test=JsonUtility.FromJson<SliceState>(JsonUtility.ToJson(test));field.SetValue(slice,test);mind.InvalidateFeedback();float care=test.care;if(!hybrid.Feedback(true)||test.care<=care||hybrid.Feedback(false)||test.Hybrid.Preference(CreatureSituation.WaterShortage,CreatureAction.WaterDelivery)<=.5f)throw new Exception("Restored context receipt and existing care did not learn exactly once");
    hybrid.Interrupt("Observe check");test.water=90;test.hunger=.05f;var toy=hybrid.Targets.Find(t=>t.affordance!=null&&t.affordance.kind==CreatureAffordance.Kind.Roll);
    if(!hybrid.Guide(GuidanceIntent.Investigate,toy))throw new Exception("Feasible investigation rejected");float time=test.Hybrid.time;test.paused=true;hybrid.Tick(40);if(test.Hybrid.time!=time||test.Hybrid.guidance.status!=GuidanceStatus.Active)throw new Exception("Pause advanced simulation/guidance");test.paused=false;
@@ -41,7 +46,7 @@ public static class HybridChecks {
    for(int i=0;i<1600&&gatherer.completedJobs==jobs;i++){float previous=test.water;slice.Simulate(.1f);if(test.water>previous)improved=true;}
    if(gatherer.completedJobs!=jobs+1||!improved)throw new Exception("Village made no independent resource progress while creature unavailable");hybrid.Suspend(false);
    Debug.Log("BWVR_HYBRID_RUNTIME_PASS: unified urgent water; exclusive owner; confirmed outcome/context; one reinforcement and legacy care; guidance rejection/expiry; pause; carried-object cleanup; saved resumable intention; no suspend advancement");
-  }finally{hybrid.Suspend(false);hybrid.Interrupt("QA complete");slice.developmentFocus=focus;field.SetValue(slice,original);hybrid.NewSeason();}
+  }finally{for(int i=0;i<traffic.Length;i++)traffic[i].GetComponent<CarryItem>().held=trafficHeld[i];hybrid.Suspend(false);hybrid.Interrupt("QA complete");slice.developmentFocus=focus;field.SetValue(slice,original);hybrid.NewSeason();}
  }
 }
 }

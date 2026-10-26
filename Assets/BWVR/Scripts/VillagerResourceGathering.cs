@@ -3,6 +3,7 @@ using UnityEngine;
 namespace BWVR {
 public sealed partial class VillagerResourceGathering:MonoBehaviour {
  public enum Phase { Idle, Approach, Harvest, Carry, Deposit, BuildStore, PlantApproach, Planting, SowApproach, Sowing, FarmApproach, PrepareFarm, ToolApproach, ToolCraft, ToolCelebrate }
+ public bool FoodWork=>Active&&(Source?.kind==VillageResource.Wheat||Sowing||PreparingFarm);
  public bool Sowing=>Current==Phase.SowApproach||Current==Phase.Sowing;
  public Phase Current{get;private set;}public bool Active=>Current!=Phase.Idle;public GatheringSource Source{get;private set;}public float Reserved{get;private set;}public int deliveries{get;private set;}
  VillageResources world;IslandNavigator nav;CarryItem actor;HumanoidMotion motion;VillagerRoutine routine;VillagerSocial social;VillagerExploration exploration;VillagerBlockPlay play;int identity;float clock,elapsed,cooldown;GameObject timber,grain,resinJar,axe,seedling,seedPouch;
@@ -13,6 +14,7 @@ public sealed partial class VillagerResourceGathering:MonoBehaviour {
   float amount=Mathf.Min(ResourceState.LoadLimit(source.kind),world.State.Find(source.id).remaining,world.FreeSpace(source.kind));if(amount<=.01f)return false;Source=source;Reserved=amount;source.owner=this;if(source.tree!=null)source.tree.ResourceReserved=true;routine.ResetTask();nav.ResetRoute();motion?.LookAt(source.tree!=null?source.tree.transform:source.visual);clock=elapsed=0;Current=Phase.Approach;return true;
  }
  public bool Tick(float dt,bool paused){if(paused||dt<=0||float.IsNaN(dt)||float.IsInfinity(dt))return Active;if(Active&&(Busy||(Source!=null&&!world.Safe(Source)))){Cancel();return false;}
+  if(Active&&world.Season.observeWithoutFoodWork&&FoodWork){Cancel();return false;}
   if(!Active){cooldown=Mathf.Max(0,cooldown-dt);if((cooldown>0&&!world.LowFood)||Busy)return false;if(TryBuildStorage()||TrySow()||TryReplant())return true;var choice=world.sources.Where(world.Available).Where(s=>world.GatheringNeed(s.kind)>0).OrderByDescending(s=>{float need=world.GatheringNeed(s.kind);if(s.kind==VillageResource.Wheat&&world.LowFood)need+=2;if(s.kind==VillageResource.Wood&&world.State.NeedsStorage&&world.FreeWood<6)need+=1;if(s.kind==VillageResource.Wood&&!world.State.Find(s.id).felled&&world.State.wood>=6&&world.State.resin<6&&world.ResinReady(s.tree))need-=.2f;float familiar=(routine.role==VillagerRoutine.Role.Farmer&&s.kind==VillageResource.Wheat)||(routine.role==VillagerRoutine.Role.Forester&&s.kind==VillageResource.Wood)?.15f:0;float salvage=s.kind==VillageResource.Wood&&world.State.Find(s.id).felled?.2f:0;return need+familiar+salvage-Vector3.Distance(transform.position,s.approach)/(nav.world.Scale*500);}).FirstOrDefault();if(choice==null||!TryBegin(choice))cooldown=8;return Active;}
   RefreshToolArt();clock+=dt;elapsed+=dt;if(elapsed>150){Cancel();return false;}
   if(ToolAction)return TickTool(dt);
@@ -29,7 +31,7 @@ public sealed partial class VillagerResourceGathering:MonoBehaviour {
   else if(Current==Phase.Deposit&&clock>=1.2f){float amount=world.State.Deposit(identity);if(amount>0){deliveries++;world.ToolPractice(identity,practiceKind);}Cancel();cooldown=24+identity*4;world.Refresh();motion?.React();}
   return Active;
  }
- public bool TrySow(){if(world.Season.paused||Active||Busy||(world.LowFood&&world.sources.Any(s=>s.kind==VillageResource.Wheat&&world.Available(s))))return false;var source=world.sources.Where(world.CanSow).OrderBy(s=>Vector3.Distance(transform.position,s.approach)).FirstOrDefault();return TrySow(source,world.ChooseCrop());}
+ public bool TrySow(){if(world.Season.observeWithoutFoodWork||world.Season.paused||Active||Busy||(world.LowFood&&world.sources.Any(s=>s.kind==VillageResource.Wheat&&world.Available(s))))return false;var source=world.sources.Where(world.CanSow).OrderBy(s=>Vector3.Distance(transform.position,s.approach)).FirstOrDefault();return TrySow(source,world.ChooseCrop());}
  FoodCrop plannedCrop;
  public bool TrySow(GatheringSource source,FoodCrop crop=FoodCrop.Wheat){if(world.Season.paused||Active||Busy||!world.CanSow(source)||!System.Enum.IsDefined(typeof(FoodCrop),crop)||!world.GetComponentInParent<QuestSlice>().GetComponentInChildren<IslandDiscoveries>().Reachable(transform.position,source.approach,nav.profile))return false;plannedCrop=crop;Source=source;Reserved=0;source.owner=this;routine.ResetTask();nav.ResetRoute();if(seedPouch==null)seedPouch=world.CreateSeedPouch();seedPouch.SetActive(true);seedPouch.transform.position=transform.position+Vector3.up*nav.world.Scale;motion?.Carry(seedPouch.transform);motion?.LookAt(source.visual);clock=elapsed=0;Current=Phase.SowApproach;return true;}
  public bool TryReplant(){if(world.LowFood||world.Season.paused||Active||Busy)return false;var source=world.sources.Where(world.CanReplant).OrderBy(s=>Vector3.Distance(transform.position,s.approach)).FirstOrDefault();return TryReplant(source);}

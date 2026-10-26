@@ -4,6 +4,7 @@ namespace BWVR {
 public sealed class HumanoidHands:MonoBehaviour {
  public Transform actor,resource,touchTarget; public bool drinking,paused,beckon,indicating;public Transform lookTarget;public Vector3 indicatedPoint;public float displayTilt; Animator animator;float sip,gestureClock;
  public Vector3 placementPoint;public Quaternion placementRotation;public float placementBlend;
+ public Transform attentionTarget;public Vector2 attentionPose;
  void Awake(){animator=GetComponent<Animator>();}
  void Update(){AdvancePose(Time.deltaTime);}
  public void AdvancePose(float dt){if(!paused){sip=Mathf.MoveTowards(sip,drinking&&resource!=null?1:0,Mathf.Max(0,dt)*3);gestureClock+=Mathf.Max(0,dt);}}
@@ -12,7 +13,9 @@ public sealed class HumanoidHands:MonoBehaviour {
   var carrying=actor.position+actor.up*height*(friend?.60f:.57f)+actor.forward*height*(friend?.36f:.23f);var mouth=head.position+actor.forward*height*.3f+actor.up*height*.1f;return Vector3.Lerp(Vector3.Lerp(carrying,mouth,sip),placementPoint,placementBlend);
  }
  void OnAnimatorIK(int layer){
-  animator.SetLookAtWeight(lookTarget!=null?.7f:0,.15f,.85f,.5f,.55f);if(lookTarget!=null)animator.SetLookAtPosition(lookTarget.position);
+  var gaze=attentionTarget!=null?attentionTarget:lookTarget;
+  animator.SetLookAtWeight(gaze!=null?.7f:0,.15f,.85f,.5f,.55f);
+  if(gaze!=null){var at=gaze.position;if(actor!=null&&attentionPose.sqrMagnitude>0){var head=animator.GetBoneTransform(HumanBodyBones.Head);var from=head!=null?head.position:actor.position;float gazeHeight=actor.lossyScale.y;at=from+(at-from).normalized*gazeHeight*2+(actor.right*attentionPose.x+actor.up*attentionPose.y)*gazeHeight;}animator.SetLookAtPosition(at);}
   bool carry=resource!=null&&actor!=null;animator.SetIKPositionWeight(AvatarIKGoal.LeftHand,carry?1:0);animator.SetIKPositionWeight(AvatarIKGoal.RightHand,carry||beckon||indicating||touchTarget!=null?1:0);
   if(actor==null)return;float height=actor.lossyScale.y;
   if(carry){var goal=Goal();float spread=height*.09f;animator.SetIKPosition(AvatarIKGoal.LeftHand,goal-actor.right*spread);animator.SetIKPosition(AvatarIKGoal.RightHand,goal+actor.right*spread);}

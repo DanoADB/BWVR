@@ -25,11 +25,13 @@ The S0 targeted Editor checkpoint is recorded in [BASELINE_CHECKPOINT.md](BASELI
 | Construction | Foundation: shared 48-piece yard, bounded authored forms, bridge use/repair | Recognize useful outcomes beyond recipe identity, shelters and new projects |
 | Weather/materials | Foundation: rain, fog, wind, storms, lightning/fire and coastal waves | Autonomous responses, meaningful protection and recovery |
 | Technology | Foundation: personally learned axe/hoe designs, paid crafting and nearby observation | Tool experimentation, shared techniques and local traditions |
-| History/explanation | Foundation: optional intent details and transient bounded journal | Persistent evidence ledger and physical Book of Creation |
+| History/explanation | Foundation: optional intent details, responses and a saved 96-event outcome ledger | Broader village evidence, discovery recognition and physical Book of Creation |
 | Audio | Planned dedicated soundscape; existing source/clip coverage must be audited before implementation | S1A: environmental ambience, contextual sounds, then soft lilting instrumental music |
 | Release | Editor checks and previous APK workflow exist | Current Quest Pro/3 comfort, performance and release validation |
 
 See the feature documents for exact limits: [tools](GOD_TOOLS.md), [creature](CREATURE_BEHAVIOR.md), [play](PLAY_AND_VILLAGE_RESPONSE.md), [construction](CONSTRUCTION_YARD.md), [materials](WEATHER_AND_MATERIALS.md), [technology](TOOLS_AND_TECHNOLOGY.md), [population](EXPANDED_POPULATION.md) and [Book](BOOK_OF_CREATION.md).
+
+S1 attention and factual outcome evidence are implemented for Editor testing; see [CREATURE_RESPONSES.md](CREATURE_RESPONSES.md). Next: S1A environmental and contextual audio. Food work can temporarily be paused independently in exploration focus to observe other behaviors; see [VILLAGE_OBSERVATION.md](VILLAGE_OBSERVATION.md).
 
 ## Research attributes to incorporate
 
@@ -40,7 +42,7 @@ All eleven research recommendations are included below. These extend existing sy
 | R1 | Consistent interacting rules | Wetness, heat, shelter, force and resources have shared meanings across tools, weather, objects and actors. Experimenting teaches transferable rules. | Partial material foundation; S2, S6 |
 | R2 | Skillful physical verbs | Paint bounded rain, aim a wind fan, plant, assemble and brace. Precision and placement affect outcomes; tools are more than menu buttons. | Basic tools exist; S2, S3, S8 |
 | R3 | Several solutions to a problem | Help a gathering place through shade, shelter, planting, relocation, supplies or creature cooperation. Keep feasible alternatives and account for tradeoffs. | Planned integrated scenario; S4–S6 |
-| R4 | Legible input and autonomous response | Distinguish target validity, cue noticed, intention chosen, progress and outcome through gaze, gesture, affect and subtle haptics. Acknowledgment does not promise obedience. | Partial previews/affect; S1 |
+| R4 | Legible input and autonomous response | Distinguish target validity, cue noticed, intention chosen, progress and outcome through gaze, gesture, affect and subtle haptics. Acknowledgment does not promise obedience. | S1 Editor foundation implemented; headset readability pending |
 | R5 | Knowledge, skill and willingness are separate | Knowing a technique does not grant equipment or mastery. Practice changes capability; reinforcement changes preference. Curiosity can favor achievable learning progress over endless novelty. | Partial knowledge/practice/preference; S5 |
 | R6 | Social actions have several consequences | A playful kick can create enjoyment, fear, injury, trust or repair needs according to witnesses and outcome. Avoid one global good/evil meter. | Partial ball/social foundation; S4, S7 |
 | R7 | Local knowledge, imitation and traditions | Actors learn from observed successful actions, try them independently, and transmit changing practices through relationships and places. No instant village-wide unlock. | Local observation exists; S7 |

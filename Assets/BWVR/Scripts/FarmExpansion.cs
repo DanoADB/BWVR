@@ -43,6 +43,7 @@ public sealed partial class VillagerResourceGathering {
  public bool PreparingFarm=>Current==Phase.FarmApproach||Current==Phase.PrepareFarm;
  public bool TryPrepareFarm(GatheringSource source){if(world.Season.paused||Active||Busy||!world.CanPrepareFarm(source))return false;Source=source;Reserved=0;source.owner=this;routine.ResetTask();nav.ResetRoute();clock=elapsed=0;timber.SetActive(true);motion?.Carry(timber.transform);Current=Phase.FarmApproach;motion?.LookAt(source.visual);return true;}
  public bool TryFoodProduction(){
+  if(world.Season.observeWithoutFoodWork)return false;
   if(!world.NeedsPlanting||world.FoodEmergency||world.State.wheat-world.ReservedSeed<1)return false;
   var renewed=world.sources.Where(s=>s.expansion&&world.CanSow(s)).OrderBy(s=>(s.at-transform.position).sqrMagnitude).FirstOrDefault();if(renewed!=null)return TrySow(renewed,world.ChooseCrop());
   int wanted=world.FoodPopulation>3?4:2;

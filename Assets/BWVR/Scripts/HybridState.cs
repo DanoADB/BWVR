@@ -10,7 +10,7 @@ public enum GuidanceStatus {None,Active,Completed,Rejected,Expired,Superseded,Ab
 }
 [Serializable] public sealed class GuidanceState {
  public GuidanceIntent intention;public string target="";public float requestedAt,expiresAt;public GuidanceStatus status;public string reason="";
- public bool playerSign;public Vector3 spot;
+ public bool playerSign,noticed;public Vector3 spot;public int evidenceId;
 }
 [Serializable] public sealed class ActionReceipt {
  public CreatureAction action;public CreatureSituation situation;public string target="",partner="";public float completedAt;public bool eligible,consumed;
@@ -18,6 +18,7 @@ public enum GuidanceStatus {None,Active,Completed,Rejected,Expired,Superseded,Ab
 }
 [Serializable] public sealed class CreatureIntention {
  public bool active;public CreatureAction action;public CreatureSituation situation;public string target="",partner="";public float startedAt,deadline;
+ public int evidenceId;public bool evidenceClosed;public EvidenceSource source;
 }
 [Serializable] public sealed class TargetCooldown {public string target;public float until;}
 [Serializable] public sealed class CreatureInterest {public string target;public float appeal=.5f,lastUsed;public int experiences;}
@@ -36,6 +37,8 @@ public enum GuidanceStatus {None,Active,Completed,Rejected,Expired,Superseded,Ab
  public float Preference(CreatureSituation situation,CreatureAction action)=>Association(situation,action)?.preference??.5f;
  public bool Reinforce(bool positive){var r=receipt;if(!r.eligible||r.consumed||time-r.completedAt>12||time<r.completedAt)return false;var a=Association(r.situation,r.action,true);if(a==null)return false;a.preference=Mathf.Clamp01(a.preference+(positive?.12f:-.12f));a.samples=Math.Min(1000000,a.samples+1);a.reinforcedAt=time;Experience(r.target,positive?.1f:-.1f);r.consumed=true;return true;}
  public bool Valid(){
+  if((evidence!=null&&!evidence.Valid(time))||guidance==null||intention==null||guidance.evidenceId<0||guidance.evidenceId>=1000000000||intention.evidenceId<0||intention.evidenceId>=1000000000||!Enum.IsDefined(typeof(EvidenceSource),intention.source))return false;
+  if(intention.source==EvidenceSource.PlayerMiracle||(evidence==null&&(guidance.evidenceId!=0||intention.evidenceId!=0))||(evidence!=null&&(guidance.evidenceId>=evidence.nextId||intention.evidenceId>=evidence.nextId)))return false;
   if((motivation!=null&&!motivation.Valid())||!BondsValid()||!Number(time,0,100000000)||!Number(energy,0,100)||!Number(lastBenefit,-100,100000000)||!Number(rainRemaining,0,6)||!Number(nextMiracleAt,0,100000001)||decisions<0||decisions>100000000||guidance==null||intention==null||receipt==null||associations==null||associations.Length>24||cooldowns==null||cooldowns.Length>128)return false;
   var ids=new System.Collections.Generic.HashSet<string>();foreach(var c in cooldowns)if(c==null||!Text(c.target)||!ids.Add(c.target)||!Number(c.until,0,100000180))return false;
   if(interests==null||interests.Length>128)return false;ids.Clear();foreach(var value in interests)if(value==null||!Text(value.target)||!ids.Add(value.target)||!Number(value.appeal,0,1)||!Number(value.lastUsed,0,time)||value.experiences<0||value.experiences>1000000)return false;

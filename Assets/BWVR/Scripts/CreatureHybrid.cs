@@ -5,14 +5,14 @@ using UnityEngine.AI;
 namespace BWVR {
 // One owner delegates to existing executors. Perception, guidance and learning are
 // small services here; none introduces a parallel animation/movement controller.
-public sealed class CreatureHybrid:MonoBehaviour {
+public sealed partial class CreatureHybrid:MonoBehaviour {
  public enum ActionOwner{None,Water,Curiosity,Observe}
  public ActionOwner Owner{get;private set;}public string Explanation{get;private set;}="Watching";
  public readonly WorldEventJournal Journal=new WorldEventJournal();
  public readonly List<HybridTarget> Targets=new List<HybridTarget>();
  public void RegisterObject(CreatureAffordance a,string id){var target=HybridTarget.Bind(a.gameObject,id,HybridTargetKind.Object);Register(target);a.simulationTime=()=>State.time;a.cooldown=State.Cooldown(id);a.rememberCooldown=until=>State.RememberCooldown(id,until);}
  readonly Dictionary<string,HybridTarget> byId=new Dictionary<string,HybridTarget>();readonly List<CreatureCandidate> candidates=new List<CreatureCandidate>();
- Func<SliceState> season;CreatureCuriosity curiosity;CreatureRoutine water;IslandNavigator nav;HumanoidMotion motion;HybridTarget observing,placedAttention;float attentionUntil,lookUntil,nextPlacementNotice;bool attentionLooking;float nextPerception,nextDecision,observeClock,nextNeedCheck;bool suppress,suspended,resume;
+ Func<SliceState> season;CreatureCuriosity curiosity;CreatureRoutine water;IslandNavigator nav;HumanoidMotion motion;HybridTarget observing,placedAttention;float attentionUntil,nextPlacementNotice;float nextPerception,nextDecision,observeClock,nextNeedCheck;bool suppress,suspended,resume;
  public SliceState Season=>season();public HybridState State=>Season.Hybrid;
  bool WaterRequested=>State.guidance.status==GuidanceStatus.Active&&State.guidance.intention==GuidanceIntent.Help&&(State.guidance.target=="water"||State.guidance.target=="cistern"||Find(State.guidance.target)?.villager?.GetComponent<VillagerRoutine>()?.role==VillagerRoutine.Role.WaterGatherer);
  public void Initialize(CreatureRoutine routine,CreatureCuriosity mind,HumanoidMotion visual,CreatureAffordance[] objects,VillagerRoutine[] villagers,GameObject cistern,CarryItem offering,Func<SliceState> current){
@@ -30,20 +30,9 @@ public sealed class CreatureHybrid:MonoBehaviour {
  public bool NoticePlaced(CarryItem item){
   if(item==null||item.held||item.kind==Offering.Creature||Season.paused||suspended||GetComponent<CarryItem>()?.held==true||State.time<nextPlacementNotice)return false;
   var target=item.GetComponent<HybridTarget>();if(target==null||Find(target.id)!=target)return false;
-  var direction=item.transform.position-transform.position;direction.y=0;
-  if(direction.magnitude>nav.world.Scale*45||direction.magnitude<nav.world.Scale*.5f||Vector3.Dot(transform.forward,direction.normalized)<.35f)return false;
-  Physics.SyncTransforms();var eye=transform.position+Vector3.up*nav.world.Scale*10;var toward=item.GetComponent<Collider>().bounds.center-eye;
-  foreach(var hit in System.Linq.Enumerable.OrderBy(Physics.RaycastAll(eye,toward.normalized,toward.magnitude),h=>h.distance)){
-   if(hit.transform.IsChildOf(transform))continue;
-   if(hit.collider.GetComponentInParent<CarryItem>()!=item)return false;break;
-  }
-  placedAttention=target;attentionUntil=State.time+12;lookUntil=State.time+1.5f;nextPlacementNotice=State.time+.5f;attentionLooking=true;motion?.LookAt(target.transform);curiosity.NoticeAttention();nextPerception=nextDecision=0;
+  if(!CanSeeCue(target))return false;
+  placedAttention=target;attentionUntil=State.time+12;nextPlacementNotice=State.time+.5f;NoticeCue(target,"Object placed nearby in front",EvidenceSource.PlayerPlacement);nextPerception=nextDecision=0;
   Journal.Add(State.time,"noticed placement",CreatureAction.InvestigateObject,target.id,"Object placed nearby in front");return true;
- }
- void PlacementGaze(){
-  if(!attentionLooking)return;
-  if(placedAttention!=null&&State.time<lookUntil&&!placedAttention.GetComponent<CarryItem>().held)motion?.LookAt(placedAttention.transform);
-  else {attentionLooking=false;motion?.LookAt(State.intention.active?Find(State.intention.target)?.transform:null);}
  }
  public bool CanReach(HybridTarget target){if(target==null||!target.gameObject.activeInHierarchy)return false;return CanReach(target.transform.position);}
  public bool CanReach(Vector3 at){if(!nav.world.Sample(transform.position,nav.profile,12,out var start)||!nav.world.Sample(at,nav.profile,12,out var end))return false;var path=new NavMeshPath();return NavMesh.CalculatePath(nav.world.ToNav(start),nav.world.ToNav(end),new NavMeshQueryFilter{agentTypeID=nav.profile.id,areaMask=1},path)&&path.status==NavMeshPathStatus.PathComplete;}
@@ -62,21 +51,23 @@ public sealed class CreatureHybrid:MonoBehaviour {
  }
  public void CancelGuidance(string reason){if(State.guidance.status!=GuidanceStatus.Active)return;if(Owner==ActionOwner.Observe&&State.intention.target==State.guidance.target)Interrupt(reason);Reject(GuidanceStatus.Abandoned,reason);}
  public bool Guide(GuidanceIntent intent,HybridTarget target){
-  if(Season.paused||suspended)return false;var g=State.guidance;if(g.status==GuidanceStatus.Active){Journal.Add(State.time,"guidance superseded",CreatureAction.RespondToGuidance,g.target,"New request");if(Owner==ActionOwner.Observe)Interrupt("Guidance superseded");}
+  if(Season.paused||suspended)return false;var g=State.guidance;if(g.status==GuidanceStatus.Active){Journal.Add(State.time,"guidance superseded",CreatureAction.RespondToGuidance,g.target,"New request");State.Evidence.Add(State.time,EvidenceKind.GuidanceEnded,EvidenceSource.PlayerGuidance,CreatureAction.RespondToGuidance,g.target,"Superseded by a new request",g.evidenceId);if(Owner==ActionOwner.Observe&&State.intention.target==g.target)Interrupt("Guidance superseded");}
   g=State.guidance=new GuidanceState{intention=intent,target=target!=null?target.id:"",requestedAt=State.time,expiresAt=State.time+30,status=GuidanceStatus.Active};
+  g.evidenceId=State.Evidence.Add(State.time,EvidenceKind.GuidanceOffered,EvidenceSource.PlayerGuidance,CreatureAction.RespondToGuidance,g.target,intent.ToString());
   if(!CanGuide(intent,target,out var reason)){Reject(GuidanceStatus.Rejected,reason);return false;}
-  motion?.LookAt(target.transform);curiosity.NoticeGreeting(target.transform);Journal.Add(State.time,"guidance",CreatureAction.RespondToGuidance,g.target,intent.ToString());nextPerception=nextDecision=0;return true;
+  NoticeGuidance();Journal.Add(State.time,"guidance",CreatureAction.RespondToGuidance,g.target,intent.ToString());nextPerception=nextDecision=0;return true;
  }
- void Reject(GuidanceStatus status,string reason){var g=State.guidance;g.status=status;g.reason=reason;Explanation=reason;Journal.Add(State.time,"guidance "+status,CreatureAction.RespondToGuidance,g.target,reason);}
+ void Reject(GuidanceStatus status,string reason){var g=State.guidance;g.status=status;g.reason=reason;Explanation=reason;Journal.Add(State.time,"guidance "+status,CreatureAction.RespondToGuidance,g.target,reason);State.Evidence.Add(State.time,EvidenceKind.GuidanceEnded,EvidenceSource.PlayerGuidance,CreatureAction.RespondToGuidance,g.target,reason,g.evidenceId);if(status==GuidanceStatus.Rejected||g.noticed)Respond(CreatureResponse.Unavailable,Find(g.target),reason,true);}
  public void Tick(float dt,bool advanceClock=true){
   if(GetComponent<CarryItem>()?.held==true)return;
   if(Season.paused||suspended||dt<=0||float.IsNaN(dt)||float.IsInfinity(dt))return;if(advanceClock)State.time=Mathf.Min(100000000,State.time+dt);
   State.Motivation.Advance(dt);
+  AdvanceResponse();
   if(State.guidance.status==GuidanceStatus.Active&&State.time>=State.guidance.expiresAt)Reject(GuidanceStatus.Expired,"Request expired");
   if(State.guidance.status==GuidanceStatus.Active&&Find(State.guidance.target)==null)Reject(GuidanceStatus.Abandoned,"Target unavailable");
   if(State.guidance.status==GuidanceStatus.Active){var g=State.guidance;var target=Find(g.target);bool solved=(g.intention==GuidanceIntent.Protect&&target?.villager!=null&&target.villager.Memory.injury<=0)||(g.intention==GuidanceIntent.Help&&(g.target=="cistern"||g.target=="water")&&Season.water>=85);if(solved){if(Owner==ActionOwner.Observe&&State.intention.target==g.target)Interrupt("Problem no longer exists");Reject(GuidanceStatus.Abandoned,"Problem no longer exists");}}
   if(Owner==ActionOwner.Curiosity&&State.intention.action!=CreatureAction.EatFood&&Season.hunger>.9f&&State.time>=nextNeedCheck){nextNeedCheck=State.time+.5f;foreach(var target in Targets)if(target.affordance?.kind==CreatureAffordance.Kind.Food&&target.affordance.Available&&Vector3.Distance(transform.position,target.transform.position)<=nav.world.Scale*350&&CanReach(target)){Interrupt("Hunger supersedes leisure");nextDecision=State.time;break;}}
-  if(Owner!=ActionOwner.None&&State.time>State.intention.deadline)Interrupt("Action timed out");
+  if(Owner!=ActionOwner.None&&State.time>State.intention.deadline)FailAction("Action timed out");
   if(Season.developmentFocus&&Owner==ActionOwner.Water&&!WaterRequested)Interrupt("Exploration focus leaves water in the background");
   if(!Season.developmentFocus&&!Season.Finished&&Season.water<18&&State.intention.action!=CreatureAction.EatFood&&(Owner==ActionOwner.Curiosity||Owner==ActionOwner.Observe)&&water.WaterAvailable)Interrupt("Critical water shortage supersedes leisure");
   if(Owner==ActionOwner.None&&State.time>=nextDecision){nextDecision=State.time+.5f;if(State.time>=nextPerception){Perceive();nextPerception=State.time+.25f;}
@@ -87,8 +78,7 @@ public sealed class CreatureHybrid:MonoBehaviour {
   // Tick curiosity's needs/affect even during water work, but disable its separate selector.
   curiosity.Tick(dt,Season,false);
   if(Owner==ActionOwner.Water)water.Tick(dt,false);
-  else if(Owner==ActionOwner.Observe){if(observing==null||!observing.gameObject.activeInHierarchy||observing.GetComponent<CarryItem>()?.held==true){Interrupt("Observed target unavailable");return;}if(nav.MoveTo(observing.transform.position,water.speed,dt)){motion?.Activity(6);observeClock+=dt;if(observeClock>=2){if(observing.villager!=null){var m=observing.villager.Memory;m.trust=Mathf.Clamp01(m.trust+.04f);m.lastAssistance=State.time;if(State.intention.action==CreatureAction.RespondToGuidance)State.RememberBond(observing.id,true);observing.GetComponent<HumanoidMotion>()?.React();}curiosity.NoticeGreeting(observing.transform);Complete();}}else if(nav.Blocked&&State.time-State.intention.startedAt>5)Interrupt("Target unreachable");}
-  PlacementGaze();
+  else if(Owner==ActionOwner.Observe){if(observing==null||!observing.gameObject.activeInHierarchy||observing.GetComponent<CarryItem>()?.held==true){FailAction("Observed target unavailable");return;}if(nav.MoveTo(observing.transform.position,water.speed,dt)){motion?.Activity(6);observeClock+=dt;if(observeClock>=2){if(observing.villager!=null){var m=observing.villager.Memory;m.trust=Mathf.Clamp01(m.trust+.04f);m.lastAssistance=State.time;if(State.intention.action==CreatureAction.RespondToGuidance)State.RememberBond(observing.id,true);observing.GetComponent<HumanoidMotion>()?.React();}curiosity.NoticeGreeting(observing.transform);Complete();}}else if(nav.Blocked&&State.time-State.intention.startedAt>5)FailAction("Target unreachable");}
  }
  public void Perceive(){
   candidates.Clear();float shortage=Season.developmentFocus||Season.Finished?0:Mathf.Clamp01((65-Season.water)/45);
@@ -110,12 +100,17 @@ public sealed class CreatureHybrid:MonoBehaviour {
   else if(c.action==CreatureAction.RespondToGuidance||c.action==CreatureAction.InvestigateObject){Owner=ActionOwner.Observe;observing=target;observeClock=0;nav.ResetRoute();motion?.LookAt(target.transform);}
   else {if(!curiosity.TryBegin(target.affordance)){nextPerception=0;return;}Owner=ActionOwner.Curiosity;}
   string partner=target?.affordance?.host?.GetComponent<HybridTarget>()?.id??target?.GetComponent<BeachBall>()?.Player?.GetComponent<HybridTarget>()?.id??"";
-  State.intention=new CreatureIntention{active=true,action=c.action,situation=c.situation,target=c.target,partner=partner,startedAt=State.time,deadline=State.time+c.timeout};Explanation=c.action+": "+(c.action==CreatureAction.WaterDelivery&&c.urgency>1?"water shortage":c.guidance>0?"your cue":c.attention>0?"a newly placed object":partner.Length>0?"a villager's invitation":State.Motivation.Reason(c.action,partner.Length>0,Season.hunger));Journal.Add(State.time,"start",c.action,c.target,c.Explain);
+  var source=c.guidance>0?EvidenceSource.PlayerGuidance:c.attention>0?EvidenceSource.PlayerPlacement:EvidenceSource.Autonomous;
+  int evidenceId=State.Evidence.Add(State.time,EvidenceKind.ActionStarted,source,c.action,c.target,c.expected,source==EvidenceSource.PlayerGuidance?State.guidance.evidenceId:0,partner,c.situation);
+  State.intention=new CreatureIntention{active=true,action=c.action,situation=c.situation,target=c.target,partner=partner,startedAt=State.time,deadline=State.time+c.timeout,evidenceId=evidenceId,source=source};
+  if(source!=EvidenceSource.Autonomous){busyTarget=null;Respond(CreatureResponse.Chosen,target,"I chose this activity",true);}Explanation=c.action+": "+(c.action==CreatureAction.WaterDelivery&&c.urgency>1?"water shortage":c.guidance>0?"your cue":c.attention>0?"a newly placed object":partner.Length>0?"a villager's invitation":State.Motivation.Reason(c.action,partner.Length>0,Season.hunger));Journal.Add(State.time,"start",c.action,c.target,c.Explain);
  }
  void CuriosityCompleted(CreatureAffordance target){if(!suppress&&Owner==ActionOwner.Curiosity){GetComponent<CreatureConstructionLearning>()?.Placed(target.GetComponent<ConstructionBlock>());Complete();}}
- void CuriosityFailed(string reason){if(!suppress&&Owner==ActionOwner.Curiosity)Interrupt(reason);}
+ void CuriosityFailed(string reason){if(!suppress&&Owner==ActionOwner.Curiosity)FailAction(reason);}
  void WaterCompleted(){if(!suppress&&Owner==ActionOwner.Water)Complete();}
- void Complete(){var intent=State.intention;var target=Find(intent.target);var block=target?.affordance?.GetComponent<ConstructionBlock>();var host=target?.affordance?.host;string partner=host!=null&&host.Current==VillagerSocial.Phase.WatchGift&&host.GetComponent<HybridTarget>()?.id==intent.partner?intent.partner:"";var ball=target?.GetComponent<BeachBall>();if(ball!=null&&ball.ConfirmedPartner==intent.partner)partner=intent.partner;State.receipt=new ActionReceipt{eligible=true,action=intent.action,situation=intent.situation,target=intent.target,partner=partner,completedAt=State.time,rhythmGame=intent.action==CreatureAction.PlayWithToy&&target?.GetComponent<SharedRhythm>()?.Completed==true&&partner.Length>0,gentleRally=intent.action==CreatureAction.PlayWithToy&&ball!=null&&!ball.Harmful&&ball.RallyReceptions>=4&&partner.Length>0,fetched=intent.action==CreatureAction.PlayWithToy&&ball?.JustFetched==true,constructionRecipe=block!=null?(int)block.Site.Recipe:-1};Journal.Add(State.time,"complete",intent.action,intent.target,"Outcome confirmed");
+ void Complete(){var intent=State.intention;if(!intent.active||Owner==ActionOwner.None)return;
+  var target=Find(intent.target);bool harmful=target?.GetComponent<BeachBall>()?.Harmful==true||target?.GetComponent<ThrowableTree>()?.World.Harmful==true;Respond(CreatureResponse.Completed,target,harmful?"Activity finished with harmful consequences":"Activity finished",false,!harmful);var block=target?.affordance?.GetComponent<ConstructionBlock>();var host=target?.affordance?.host;string partner=host!=null&&host.Current==VillagerSocial.Phase.WatchGift&&host.GetComponent<HybridTarget>()?.id==intent.partner?intent.partner:"";var ball=target?.GetComponent<BeachBall>();if(ball!=null&&ball.ConfirmedPartner==intent.partner)partner=intent.partner;State.receipt=new ActionReceipt{eligible=true,action=intent.action,situation=intent.situation,target=intent.target,partner=partner,completedAt=State.time,rhythmGame=intent.action==CreatureAction.PlayWithToy&&target?.GetComponent<SharedRhythm>()?.Completed==true&&partner.Length>0,gentleRally=intent.action==CreatureAction.PlayWithToy&&ball!=null&&!ball.Harmful&&ball.RallyReceptions>=4&&partner.Length>0,fetched=intent.action==CreatureAction.PlayWithToy&&ball?.JustFetched==true,constructionRecipe=block!=null?(int)block.Site.Recipe:-1};Journal.Add(State.time,"complete",intent.action,intent.target,"Outcome confirmed");
+  if(!intent.evidenceClosed){State.Evidence.Add(State.time,EvidenceKind.ActionCompleted,intent.source,intent.action,intent.target,harmful?"Completed with harmful consequences":"Outcome confirmed",intent.evidenceId,partner,intent.situation);intent.evidenceClosed=true;}
   if(intent.action==CreatureAction.PlayWithToy||intent.action==CreatureAction.EatFood||intent.action==CreatureAction.ConstructionPlay)State.Experience(intent.target,.025f);
   if(Owner==ActionOwner.Observe&&observing!=null)GetComponent<CreatureConstructionLearning>()?.Observe(observing.GetComponent<ConstructionInspiration>());
   if(Owner==ActionOwner.Observe)curiosity.RememberObservation(Season);
@@ -126,9 +121,11 @@ public sealed class CreatureHybrid:MonoBehaviour {
  }
  public bool Feedback(bool positive){if(Season.paused||suspended)return false;bool learned=State.Reinforce(positive);if(learned)curiosity.PrepareFeedback(State.receipt,Season,Find(State.receipt.target)?.villager);curiosity.Feedback(positive,learned);if(learned){var partner=State.receipt.partner.Length>0?State.receipt.partner:Find(State.receipt.target)?.villager?.GetComponent<HybridTarget>()?.id;State.TeachBond(partner,positive);if(State.receipt.partner.Length>0)Find(State.receipt.partner)?.villager?.Feedback(positive);}if(learned&&State.receipt.action==CreatureAction.PlayWithToy&&Find(State.receipt.target)?.GetComponent<ThrowableTree>()!=null)Season.WorldPlay.Trees.preference=Mathf.Clamp01(Season.WorldPlay.Trees.preference+(positive?.12f:-.12f));if(learned&&State.receipt.rhythmGame)Season.WorldPlay.rhythmFun=Mathf.Clamp01(Season.WorldPlay.rhythmFun+(positive?.12f:-.12f));if(learned&&State.receipt.gentleRally)Season.WorldPlay.GentleBall.Reinforce(positive);if(learned&&State.receipt.fetched)Season.WorldPlay.fetchFun=Mathf.Clamp01(Season.WorldPlay.fetchFun+(positive?.12f:-.12f));if(learned&&State.receipt.action==CreatureAction.ConstructionPlay&&State.receipt.constructionRecipe>=0)GetComponent<CreatureConstructionLearning>()?.Reinforce((BuildRecipe)State.receipt.constructionRecipe,positive);Journal.Add(State.time,learned?"reinforced":"feedback without lesson",State.receipt.action,State.receipt.target,positive?"Praise":"Discourage");return learned;}
  public void InvalidateLesson(string reason){State.receipt.eligible=false;curiosity.InvalidateFeedback();Journal.Add(State.time,"lesson cleared",State.receipt.action,State.receipt.target,reason);}
- public void Interrupt(string reason,bool keepIntention=false){if(season==null)return;var prior=State.intention;suppress=true;curiosity.ResetTask();water.ResetTask();suppress=false;motion?.LookAt(null);motion?.Activity(0);nav.ResetRoute();observing=null;Owner=ActionOwner.None;State.receipt.eligible=false;prior.active=keepIntention&&prior.active;resume=prior.active;Journal.Add(State.time,"interrupted",prior.action,prior.target,reason);Explanation=reason;nextNeedCheck=State.time;nextDecision=State.time+.5f;nextPerception=0;}
+ public void Interrupt(string reason,bool keepIntention=false){if(season==null)return;var prior=State.intention;
+  if(prior.active&&!prior.evidenceClosed){State.Evidence.Add(State.time,EvidenceKind.ActionInterrupted,prior.source,prior.action,prior.target,reason,prior.evidenceId,prior.partner,prior.situation);prior.evidenceClosed=true;}
+  ResetResponses();suppress=true;curiosity.ResetTask();water.ResetTask();suppress=false;motion?.LookAt(null);motion?.Activity(0);nav.ResetRoute();observing=null;Owner=ActionOwner.None;State.receipt.eligible=false;prior.active=keepIntention&&prior.active;resume=prior.active;Journal.Add(State.time,"interrupted",prior.action,prior.target,reason);Explanation=reason;nextNeedCheck=State.time;nextDecision=State.time+.5f;nextPerception=0;}
  public void Suspend(bool value){if(value&&!suspended)Interrupt("Application suspended",true);suspended=value;}
- public void NewSeason(){Interrupt("New season");resume=false;placedAttention=null;attentionLooking=false;attentionUntil=lookUntil=nextPlacementNotice=0;nextNeedCheck=0;nextDecision=nextPerception=0;foreach(var t in Targets)if(t.affordance!=null)t.affordance.cooldown=0;}
+ public void NewSeason(){Interrupt("New season");resume=false;placedAttention=null;ResetResponses();attentionUntil=nextPlacementNotice=0;nextNeedCheck=0;nextDecision=nextPerception=0;foreach(var t in Targets)if(t.affordance!=null)t.affordance.cooldown=0;}
  void OnDisable(){if(season!=null)Interrupt("Creature disabled");}
  void OnDestroy(){if(curiosity!=null){curiosity.Completed-=CuriosityCompleted;curiosity.Failed-=CuriosityFailed;}if(water!=null)water.Completed-=WaterCompleted;}
 }

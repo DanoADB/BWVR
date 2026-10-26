@@ -16,6 +16,8 @@ Current priorities and implementation status: [roadmap](docs/ROADMAP.md). Follow
 
 The generated scene contains the BWVR bootstrap. It builds the island and spatial UI at runtime. To regenerate the scene and Quest settings, select **BWVR > Set up first Quest slice**. This replaces the prototype scene, so save custom scene work elsewhere first.
 
+**Creature responses:** a visible nearby placement or suggestion can get a curious glance; choosing a suggested activity gets a brief nod, while continuing other work gets a brief sideways response. Completion and failure have separate affect. These cues preserve autonomy and player teaching. A bounded saved outcome history supplies the future Book of Creation; see [responses and evidence](docs/CREATURE_RESPONSES.md).
+
 ## Quest Link: press Play in the headset
 
 Install Meta Horizon Link on Windows and set it as the active OpenXR runtime in its Settings > General. Connect your Quest over USB or Air Link, then launch Quest Link inside the headset before pressing Play in Unity.
@@ -93,3 +95,5 @@ The island now has interacting rain, wind, fog, lightning, fire and coastal stor
 Construction toys now share one large yard with 48 pieces in eight shapes. Old tray assemblies migrate into it; the functional creek bridge remains separate. See [shared construction yard](docs/CONSTRUCTION_YARD.md).
 
 Villagers now cut finite timber sources, harvest existing wheat, carry reserved loads into a visible shared store, and consume stored food. See [resource gathering](docs/RESOURCE_GATHERING.md) for persistence rules and the remaining forestry/farming roadmap.
+
+Exploration observation can temporarily pause villager food work and meal consumption without changing stored supplies. Children are larger and use normal pickup/drop. See [village observation](docs/VILLAGE_OBSERVATION.md).

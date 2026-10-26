@@ -6,8 +6,8 @@ public sealed partial class VillageResources {
  public float FoodReserveTarget=>ReserveTarget(FoodPopulation,State.Limit(VillageResource.Wheat));
  public float MealGrain=>State.freshFood+Mathf.Max(0,State.wheat-ReservedSeed);
  public float FoodSeconds=>MealGrain*90/Mathf.Max(1,FoodPopulation);
- public bool NeedsFoodReserve=>MealGrain<FoodReserveTarget;
- public bool FoodEmergency=>FoodSeconds<135;
+ public bool NeedsFoodReserve=>!Season.observeWithoutFoodWork&&MealGrain<FoodReserveTarget;
+ public bool FoodEmergency=>!Season.observeWithoutFoodWork&&FoodSeconds<135;
  // Six minutes of meals plus three future sowings; bounded by real covered space.
  public static float ReserveTarget(int people,float capacity)=>Mathf.Min(Mathf.Max(0,capacity),Mathf.Clamp(people,0,VillagePopulation.Maximum)*4+3);
  GameObject[] reserveMeals;
@@ -24,7 +24,7 @@ public sealed partial class VillageResources {
 public sealed partial class VillagerResourceGathering {
  // Reserve work competes for idle adults, never interrupts an owned activity.
  public bool TryFoodReserve(){
-  if(world==null||world.Season.paused||Active||Busy)return false;
+  if(world==null||world.Season.observeWithoutFoodWork||world.Season.paused||Active||Busy)return false;
   int workers=world.Gatherers.Count(a=>a.Active&&(a.Source?.kind==VillageResource.Wheat));
   if(workers>=(world.FoodEmergency?2:1))return false;
   if(TryFoodProduction())return true;if(!world.NeedsFoodReserve)return false;

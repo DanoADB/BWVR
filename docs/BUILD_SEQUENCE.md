@@ -20,7 +20,7 @@ Current implementation order, 2026-10-26. Implements [ROADMAP.md](ROADMAP.md). T
 
 **Gate:** current project compiles; baseline pickup/drop, pause/resume, saving, autonomy and tool release/rearm work. Classify failures as product defects or demonstrated test-fixture defects with evidence. Preserve a known-good save and record starting population/weather/seed. No priority changes to water merely to make a test pass.
 
-**Depends on:** existing implementation. **Next implementation task after this checkpoint:** S1.
+**Depends on:** existing implementation. **S1 Editor implementation:** delivered; see [CREATURE_RESPONSES.md](CREATURE_RESPONSES.md). Headset readability remains a release check. Next implementation stage: S1A.
 
 ## S1 — Make attention and consequences readable
 

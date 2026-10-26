@@ -54,7 +54,7 @@ public sealed class DivineIntervention:MonoBehaviour {
   State.energy-=cost;State.nextMiracleAt=State.time+.5f;creature.InvalidateLesson("Player miracle is not creature work");
   if(kind==SpiritualTool.Rain){Season.RememberOutcome();Season.water=Mathf.Clamp(Season.water+tuning.rainWater,0,100);Season.crops=Mathf.Clamp(Season.crops+tuning.rainCrops,0,100);State.rainRemaining=6;rain.Play();foreach(var v in villagers)v.Celebrate(creature.transform);}
   else {target.villager.Memory.injury=0;target.GetComponent<HumanoidMotion>()?.React();healing.transform.position=target.transform.position+Vector3.up*nav.Scale;healing.Play();healing.Emit(16);}
-  creature.GetComponent<CreatureCuriosity>().NoticeGreeting(target.transform);creature.Journal.Add(State.time,"miracle",CreatureAction.IdleOrObserve,target.id,kind+" cost "+cost);LastReason="";RefreshConditions();return true;
+  if(creature.CanSeeCue(target))creature.GetComponent<CreatureCuriosity>().NoticeGreeting(target.transform);creature.Journal.Add(State.time,"miracle",CreatureAction.IdleOrObserve,target.id,kind+" cost "+cost);State.Evidence.Add(State.time,EvidenceKind.Miracle,EvidenceSource.PlayerMiracle,CreatureAction.IdleOrObserve,target.id,kind+" cost "+cost);LastReason="";RefreshConditions();return true;
  }
  public void Tick(float dt,bool paused){
   bool frozen=paused||Suspended;if(frozen){if(rain.isPlaying)rain.Pause();if(healing.isPlaying)healing.Pause();return;}

@@ -46,3 +46,11 @@ After confirmed Play stop, the original user season file was restored and SHA-25
 Back up the device season, start FirstQuestSlice, confirm live frames, then run the targeted menu checks above from a fresh Play session. GodToolsChecks expects a fresh palette use count; cancel/release tool input before ordinary pickup checks. These tests replace live logical state: stop and restore the backup afterward. Use fixed model seeds for decision comparisons; record positions/weather separately for world/traffic checks.
 
 Proceed to S1 attention/response and bounded evidence work. Keep exploration focus and water secondary. The immediate control/sign adjustments do not mark S1 or audio S1A complete.
+
+## S1 verification follow-up
+
+The old isolated HybridChecks water phase sometimes stuck against villagers that the test never ticked. A diagnostic run confirmed blocked navigation and zero deliveries over 200 simulated seconds; the comparison with frozen NPC bodies excluded completed delivery. Only that isolated phase now temporarily excludes those bodies and restores them before the independent village-progress check and in cleanup. Live crowd navigation is not proven by this fixture. The feedback fixture also uses a temporary ordinary toy rather than borrowing a beachball that live villagers may have reserved. These changes do not raise gameplay water priority or bypass real cue occlusion.
+
+S1 response/evidence model and runtime checks passed. A native-frame gorilla render verified aligned eye/head animation; headset comfort remains untested. See CREATURE_RESPONSES.md for scope.
+
+Final S1 regression run passed responses/evidence, hybrid model/runtime, development focus, creature skills, god tools, miracles, creature carrying, feedback and population. The new village observation check initially stopped at a birth-fixture cooldown; its corrected complete body then passed through the live Editor evaluator. The final scene advanced from frame 5511 to 7529, observation active with zero food work and one child. The console reported no current compilation failures or gameplay errors at inspection; pre-existing obsolete API warnings and earlier tooling/test failures remain in historical output. These are Editor checks, not a Quest device test.
