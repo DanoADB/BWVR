@@ -4,7 +4,7 @@ namespace BWVR {
 public sealed partial class VillageResources {
  public int FoodPopulation=>Gatherers.Length+Season.Families.children.Length;
  public float FoodReserveTarget=>ReserveTarget(FoodPopulation,State.Limit(VillageResource.Wheat));
- public float MealGrain=>Mathf.Max(0,State.wheat-ReservedSeed);
+ public float MealGrain=>State.freshFood+Mathf.Max(0,State.wheat-ReservedSeed);
  public float FoodSeconds=>MealGrain*90/Mathf.Max(1,FoodPopulation);
  public bool NeedsFoodReserve=>MealGrain<FoodReserveTarget;
  public bool FoodEmergency=>FoodSeconds<135;

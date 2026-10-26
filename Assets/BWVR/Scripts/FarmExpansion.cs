@@ -16,7 +16,7 @@ public sealed partial class ResourceState {
 public sealed partial class VillageResources {
  public float ReservedFarmWood=>Gatherers==null?0:Gatherers.Count(a=>a.PreparingFarm)*2;
  public float FreeWood=>Mathf.Max(0,State.wood-ReservedFarmWood-ReservedToolWood);
- public float FutureHarvest=>sources.Where(s=>s.kind==VillageResource.Wheat).Sum(s=>{var r=State.Find(s.id);return r==null?0:r.growing?12:r.remaining;});
+ public float FutureHarvest=>sources.Where(s=>s.kind==VillageResource.Wheat).Sum(s=>{var r=State.Find(s.id);return r==null?0:r.growing?ResourceState.SourceYield(r):r.remaining;});
  public bool NeedsPlanting=>FutureHarvest<FoodReserveTarget*2&&sources.Count(s=>s.kind==VillageResource.Wheat&&(State.Find(s.id)?.growing==true||s.owner?.Sowing==true))<3;
  bool FarmSite(Vector3 at){
   if(!Navigation.Sample(at,Navigation.villager,.2f,out var foot)||!discoveries.Reachable(StoreApproach,foot,Navigation.villager))return false;
@@ -44,10 +44,10 @@ public sealed partial class VillagerResourceGathering {
  public bool TryPrepareFarm(GatheringSource source){if(world.Season.paused||Active||Busy||!world.CanPrepareFarm(source))return false;Source=source;Reserved=0;source.owner=this;routine.ResetTask();nav.ResetRoute();clock=elapsed=0;timber.SetActive(true);motion?.Carry(timber.transform);Current=Phase.FarmApproach;motion?.LookAt(source.visual);return true;}
  public bool TryFoodProduction(){
   if(!world.NeedsPlanting||world.FoodEmergency||world.State.wheat-world.ReservedSeed<1)return false;
-  var renewed=world.sources.Where(s=>s.expansion&&world.CanSow(s)).OrderBy(s=>(s.at-transform.position).sqrMagnitude).FirstOrDefault();if(renewed!=null)return TrySow(renewed);
+  var renewed=world.sources.Where(s=>s.expansion&&world.CanSow(s)).OrderBy(s=>(s.at-transform.position).sqrMagnitude).FirstOrDefault();if(renewed!=null)return TrySow(renewed,world.ChooseCrop());
   int wanted=world.FoodPopulation>3?4:2;
   if(world.sources.Count(s=>s.expansion&&world.State.Find(s.id)?.farmPrepared==true)<wanted&&!world.Gatherers.Any(a=>a.PreparingFarm)){var newPlot=world.sources.Where(world.CanPrepareFarm).OrderBy(s=>(s.at-transform.position).sqrMagnitude).FirstOrDefault();if(newPlot!=null)return TryPrepareFarm(newPlot);}
-  var oldPlot=world.sources.Where(world.CanSow).OrderBy(s=>(s.at-transform.position).sqrMagnitude).FirstOrDefault();return oldPlot!=null&&TrySow(oldPlot);
+  var oldPlot=world.sources.Where(world.CanSow).OrderBy(s=>(s.at-transform.position).sqrMagnitude).FirstOrDefault();return oldPlot!=null&&TrySow(oldPlot,world.ChooseCrop());
  }
  bool TickFarm(float dt){
   if(Current==Phase.FarmApproach){motion?.Activity(0);if(nav.MoveTo(Source.approach,transform.lossyScale.y*1.6f,dt)){Current=Phase.PrepareFarm;clock=0;motion?.Carry(null);timber.SetActive(false);motion?.Activity(3);}else if(nav.Blocked&&elapsed>5)Cancel();}

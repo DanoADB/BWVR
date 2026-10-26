@@ -168,3 +168,12 @@ actions and shared material budgets retain precedence. Quaternius CC0 food sacks
 replace carried and stored grain spheres. See WEATHER_FOOD_PROTECTION.md. Crop
 variety, storm sheltering and seasons remain queued; no future weather knowledge
 or new worker framework is introduced.
+
+### Crop variety — turnips
+
+A second crop adds short-term food choices: turnips mature in 90 seconds for eight
+meal units; wheat remains a slower, larger, durable reserve. Fresh turnips share
+covered capacity, are eaten first and lose freshness over simulation time. Saved
+crop choice, local growing limits and existing sow/harvest/carry ownership remain.
+See CROP_VARIETY.md. Standing-crop weather damage, storm sheltering and seasons
+remain later milestones.

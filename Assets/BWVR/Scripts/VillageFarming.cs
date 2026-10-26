@@ -21,6 +21,7 @@ public sealed partial class VillageResources {
   if(cropTint==null)cropTint=new MaterialPropertyBlock();
   if(node.cropStem==null)node.cropStem=node.visual.GetChild(0).GetComponent<Renderer>();
   if(node.cropHead==null)node.cropHead=node.visual.GetChild(1).GetComponent<Renderer>();
+  if(RefreshTurnips(node,record))return;
   float height=record.growing?.12f+.88f*record.growth:.15f+.85f*record.remaining/12;
   node.visual.localScale=new Vector3(1,height,1)*Navigation.Scale;node.visual.gameObject.SetActive(true);
   node.cropHead.gameObject.SetActive(record.growing?record.growth>=.65f:record.remaining>.001f);
