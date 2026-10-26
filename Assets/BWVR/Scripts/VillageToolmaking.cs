@@ -15,7 +15,7 @@ public sealed partial class VillageResources {
   }
   foreach(var actor in Gatherers)actor.RefreshToolArt();
  }
- public GameObject CreateHoe(){var go=new GameObject("Cultivating hoe");go.transform.SetParent(transform,false);go.transform.localScale=Vector3.one*Navigation.Scale;AxePart(go.transform,"Long handle",new Vector3(0,.3f,0),new Vector3(.12f,1.8f,.12f),timber);AxePart(go.transform,"Cultivating blade",new Vector3(0,1,.18f),new Vector3(.65f,.15f,.5f),roof);AddToolBinding(go.transform);return go;}
+ public GameObject CreateHoe(){return HandTool("tool-hoe-upgraded","Cultivating hoe",2.1f);}
  public GameObject AddToolBinding(Transform tool){var go=GameObject.CreatePrimitive(PrimitiveType.Cube);go.name="Amber resin binding";go.transform.SetParent(tool,false);go.transform.localPosition=new Vector3(0,.78f,0);go.transform.localScale=new Vector3(.25f,.25f,.25f);go.GetComponent<Renderer>().sharedMaterial=resinAmber;var hit=go.GetComponent<Collider>();hit.enabled=false;Destroy(hit);return go;}
 }
 public sealed partial class VillagerResourceGathering {

@@ -10,15 +10,15 @@ public sealed partial class VillageResources {
  public bool FoodEmergency=>FoodSeconds<135;
  // Six minutes of meals plus three future sowings; bounded by real covered space.
  public static float ReserveTarget(int people,float capacity)=>Mathf.Min(Mathf.Max(0,capacity),Mathf.Clamp(people,0,6)*4+3);
- Transform foodReserveFill;Renderer foodReserveRenderer;MaterialPropertyBlock foodReserveTint;
+ GameObject[] reserveMeals;
+ public int VisibleReserveMeals {get;private set;}
  void BuildFoodReserveMarker(){
-  float u=Navigation.Scale;Part("Food reserve target post",PrimitiveType.Cube,Store+new Vector3(6,2.5f,-4)*u,new Vector3(.8f,5,.5f),roof);
-  foodReserveFill=Part("Food reserve readiness",PrimitiveType.Cube,Store,new Vector3(.5f,.1f,.7f),grain).transform;foodReserveRenderer=foodReserveFill.GetComponent<Renderer>();
+  float u=Navigation.Scale;Prop("box-open","Meal reserve crate",Store+new Vector3(3,.3f,-1)*u,1.3f);
+  reserveMeals=new GameObject[8];for(int i=0;i<reserveMeals.Length;i++)reserveMeals[i]=Part("Reserved grain portion "+i,PrimitiveType.Sphere,Store+new Vector3(2.5f+(i%2)*.55f,1+(i/4)*.5f,-1.5f+(i%4/2)*.65f)*u,new Vector3(.5f,.6f,.6f),grain);
  }
  void RefreshFoodReserve(){
-  if(foodReserveFill==null)return;float ratio=Mathf.Clamp01(MealGrain/Mathf.Max(1,FoodReserveTarget));float height=Mathf.Max(.15f,4.5f*ratio);
-  foodReserveFill.position=Store+new Vector3(6,height*.5f,-4.4f)*Navigation.Scale;foodReserveFill.localScale=new Vector3(.55f,height,.7f)*Navigation.Scale;
-  if(foodReserveTint==null)foodReserveTint=new MaterialPropertyBlock();foodReserveTint.SetColor("_Color",FoodEmergency?new Color(.85f,.16f,.08f):NeedsFoodReserve?new Color(.95f,.6f,.12f):new Color(.24f,.7f,.26f));foodReserveRenderer.SetPropertyBlock(foodReserveTint);
+  if(reserveMeals==null)return;VisibleReserveMeals=Mathf.CeilToInt(Mathf.Clamp01(MealGrain/Mathf.Max(1,FoodReserveTarget))*reserveMeals.Length);
+  for(int i=0;i<reserveMeals.Length;i++)reserveMeals[i].SetActive(i<VisibleReserveMeals);
  }
 }
 public sealed partial class VillagerResourceGathering {

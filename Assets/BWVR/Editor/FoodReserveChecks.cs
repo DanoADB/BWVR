@@ -18,8 +18,8 @@ public static class FoodReserveChecks {
    test.Resources.wheat=1;Require(actors[0].TryFoodReserve()&&actors[1].TryFoodReserve()&&!actors[2].TryFoodReserve(),"Emergency reserve slots invalid");Require(actors[0].Source!=actors[1].Source,"Workers reserved the same plot");foreach(var a in actors)a.Cancel();
    test.paused=true;Require(!actors[0].TryFoodReserve(),"Paused village started food work");test.paused=false;
    test.Resources.wheat=world.FoodReserveTarget;Require(!actors[0].TryFoodReserve(),"Healthy reserve still preempted leisure");
-   world.Refresh();var marker=world.transform.Find("Food reserve readiness");Require(marker!=null&&(marker.GetComponent<Collider>()==null||!marker.GetComponent<Collider>().enabled),"Reserve marker missing or blocking movement");float fullHeight=marker.localScale.y;
-   test.Resources.wheat=1;world.Refresh();Require(marker.localScale.y<fullHeight*.2f,"Low food marker did not visibly empty");
+   world.Refresh();Require(world.transform.Find("Meal reserve crate")!=null&&world.VisibleReserveMeals==8,"Full meal reserve crate missing or not filled");
+   test.Resources.wheat=1;world.Refresh();Require(world.VisibleReserveMeals==1,"Low food reserve crate did not visibly empty");
    // An existing trip is not duplicated to fill the last small deficit.
    test.Resources.wheat=world.FoodReserveTarget-1;Require(actors[0].TryFoodReserve()&&!actors[1].TryFoodReserve(),"Incoming food was ignored");actors[0].Cancel();
    // With no ripe grain, preserve actual seed and use the existing sowing motor.
