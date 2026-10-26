@@ -6,6 +6,7 @@ namespace BWVR {
 // OpenXR exposes separate grip and aim poses. Keep carried objects at the grip;
 // use the aim pose for selection rays instead of adding a guessed angle.
 public static class QuestControls {
+ public const float MinimumViewScale=.025f,MaximumViewScale=2f;
  public struct Hand {
   public bool tracked,grip,trigger,menu,recenter,zoom,praise,discourage;
   public Vector2 stick;
@@ -38,7 +39,7 @@ public static class QuestControls {
  public static void Zoom(Transform origin,Vector3 focus,float amount){
   if(float.IsNaN(amount)||float.IsInfinity(amount))return;
   float before=origin.localScale.x;
-  float after=Mathf.Clamp(before*Mathf.Exp(-Mathf.Clamp(amount,-1,1)),.125f,2f);
+  float after=Mathf.Clamp(before*Mathf.Exp(-Mathf.Clamp(amount,-1,1)),MinimumViewScale,MaximumViewScale);
   if(Mathf.Approximately(before,after))return;
   origin.position=focus+(origin.position-focus)*(after/before);
   origin.localScale=Vector3.one*after;

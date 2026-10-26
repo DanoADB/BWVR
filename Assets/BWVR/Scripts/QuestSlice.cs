@@ -10,7 +10,8 @@ using CommonUsages=UnityEngine.XR.CommonUsages;
 namespace BWVR {
 public sealed class QuestSlice:MonoBehaviour {
  public const float ActorScale=1.1f;
- public const float VillagerScale=ActorScale*1.15f;
+ // Readability boost applies to villagers only; navigation uses this same scale.
+ public const float VillagerScale=ActorScale*1.15f*1.5f;
  public const float BuildingScale=ActorScale*1.15f;
  [Tooltip("Pause drought pressure and keep water assistance in the background while developing interactions.")]
  public bool developmentFocus=true;

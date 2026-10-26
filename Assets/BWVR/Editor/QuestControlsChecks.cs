@@ -47,7 +47,7 @@ public static class QuestControlsChecks {
    QuestControls.Zoom(origin.transform,focus,-.5f);
    if(Vector3.Distance(origin.transform.position,originalPosition)>.0001f||Mathf.Abs(origin.transform.localScale.x-1)>.0001f)throw new Exception("Zoom round trip drifted");
    for(int i=0;i<30;i++)QuestControls.Zoom(origin.transform,focus,1);
-   if(Mathf.Abs(origin.transform.localScale.x-.125f)>.00001f)throw new Exception("Zoom-in limit failed");
+   if(Mathf.Abs(origin.transform.localScale.x-.025f)>.00001f)throw new Exception("Zoom-in limit failed");
    for(int i=0;i<30;i++)QuestControls.Zoom(origin.transform,focus,-1);
    if(Mathf.Abs(origin.transform.localScale.x-2)>.00001f)throw new Exception("Zoom-out limit failed");
    QuestSlice.PlaceView(origin.transform,head.transform,Vector3.zero);
