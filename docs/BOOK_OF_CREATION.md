@@ -53,3 +53,11 @@ Limit profiles, creation records, patterns and evidence to explicit configured c
 4. Add recognition of independent imitation and changing traditions only when event evidence supports it.
 
 Validate live updates, old/new save round-trips, pause, new-season reset, exactly-once counts, missing/deleted targets, record caps and mixed sentiment. Test discovery false positives using forced repetition, canceled actions, duplicate events and insufficient opportunities, as well as positive independent-choice cases. Verify Quest readability, comfortable placement, hand interaction, closing/reopening and frame cost on hardware before calling the VR interface complete.
+
+## Planned summonable-tool entry
+
+The underside-left-wrist palette is a proposed additional entry to summon the
+physical book, alongside the sanctuary. The Book remains read-only and closed by
+default; opening it does not implicitly pause. Coordinate selection, placement,
+closing and controller ownership with [summonable tools](SUMMONABLE_TOOLS.md).
+Neither the palette integration nor the Book shell is implemented by this plan.

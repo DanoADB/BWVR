@@ -87,3 +87,13 @@ Transform-driven actors now use swept horizontal body clearance against a bounde
 Verification: `ActorMovementChecks.Verify` passed native carrying leg/hand pose and pause checks, five gorilla walk sole samples, swept collision/occupied placement, stationary detouring, social reach, held-body exclusion and head-on passing. Native farming and resource gathering passed. All fourteen broader gameplay checks passed after updating the construction fixture to park its non-ticking idle witnesses outside the work approach. A standalone construction invocation without the shared fixture cleanup initially found a busy helper; the isolated full regression harness passed. A finished-season native cargo test confirmed animation remains active and explicit pause freezes it.
 
 Pose renders were inspected and the live gorilla visual-root correction was verified. Temporary actor removal exposed a stale cached animation reference; Update and suspend now skip removed actors. The final removal test and movement/free-play checks passed after that guard, and the live game advanced to frame 5235 with zero current console errors or warnings. The player's original save was restored and hash-verified. No APK or physical headset validation was performed.
+
+## Planned underside-wrist tool palette
+
+A hidden palette may be revealed by intentionally rotating the left controller
+underside toward the player. It would summon guidance signs, terrain tools,
+miracles and the Book, with an optional local spirit presentation. This is a
+roadmap proposal, not a changed binding. Existing menu/X fallback, right side-grip
+zoom, right front-trigger pickup, locomotion and A/B feedback remain in place.
+Audit input ownership and test the gesture on hardware before implementation.
+See [summonable tools](SUMMONABLE_TOOLS.md).

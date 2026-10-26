@@ -65,3 +65,11 @@ Test old/new saves, cancellation, suspend/reconnect, duplicate spending, malform
 ## Official reference
 
 OpenAI Realtime supports function tools whose actual operations are executed by the application: https://developers.openai.com/api/docs/guides/realtime-mcp . The Unity adapters, character and development worker still require implementation.
+
+## Planned connection to summonable tools
+
+The private orb may optionally present a tool palette at the underside of the
+left wrist and acknowledge summoning/target validity through its existing visual
+language. See [summonable tools](SUMMONABLE_TOOLS.md). All tools must function
+without connected AI or voice; this presentation idea does not resume the deferred
+agent/development-bridge work or give the orb an actor-perception role.

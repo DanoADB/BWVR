@@ -177,3 +177,17 @@ covered capacity, are eaten first and lose freshness over simulation time. Saved
 crop choice, local growing limits and existing sow/harvest/carry ownership remain.
 See CROP_VARIETY.md. Standing-crop weather damage, storm sheltering and seasons
 remain later milestones.
+
+### Summonable tools and underside-wrist palette — planned, 2026-10-26
+
+Add a hidden-by-default tool palette, provisionally revealed by rotating the left
+controller to expose the underside of the wrist. Summon recognizable guidance
+signs for a particular world spot, terrain brushes, contextual miracles and the
+physical Book of Creation. Optionally let the private spirit present the tools.
+Use minimal text, deliberate reveal/selection, and existing menu/desktop fallbacks;
+preserve pickup, movement, zoom and teaching controls. Guidance influences an
+autonomous creature rather than issuing guaranteed orders. Miracles reuse energy
+costs; terrain editing requires coordinated geometry/collision/navigation and save
+support. The Book and integrated palette remain planned. Companion AI/voice work
+stays deferred. See [summonable tools](SUMMONABLE_TOOLS.md) for sequencing and gates;
+current food-priority tuning remains ahead of this interface work.
