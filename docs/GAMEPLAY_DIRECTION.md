@@ -147,3 +147,7 @@ Its presentation now follows the user's glowing-ball direction: slowly shifting 
 ### Return to resource milestones — renewable wheat
 
 The user has deferred further companion work in favor of earlier roadmap items. Existing wheat patches now support paid villager sowing, saved green-to-gold growth and another finite harvest. Seed and plot reservations reuse the resource/action pipeline, with no permanent job assignments; water remains secondary. See [renewable wheat](FARMING.md) for accounting and tested boundaries. New plots, a second crop, weather-driven food security and seasons follow this foundation; fuel, housing and creative wood uses remain queued.
+
+### Population-aware food reserves — 2026-10-25
+
+The next food-security step adds an early reserve goal, limited idle-adult food priority, emergency assistance and a physical readiness post. Villagers count real covered grain, incoming trips and reserved seed; they stop prioritizing reserves when enough is stored/promised. See FOOD_RESERVES.md. New farms, crop variety and observable bad-weather preparation remain queued; the companion stays deferred.

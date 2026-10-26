@@ -33,3 +33,5 @@ Five model checks and five native runtime checks passed across farming, resource
 A one-hour unattended simulation, starting with normal fields and without planting commands, completed seven paid sowings, seven crop maturations and 67 resource deliveries. Remaining covered wheat was approximately 0.97 units: this demonstrates renewable farming, but does not establish a balanced or guaranteed self-sufficient food economy. Reserve tuning and additional farm sites remain future work.
 
 Staged green and ripe render captures were inspected. Young shoots remain small among surrounding vegetation, while ripe grain has visible golden heads. The original player save was restored after testing and its hash matched the pre-test backup. No Quest APK or headset performance validation was performed for this milestone.
+
+Food-reserve priorities and a population-aware readiness marker now extend this loop; see FOOD_RESERVES.md. Crop variety, new farm plots and weather preparation remain separate upcoming work.

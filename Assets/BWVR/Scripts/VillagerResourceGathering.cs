@@ -1,7 +1,7 @@
 using System.Linq;
 using UnityEngine;
 namespace BWVR {
-public sealed class VillagerResourceGathering:MonoBehaviour {
+public sealed partial class VillagerResourceGathering:MonoBehaviour {
  public enum Phase { Idle, Approach, Harvest, Carry, Deposit, BuildStore, PlantApproach, Planting, SowApproach, Sowing }
  public bool Sowing=>Current==Phase.SowApproach||Current==Phase.Sowing;
  public Phase Current{get;private set;}public bool Active=>Current!=Phase.Idle;public GatheringSource Source{get;private set;}public float Reserved{get;private set;}public int deliveries{get;private set;}

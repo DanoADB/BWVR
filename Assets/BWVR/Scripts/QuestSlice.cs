@@ -241,7 +241,7 @@ public sealed class QuestSlice:MonoBehaviour {
    bool urgent=!state.developmentFocus&&!state.Finished&&(job.role==VillagerRoutine.Role.WaterGatherer&&state.water<45);
    if(urgent){families?.Release(job);gathering?.Cancel();if(social.Active)social.ResetTask();if(explore.Active)explore.ResetTask();if(play.Active)play.ResetTask();job.Tick(dt,false);continue;}
    if(families!=null&&families.TickAdult(job,dt))continue;
-   if(gathering!=null&&(gathering.Active||gathering.TryBuildStorage()||gathering.TryReplant())){if(gathering.Tick(dt,false))continue;}
+   if(gathering!=null&&(gathering.Active||gathering.TryFoodReserve()||gathering.TryBuildStorage()||gathering.TryReplant())){if(gathering.Tick(dt,false))continue;}
    if(families!=null&&families.TickAdult(job,dt))continue;
    if(gathering!=null&&job.role!=VillagerRoutine.Role.WaterGatherer&&resources.LowFood&&gathering.Tick(dt,false))continue;
    bool playing=social.Tick(dt,false);if(!playing&&families!=null&&families.TickAdult(job,dt))continue;if(!playing)playing=explore.Tick(dt,false);if(!playing&&families!=null&&families.TickAdult(job,dt))continue;if(!playing)playing=play.Tick(dt,false);if(!playing&&families!=null&&families.TickAdult(job,dt))continue;if(!playing){if(job.role!=VillagerRoutine.Role.WaterGatherer&&gathering!=null)gathering.Tick(dt,false);else if(!state.Finished)job.Tick(dt,false);}
