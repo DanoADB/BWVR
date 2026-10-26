@@ -19,7 +19,7 @@ public sealed partial class QuestSlice:MonoBehaviour {
  public bool observeWithoutFoodWork=true;
  BeachBall[] balls=Array.Empty<BeachBall>();
  IslandAudio soundscape;GameObject audioSettings;
- VillageTributes tributes;SpiritCompanion spirit;GodToolPalette godTools;bool toolsKeyLast;
+ VillageWorship worship;VillageTributes tributes;SpiritCompanion spirit;GodToolPalette godTools;bool toolsKeyLast;
  VillageFamilies families;VillageResources resources;IslandWeather weather;TreePlayWorld treePlay;IslandNavigation navigation; IslandTerrainData terrain; Collider groundCollider; const float Floor=.82f; SliceState state=new SliceState(); Camera eye; Transform rig,left,right,creature; Text status,creatureLabel; GameObject panel; Font font; GameArtCatalog art; OriginalCowMotion cowMotion; HumanoidMotion godMotion; HumanoidMotion[] humanoids=Array.Empty<HumanoidMotion>();
  readonly Transform[] aims=new Transform[2]; readonly QuestControls.Hand[] controllerHands=new QuestControls.Hand[2]; bool turnHeld,recenterLast,zoomHeld; Vector3 zoomFocus;
  readonly List<CarryItem> items=new List<CarryItem>(); readonly List<Transform> workers=new List<Transform>();
@@ -98,7 +98,7 @@ public sealed partial class QuestSlice:MonoBehaviour {
   families=VillageFamilies.Build(transform,navigation,jobs,()=>state);
   learning=creature.gameObject.AddComponent<CreatureConstructionLearning>();learning.Initialize(hybrid,construction,discoveries,()=>state);
   foreach(var job in jobs)job.GetComponent<VillagerExploration>().ConfigureConstruction(learning);
-  tributes=VillageTributes.Build(transform,hybrid,jobs,navigation,cistern);
+  tributes=VillageTributes.Build(transform,hybrid,jobs,navigation,cistern);worship=new VillageWorship(jobs,resources,hybrid,families,tributes.Altar);
   foreach(var affordance in affordances){var cue=affordance.gameObject.AddComponent<SpatialTarget>();var offered=affordance;cue.invoke=()=>curiosity.Offer(offered);}
   creature.gameObject.AddComponent<CreatureAffect>().Initialize(curiosity,terrain!=null?terrain.scale:.025f);
   signals=gameObject.AddComponent<DroughtSignals>();signals.Initialize(reservoir,ground.sharedMaterial,jobs,creatureRoutine);
@@ -134,7 +134,7 @@ public sealed partial class QuestSlice:MonoBehaviour {
  CarryItem Item(string name,Offering kind,Vector3 at,PrimitiveType primitive,Color color,float size){var modern=kind==Offering.Villager?Resources.Load<GameObject>("Villagers/Villager"+VillagePopulation.Model(items.Count)):null;GameObject fitted=null;if(modern!=null){fitted=Instantiate(modern,transform);fitted.transform.position=Ground(at);fitted.transform.localScale=Vector3.one*Size(.085f,1.661f);}var original=fitted??(kind==Offering.Villager?Original(items.Count%2==0?"woman":"man",Ground(at),Size(.07f,1.661f)):null);var g=original??Shape(name,primitive,at,Vector3.one*size,color);if(kind==Offering.Villager)g.transform.localScale*=VillagerScale;var item=g.AddComponent<CarryItem>();item.kind=kind;item.home=g.transform.position;items.Add(item);return item;}
  Text Label(string name,Transform parent,Vector3 position,Vector2 size,float scale,int fontSize){var g=new GameObject(name,typeof(RectTransform));g.transform.SetParent(parent,false);g.transform.localPosition=position;g.transform.localScale=Vector3.one*scale;if(!parent.GetComponentInParent<Canvas>()){var c=g.AddComponent<Canvas>();c.renderMode=RenderMode.WorldSpace;}var t=g.AddComponent<Text>();t.font=font;t.fontSize=fontSize;t.color=new Color(.94f,.9f,.74f);t.alignment=TextAnchor.MiddleCenter;t.horizontalOverflow=HorizontalWrapMode.Wrap;g.GetComponent<RectTransform>().sizeDelta=size;return t;}
  GameObject Button(string title,Vector3 position,Action action,Transform parent=null){var g=new GameObject(title,typeof(RectTransform),typeof(Image),typeof(BoxCollider),typeof(SpatialTarget));g.transform.SetParent(parent??panel.transform,false);g.transform.localPosition=position;g.GetComponent<RectTransform>().sizeDelta=new Vector2(260,68);g.GetComponent<Image>().color=new Color(.13f,.28f,.29f);g.GetComponent<BoxCollider>().size=new Vector3(260,68,15);g.GetComponent<SpatialTarget>().invoke=action;Label("Caption",g.transform,Vector3.zero,new Vector2(250,65),1,24).text=title;return g;}
- void Update(){if(eye==null||applicationSuspended)return;foreach(var motion in humanoids)if(motion!=null)motion.paused=state.paused||(state.Finished&&motion.GetComponent<CarryItem>()!=null&&motion.GetComponent<CarryItem>().kind!=Offering.Creature&&!(motion.GetComponent<VillagerBlockPlay>()?.Active??false)&&!(motion.GetComponent<VillagerSocial>()?.Active??false)&&!(motion.GetComponent<VillagerExploration>()?.Active??false)&&!(motion.GetComponent<VillagerResourceGathering>()?.Active??false));if(cowMotion!=null)cowMotion.paused=state.paused;clock+=Time.deltaTime;bool xr=XRSettings.isDeviceActive;
+ void Update(){if(eye==null||applicationSuspended)return;foreach(var motion in humanoids)if(motion!=null)motion.paused=state.paused||(state.Finished&&motion.GetComponent<CarryItem>()!=null&&motion.GetComponent<CarryItem>().kind!=Offering.Creature&&!(motion.GetComponent<VillagerBlockPlay>()?.Active??false)&&!(motion.GetComponent<VillagerSocial>()?.Active??false)&&!(motion.GetComponent<VillagerExploration>()?.Active??false)&&!(motion.GetComponent<VillagerResourceGathering>()?.Active??false)&&!(worship?.Active(motion.GetComponent<VillagerRoutine>())??false));if(cowMotion!=null)cowMotion.paused=state.paused;clock+=Time.deltaTime;bool xr=XRSettings.isDeviceActive;
   if(xr){if(!trackingConfigured){var inputs=new List<XRInputSubsystem>();SubsystemManager.GetSubsystems(inputs);bool floor=false;foreach(var input in inputs)floor|=input.TrySetTrackingOriginMode(TrackingOriginModeFlags.Floor);if(!floor)rig.position+=Vector3.up*1.55f;trackingConfigured=true;}Pose(XRNode.Head,eye.transform);UpdateController(0,left);UpdateController(1,right);if(!viewPlaced){var head=InputDevices.GetDeviceAtXRNode(XRNode.Head);if(head.TryGetFeatureValue(CommonUsages.isTracked,out bool tracked)&&tracked)RecenterView();}
    bool zoom=controllerHands[1].zoom;
    if(zoom&&!zoomHeld)zoomFocus=ZoomFocus();
@@ -251,8 +251,10 @@ public sealed partial class QuestSlice:MonoBehaviour {
   if(!paused){state.Hybrid.time=Mathf.Min(100000000,state.Hybrid.time+dt);state.Step(dt);learning?.Tick();tributes?.Tick(dt,false);AnimateVillage(dt);}families?.Advance(dt,paused);resources?.Advance(dt,paused);weather?.Advance(dt,paused);foreach(var ball in balls)ball.Advance(dt,paused);treePlay?.Advance(dt,paused);miracles?.Tick(paused?0:dt,paused);signals.Tick(paused?0:dt,state);soundscape?.Advance(dt,paused);
  }
  void AnimateVillage(float dt){
+  worship?.Advance(dt);
   foreach(var job in jobs){var social=job.GetComponent<VillagerSocial>();var explore=job.GetComponent<VillagerExploration>();var play=job.GetComponent<VillagerBlockPlay>();
    social.Memory.restNeed=Mathf.Clamp01(social.Memory.restNeed+dt*.002f);
+   if(worship!=null&&worship.Tick(job,dt))continue;
    var gathering=job.GetComponent<VillagerResourceGathering>();
    if(state.observeWithoutFoodWork&&gathering!=null&&gathering.FoodWork)gathering.Cancel();
    bool urgent=!state.developmentFocus&&!state.Finished&&(job.role==VillagerRoutine.Role.WaterGatherer&&state.water<45);
@@ -273,7 +275,7 @@ public sealed partial class QuestSlice:MonoBehaviour {
   string energyLabel=miracles!=null&&miracles.UnlimitedEnergy?"unlimited":Mathf.FloorToInt(state.Hybrid.energy).ToString();
   if(!helpVisible)return title+"\nEnergy "+energyLabel+(saveError!=null?"\n"+saveError:"");
   var g=state.Hybrid.guidance;string reason=g.reason.Length>48?g.reason.Substring(0,48):g.reason;
-  return title+" · "+Mathf.CeilToInt(state.seconds)+"s\nWater "+Mathf.RoundToInt(state.water)+" · Crops "+Mathf.RoundToInt(state.crops)+" · Energy "+energyLabel+"\n"+hybrid.Explanation+(hybrid.ResponseDetails.Length>0?"\n"+hybrid.ResponseDetails:"")+"\nCue: "+g.status+(reason.Length>0?" · "+reason:"")+"\nRight front trigger: hold to carry the creature or objects · release to place\nMove and release a held ball to toss · A/B: teach\nGod tools: summon rain/healing or place a guidance sign\nTurn left wrist underside toward you, or X > God tools\nX menu · right grip + stick: zoom"+(xr?"":"\nDesktop: 1/2 teach · E carry · F select · Space + release E toss");
+  return title+" · "+Mathf.CeilToInt(state.seconds)+"s\nReligion: "+(worship?.Description??"Balanced")+"\nWater "+Mathf.RoundToInt(state.water)+" · Crops "+Mathf.RoundToInt(state.crops)+" · Energy "+energyLabel+"\n"+hybrid.Explanation+(hybrid.ResponseDetails.Length>0?"\n"+hybrid.ResponseDetails:"")+"\nCue: "+g.status+(reason.Length>0?" · "+reason:"")+"\nRight front trigger: hold to carry the creature or objects · release to place\nMove and release a held ball to toss · A/B: teach\nGod tools: summon rain/healing or place a guidance sign\nTurn left wrist underside toward you, or X > God tools\nX menu · right grip + stick: zoom"+(xr?"":"\nDesktop: 1/2 teach · E carry · F select · Space + release E toss");
  }
  public bool GiveFeedback(bool positive){
   if(state.paused||curiosity==null||held[0]!=null||held[1]!=null||Time.unscaledTime<feedbackReady)return false;

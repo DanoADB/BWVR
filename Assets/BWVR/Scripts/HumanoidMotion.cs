@@ -12,6 +12,7 @@ public sealed class HumanoidMotion:MonoBehaviour {
   // A held load owns the hands, not the legs. Movement supersedes stale work poses.
   animator.speed=paused?0:1;if(hands!=null)hands.paused=paused;animator.SetFloat("Speed",walking?1:0);animator.SetInteger("Activity",carried||walking?0:activity);
  }
+ public void Pray(bool value){if(hands!=null)hands.praying=value;}
  public void Activity(int value){activity=value;}
  public void Touch(Transform target){if(hands!=null)hands.touchTarget=target;}
  public void Carry(Transform resource,bool drink=false){if(hands!=null){hands.resource=resource;hands.drinking=drink;}}
