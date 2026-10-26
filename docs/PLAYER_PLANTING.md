@@ -1,3 +1,5 @@
+> Current input: hold the tool trigger (desktop F) to plant at the pointer. Sweeping across eligible plots plants at most twice per simulation second; staying on a growing plot does not spend again. Release stops planting.
+
 # Player planting — S3 second increment
 
 Open **God tools**, select **Plant seeds**, aim at an empty field outline, then press the normal tool trigger (desktop **F**). Release before planting another plot. The selected tool shows the existing CC0 food-sack model as a seed pouch. Temporary outlines appear only while this tool is selected: green squares are eligible; crossed amber outlines need supplies or have a current restriction. The pointer also uses a crossed invalid shape, plus a concise reason.

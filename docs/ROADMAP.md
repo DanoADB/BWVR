@@ -12,7 +12,7 @@ Research supplies design hypotheses, not proof that copying a feature will repro
 
 ## Current baseline
 
-The S0 checkpoint is recorded in [BASELINE_CHECKPOINT.md](BASELINE_CHECKPOINT.md). S1 attention/evidence, S1A audio/music and S2 physical rain/fan tools have Editor-tested foundations. S3 now adds geometry-based useful shelters and finite player crop planting. Next implementation stage: S4 shared gathering place. Hardware feel/performance remains pending.
+The S0 checkpoint is recorded in [BASELINE_CHECKPOINT.md](BASELINE_CHECKPOINT.md). S1 attention/evidence, S1A audio/music and S2 physical rain/fan tools have Editor-tested foundations. S3 now adds geometry-based useful shelters and finite player crop planting. The tool palette also adds open icon art, direct held world actions and Food/Wood gifts with witnessed religious memory; see [provisions](PLAYER_PROVISIONS.md). Next implementation stage: S4 shared gathering place. Hardware feel/performance remains pending.
 
 “Foundation” means a bounded implementation exists, not feature completeness or verified standalone Quest performance. Verification results and limits are recorded in the feature documents.
 
@@ -31,7 +31,7 @@ The S0 checkpoint is recorded in [BASELINE_CHECKPOINT.md](BASELINE_CHECKPOINT.md
 
 See the feature documents for exact limits: [tools](GOD_TOOLS.md), [creature](CREATURE_BEHAVIOR.md), [play](PLAY_AND_VILLAGE_RESPONSE.md), [construction](CONSTRUCTION_YARD.md), [materials](WEATHER_AND_MATERIALS.md), [technology](TOOLS_AND_TECHNOLOGY.md), [population](EXPANDED_POPULATION.md) and [Book](BOOK_OF_CREATION.md).
 
-S1 attention and factual outcome evidence are implemented for Editor testing; see [CREATURE_RESPONSES.md](CREATURE_RESPONSES.md). S1A environmental/contextual audio now has an Editor-tested foundation; see [ISLAND_AUDIO.md](ISLAND_AUDIO.md). The soft background melody is now implemented; see [ISLAND_MUSIC.md](ISLAND_MUSIC.md). S2 rain brush and wind fan are implemented; see [PHYSICAL_GOD_TOOLS.md](PHYSICAL_GOD_TOOLS.md). Next implementation: S3 useful shelter and planting. Food work can temporarily be paused independently in exploration focus to observe other behaviors; see [VILLAGE_OBSERVATION.md](VILLAGE_OBSERVATION.md).
+S1 attention and factual outcome evidence are implemented for Editor testing; see [CREATURE_RESPONSES.md](CREATURE_RESPONSES.md). S1A environmental/contextual audio now has an Editor-tested foundation; see [ISLAND_AUDIO.md](ISLAND_AUDIO.md). The soft background melody is now implemented; see [ISLAND_MUSIC.md](ISLAND_MUSIC.md). S2 rain brush and wind fan are implemented; see [PHYSICAL_GOD_TOOLS.md](PHYSICAL_GOD_TOOLS.md). S3 useful shelter and planting now have Editor-tested foundations. Next implementation: S4 shared gathering place. Food work can temporarily be paused independently in exploration focus to observe other behaviors; see [VILLAGE_OBSERVATION.md](VILLAGE_OBSERVATION.md).
 
 ## Research attributes to incorporate
 

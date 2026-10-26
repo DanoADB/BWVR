@@ -1,6 +1,6 @@
 using System;
 namespace BWVR {
-public enum EvidenceKind {GuidanceOffered,Noticed,Busy,ActionStarted,ActionCompleted,ActionInterrupted,GuidanceEnded,Miracle}
+public enum EvidenceKind {GuidanceOffered,Noticed,Busy,ActionStarted,ActionCompleted,ActionInterrupted,GuidanceEnded,Miracle,Provision}
 public enum EvidenceSource {Autonomous,PlayerPlacement,PlayerGuidance,PlayerMiracle}
 [Serializable] public sealed class OutcomeEvidence {
  public int id,relatedId;public float time;public EvidenceKind kind;public EvidenceSource source;public CreatureAction action;public CreatureSituation situation;
@@ -31,7 +31,7 @@ public enum EvidenceSource {Autonomous,PlayerPlacement,PlayerGuidance,PlayerMira
   }return true;
  }
  static bool Text(string value)=>value!=null&&value.Length<=160;
- static string Actor(EvidenceKind kind)=>kind==EvidenceKind.Miracle||kind==EvidenceKind.GuidanceOffered?"player":kind==EvidenceKind.GuidanceEnded?"system":"creature";
+ static string Actor(EvidenceKind kind)=>kind==EvidenceKind.Miracle||kind==EvidenceKind.Provision||kind==EvidenceKind.GuidanceOffered?"player":kind==EvidenceKind.GuidanceEnded?"system":"creature";
 }
 public sealed partial class HybridState {
  public OutcomeLedger evidence;

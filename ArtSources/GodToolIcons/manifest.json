@@ -1,0 +1,87 @@
+{
+  "repository": "https://github.com/game-icons/icons",
+  "commit": "82d948812bfe3f269ef8f731dcdb07b08160edc4",
+  "license": "CC BY 3.0",
+  "icons": [
+    {
+      "tool": "help",
+      "upstreamPath": "delapouite/shaking-hands.svg",
+      "author": "Delapouite",
+      "url": "https://raw.githubusercontent.com/game-icons/icons/82d948812bfe3f269ef8f731dcdb07b08160edc4/delapouite/shaking-hands.svg",
+      "page": "https://game-icons.net/1x1/delapouite/shaking-hands.html",
+      "sha256": "e222d289358dd960af44e83d28c53f07c382c62ebf592ac8d9ad4d50a7d96fa2"
+    },
+    {
+      "tool": "protect",
+      "upstreamPath": "delapouite/heart-shield.svg",
+      "author": "Delapouite",
+      "url": "https://raw.githubusercontent.com/game-icons/icons/82d948812bfe3f269ef8f731dcdb07b08160edc4/delapouite/heart-shield.svg",
+      "page": "https://game-icons.net/1x1/delapouite/heart-shield.html",
+      "sha256": "f56239f71739c19fb31d52c79af0704b1e50241abca1c5044e3aaf81d24885a5"
+    },
+    {
+      "tool": "investigate",
+      "upstreamPath": "lorc/magnifying-glass.svg",
+      "author": "Lorc",
+      "url": "https://raw.githubusercontent.com/game-icons/icons/82d948812bfe3f269ef8f731dcdb07b08160edc4/lorc/magnifying-glass.svg",
+      "page": "https://game-icons.net/1x1/lorc/magnifying-glass.html",
+      "sha256": "089f628ebb75669198850f8a5caacb648f557e6844652709abcbd709f1f03037"
+    },
+    {
+      "tool": "rain",
+      "upstreamPath": "lorc/raining.svg",
+      "author": "Lorc",
+      "url": "https://raw.githubusercontent.com/game-icons/icons/82d948812bfe3f269ef8f731dcdb07b08160edc4/lorc/raining.svg",
+      "page": "https://game-icons.net/1x1/lorc/raining.html",
+      "sha256": "a7355caed7566da5ede7f0c2580f7d4a32cf188d9f97692ec52d324a1c4b25f2"
+    },
+    {
+      "tool": "heal",
+      "upstreamPath": "delapouite/healing.svg",
+      "author": "Delapouite",
+      "url": "https://raw.githubusercontent.com/game-icons/icons/82d948812bfe3f269ef8f731dcdb07b08160edc4/delapouite/healing.svg",
+      "page": "https://game-icons.net/1x1/delapouite/healing.html",
+      "sha256": "1469b2f79fe72774afc3995f6b3888406b620a4be18e2e1dfc55e450ee87a89f"
+    },
+    {
+      "tool": "rain-brush",
+      "upstreamPath": "delapouite/watering-can.svg",
+      "author": "Delapouite",
+      "url": "https://raw.githubusercontent.com/game-icons/icons/82d948812bfe3f269ef8f731dcdb07b08160edc4/delapouite/watering-can.svg",
+      "page": "https://game-icons.net/1x1/delapouite/watering-can.html",
+      "sha256": "003a2f17eeadc2ec6c60816c671e0b3eb78d875fc2dcba16e37d5f9ccbfae724"
+    },
+    {
+      "tool": "wind",
+      "upstreamPath": "lorc/windy-stripes.svg",
+      "author": "Lorc",
+      "url": "https://raw.githubusercontent.com/game-icons/icons/82d948812bfe3f269ef8f731dcdb07b08160edc4/lorc/windy-stripes.svg",
+      "page": "https://game-icons.net/1x1/lorc/windy-stripes.html",
+      "sha256": "f6e42103bd79d0fad62866f21cfea191556dd04f0d83cb88cefaaa297be06c14"
+    },
+    {
+      "tool": "plant",
+      "upstreamPath": "delapouite/seedling.svg",
+      "author": "Delapouite",
+      "url": "https://raw.githubusercontent.com/game-icons/icons/82d948812bfe3f269ef8f731dcdb07b08160edc4/delapouite/seedling.svg",
+      "page": "https://game-icons.net/1x1/delapouite/seedling.html",
+      "sha256": "e47c7d50254daf9ce689e039e693bbc12d3cf9c57e96da1e25547efdca38a39b"
+    },
+    {
+      "tool": "food",
+      "upstreamPath": "delapouite/meal.svg",
+      "author": "Delapouite",
+      "url": "https://raw.githubusercontent.com/game-icons/icons/82d948812bfe3f269ef8f731dcdb07b08160edc4/delapouite/meal.svg",
+      "page": "https://game-icons.net/1x1/delapouite/meal.html",
+      "sha256": "71648b5b6d5417a860747182cc0da1a4a71dc0b568e139bb1c27c6822cfd75b7"
+    },
+    {
+      "tool": "wood",
+      "upstreamPath": "delapouite/wood-pile.svg",
+      "author": "Delapouite",
+      "url": "https://raw.githubusercontent.com/game-icons/icons/82d948812bfe3f269ef8f731dcdb07b08160edc4/delapouite/wood-pile.svg",
+      "page": "https://game-icons.net/1x1/delapouite/wood-pile.html",
+      "sha256": "e4aeaff5112e08792e606fd3d7159c65efbbf3132b09ec886ca75310c796ee64"
+    }
+  ]
+}

@@ -1,3 +1,5 @@
+> Current palette: Help, Protect, Investigate, Rain, Heal, Wind, Plant, Food and Wood. Only the first three place floating cues. Rain/Wind/Plant act where aimed while the trigger (desktop F) is held; release stops them. Food/Wood give bounded supplies while held. Rain is now the local brush, not the old cistern cast; legacy engine rain remains for compatibility. See [resource gifts](PLAYER_PROVISIONS.md) and [tool art](GOD_TOOL_ART.md). Earlier delivery notes below describe their original increments.
+
 # Summonable god tools — first playable delivery
 
 The player can summon Help, Protect, Investigate, Rain and Healing without hunting

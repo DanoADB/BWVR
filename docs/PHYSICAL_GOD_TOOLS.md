@@ -1,3 +1,5 @@
+> Current palette: Help, Protect, Investigate, Rain, Heal, Wind, Plant, Food and Wood. Only the first three place floating cues. Rain/Wind/Plant act where aimed while the trigger (desktop F) is held; release stops them. Food/Wood give bounded supplies while held. Rain is now the local brush, not the old cistern cast; legacy engine rain remains for compatibility. See [resource gifts](PLAYER_PROVISIONS.md) and [tool art](GOD_TOOL_ART.md). Earlier delivery notes below describe their original increments.
+
 # Physical god tools — S2
 
 The palette adds a **Rain brush** beside the existing guidance, cistern Rain and Healing tools. Select it and hold the normal tool trigger over a supported patch of dry island ground (desktop F). Release to stop. The circular footprint changes to a crossed shape when invalid, as well as changing color. Tracking loss, pause, carrying/zoom/menu conflicts and dismissal stop the channel. These gestures keep existing pickup, zoom and feedback bindings.

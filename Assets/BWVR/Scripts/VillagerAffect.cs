@@ -5,7 +5,7 @@ public sealed class VillagerAffect:MonoBehaviour {
  public enum Mood {None,Learning,Love,Hungry,Angry,Afraid,Hurt}
  public Mood Displayed{get;private set;}
  static Texture2D atlas;static Sprite[] sprites;static int users;bool initialized;
- VillageResources world;VillagerSocial social;Canvas canvas;UnityEngine.UI.Image image;float height,size,learningUntil,angerUntil,loveUntil;int disputes,kindness;
+ VillageResources world;VillagerSocial social;Canvas canvas;UnityEngine.UI.Image image;float height,size,learningUntil,angerUntil,loveUntil,provisionUntil;int disputes,kindness;
  public void Initialize(VillageResources resources){world=resources;social=GetComponent<VillagerSocial>();disputes=social.Memory.disputes;kindness=Kindness();
   float body=transform.lossyScale.y;var animator=GetComponentInChildren<Animator>();if(animator!=null){var renderers=animator.GetComponentsInChildren<Renderer>();if(renderers.Length>0){var bounds=renderers[0].bounds;foreach(var r in renderers)bounds.Encapsulate(r.bounds);body=Mathf.Max(body,bounds.max.y-transform.position.y);}}
   height=body+world.Navigation.Scale*1.2f;size=body*.48f;
@@ -13,10 +13,12 @@ public sealed class VillagerAffect:MonoBehaviour {
   var symbol=new GameObject("Nonverbal villager state",typeof(RectTransform),typeof(UnityEngine.UI.Image));symbol.transform.SetParent(rect,false);image=symbol.GetComponent<UnityEngine.UI.Image>();image.raycastTarget=false;image.rectTransform.sizeDelta=new Vector2(64,64);canvas.enabled=false;
  }
  int Kindness()=>social.Memory.greetings+social.Memory.sharedPlay+social.Memory.rides+social.Memory.comfortReceived;
+ public void ProvisionSeen(){if(world!=null&&!world.Season.paused)provisionUntil=world.Season.Hybrid.time+4;}
  public void Learned(){if(world!=null&&!world.Season.paused)learningUntil=world.Season.Hybrid.time+4;}
  public static Mood Select(bool hurt,bool afraid,bool angry,bool hungry,bool learning,bool love)=>hurt?Mood.Hurt:afraid?Mood.Afraid:angry?Mood.Angry:hungry?Mood.Hungry:learning?Mood.Learning:love?Mood.Love:Mood.None;
  void LateUpdate(){if(world==null||canvas==null)return;float now=world.Season.Hybrid.time;if(social.Memory.disputes>disputes)angerUntil=now+4;disputes=social.Memory.disputes;int k=Kindness();if(k>kindness)loveUntil=now+4;kindness=k;
   var mood=Select(social.Memory.injury>.05f,social.RecentFright,now<angerUntil,world.FoodSeconds<90,now<learningUntil,now<loveUntil);
+  if(now<provisionUntil&&mood!=Mood.Hurt&&mood!=Mood.Afraid&&mood!=Mood.Angry)mood=Mood.Love;
   // Needs recur briefly; event acknowledgments remain visible for four simulation seconds.
   bool eventState=mood==Mood.Learning||mood==Mood.Love||mood==Mood.Angry;bool visible=mood!=Mood.None&&(eventState||now%14<4);
   Displayed=visible?mood:Mood.None;canvas.enabled=visible;if(visible)image.sprite=sprites[(int)mood-1];canvas.transform.position=transform.position+Vector3.up*height;var camera=Camera.main;if(camera!=null)canvas.transform.rotation=Quaternion.LookRotation(canvas.transform.position-camera.transform.position);
