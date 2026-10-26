@@ -12,7 +12,7 @@ namespace BWVR {
  public BuildingMemory building;public BuildingMemory Building=>building??(building=new BuildingMemory());
  public WorldPlayMemory worldPlay;public WorldPlayMemory WorldPlay=>worldPlay??(worldPlay=new WorldPlayMemory());
  public FamilyState families;public FamilyState Families{get{var value=families??(families=new FamilyState());value.EnsurePopulation();return value;}}
- public ResourceState resources;public ResourceState Resources{get{var value=resources??(resources=new ResourceState{wheat=12});value.EnsurePopulation();return value;}}
+ public ResourceState resources;public ResourceState Resources{get{var value=resources??(resources=new ResourceState{wheat=VillagePopulation.Adults*2});value.EnsurePopulation();return value;}}
  public ToolTechnologyState tools;public ToolTechnologyState Tools{get{var value=tools??(tools=new ToolTechnologyState());value.EnsurePopulation();return value;}}
  public WeatherState weather;public WeatherState Weather=>weather??(weather=new WeatherState());
  public TributeMemory tribute;public TributeMemory Tribute=>tribute??(tribute=new TributeMemory());

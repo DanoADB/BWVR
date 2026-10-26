@@ -64,3 +64,56 @@ State remained valid. Ready meals never reached zero after the initial five-minu
 warm-up in this run; final food was 12.27 grain for seven residents. This is one
 observed run, not a balanced-economy guarantee for other conditions or all nine
 residents. Original user save was restored and hash-verified. No APK was built.
+
+## Doubled starting population — 2026-10-26
+
+The current starting roster is twelve adults: six men and six women. The original
+six keep their IDs, names, appearances, familiar roles and personal progress.
+Corin, Nora, Darin, Lena, Ewan and Faye add six more independent actors, with
+clothing tint variation and existing male/female humanoid prefabs. The new familiar
+farming/forestry roles cross the previous appearance pattern; all adults still
+choose needs-based jobs and have the same available capabilities. There remains
+one background water worker and the existing three-child/one-household foundation,
+for a bounded maximum of fifteen residents.
+
+This section supersedes the six-adult counts above. Save validation accepts the
+historical three- and six-entry rosters and the new twelve-entry roster. Expansion
+appends only missing social, trait, cargo and tool records, preserving every prior
+entry, pending cargo and parent identity. The twelve-adult save format retains
+version 1 with validated optional/larger arrays. New seasons start with 24 grain
+(two units per adult); loaded inventories are never increased. Food consumption
+and reserve targets count all fifteen possible residents, within existing covered
+capacity. Discovery visit bits cover the creature plus all twelve adults; earlier
+visit bits keep their meaning. Peer-memory limits already fit the enlarged roster.
+
+Spawn clearance, live actor avoidance, icons and personal routines apply to every
+new adult. This does not add multi-household simulation, a larger child cap or an
+unlimited population. Quest device performance and food balance still need hardware
+and longer mixed-weather validation; Editor simulation results are not a headset
+frame-rate guarantee.
+
+Validation for the twelve-adult update: PopulationChecks (model and runtime),
+FoodReserveChecks, ToolTechnologyChecks, ResourceChecks, TurnipChecks,
+HouseholdStorageChecks and SpiritChecks model passed. Actual prefab rigs and
+clothing variation were inspected in a staged twelve-character lineup.
+
+In a 1,200-second unattended clear-weather simulation from 24 grain/18 timber,
+all twelve adults delivered resources: 1, 7, 9, 8, 6, 8, 7, 7, 7, 7, 6 and 10
+completed deliveries (83 total). Twelve learned the hoe design; nine crafted it.
+Three farms were prepared, twelve crops were sown and eleven matured. One child
+was born. The season remained valid. Ready food did not reach zero after the
+five-minute warm-up, but ended at about 82 seconds of meals for thirteen people;
+this is an observed run, not a balanced-economy guarantee. The loop took about
+23 seconds of Editor CPU time, which does not measure Quest rendering performance.
+
+Twelve of fourteen broader regression checks passed: hybrid decision model,
+gathering, shared activities, construction yard, village building, villager repair,
+bridges, navigation, tree play, weather, creature carrying and teaching feedback.
+Two failures remain unresolved: HybridChecks.VerifyRuntime did not confirm a
+water-delivery outcome in its isolated creature loop; DevelopmentFocusChecks
+encountered a null resource record in HarvestSeconds after replacing live season
+state. A separate water diagnostic did complete one delivery, but the full hybrid
+check still failed on retest. Do not interpret this update as passing every
+regression or resolving those failures. No production workaround was added to
+suppress them. Original user save restored and hash-verified after stopping Play
+mode. No APK built; physical headset performance remains unverified.

@@ -200,3 +200,11 @@ legacy IDs and saved progress. Count all residents in food demand, retain one
 background water worker and the existing household/three-child limits. See
 EXPANDED_POPULATION.md. Larger settlement, multi-household expansion and economy
 tuning remain future work.
+
+### Twelve starting adults — 2026-10-26
+
+Double the starting village to twelve autonomous adults, six men and six women.
+Preserve the first six identities and migrate both three- and six-adult saves.
+Count up to fifteen residents including the existing child cap, retain one
+background water routine, and keep personal cargo, learning, discovery and social
+records independent. See EXPANDED_POPULATION.md for current counts and validation.
