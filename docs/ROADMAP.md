@@ -12,13 +12,13 @@ Research supplies design hypotheses, not proof that copying a feature will repro
 
 ## Current baseline
 
-The S0 targeted Editor checkpoint is recorded in [BASELINE_CHECKPOINT.md](BASELINE_CHECKPOINT.md); S1 attention/response is the next planned feature, followed by early audio S1A. The immediate navigation-speed and player-issued sign adjustments are implemented, with hardware feel still pending.
+The S0 checkpoint is recorded in [BASELINE_CHECKPOINT.md](BASELINE_CHECKPOINT.md). S1 attention/evidence, S1A audio/music and S2 physical rain/fan tools have Editor-tested foundations. Next implementation stage: S3 useful shelter and planting. Hardware feel/performance remains pending.
 
-“Foundation” means a bounded implementation exists, not feature completeness or verified standalone Quest performance. This documentation update does not rerun gameplay checks.
+“Foundation” means a bounded implementation exists, not feature completeness or verified standalone Quest performance. Verification results and limits are recorded in the feature documents.
 
 | Area | Current status | Next extension |
 | --- | --- | --- |
-| Player tools | Foundation: wrist palette, paid cistern rain, targeted healing, one saved player-issued guidance sign; old intention props hidden | Local world effects, clear acknowledgments, physical skill |
+| Player tools | Foundation: wrist palette, paid cistern rain, targeted healing, one saved player-issued guidance sign, local rain brush and directional wind fan; old intention props hidden | Useful shelters and bounded planting (S3) |
 | Creature autonomy | Foundation: utility selection, exclusive action owner, contextual training, needs/favorites/practice | Perceived opportunities, short reusable plans, richer learning |
 | Shared activities | Foundation: ball, fetch, chime, bench visits and cooperative construction | A gathering place with several uses and changing social meaning |
 | Village agency | Foundation: twelve adults, individual memories, gathering, farming, storage, equipment and limited households | Need-driven projects, broader cooperation and settlement growth |
@@ -31,7 +31,7 @@ The S0 targeted Editor checkpoint is recorded in [BASELINE_CHECKPOINT.md](BASELI
 
 See the feature documents for exact limits: [tools](GOD_TOOLS.md), [creature](CREATURE_BEHAVIOR.md), [play](PLAY_AND_VILLAGE_RESPONSE.md), [construction](CONSTRUCTION_YARD.md), [materials](WEATHER_AND_MATERIALS.md), [technology](TOOLS_AND_TECHNOLOGY.md), [population](EXPANDED_POPULATION.md) and [Book](BOOK_OF_CREATION.md).
 
-S1 attention and factual outcome evidence are implemented for Editor testing; see [CREATURE_RESPONSES.md](CREATURE_RESPONSES.md). S1A environmental/contextual audio now has an Editor-tested foundation; see [ISLAND_AUDIO.md](ISLAND_AUDIO.md). The soft background melody is now implemented; see [ISLAND_MUSIC.md](ISLAND_MUSIC.md). Next implementation: S2 physical rain brush, then wind fan. Food work can temporarily be paused independently in exploration focus to observe other behaviors; see [VILLAGE_OBSERVATION.md](VILLAGE_OBSERVATION.md).
+S1 attention and factual outcome evidence are implemented for Editor testing; see [CREATURE_RESPONSES.md](CREATURE_RESPONSES.md). S1A environmental/contextual audio now has an Editor-tested foundation; see [ISLAND_AUDIO.md](ISLAND_AUDIO.md). The soft background melody is now implemented; see [ISLAND_MUSIC.md](ISLAND_MUSIC.md). S2 rain brush and wind fan are implemented; see [PHYSICAL_GOD_TOOLS.md](PHYSICAL_GOD_TOOLS.md). Next implementation: S3 useful shelter and planting. Food work can temporarily be paused independently in exploration focus to observe other behaviors; see [VILLAGE_OBSERVATION.md](VILLAGE_OBSERVATION.md).
 
 ## Research attributes to incorporate
 

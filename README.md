@@ -101,3 +101,5 @@ Exploration observation can temporarily pause villager food work and meal consum
 The island now has quiet surf/wind/rain, sparse birds and pooled interaction sounds. Open the wrist sanctuary → **Sound** for device-local master/ambience/effects levels. These are original sound sketches; an original background-music sketch now plays with long quiet gaps, while Quest listening/profiling remain pending. See [island audio](docs/ISLAND_AUDIO.md).
 
 Music has a separate volume/mute under **wrist sanctuary → Sound → Music**. The original Quiet Island sketch fades beneath interactions and storms. See [music behavior and checks](docs/ISLAND_MUSIC.md).
+
+**God tools** now includes a local **Rain brush** (wet/cool material, tend planted crops) and **Wind fan** (nudge free balls/loose blocks). Hold the normal tool trigger, or F on desktop; release to stop. Both use limited energy and respect held/reserved objects. See [physical tools](docs/PHYSICAL_GOD_TOOLS.md).

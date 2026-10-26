@@ -11,7 +11,7 @@ public sealed partial class WorldBrush:MonoBehaviour {
  SliceState knownSeason;
  void EnsureSeason(){if(knownSeason==Season)return;Stop();nextPulse=0;knownSeason=Season;}
  float nextPulse,heldFor;int strokePulses;bool restRequired;SliceState Season=>creature.Season;
- public static WorldBrush Build(Transform parent,CreatureHybrid god,DivineIntervention miracles,IslandNavigation nav){var go=new GameObject("Physical god brush tools");go.transform.SetParent(parent,false);var b=go.AddComponent<WorldBrush>();b.creature=god;b.miracles=miracles;b.nav=nav;b.weather=nav.GetComponentInChildren<IslandWeather>();b.resources=nav.GetComponentInChildren<VillageResources>();b.BuildRain();return b;}
+ public static WorldBrush Build(Transform parent,CreatureHybrid god,DivineIntervention miracles,IslandNavigation nav){var go=new GameObject("Physical god brush tools");go.transform.SetParent(parent,false);var b=go.AddComponent<WorldBrush>();b.creature=god;b.miracles=miracles;b.nav=nav;b.weather=nav.GetComponentInChildren<IslandWeather>();b.resources=nav.GetComponentInChildren<VillageResources>();b.BuildRain();b.BuildWind();return b;}
  void BuildRain(){material=new Material(Resources.Load<Material>("ConstructionPreview"));var go=new GameObject("Player rain brush — 64 droplets");go.transform.SetParent(transform,false);rain=go.AddComponent<ParticleSystem>();rain.Stop(true,ParticleSystemStopBehavior.StopEmittingAndClear);var main=rain.main;main.playOnAwake=false;main.loop=true;main.startSpeed=0;main.startLifetime=.7f;main.startSize=nav.Scale*.18f;main.startColor=new Color(.45f,.8f,1,.75f);main.maxParticles=64;main.simulationSpace=ParticleSystemSimulationSpace.World;var emission=rain.emission;emission.rateOverTime=70;var shape=rain.shape;shape.shapeType=ParticleSystemShapeType.Circle;shape.radius=nav.Scale*12;shape.rotation=new Vector3(90,0,0);var velocity=rain.velocityOverLifetime;velocity.enabled=true;velocity.space=ParticleSystemSimulationSpace.World;velocity.y=-nav.Scale*30;var renderer=rain.GetComponent<ParticleSystemRenderer>();renderer.sharedMaterial=material;renderer.renderMode=ParticleSystemRenderMode.Stretch;renderer.lengthScale=3;renderer.shadowCastingMode=ShadowCastingMode.Off;}
  public bool CanRain(Vector3 point,out string reason){EnsureSeason();reason="";
   if(Season.paused||miracles.Suspended){reason="Paused";return false;}
@@ -26,12 +26,12 @@ public sealed partial class WorldBrush:MonoBehaviour {
   Season.Hybrid.energy-=RainCost;nextPulse=Season.Hybrid.time+PulseSeconds;Pulses++;Point=point;Reason="";creature.InvalidateLesson("Player rain brush is not creature work");
   Season.Hybrid.Evidence.Add(Season.Hybrid.time,EvidenceKind.Miracle,EvidenceSource.PlayerMiracle,CreatureAction.IdleOrObserve,"ground-rain-brush","Local rain dose; affected "+affected+"; cost "+RainCost);IslandAudio.Cue(IslandSound.Pour,point,GetEntityId().GetHashCode(),.5f);return true;
  }
- public bool ProcessRain(Vector3 point,bool held,float dt,bool aimValid=true){EnsureSeason();if(!held||Season.paused||miracles.Suspended||!HybridState.Number(dt,0,1)){Stop();return false;}heldFor+=Mathf.Min(dt,.05f);if(Season.Hybrid.energy<RainCost){restRequired=true;StopRain();Reason="Release the trigger: energy exhausted";return false;}if(restRequired||heldFor>StrokeSeconds||strokePulses>=16){StopRain();Reason="Release the trigger to rest the brush";return false;}
+ public bool ProcessRain(Vector3 point,bool held,float dt,bool aimValid=true){EnsureSeason();StopWind();if(!held||Season.paused||miracles.Suspended||!HybridState.Number(dt,0,1)){Stop();return false;}heldFor+=Mathf.Min(dt,.05f);if(Season.Hybrid.energy<RainCost){restRequired=true;StopRain();Reason="Release the trigger: energy exhausted";return false;}if(restRequired||heldFor>StrokeSeconds||strokePulses>=16){StopRain();Reason="Release the trigger to rest the brush";return false;}
   if(!aimValid){StopRain();Reason="Aim at a supported patch of island ground";return false;}if(!CanRain(point,out var reason)){StopRain();Reason=reason;return false;}bool applied=false;if(Season.Hybrid.time>=nextPulse){applied=RainPulse(point);if(applied)strokePulses++;}
   Active=true;Point=point;rain.transform.position=point+Vector3.up*nav.Scale*20;if(!rain.isPlaying)rain.Play();return applied;
  }
  void StopRain(){Active=false;if(rain!=null)rain.Stop(true,ParticleSystemStopBehavior.StopEmittingAndClear);}
- public void Stop(){StopRain();heldFor=0;strokePulses=0;restRequired=false;}
+ public void Stop(){StopRain();StopWind();heldFor=0;strokePulses=0;restRequired=false;}
  void OnDisable(){Stop();}void OnDestroy(){if(material!=null)Destroy(material);}
 }
 }

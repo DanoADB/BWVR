@@ -124,5 +124,12 @@
     "rms": 0.07298817316271751,
     "boundaryDelta": 0.0,
     "loop": false
+  },
+  "gust": {
+    "seconds": 0.48,
+    "peak": 0.68,
+    "rms": 0.0974553669891115,
+    "boundaryDelta": 0.0,
+    "loop": false
   }
 }

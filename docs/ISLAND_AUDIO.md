@@ -23,7 +23,7 @@ Explicit pause/application suspension stops one-shots and pauses loops in place.
 
 ## Sources and imports
 
-All 18 mono sound sketches are original procedural noise/oscillator designs, with no third-party recordings. WAVs: PCM16 / 22050 Hz, about 2.19 MB source and 4.38 MB decoded PCM before Unity object overhead. Small files use preloaded PCM DecompressOnLoad; only this new owned asset folder receives those importer settings. The generator, waveform report and CC0 audio dedication live beside the assets/in tools. This is a first-pass sound palette, not photoreal recordings or an imitated score.
+All 19 mono sound sketches are original procedural noise/oscillator designs, with no third-party recordings. WAVs: PCM16 / 22050 Hz, about 2.21 MB source and 4.43 MB decoded PCM before Unity object overhead. Small files use preloaded PCM DecompressOnLoad; only this new owned asset folder receives those importer settings. The generator, waveform report and CC0 audio dedication live beside the assets/in tools. This is a first-pass sound palette, not photoreal recordings or an imitated score.
 
 ## Validation
 

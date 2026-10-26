@@ -20,7 +20,7 @@ Current implementation order, 2026-10-26. Implements [ROADMAP.md](ROADMAP.md). T
 
 **Gate:** current project compiles; baseline pickup/drop, pause/resume, saving, autonomy and tool release/rearm work. Classify failures as product defects or demonstrated test-fixture defects with evidence. Preserve a known-good save and record starting population/weather/seed. No priority changes to water merely to make a test pass.
 
-**Depends on:** existing implementation. **S1 Editor implementation:** delivered; see [CREATURE_RESPONSES.md](CREATURE_RESPONSES.md). Headset readability remains a release check. S1A ambience/context foundation is delivered for Editor testing; the background-melody increment passed Editor behavior/output checks. Next stage: S2 physical rain brush.
+**Depends on:** existing implementation. **S1 Editor implementation:** delivered; see [CREATURE_RESPONSES.md](CREATURE_RESPONSES.md). Headset readability remains a release check. S1A ambience/context foundation is delivered for Editor testing; the background-melody increment passed Editor behavior/output checks. S2 rain/fan tools are delivered for Editor testing. Next stage: S3 useful shelter and planting.
 
 ## S1 — Make attention and consequences readable
 
@@ -46,7 +46,7 @@ Current implementation order, 2026-10-26. Implements [ROADMAP.md](ROADMAP.md). T
 
 ## S2 — Turn tools into world interactions
 
-**Rain increment:** implemented and Editor-checked; see [PHYSICAL_GOD_TOOLS.md](PHYSICAL_GOD_TOOLS.md). Wind fan is next.
+**Status:** local rain brush and directional wind fan implemented and Editor-checked; see [PHYSICAL_GOD_TOOLS.md](PHYSICAL_GOD_TOOLS.md). Quest feel/performance remains pending. Next: S3.
 
 **Deliver in two increments:** first a bounded ground-target rain brush, then a lightweight directional wind fan. Rain uses the same wetness/cooling rules as weather and affects only implemented local crop/material properties. Wind applies capped force to supported loose objects and visible foliage/particles. Preserve existing cistern rain's explicit accounting; do not grant global water/crop bonuses for every brush patch.
 

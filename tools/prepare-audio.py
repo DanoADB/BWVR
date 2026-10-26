@@ -49,6 +49,6 @@ for args in [
  ('snap',.30,520,13,.3,-250),('ball',.28,180,17,.3,-110),('pour',.85,480,2,.95,-180),
  ('harvest',.24,200,20,.8,-80),('notice',.35,300,7,.05,200),('content',.6,190,3,.08,80),
  ('uneasy',.48,200,4,.2,-100),('miracle',1.2,580,2,.04,300),('discovery',.8,440,3,.05,350),
- ('chime',.6,660,5,.02,0),('bird',.85,1800,1,.01,1600),('thunder',2.6,48,1.3,.9,-20)]:effect(*args)
+ ('chime',.6,660,5,.02,0),('bird',.85,1800,1,.01,1600),('thunder',2.6,48,1.3,.9,-20),('gust',.48,90,3,.99,-20)]:effect(*args)
 (OUT/'analysis.json').write_text(json.dumps(report,indent=2)+'\n')
 print(json.dumps({'clips':len(report),'pcmBytes':sum((OUT/(k+'.wav')).stat().st_size for k in report),'maxLoopBoundary':max(v['boundaryDelta'] for v in report.values() if v['loop'])}))
