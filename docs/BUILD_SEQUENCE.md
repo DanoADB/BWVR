@@ -14,11 +14,13 @@ Current implementation order, 2026-10-26. Implements [ROADMAP.md](ROADMAP.md). T
 
 ## S0 — Establish a trustworthy checkpoint
 
+**Checkpoint:** targeted Editor baseline recorded in [BASELINE_CHECKPOINT.md](BASELINE_CHECKPOINT.md). The resource-state fixture defect is corrected; both previously failing checks passed in the final run. The historical intermittent hybrid failure's cause remains unproven. Hardware/full-suite validation is not claimed. Next planned feature is S1.
+
 **Deliver:** confirm current source and saves, document available event receipts and tool/actor ownership, and make a short repeatable baseline scenario. Resolve or isolate the older HybridChecks water-receipt failure and DevelopmentFocus state-swap fixture failure before expanding affected systems; report any unresolved failure explicitly.
 
 **Gate:** current project compiles; baseline pickup/drop, pause/resume, saving, autonomy and tool release/rearm work. Classify failures as product defects or demonstrated test-fixture defects with evidence. Preserve a known-good save and record starting population/weather/seed. No priority changes to water merely to make a test pass.
 
-**Depends on:** existing implementation. **First implementation task:** S0 followed by S1.
+**Depends on:** existing implementation. **Next implementation task after this checkpoint:** S1.
 
 ## S1 — Make attention and consequences readable
 
@@ -138,7 +140,7 @@ Current implementation order, 2026-10-26. Implements [ROADMAP.md](ROADMAP.md). T
 
 ## How to choose the next task
 
-1. Follow the earliest unfinished dependency for the active milestone; default now is S0 → S1 → S1A (ambience → contextual sounds → gentle music) → S2 → S3 → S4.
+1. Follow the earliest unfinished dependency for the active milestone; the S0 Editor checkpoint is recorded, so default now is S1 → S1A (ambience → contextual sounds → gentle music) → S2 → S3 → S4. Recheck the baseline after affected system changes.
 2. Write the small user-visible outcome, source integration points and acceptance check before coding. Do not implement an entire stage in one uncontrolled change.
 3. Verify affected behavior plus necessary regressions, inspect actual presentation, preserve the user's save, commit and push. Record limitations in the feature document and update this roadmap's status when a stage passes.
 4. At S4 and S7, use playtests to choose depth versus breadth. Reorder later work explicitly based on results; do not silently treat research suggestions as completed features.
