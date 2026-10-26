@@ -9,7 +9,7 @@ public sealed partial class VillageResources {
  public bool NeedsFoodReserve=>MealGrain<FoodReserveTarget;
  public bool FoodEmergency=>FoodSeconds<135;
  // Six minutes of meals plus three future sowings; bounded by real covered space.
- public static float ReserveTarget(int people,float capacity)=>Mathf.Min(Mathf.Max(0,capacity),Mathf.Clamp(people,0,6)*4+3);
+ public static float ReserveTarget(int people,float capacity)=>Mathf.Min(Mathf.Max(0,capacity),Mathf.Clamp(people,0,VillagePopulation.Maximum)*4+3);
  GameObject[] reserveMeals;
  public int VisibleReserveMeals {get;private set;}
  void BuildFoodReserveMarker(){

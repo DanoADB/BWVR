@@ -191,3 +191,12 @@ costs; terrain editing requires coordinated geometry/collision/navigation and sa
 support. The Book and integrated palette remain planned. Companion AI/voice work
 stays deferred. See [summonable tools](SUMMONABLE_TOOLS.md) for sequencing and gates;
 current food-priority tuning remains ahead of this interface work.
+
+### Six starting adults — 2026-10-26
+
+Expand the village to six autonomous adults, with three men and three women and
+clothing variation. Extend personal social/cargo/tool/trait records while preserving
+legacy IDs and saved progress. Count all residents in food demand, retain one
+background water worker and the existing household/three-child limits. See
+EXPANDED_POPULATION.md. Larger settlement, multi-household expansion and economy
+tuning remain future work.

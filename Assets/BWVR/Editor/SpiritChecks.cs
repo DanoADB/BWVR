@@ -10,7 +10,7 @@ public static class SpiritChecks {
  public static void VerifyModel(){
   var legacy=new SliceState();string before=JsonUtility.ToJson(legacy);var empty=SpiritObservation.Capture(legacy,CreatureAffect.Mood.Curious);
   Require(JsonUtility.ToJson(legacy)==before&&legacy.resources==null&&legacy.hybrid==null&&legacy.families==null,"Inspection initialized or changed legacy state");
-  Require(!empty.resourcesKnown&&empty.adults==3&&empty.children==0&&empty.learnedAssociations==0&&empty.weather=="Unknown","Unknown observations invented data");
+  Require(!empty.resourcesKnown&&empty.adults==VillagePopulation.Adults&&empty.children==0&&empty.learnedAssociations==0&&empty.weather=="Unknown","Unknown observations invented data");
   Require(empty.Summary().Contains("AI DISCONNECTED")&&SpiritObservation.Capture(null,CreatureAffect.Mood.Calm)==null,"Disconnected/missing-state status wrong");
   var state=new SliceState{resources=new ResourceState{wood=9,wheat=11,resin=2,exposedWheat=3},hybrid=new HybridState(),families=new FamilyState(),weather=new WeatherState()};
   state.hybrid.associations=new[]{new LearnedAssociation{samples=0},new LearnedAssociation{samples=2}};before=JsonUtility.ToJson(state);

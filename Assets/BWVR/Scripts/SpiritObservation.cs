@@ -8,9 +8,9 @@ public sealed class SpiritObservation {
  public readonly CreatureAffect.Mood mood;
  public readonly string weather;
  SpiritObservation(SliceState state,CreatureAffect.Mood feeling){
-  paused=state.paused;adults=3;children=state.families?.children?.Length??0;mood=feeling;
+  paused=state.paused;adults=VillagePopulation.Adults;children=state.families?.children?.Length??0;mood=feeling;
   resourcesKnown=state.resources!=null;
-  if(resourcesKnown){wood=state.resources.wood;wheat=state.resources.wheat;resin=state.resources.resin;exposedFood=state.resources.exposedWheat;}
+  if(resourcesKnown){wood=state.resources.wood;wheat=state.resources.wheat+state.resources.freshFood;resin=state.resources.resin;exposedFood=state.resources.exposedWheat;}
   weather=state.weather==null?"Unknown":state.weather.kind.ToString();
   if(state.hybrid?.associations!=null)foreach(var association in state.hybrid.associations)if(association!=null&&association.samples>0)learnedAssociations++;
  }

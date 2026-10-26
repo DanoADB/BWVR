@@ -9,7 +9,7 @@ public static class FoodReserveChecks {
  [MenuItem("BWVR/Verify food reserves (Play mode)")]
  public static void Verify(){
   Require(Application.isPlaying,"Enter Play mode");Require(VillageResources.ReserveTarget(3,48)==15&&VillageResources.ReserveTarget(6,48)==27&&VillageResources.ReserveTarget(6,20)==20,"Population/capacity reserve targets invalid");
-  var world=UnityEngine.Object.FindAnyObjectByType<VillageResources>();var slice=world.GetComponentInParent<QuestSlice>();var field=typeof(QuestSlice).GetField("state",BindingFlags.Instance|BindingFlags.NonPublic);var original=(SliceState)field.GetValue(slice);var actors=world.Gatherers;var positions=actors.Select(a=>a.transform.position).ToArray();var test=new SliceState{developmentFocus=true};test.Resources.wheat=6;test.Resources.wood=18;
+  var world=UnityEngine.Object.FindAnyObjectByType<VillageResources>();var slice=world.GetComponentInParent<QuestSlice>();var field=typeof(QuestSlice).GetField("state",BindingFlags.Instance|BindingFlags.NonPublic);var original=(SliceState)field.GetValue(slice);var actors=world.Gatherers;var positions=actors.Select(a=>a.transform.position).ToArray();var test=new SliceState{developmentFocus=true};test.Resources.wheat=VillagePopulation.Adults*2;test.Resources.wood=18;
   slice.GetComponentInChildren<CreatureHybrid>().Interrupt("Food reserve QA");foreach(var a in actors){a.Cancel();a.GetComponent<VillagerSocial>().ResetTask();a.GetComponent<VillagerExploration>().ResetTask();a.GetComponent<VillagerBlockPlay>().ResetTask();}
   field.SetValue(slice,test);world.ResetWorld();
   try{
