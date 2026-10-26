@@ -8,7 +8,9 @@ public sealed class HumanoidMotion:MonoBehaviour {
   var item=GetComponentInParent<CarryItem>();bool carried=item!=null&&item.held;
   delta.y=0;bool moving=delta.magnitude/Mathf.Max(Time.deltaTime,.000001f)>transform.lossyScale.y*.05f;
   if(item!=null&&item.kind!=Offering.Creature&&moving&&!carried&&!paused&&delta.sqrMagnitude>1e-12f)transform.rotation=Quaternion.LookRotation(delta);
-  animator.speed=paused?0:1;if(hands!=null)hands.paused=paused;animator.SetFloat("Speed",!paused&&!carried&&moving?1:0);animator.SetInteger("Activity",carried?0:activity);
+  bool walking=!paused&&!carried&&moving;
+  // A held load owns the hands, not the legs. Movement supersedes stale work poses.
+  animator.speed=paused?0:1;if(hands!=null)hands.paused=paused;animator.SetFloat("Speed",walking?1:0);animator.SetInteger("Activity",carried||walking?0:activity);
  }
  public void Activity(int value){activity=value;}
  public void Touch(Transform target){if(hands!=null)hands.touchTarget=target;}
