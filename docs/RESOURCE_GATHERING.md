@@ -7,7 +7,7 @@ This is the first autonomous resource milestone: finite gathering, reserved carr
 - A bounded registry selects up to 16 nearby suitable trees and eight existing field locations, using stable source identities and reachable native navigation approaches.
 - Each source contains 12 units. Workers reserve one source and up to three units of store capacity. No stock is credited until delivery.
 - Cutting a standing tree uses the existing work animation and a small hand axe. The tree becomes a stump, its original trunk navigation obstruction is removed through the existing asynchronous tree pipeline, and its remaining timber stays available for later trips. The creature cannot uproot a harvested or reserved tree. Workers prefer collecting timber already cut before felling more trees.
-- Existing fields gain small batched wheat stalks. Harvesting reduces their visible height to stubble as the finite yield is depleted. This does not yet sow a new crop or create a farm.
+- Existing fields use small batched wheat stalks. Harvesting lowers the visible crop to stubble as its finite yield is depleted. Villagers can now sow an emptied plot using stored grain and wait for green-to-gold growth before another harvest; see FARMING.md. Creating new farm plots remains later work.
 - A covered village store shows timber stacks and grain sacks filling up. It has a native navigation footprint and a separate approach point. Workers carry a visible load, reach the store, unload, then return to the shared scheduler.
 - Wood and wheat have capacities of 36 and 48 units. Low stocks encourage gathering toward a soft target of 18; simultaneous deliveries can exceed that target within capacity. Existing farmer/forester roles supply a small preference, rather than an exclusive resource assignment. The water gatherer retains its current work in normal play.
 - Each resident consumes one stored wheat unit per 90 simulation seconds. Wheat is an abstract food ration in this slice; milling, baking, individual hunger/starvation consequences and dietary variety are later work. Food comes from actual stock rather than the old crop-health meter.
@@ -24,7 +24,7 @@ The visible store and worker loads represent counted inventory. They are not yet
 
 ## Next resource milestones
 
-Replanting/sapling growth and deliberate forest creation; renewable resin; crop growth, sowing and new farm plots; additional foods; storage losses and weather preparation; then seasons. These remain queued in [gameplay direction](GAMEPLAY_DIRECTION.md). Existing tree play and resin-free toy systems are preserved rather than rewritten as an economy.
+Registered-site reforestation, renewable resin and wheat sowing/growth are implemented. Next resource work includes new forest/farm patches, additional foods, resin/wood recipes, weather-driven losses/preparation and seasons; see [gameplay direction](GAMEPLAY_DIRECTION.md). Existing tree play and construction toys retain their current behavior while the economy grows.
 
 ## Checks
 
@@ -40,6 +40,8 @@ The 2026-10-25 household/storage extension supersedes the fixed capacity and thr
 Replanting depleted registered tree sites and saved sapling growth are now implemented; see REFORESTATION.md. Each mature tree still offers a finite twelve-unit yield, renewed only after completed planting and growth.
 
 Renewable resin gathering is now implemented as a third distinct resource, linked to living wood trees. See RESIN_GATHERING.md for replenishment, reservations, capacity and persistence details.
+
+Renewable wheat now supersedes the initial finite-field limitation: villagers reserve grain and a depleted plot, sow it, and wait for visible growth/ripening before another harvest. See FARMING.md. New farm plots and additional crops remain later work.
 
 ## Planned wood uses
 
