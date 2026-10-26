@@ -16,17 +16,17 @@ public sealed partial class WorldBrush:MonoBehaviour {
  public bool CanRain(Vector3 point,out string reason){EnsureSeason();reason="";
   if(Season.paused||miracles.Suspended){reason="Paused";return false;}
   if(!GroundPoint(point)){reason="Aim at dry island ground";return false;}
-  if(Season.Hybrid.energy<RainCost){reason="Not enough spiritual energy";return false;}
+  if(!miracles.CanAfford(RainCost)){reason="Not enough spiritual energy";return false;}
   if(weather.RainBrush(point,PulseSeconds,false)+resources.RainBrush(point,PulseSeconds,false)==0){reason="Aim near dry timber, fire or growing crops";return false;}
   return true;
  }
  bool GroundPoint(Vector3 point){if(!HybridState.Number(point.x,-10000,10000)||!HybridState.Number(point.y,-10000,10000)||!HybridState.Number(point.z,-10000,10000))return false;return nav.Terrain!=null?nav.Terrain.Dry(point)&&Mathf.Abs(nav.Terrain.Project(point).y-point.y)<nav.Scale*2:Mathf.Abs(point.y-.82f)<nav.Scale*2;}
  public bool RainPulse(Vector3 point){EnsureSeason();if(Season.Hybrid.time<nextPulse){Reason="Brush is settling";return false;}if(!CanRain(point,out var reason)){Reason=reason;return false;}
   int affected=weather.RainBrush(point,PulseSeconds,true)+resources.RainBrush(point,PulseSeconds,true);if(affected==0){Reason="Nothing needs rain here";return false;}
-  Season.Hybrid.energy-=RainCost;nextPulse=Season.Hybrid.time+PulseSeconds;Pulses++;Point=point;Reason="";creature.InvalidateLesson("Player rain brush is not creature work");
-  Season.Hybrid.Evidence.Add(Season.Hybrid.time,EvidenceKind.Miracle,EvidenceSource.PlayerMiracle,CreatureAction.IdleOrObserve,"ground-rain-brush","Local rain dose; affected "+affected+"; cost "+RainCost);IslandAudio.Cue(IslandSound.Pour,point,GetEntityId().GetHashCode(),.5f);return true;
+  miracles.SpendEnergy(RainCost);nextPulse=Season.Hybrid.time+PulseSeconds;Pulses++;Point=point;Reason="";creature.InvalidateLesson("Player rain brush is not creature work");
+  Season.Hybrid.Evidence.Add(Season.Hybrid.time,EvidenceKind.Miracle,EvidenceSource.PlayerMiracle,CreatureAction.IdleOrObserve,"ground-rain-brush","Local rain dose; affected "+affected+"; cost "+miracles.EnergyCost(RainCost));IslandAudio.Cue(IslandSound.Pour,point,GetEntityId().GetHashCode(),.5f);return true;
  }
- public bool ProcessRain(Vector3 point,bool held,float dt,bool aimValid=true){EnsureSeason();StopWind();if(!held||Season.paused||miracles.Suspended||!HybridState.Number(dt,0,1)){Stop();return false;}heldFor+=Mathf.Min(dt,.05f);if(Season.Hybrid.energy<RainCost){restRequired=true;StopRain();Reason="Release the trigger: energy exhausted";return false;}if(restRequired||heldFor>StrokeSeconds||strokePulses>=16){StopRain();Reason="Release the trigger to rest the brush";return false;}
+ public bool ProcessRain(Vector3 point,bool held,float dt,bool aimValid=true){EnsureSeason();StopWind();if(!held||Season.paused||miracles.Suspended||!HybridState.Number(dt,0,1)){Stop();return false;}heldFor+=Mathf.Min(dt,.05f);if(!miracles.CanAfford(RainCost)){restRequired=true;StopRain();Reason="Release the trigger: energy exhausted";return false;}if(restRequired||heldFor>StrokeSeconds||strokePulses>=16){StopRain();Reason="Release the trigger to rest the brush";return false;}
   if(!aimValid){StopRain();Reason="Aim at a supported patch of island ground";return false;}if(!CanRain(point,out var reason)){StopRain();Reason=reason;return false;}bool applied=false;if(Season.Hybrid.time>=nextPulse){applied=RainPulse(point);if(applied)strokePulses++;}
   Active=true;Point=point;rain.transform.position=point+Vector3.up*nav.Scale*20;if(!rain.isPlaying)rain.Play();return applied;
  }

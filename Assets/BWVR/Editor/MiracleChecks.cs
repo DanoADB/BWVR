@@ -8,6 +8,7 @@ public static class MiracleChecks {
  [MenuItem("BWVR/Verify guidance tools and miracles (Play mode)")]
  public static void Verify(){
   if(!EditorApplication.isPlaying)throw new Exception("Enter Play mode first");var slice=UnityEngine.Object.FindAnyObjectByType<QuestSlice>();var god=UnityEngine.Object.FindAnyObjectByType<CreatureHybrid>();var system=UnityEngine.Object.FindAnyObjectByType<DivineIntervention>();var stateField=typeof(QuestSlice).GetField("state",BindingFlags.Instance|BindingFlags.NonPublic);var original=(SliceState)stateField.GetValue(slice);god.Interrupt("Miracle QA");var test=new SliceState{water=20,crops=40};stateField.SetValue(slice,test);
+  var energyTuning=system.tuning;bool unlimited=energyTuning.unlimitedEnergy;energyTuning.unlimitedEnergy=false;
   try{
    system.ResetWorld();if(system.tools.Count!=5||system.tools.Any(t=>t.GetComponent<CreatureAffordance>()!=null))throw new Exception("Physical cue inventory invalid");
    var target=god.Find("cistern");float energy=test.Hybrid.energy;test.Hybrid.receipt=new ActionReceipt{eligible=true,action=CreatureAction.WaterDelivery,situation=CreatureSituation.WaterShortage,target="water"};
@@ -24,8 +25,9 @@ public static class MiracleChecks {
    if(!system.TryUse(SpiritualTool.Help,target)||test.Hybrid.guidance.target!="cistern")throw new Exception("Physical help cue missing");
    var restored=JsonUtility.FromJson<SliceState>(JsonUtility.ToJson(test));if(!restored.Valid()||restored.Hybrid.energy!=test.Hybrid.energy||restored.Social(2).injury!=0||restored.Hybrid.guidance.status!=GuidanceStatus.Active)throw new Exception("Energy/guidance/health did not save");
    var ended=new SliceState{seconds=0,water=0,crops=0};ended.RememberOutcome();ended.water=ended.crops=100;if(ended.Won)throw new Exception("Free-play resource change rewrote season outcome");
+   energyTuning.unlimitedEnergy=true;test.Hybrid.energy=0;for(int i=0;i<6;i++){test.Hybrid.time+=1;if(!system.TryUse(SpiritualTool.Rain,target)||test.Hybrid.energy!=0)throw new Exception("Unlimited rain failed or spent at zero balance");}test.Hybrid.time+=1;patient.villager.Memory.injury=.35f;if(!system.TryUse(SpiritualTool.Heal,patient)||test.Hybrid.energy!=0||patient.villager.Memory.injury!=0)throw new Exception("Unlimited healing failed at zero balance");test.Hybrid.time+=1;test.paused=true;if(system.TryUse(SpiritualTool.Rain,target))throw new Exception("Unlimited miracle bypassed pause");test.paused=false;var zeroSave=JsonUtility.FromJson<SliceState>(JsonUtility.ToJson(test));if(!zeroSave.Valid()||zeroSave.Hybrid.energy!=0)throw new Exception("Unlimited mode corrupted saved balance");
    Debug.Log("BWVR_MIRACLE_PASS: five physical tools; rain exact delta/cost; duplicate and affordability gates; pause/suspend; healing only injury; no miracle training; recovery/effect expiry; credible protection; help cue; saved energy/health/guidance; historical outcome retained");
-  }finally{system.Suspended=false;god.Interrupt("Miracle QA complete");stateField.SetValue(slice,original);system.Tick(0,false);}
+  }finally{energyTuning.unlimitedEnergy=unlimited;system.Suspended=false;god.Interrupt("Miracle QA complete");stateField.SetValue(slice,original);system.Tick(0,false);}
  }
 }
 }

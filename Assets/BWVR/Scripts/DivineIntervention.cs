@@ -4,6 +4,7 @@ using UnityEngine;
 namespace BWVR {
 [Serializable] public sealed class DivineTuning {
  [Range(1,100)]public float maximum=100;[Range(0,100)]public float initial=60;public float rainCost=35,healingCost=25,recovery=.1f;
+ [Tooltip("Testing: tools consume no spiritual energy. Disable when tuning the economy.")] public bool unlimitedEnergy=true;
  public float rainWater=22,rainCrops=6;public bool initialMinorInjury=true;
 }
 public sealed class DivineIntervention:MonoBehaviour {
@@ -11,6 +12,10 @@ public sealed class DivineIntervention:MonoBehaviour {
  public readonly List<DivineTool> tools=new List<DivineTool>();CreatureHybrid creature;IslandNavigation nav;Vector3 cistern;Func<SliceState> season;
  ParticleSystem rain,healing;Material[] materials;Material particleMaterial;readonly List<Renderer> wraps=new List<Renderer>();VillagerRoutine[] villagers;readonly Dictionary<DivineTool,Renderer[]> views=new Dictionary<DivineTool,Renderer[]>();MaterialPropertyBlock tint;
  SliceState Season=>season();HybridState State=>Season.Hybrid;
+ public bool UnlimitedEnergy=>tuning.unlimitedEnergy;
+ public bool CanAfford(float cost)=>UnlimitedEnergy||State.energy>=cost;
+ public float EnergyCost(float cost)=>UnlimitedEnergy?0:cost;
+ public void SpendEnergy(float cost){State.energy-=EnergyCost(cost);}
  public static DivineIntervention Build(Transform parent,CreatureHybrid god,IslandNavigation navigation,Vector3 reservoir,VillagerRoutine[] residents,Func<SliceState> current){var root=new GameObject("Quiet intention and miracle tools");root.transform.SetParent(parent,false);var system=root.AddComponent<DivineIntervention>();system.Initialize(god,navigation,reservoir,residents,current);return system;}
  void Initialize(CreatureHybrid god,IslandNavigation navigation,Vector3 reservoir,VillagerRoutine[] residents,Func<SliceState> current){
   creature=god;nav=navigation;cistern=reservoir;villagers=residents;season=current;tint=new MaterialPropertyBlock();InitializeState();
@@ -39,7 +44,7 @@ public sealed class DivineIntervention:MonoBehaviour {
   if(kind<=SpiritualTool.Investigate)return creature.CanGuide((GuidanceIntent)kind,target,out reason);
   if(State.time<State.nextMiracleAt){reason="Wait for the previous gesture";return false;}
   float cost=Mathf.Clamp(kind==SpiritualTool.Rain?tuning.rainCost:tuning.healingCost,1,100);
-  if(float.IsNaN(cost)){reason="Invalid miracle tuning";return false;}if(State.energy<cost){reason="Not enough spiritual energy";return false;}
+  if(float.IsNaN(cost)){reason="Invalid miracle tuning";return false;}if(!CanAfford(cost)){reason="Not enough spiritual energy";return false;}
   if(kind==SpiritualTool.Rain&&(target==null||(target.kind!=HybridTargetKind.Cistern&&target.kind!=HybridTargetKind.Water))){reason="Aim rain at the cistern or water offering";return false;}
   if(kind==SpiritualTool.Heal&&(target?.villager==null||target.villager.Memory.injury<=0||target.GetComponent<CarryItem>()?.held==true)){reason="Aim at an injured villager";return false;}
   return true;
@@ -49,13 +54,13 @@ public sealed class DivineIntervention:MonoBehaviour {
   if(!Enum.IsDefined(typeof(SpiritualTool),kind)){LastReason="Unknown tool";return false;}if(kind>SpiritualTool.Heal){LastReason="Use the physical brush";return false;}if((int)kind<=(int)SpiritualTool.Investigate){bool accepted=creature.Guide((GuidanceIntent)kind,target);LastReason=accepted?"":State.guidance.reason;return accepted;}
   if(State.time<State.nextMiracleAt){LastReason="Wait for the previous gesture";return false;}
   float cost=Mathf.Clamp(kind==SpiritualTool.Rain?tuning.rainCost:tuning.healingCost,1,100);if(float.IsNaN(cost)){LastReason="Invalid miracle tuning";return false;}
-  if(State.energy<cost){LastReason="Not enough spiritual energy";return false;}
+  if(!CanAfford(cost)){LastReason="Not enough spiritual energy";return false;}
   if(kind==SpiritualTool.Rain&&(target==null||(target.kind!=HybridTargetKind.Cistern&&target.kind!=HybridTargetKind.Water))){LastReason="Rain belongs over the village water system";return false;}
   if(kind==SpiritualTool.Heal&&(target?.villager==null||target.villager.Memory.injury<=0||target.GetComponent<CarryItem>()?.held==true)){LastReason="No available injured villager";return false;}
-  IslandAudio.Cue(IslandSound.Miracle,target.transform.position,GetEntityId().GetHashCode());State.energy-=cost;State.nextMiracleAt=State.time+.5f;creature.InvalidateLesson("Player miracle is not creature work");
+  IslandAudio.Cue(IslandSound.Miracle,target.transform.position,GetEntityId().GetHashCode());SpendEnergy(cost);State.nextMiracleAt=State.time+.5f;creature.InvalidateLesson("Player miracle is not creature work");
   if(kind==SpiritualTool.Rain){Season.RememberOutcome();Season.water=Mathf.Clamp(Season.water+tuning.rainWater,0,100);Season.crops=Mathf.Clamp(Season.crops+tuning.rainCrops,0,100);State.rainRemaining=6;rain.Play();foreach(var v in villagers)v.Celebrate(creature.transform);}
   else {target.villager.Memory.injury=0;target.GetComponent<HumanoidMotion>()?.React();healing.transform.position=target.transform.position+Vector3.up*nav.Scale;healing.Play();healing.Emit(16);}
-  if(creature.CanSeeCue(target))creature.GetComponent<CreatureCuriosity>().NoticeGreeting(target.transform);creature.Journal.Add(State.time,"miracle",CreatureAction.IdleOrObserve,target.id,kind+" cost "+cost);State.Evidence.Add(State.time,EvidenceKind.Miracle,EvidenceSource.PlayerMiracle,CreatureAction.IdleOrObserve,target.id,kind+" cost "+cost);LastReason="";RefreshConditions();return true;
+  if(creature.CanSeeCue(target))creature.GetComponent<CreatureCuriosity>().NoticeGreeting(target.transform);creature.Journal.Add(State.time,"miracle",CreatureAction.IdleOrObserve,target.id,kind+" cost "+EnergyCost(cost));State.Evidence.Add(State.time,EvidenceKind.Miracle,EvidenceSource.PlayerMiracle,CreatureAction.IdleOrObserve,target.id,kind+" cost "+EnergyCost(cost));LastReason="";RefreshConditions();return true;
  }
  public void Tick(float dt,bool paused){
   bool frozen=paused||Suspended;if(frozen){if(rain.isPlaying)rain.Pause();if(healing.isPlaying)healing.Pause();return;}
@@ -63,7 +68,7 @@ public sealed class DivineIntervention:MonoBehaviour {
   if(State.rainRemaining>0){if(!rain.isPlaying)rain.Play();}else if(rain.isPlaying||rain.isPaused)rain.Stop(true,ParticleSystemStopBehavior.StopEmittingAndClear);
   if(healing.isPaused)healing.Play();RefreshConditions();
  }
- void RefreshConditions(){for(int i=0;i<wraps.Count;i++)wraps[i].enabled=villagers[i].GetComponent<VillagerSocial>().Memory.injury>0;foreach(var tool in tools){float cost=tool.kind==SpiritualTool.Rain?tuning.rainCost:tool.kind==SpiritualTool.Heal?tuning.healingCost:0;float light=cost<=0||State.energy>=cost?1:.28f;foreach(var r in views[tool]){var c=r.sharedMaterial.color;c.r*=light;c.g*=light;c.b*=light;tint.SetColor("_Color",c);r.SetPropertyBlock(tint);}}}
+ void RefreshConditions(){for(int i=0;i<wraps.Count;i++)wraps[i].enabled=villagers[i].GetComponent<VillagerSocial>().Memory.injury>0;foreach(var tool in tools){float cost=tool.kind==SpiritualTool.Rain?tuning.rainCost:tool.kind==SpiritualTool.Heal?tuning.healingCost:0;float light=cost<=0||CanAfford(cost)?1:.28f;foreach(var r in views[tool]){var c=r.sharedMaterial.color;c.r*=light;c.g*=light;c.b*=light;tint.SetColor("_Color",c);r.SetPropertyBlock(tint);}}}
  public void ResetWorld(){InitializeState();foreach(var tool in tools)tool.ReturnHome();rain.Stop(true,ParticleSystemStopBehavior.StopEmittingAndClear);healing.Stop(true,ParticleSystemStopBehavior.StopEmittingAndClear);RefreshConditions();}
  void OnDestroy(){if(materials!=null)foreach(var m in materials)Destroy(m);if(particleMaterial!=null)Destroy(particleMaterial);}
 }
