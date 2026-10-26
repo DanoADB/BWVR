@@ -133,7 +133,7 @@ public sealed class QuestSlice:MonoBehaviour {
   if(xr){if(!trackingConfigured){var inputs=new List<XRInputSubsystem>();SubsystemManager.GetSubsystems(inputs);bool floor=false;foreach(var input in inputs)floor|=input.TrySetTrackingOriginMode(TrackingOriginModeFlags.Floor);if(!floor)rig.position+=Vector3.up*1.55f;trackingConfigured=true;}Pose(XRNode.Head,eye.transform);UpdateController(0,left);UpdateController(1,right);if(!viewPlaced){var head=InputDevices.GetDeviceAtXRNode(XRNode.Head);if(head.TryGetFeatureValue(CommonUsages.isTracked,out bool tracked)&&tracked)RecenterView();}
    bool zoom=controllerHands[1].zoom;
    if(zoom&&!zoomHeld)zoomFocus=ZoomFocus();
-   if(zoom&&held[0]==null&&held[1]==null){float value=controllerHands[1].stick.y;if(Mathf.Abs(value)>.2f)QuestControls.Zoom(rig,zoomFocus,value*Time.deltaTime);}
+   if(zoom&&held[0]==null&&held[1]==null){float value=controllerHands[1].stick.y;if(Mathf.Abs(value)>.2f)QuestControls.Zoom(rig,zoomFocus,value*QuestControls.ZoomSpeed*Mathf.Min(Time.deltaTime,.05f));}
    zoomHeld=zoom;
    QuestControls.Move(rig,eye.transform,controllerHands[0].stick,zoom?Vector2.zero:controllerHands[1].stick,Time.deltaTime,ref turnHeld);
    UpdateViewScale();
@@ -199,10 +199,10 @@ public sealed class QuestSlice:MonoBehaviour {
   aims[side].SetLocalPositionAndRotation(input.aimPosition,input.aimRotation);
  }
  void Pose(XRNode node,Transform target){var d=InputDevices.GetDeviceAtXRNode(node);if(d.TryGetFeatureValue(CommonUsages.devicePosition,out Vector3 p))target.localPosition=p;if(d.TryGetFeatureValue(CommonUsages.deviceRotation,out Quaternion r))target.localRotation=r;}
- void Desktop(){var k=Keyboard.current;var m=Mouse.current;if(k==null||m==null)return;if(m.rightButton.isPressed){var delta=m.delta.ReadValue()*.12f;var e=eye.transform.localEulerAngles;float pitch=Mathf.DeltaAngle(0,e.x);eye.transform.localRotation=Quaternion.Euler(Mathf.Clamp(pitch-delta.y,-65,65),e.y+delta.x,0);}var movement=new Vector3((k.dKey.isPressed?1:0)-(k.aKey.isPressed?1:0),0,(k.wKey.isPressed?1:0)-(k.sKey.isPressed?1:0));rig.position+=Quaternion.Euler(0,eye.transform.eulerAngles.y,0)*movement*Time.deltaTime*(.6f*rig.localScale.x);
-  if(held[0]==null&&held[1]==null&&Mathf.Abs(m.scroll.ReadValue().y)>.01f){QuestControls.Zoom(rig,ZoomFocus(),m.scroll.ReadValue().y*.0015f);UpdateViewScale();}right.position=eye.transform.position-eye.transform.up*.08f;right.rotation=eye.transform.rotation;}
+ void Desktop(){var k=Keyboard.current;var m=Mouse.current;if(k==null||m==null)return;if(m.rightButton.isPressed){var delta=m.delta.ReadValue()*.12f;var e=eye.transform.localEulerAngles;float pitch=Mathf.DeltaAngle(0,e.x);eye.transform.localRotation=Quaternion.Euler(Mathf.Clamp(pitch-delta.y,-65,65),e.y+delta.x,0);}var movement=new Vector3((k.dKey.isPressed?1:0)-(k.aKey.isPressed?1:0),0,(k.wKey.isPressed?1:0)-(k.sKey.isPressed?1:0));rig.position+=Quaternion.Euler(0,eye.transform.eulerAngles.y,0)*Vector3.ClampMagnitude(movement,1)*Mathf.Min(Time.deltaTime,.05f)*(QuestControls.TravelSpeed*rig.localScale.x);
+  if(held[0]==null&&held[1]==null&&Mathf.Abs(m.scroll.ReadValue().y)>.01f){QuestControls.Zoom(rig,ZoomFocus(),m.scroll.ReadValue().y*QuestControls.WheelZoomSpeed);UpdateViewScale();}right.position=eye.transform.position-eye.transform.up*.08f;right.rotation=eye.transform.rotation;}
  bool TryGrab(int side,CarryItem item){
-  if(godTools!=null&&godTools.ClaimsInput)return false;if(item==null||!item.CanGrab||held[side]!=null||(item.kind==Offering.Creature&&side!=1))return false;
+  if(godTools!=null&&godTools.ClaimsInput)return false;if(item==null||!item.gameObject.activeInHierarchy||!item.CanGrab||held[side]!=null||(item.kind==Offering.Creature&&side!=1))return false;
   if(item.kind==Offering.Creature){item.home=item.transform.position;hybrid.Interrupt("Picked up by the player");}
   throwMotion[side].Reset();held[side]=item;item.held=true;item.GetComponent<Collider>().enabled=false;item.GetComponent<ConstructionBlock>()?.Grab();notice="Release the carry button over clear ground to place.";return true;
  }
@@ -265,7 +265,7 @@ public sealed class QuestSlice:MonoBehaviour {
   string title=developmentFocus?(state.paused?"EXPLORATION · Paused":"EXPLORATION"):("THE LONG DRY"+(state.Finished?(state.Won?" · Village safe":" · Village struggling"):state.paused?" · Paused":""));
   if(!helpVisible)return title+"\nEnergy "+Mathf.FloorToInt(state.Hybrid.energy)+(saveError!=null?"\n"+saveError:"");
   var g=state.Hybrid.guidance;string reason=g.reason.Length>48?g.reason.Substring(0,48):g.reason;
-  return title+" · "+Mathf.CeilToInt(state.seconds)+"s\nWater "+Mathf.RoundToInt(state.water)+" · Crops "+Mathf.RoundToInt(state.crops)+" · Energy "+Mathf.FloorToInt(state.Hybrid.energy)+"\n"+hybrid.Explanation+"\nCue: "+g.status+(reason.Length>0?" · "+reason:"")+"\nRight front trigger: hold to carry the creature or objects · release to place\nMove and release a held ball to toss · A/B: teach\nCarry cloud to water; sprig to injured villager\nHelp / shield / lens: offer over a target\nX menu · right grip + stick: zoom"+(xr?"":"\nDesktop: 1/2 teach · E carry · F select · Space + release E toss");
+  return title+" · "+Mathf.CeilToInt(state.seconds)+"s\nWater "+Mathf.RoundToInt(state.water)+" · Crops "+Mathf.RoundToInt(state.crops)+" · Energy "+Mathf.FloorToInt(state.Hybrid.energy)+"\n"+hybrid.Explanation+"\nCue: "+g.status+(reason.Length>0?" · "+reason:"")+"\nRight front trigger: hold to carry the creature or objects · release to place\nMove and release a held ball to toss · A/B: teach\nGod tools: summon rain/healing or place a guidance sign\nTurn left wrist underside toward you, or X > God tools\nX menu · right grip + stick: zoom"+(xr?"":"\nDesktop: 1/2 teach · E carry · F select · Space + release E toss");
  }
  public bool GiveFeedback(bool positive){
   if(state.paused||curiosity==null||held[0]!=null||held[1]!=null||Time.unscaledTime<feedbackReady)return false;

@@ -34,10 +34,11 @@ Reference: [Meta Link development workflow](https://developers.meta.com/vr/docum
 
 - Hold **right SIDE trigger (grip) + right stick up/down** to zoom in/out around the island under your gaze (0.5×–8×). Release the side trigger for normal height adjustment. The front/index trigger does not zoom. **Y** resets zoom and recenters; desktop mouse wheel also zooms. Zoom pauses while carrying an object.
 - Left stick: move forward/back/sideways relative to your head. Right stick left/right: 30-degree snap turn; center the stick before turning again. Right stick up/down: rise/lower above the tabletop.
+- Island traversal uses faster defaults: horizontal/vertical stick travel is 4× the earlier rate, right-grip stick zoom is 2.5×, and desktop wheel zoom is 2×. Partial stick deflection still provides fine movement; zoom limits and snap turns stay the same. Desktop WASD uses the same horizontal speed as the sticks.
 - Point a controller at a resource or villager. Hold the **right front/index trigger** or **left side grip** to carry; release while pointing onto the island to place. Rays use the OpenXR aim pose; held objects use the grip pose.
 - Release the blue water offering over the blue village cistern to deliver water.
 - Aim at the creature and tap right A/B to praise/discourage its last eligible completed action. The front-trigger interaction also praises. Food satisfies hunger; it does not teach an unrelated action.
-- Carry one of the five small intention objects near the cistern and release while aiming at a world target: hands/drop for Help, shield for Protect, lens for Investigate, cloud for Rain, green sprig for Healing. Guidance is temporary influence; the creature chooses its response. Rain targets the water system; healing targets an injured villager (ankle wrap). Tools return to their home afterward. No new buttons are assigned.
+- Summon Help, Protect, Investigate, Rain or Healing from the hidden God tools palette, then aim and press to use. Behavior/action cues are player-issued; the five old intention objects are no longer pre-placed beside the cistern. Guidance remains temporary influence, rain targets the water system, and healing targets an injured villager (ankle wrap).
 - Press X (or the left controller menu button) to show/hide the wrist sanctuary. Press Y to recenter the island ahead. Point and trigger to pause, save, resume or begin again.
 - Locomotion is user-controlled; no forced camera travel after the initial placement. The right stick changes viewing height, with ground clearance.
 

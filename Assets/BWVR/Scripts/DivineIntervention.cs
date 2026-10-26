@@ -16,9 +16,8 @@ public sealed class DivineIntervention:MonoBehaviour {
   creature=god;nav=navigation;cistern=reservoir;villagers=residents;season=current;tint=new MaterialPropertyBlock();InitializeState();
   var colors=new[]{new Color(.25f,.62f,.40f),new Color(.25f,.5f,.85f),new Color(.92f,.75f,.28f),new Color(.82f,.84f,.78f),new Color(.65f,.18f,.19f)};materials=new Material[colors.Length];for(int i=0;i<colors.Length;i++){materials[i]=new Material(Shader.Find("BWVR/GameSurface"));materials[i].color=colors[i];}
   for(int i=0;i<5;i++){
-   float angle=(i*35+140)*Mathf.Deg2Rad;var desired=cistern+new Vector3(Mathf.Cos(angle),0,Mathf.Sin(angle))*(13+i*2)*nav.Scale;
-   if(!nav.Sample(desired,nav.villager,8,out var at)){Debug.LogWarning("BWVR_SPIRITUAL_TOOL_SKIPPED: "+i);continue;}if(nav.Terrain!=null)at=nav.Terrain.Project(at);
-   var root=new GameObject(((SpiritualTool)i)+" intention object");root.transform.SetParent(transform,false);root.transform.position=at+Vector3.up*nav.Scale*1.2f;root.transform.localScale=Vector3.one*nav.Scale;
+   // Palette glyph templates only. Guidance is introduced by the player, never pre-placed.
+   var root=new GameObject(((SpiritualTool)i)+" private tool template");root.SetActive(false);root.transform.SetParent(transform,false);root.transform.localScale=Vector3.one*nav.Scale;
    Part(root.transform,PrimitiveType.Cylinder,new Vector3(0,-.6f,0),new Vector3(.4f,.8f,.4f),2);
    if(i==0){Part(root.transform,PrimitiveType.Sphere,new Vector3(-.6f,.4f,0),new Vector3(.8f,1.1f,.5f),0);Part(root.transform,PrimitiveType.Sphere,new Vector3(.6f,.4f,0),new Vector3(.8f,1.1f,.5f),0);Part(root.transform,PrimitiveType.Sphere,new Vector3(0,.8f,0),Vector3.one*.7f,1);}
    else if(i==1){var shield=Part(root.transform,PrimitiveType.Cube,new Vector3(0,.6f,0),new Vector3(1.5f,1.6f,.35f),1);shield.transform.localRotation=Quaternion.Euler(0,0,20);}

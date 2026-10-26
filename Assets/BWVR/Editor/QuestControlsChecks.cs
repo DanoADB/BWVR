@@ -37,6 +37,17 @@ public static class QuestControlsChecks {
    float y=origin.transform.position.y;
    QuestControls.Move(origin.transform,head.transform,Vector2.zero,Vector2.up,.05f,ref latch);
    if(origin.transform.position.y<=y)throw new Exception("Vertical stick travel failed");
+   // Fast island travel must retain analog precision and work at every supported zoom.
+   foreach(float scale in new[]{QuestControls.MinimumViewScale,.25f,QuestControls.MaximumViewScale}){
+    origin.transform.localScale=Vector3.one*scale;origin.transform.position=Vector3.zero;
+    QuestControls.Move(origin.transform,head.transform,Vector2.up,Vector2.zero,.05f,ref latch);
+    float full=origin.transform.position.magnitude;
+    if(full<2.5f*scale*.05f)throw new Exception("Island traversal is still too slow");
+    origin.transform.position=Vector3.zero;QuestControls.Move(origin.transform,head.transform,Vector2.up*.4f,Vector2.zero,.05f,ref latch);
+    if(origin.transform.position.magnitude>=full*.5f||origin.transform.position.magnitude<=0)throw new Exception("Fast travel lost fine analog control");
+    origin.transform.position=Vector3.zero;QuestControls.Move(origin.transform,head.transform,Vector2.zero,Vector2.up,.05f,ref latch);
+    if(origin.transform.position.y<1.7f*scale*.05f)throw new Exception("Island height travel is still too slow");
+   }
    origin.transform.localScale=Vector3.one;
    var focus=head.transform.position+head.transform.forward*2;
    var originalPosition=origin.transform.position;var originalRotation=head.transform.rotation;

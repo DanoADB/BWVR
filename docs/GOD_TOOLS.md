@@ -26,6 +26,13 @@ The palette does not pause the world. No forced camera movement is introduced.
 
 ## What to try
 
+The former five intention objects beside the cistern are no longer placed in the
+world. Their inactive mesh templates supply palette/hand/sign symbols only. The
+player summons the tools and places guidance deliberately; no preset behavior sign
+is introduced at startup or new season. An active player-placed saved sign can still
+restore normally. Storage labels/fullness indicators and actor affect icons remain
+informational; they do not assign behavior.
+
 Rain costs 35 spiritual energy and targets the cistern or water offering. It uses
 the existing localized rain effect and adds 22 water/6 crop condition once per
 press. Healing costs 25 and targets an injured villager, removing that injury.
@@ -62,6 +69,12 @@ Terrain editing, Book of Creation, AI/voice companion tools, multi-sign queues a
 new miracle types remain queued. Water remains secondary in development focus.
 
 ## Validation
+
+Follow-up verification after removing the pre-placed intention props: all five
+inactive templates and summoned mesh symbols passed GodToolsChecks alongside the
+existing placement, save/restore and input checks. A rendered palette was inspected.
+See [baseline checkpoint](BASELINE_CHECKPOINT.md) for the complete targeted run and
+remaining hardware/testing limits.
 
 Native Play-mode check: BWVR → Verify summonable god tools (Play mode).
 Validation results and physical-headset limitations are recorded after the run.

@@ -12,11 +12,13 @@ Research supplies design hypotheses, not proof that copying a feature will repro
 
 ## Current baseline
 
+The S0 targeted Editor checkpoint is recorded in [BASELINE_CHECKPOINT.md](BASELINE_CHECKPOINT.md); S1 attention/response is the next planned feature, followed by early audio S1A. The immediate navigation-speed and player-issued sign adjustments are implemented, with hardware feel still pending.
+
 “Foundation” means a bounded implementation exists, not feature completeness or verified standalone Quest performance. This documentation update does not rerun gameplay checks.
 
 | Area | Current status | Next extension |
 | --- | --- | --- |
-| Player tools | Foundation: wrist palette, paid cistern rain, targeted healing, one saved guidance sign | Local world effects, clear acknowledgments, physical skill |
+| Player tools | Foundation: wrist palette, paid cistern rain, targeted healing, one saved player-issued guidance sign; old intention props hidden | Local world effects, clear acknowledgments, physical skill |
 | Creature autonomy | Foundation: utility selection, exclusive action owner, contextual training, needs/favorites/practice | Perceived opportunities, short reusable plans, richer learning |
 | Shared activities | Foundation: ball, fetch, chime, bench visits and cooperative construction | A gathering place with several uses and changing social meaning |
 | Village agency | Foundation: twelve adults, individual memories, gathering, farming, storage, equipment and limited households | Need-driven projects, broader cooperation and settlement growth |

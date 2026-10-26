@@ -7,6 +7,7 @@ namespace BWVR {
 // use the aim pose for selection rays instead of adding a guessed angle.
 public static class QuestControls {
  public const float MinimumViewScale=.025f,MaximumViewScale=2f;
+ public const float TravelSpeed=2.6f,VerticalSpeed=1.8f,ZoomSpeed=2.5f,WheelZoomSpeed=.003f;
  public struct Hand {
   public bool tracked,grip,trigger,menu,recenter,zoom,praise,discourage;
   public Vector2 stick;
@@ -53,12 +54,12 @@ public static class QuestControls {
   if(forward.sqrMagnitude<.01f)forward=origin.forward;
   var right=Vector3.Cross(Vector3.up,forward);
   var input=DeadZone(move);
-  origin.position+=(forward*input.y+right*input.x)*(.65f*origin.localScale.x*Mathf.Min(delta,.05f));
+  origin.position+=(forward*input.y+right*input.x)*(TravelSpeed*origin.localScale.x*Mathf.Min(delta,.05f));
   if(Mathf.Abs(turn.x)<.25f)turnHeld=false;
   if(Mathf.Abs(turn.x)>.7f&&!turnHeld){origin.RotateAround(head.position,Vector3.up,Mathf.Sign(turn.x)*30);turnHeld=true;}
   // Vertical travel lets the unseen player inspect the tabletop at different heights.
   float vertical=Mathf.Abs(turn.y)>.3f?Mathf.Sign(turn.y)*(Mathf.Abs(turn.y)-.3f)/.7f:0;
-  origin.position+=Vector3.up*(vertical*.45f*origin.localScale.x*Mathf.Min(delta,.05f));
+  origin.position+=Vector3.up*(vertical*VerticalSpeed*origin.localScale.x*Mathf.Min(delta,.05f));
  }
 }
 }
