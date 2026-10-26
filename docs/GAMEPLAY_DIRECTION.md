@@ -155,3 +155,7 @@ The next food-security step adds an early reserve goal, limited idle-adult food 
 ### Farm expansion and planting ahead — 2026-10-25
 
 Idle villagers can prepare up to four saved new farm plots using timber and then sow them using real grain. Future harvest availability now influences planting before an emergency, including when covered reserves are already healthy. Existing eight fields, finite harvest accounting, growth limits and water's secondary development role remain. See FARM_EXPANSION.md for costs, site selection, persistence and validation. Crop variety and observable bad-weather preparation remain queued.
+
+### Practical technology through work — 2026-10-25
+
+The first tool/technology loop adds personally discovered bound axes and cultivating hoes, real timber/resin crafting, faster equipped work and local learning by observing a completed craft. Successful delivered work supplies the evidence; knowledge and owned tools persist separately. See TOOLS_AND_TECHNOLOGY.md. This is a bounded capability foundation, not unrestricted invention or a new AI system. The companion remains deferred.

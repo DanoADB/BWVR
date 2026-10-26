@@ -15,7 +15,7 @@ public sealed partial class ResourceState {
 }
 public sealed partial class VillageResources {
  public float ReservedFarmWood=>Gatherers==null?0:Gatherers.Count(a=>a.PreparingFarm)*2;
- public float FreeWood=>Mathf.Max(0,State.wood-ReservedFarmWood);
+ public float FreeWood=>Mathf.Max(0,State.wood-ReservedFarmWood-ReservedToolWood);
  public float FutureHarvest=>sources.Where(s=>s.kind==VillageResource.Wheat).Sum(s=>{var r=State.Find(s.id);return r==null?0:r.growing?12:r.remaining;});
  public bool NeedsPlanting=>FutureHarvest<FoodReserveTarget*2&&sources.Count(s=>s.kind==VillageResource.Wheat&&(State.Find(s.id)?.growing==true||s.owner?.Sowing==true))<3;
  bool FarmSite(Vector3 at){
@@ -51,7 +51,7 @@ public sealed partial class VillagerResourceGathering {
  }
  bool TickFarm(float dt){
   if(Current==Phase.FarmApproach){motion?.Activity(0);if(nav.MoveTo(Source.approach,transform.lossyScale.y*1.6f,dt)){Current=Phase.PrepareFarm;clock=0;motion?.Carry(null);timber.SetActive(false);motion?.Activity(3);}else if(nav.Blocked&&elapsed>5)Cancel();}
-  else if(clock>=18){bool done=world.State.PrepareFarm(Source.id);Cancel();if(done)world.ClearCropFootprints();world.Refresh();if(done)motion?.React();}return Active;
+  else if(clock>=FarmPreparationSeconds){bool done=world.State.PrepareFarm(Source.id);Cancel();if(done)world.ClearCropFootprints();world.Refresh();if(done)motion?.React();}return Active;
  }
 }
 }
