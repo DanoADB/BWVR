@@ -1,0 +1,18 @@
+{
+  "title": "Quiet Island",
+  "seconds": 46,
+  "tempoQuarter": 72,
+  "meter": "6/8",
+  "channels": 2,
+  "sampleRate": 22050,
+  "peak": 0.579986572265625,
+  "rms": 0.10515156766011366,
+  "sourceBytes": 4057200,
+  "melodyRestBars": [
+    4,
+    5,
+    10,
+    11
+  ],
+  "samplesUsed": false
+}

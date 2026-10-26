@@ -4,7 +4,7 @@ using UnityEngine;
 namespace BWVR {
 public enum IslandSound {Step,Grasp,Place,Snap,Ball,Pour,Harvest,Notice,Content,Uneasy,Miracle,Discovery,Chime,Bird,Thunder}
 // Presentation only. No audio event grants a resource, teaches, or drives AI perception.
-public sealed class IslandAudio:MonoBehaviour {
+public sealed partial class IslandAudio:MonoBehaviour {
  public const int VoiceLimit=8;
  public static IslandAudio Current{get;private set;}
  public float Master{get;private set;}public float Ambience{get;private set;}public float Effects{get;private set;}
@@ -25,7 +25,7 @@ public sealed class IslandAudio:MonoBehaviour {
   Master=Read("master",.8f);Ambience=Read("ambience",.65f);Effects=Read("effects",.8f);
   var names=new[]{"step","grasp","place","snap","ball","pour","harvest","notice","content","uneasy","miracle","discovery","chime","bird","thunder"};clips=new AudioClip[names.Length];for(int i=0;i<names.Length;i++)clips[i]=Resources.Load<AudioClip>("IslandAudio/"+names[i]);
   string[] loops={"surf","wind","rain"};for(int i=0;i<3;i++){beds[i]=Source(loops[i]+" ambience",false);beds[i].loop=true;beds[i].priority=180;beds[i].clip=Resources.Load<AudioClip>("IslandAudio/"+loops[i]);beds[i].volume=0;if(beds[i].clip!=null)beds[i].Play();}
-  for(int i=0;i<VoiceLimit;i++)voices[i]=new Voice{sound=Source("Context voice "+i,true)};
+  for(int i=0;i<VoiceLimit;i++)voices[i]=new Voice{sound=Source("Context voice "+i,true)};InitializeMusic();
  }
  AudioSource Source(string label,bool spatial){var go=new GameObject(label);go.transform.SetParent(transform,false);var s=go.AddComponent<AudioSource>();s.playOnAwake=false;s.spatialBlend=spatial?1:0;s.dopplerLevel=0;s.reverbZoneMix=0;s.rolloffMode=AudioRolloffMode.Linear;s.priority=spatial?100:180;return s;}
  static float Read(string name,float fallback){float v=PlayerPrefs.GetFloat("BWVR.Audio."+name,fallback);return float.IsNaN(v)||float.IsInfinity(v)?fallback:Mathf.Clamp01(v);}
@@ -51,10 +51,10 @@ public sealed class IslandAudio:MonoBehaviour {
  }
  void Distances(AudioSource s){s.minDistance=NearDistance;s.maxDistance=FarDistance;}
  public void RegisterWalker(HumanoidMotion motion){if(motion==null||walkers.Exists(w=>w.motion==motion))return;var item=motion.GetComponentInParent<CarryItem>();if(item!=null)walkers.Add(new Walker{motion=motion,item=item,previous=motion.transform.position});}
- public void SetFrozen(bool pause){if(frozen==pause)return;frozen=pause;foreach(var v in voices){v.sound.Stop();v.left=0;}foreach(var b in beds){if(pause)b.Pause();else b.UnPause();}foreach(var w in walkers){if(w.motion!=null)w.previous=w.motion.transform.position;w.distance=0;}}
+ public void SetFrozen(bool pause){if(frozen==pause)return;frozen=pause;PauseMusic(pause);foreach(var v in voices){v.sound.Stop();v.left=0;}foreach(var b in beds){if(pause)b.Pause();else b.UnPause();}foreach(var w in walkers){if(w.motion!=null)w.previous=w.motion.transform.position;w.distance=0;}}
  public void Suspend(bool value){suspended=value;SetFrozen(value||season().paused);}
  public void Advance(float dt,bool paused){
-  SetFrozen(paused||suspended);if(Frozen||dt<=0||!Finite(dt))return;dt=Mathf.Min(dt,.1f);clock+=dt;duck=Mathf.Max(0,duck-dt);
+  SetFrozen(paused||suspended);if(Frozen||dt<=0||!Finite(dt))return;dt=Mathf.Min(dt,.1f);clock+=dt;AdvanceMusic(dt);duck=Mathf.Max(0,duck-dt);
   for(int i=0;i<voices.Length;i++){var v=voices[i];v.left=Mathf.Max(0,v.left-dt);Distances(v.sound);}
   var weather=season().Weather;float rain=Mathf.Max(weather.rain,season().Hybrid.rainRemaining>0?.6f:0);
   for(int i=0;i<3;i++){float target=i==0?.18f+weather.wind*.08f:i==1?.035f+weather.wind*.18f:rain*.25f;bedGain[i]=Mathf.MoveTowards(bedGain[i],target,dt*.09f);}ApplyMix();
@@ -64,8 +64,8 @@ public sealed class IslandAudio:MonoBehaviour {
    if(distance<unit*.001f)continue;w.distance+=distance;if(w.distance>=step){w.distance%=Mathf.Max(unit,step);Emit(IslandSound.Step,at,w.item.GetEntityId().GetHashCode(),w.item.kind==Offering.Creature?1:.65f,w.item.kind==Offering.Creature?.7f:1);}
   }
  }
- void ApplyMix(){float headroom=Mathf.Min(1,2f/Mathf.Max(1,ActiveVoices));for(int i=0;i<3;i++)if(beds[i]!=null)beds[i].volume=bedGain[i]*Master*Ambience*(duck>0?.72f:1);foreach(var v in voices)if(v!=null)v.sound.volume=v.gain*Master*Effects*headroom;}
- void OnDisable(){foreach(var b in beds)if(b!=null)b.Stop();foreach(var v in voices)if(v!=null){v.sound.Stop();v.left=0;}}
+ void ApplyMix(){float headroom=Mathf.Min(1,2f/Mathf.Max(1,ActiveVoices));for(int i=0;i<3;i++)if(beds[i]!=null)beds[i].volume=bedGain[i]*Master*Ambience*(duck>0?.72f:1);foreach(var v in voices)if(v!=null)v.sound.volume=v.gain*Master*Effects*headroom;ApplyMusicMix();}
+ void OnDisable(){StopMusic(12);foreach(var b in beds)if(b!=null)b.Stop();foreach(var v in voices)if(v!=null){v.sound.Stop();v.left=0;}}
  void OnDestroy(){if(Current==this)Current=null;}
 }
 }

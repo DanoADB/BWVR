@@ -98,4 +98,6 @@ Villagers now cut finite timber sources, harvest existing wheat, carry reserved 
 
 Exploration observation can temporarily pause villager food work and meal consumption without changing stored supplies. Children are larger and use normal pickup/drop. See [village observation](docs/VILLAGE_OBSERVATION.md).
 
-The island now has quiet surf/wind/rain, sparse birds and pooled interaction sounds. Open the wrist sanctuary → **Sound** for device-local master/ambience/effects levels. These are original sound sketches; background music and Quest listening/profiling remain next. See [island audio](docs/ISLAND_AUDIO.md).
+The island now has quiet surf/wind/rain, sparse birds and pooled interaction sounds. Open the wrist sanctuary → **Sound** for device-local master/ambience/effects levels. These are original sound sketches; an original background-music sketch now plays with long quiet gaps, while Quest listening/profiling remain pending. See [island audio](docs/ISLAND_AUDIO.md).
+
+Music has a separate volume/mute under **wrist sanctuary → Sound → Music**. The original Quiet Island sketch fades beneath interactions and storms. See [music behavior and checks](docs/ISLAND_MUSIC.md).

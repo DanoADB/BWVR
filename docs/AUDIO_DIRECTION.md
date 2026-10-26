@@ -1,6 +1,6 @@
 # Audio direction
 
-Roadmap direction, 2026-10-26. Environmental/contextual first-pass implementation now exists; see [ISLAND_AUDIO.md](ISLAND_AUDIO.md) for coverage and verification limits. Music and hardware audition remain pending. The user requested environmental and contextual sounds first, with a soft, lilting background melody. Deliver this as S1A in [BUILD_SEQUENCE.md](BUILD_SEQUENCE.md), before the expanded god tools. Audit existing clips, sources and listeners before introducing new playback machinery.
+Roadmap direction, 2026-10-26. Environmental/contextual first-pass implementation now exists; see [ISLAND_AUDIO.md](ISLAND_AUDIO.md) for coverage and verification limits. An original intermittent background-music sketch is now implemented too; see [ISLAND_MUSIC.md](ISLAND_MUSIC.md). Hardware audition remains pending. The user requested environmental and contextual sounds first, with a soft, lilting background melody. Deliver this as S1A in [BUILD_SEQUENCE.md](BUILD_SEQUENCE.md), before the expanded god tools. Audit existing clips, sources and listeners before introducing new playback machinery.
 
 ## 1. Environmental ambience
 

@@ -26,12 +26,12 @@ The S0 targeted Editor checkpoint is recorded in [BASELINE_CHECKPOINT.md](BASELI
 | Weather/materials | Foundation: rain, fog, wind, storms, lightning/fire and coastal waves | Autonomous responses, meaningful protection and recovery |
 | Technology | Foundation: personally learned axe/hoe designs, paid crafting and nearby observation | Tool experimentation, shared techniques and local traditions |
 | History/explanation | Foundation: optional intent details, responses and a saved 96-event outcome ledger | Broader village evidence, discovery recognition and physical Book of Creation |
-| Audio | Editor foundation: surf/wind/rain, sparse birds, bounded contextual effects and device-local mix controls | Next: S1A soft lilting instrumental music; headset audition/performance pending |
+| Audio | Editor foundation: surf/wind/rain, sparse birds, bounded contextual effects and device-local mix controls | S1A includes an original intermittent instrumental sketch; headset audition/performance pending |
 | Release | Editor checks and previous APK workflow exist | Current Quest Pro/3 comfort, performance and release validation |
 
 See the feature documents for exact limits: [tools](GOD_TOOLS.md), [creature](CREATURE_BEHAVIOR.md), [play](PLAY_AND_VILLAGE_RESPONSE.md), [construction](CONSTRUCTION_YARD.md), [materials](WEATHER_AND_MATERIALS.md), [technology](TOOLS_AND_TECHNOLOGY.md), [population](EXPANDED_POPULATION.md) and [Book](BOOK_OF_CREATION.md).
 
-S1 attention and factual outcome evidence are implemented for Editor testing; see [CREATURE_RESPONSES.md](CREATURE_RESPONSES.md). S1A environmental/contextual audio now has an Editor-tested foundation; see [ISLAND_AUDIO.md](ISLAND_AUDIO.md). Next: the soft background melody and headset audition. Food work can temporarily be paused independently in exploration focus to observe other behaviors; see [VILLAGE_OBSERVATION.md](VILLAGE_OBSERVATION.md).
+S1 attention and factual outcome evidence are implemented for Editor testing; see [CREATURE_RESPONSES.md](CREATURE_RESPONSES.md). S1A environmental/contextual audio now has an Editor-tested foundation; see [ISLAND_AUDIO.md](ISLAND_AUDIO.md). The soft background melody is now implemented; see [ISLAND_MUSIC.md](ISLAND_MUSIC.md). Next implementation: S2 physical rain brush, then wind fan. Food work can temporarily be paused independently in exploration focus to observe other behaviors; see [VILLAGE_OBSERVATION.md](VILLAGE_OBSERVATION.md).
 
 ## Research attributes to incorporate
 
