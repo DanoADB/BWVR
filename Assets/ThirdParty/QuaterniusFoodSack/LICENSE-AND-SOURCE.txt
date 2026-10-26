@@ -1,0 +1,8 @@
+Bag Open by Quaternius. Published 11 July 2022.
+Source: https://poly.pizza/m/rJuZexcuhU
+Source asset ID: d80aaa87-23d8-4e45-83a2-5ffd22c36356
+License explicitly listed by the source: Public Domain (CC0 1.0)
+https://creativecommons.org/publicdomain/zero/1.0/
+Original GLB retained. FBX converted with Blender 5.1.1 for Unity import.
+280 source triangles. Runtime materials adapted to BWVR/GameSurface;
+normalized pivot, grain fill and scale are BWVR presentation adaptations.

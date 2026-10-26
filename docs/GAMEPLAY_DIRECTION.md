@@ -159,3 +159,12 @@ Idle villagers can prepare up to four saved new farm plots using timber and then
 ### Practical technology through work — 2026-10-25
 
 The first tool/technology loop adds personally discovered bound axes and cultivating hoes, real timber/resin crafting, faster equipped work and local learning by observing a completed craft. Successful delivered work supplies the evidence; knowledge and owned tools persist separately. See TOOLS_AND_TECHNOLOGY.md. This is a bounded capability foundation, not unrestricted invention or a new AI system. The companion remains deferred.
+
+### Observable rain and food protection — 2026-10-26
+
+Exposed grain now spoils faster in current rain. Available villagers can prioritize
+paid covered-storage expansion to shelter it, while food emergencies, active
+actions and shared material budgets retain precedence. Quaternius CC0 food sacks
+replace carried and stored grain spheres. See WEATHER_FOOD_PROTECTION.md. Crop
+variety, storm sheltering and seasons remain queued; no future weather knowledge
+or new worker framework is introduced.
