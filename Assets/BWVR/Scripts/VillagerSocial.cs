@@ -13,7 +13,7 @@ namespace BWVR {
  static bool Count(int n)=>n>=0&&n<=1000000;
 }
 // Social attention competes with other intentions; memories belong to the saved season.
-public sealed class VillagerSocial:MonoBehaviour {
+public sealed partial class VillagerSocial:MonoBehaviour {
  public enum Phase{Idle,Approach,Greet,Wait,FetchGift,CarryGift,PresentGift,WatchGift,Recoil}
  public Phase Current{get;private set;}public bool Active=>Current!=Phase.Idle;
  public SocialMemory Memory=>season().Social(index);
@@ -31,8 +31,10 @@ public sealed class VillagerSocial:MonoBehaviour {
  public bool TryShare(CreatureAffordance prop){
   if(hybrid==null||season().paused||Active||item.held||!Willing||(!season().developmentFocus&&!season().Finished&&season().water<45)||Memory.nextInvitationAt>season().Hybrid.time||hybrid.Owner!=CreatureHybrid.ActionOwner.None||creature.Current!=CreatureCuriosity.Phase.Rest||(GetComponent<VillagerExploration>()?.Active??false)||(GetComponent<VillagerBlockPlay>()?.Active??false)||!Shareable(prop))return false;
   if(Vector3.Distance(transform.position,prop.transform.position)>walker.world.Scale*120||!hybrid.CanReach(prop.GetComponent<HybridTarget>())||!walker.world.Sample(prop.transform.position,walker.profile,8,out _))return false;
+  var place=KnownMusicPlace(prop);if(place!=null){if(place.Paused||place.Locked||!MusicMeeting(prop,out meeting))return false;}else{
   var delta=transform.position-creature.transform.position;delta.y=0;if(delta.sqrMagnitude<1e-10f)delta=-creature.transform.forward;
-  if(!walker.world.Sample(creature.transform.position+delta.normalized*walker.world.Scale*7,walker.profile,8,out meeting)||!walker.world.Sample(creature.transform.position+delta.normalized*walker.world.Scale*4,walker.world.creature,8,out offeringPoint))return false;
+  if(!walker.world.Sample(creature.transform.position+delta.normalized*walker.world.Scale*7,walker.profile,8,out meeting)||!walker.world.Sample(creature.transform.position+delta.normalized*walker.world.Scale*4,walker.world.creature,8,out offeringPoint))return false;}
+  musicPlace=place;musicAnchor=prop.transform.position;
   Offering=prop;prop.host=this;prop.GetComponent<SharedRhythm>()?.ResetOffer();giftOrigin=prop.transform.position;giftRotation=prop.transform.rotation;routine.ResetTask();walker.ResetRoute();clock=elapsed=0;Current=Phase.FetchGift;motion?.LookAt(prop.transform);return true;
  }
  bool ChooseShare(){if(sharingObjects==null||hybrid==null||Memory.nextInvitationAt>season().Hybrid.time)return false;CreatureAffordance best=null;float score=float.NegativeInfinity;foreach(var prop in sharingObjects){if(!Shareable(prop))continue;float distance=Vector3.Distance(transform.position,prop.transform.position)/walker.world.Scale;float value=(prop.kind==CreatureAffordance.Kind.Food?season().hunger*2:.8f)-distance*.015f;if(value>score){score=value;best=prop;}}return TryShare(best);}
@@ -69,13 +71,17 @@ public sealed class VillagerSocial:MonoBehaviour {
   clock+=dt;elapsed+=dt;
   if(Offering==null||Offering.host!=this||elapsed>90){ResetTask();return false;}
   var prop=Offering;var carried=prop.Item;
+  if(musicPlace!=null&&(musicPlace.Paused||musicPlace.Locked||carried.held||Vector3.Distance(prop.transform.position,musicAnchor)>walker.world.Scale*.5f)){ResetTask();return false;}
+  if(Current==Phase.FetchGift&&musicPlace!=null){
+   if(walker.MoveTo(meeting,transform.lossyScale.y*1.6f,dt)){PresentOffering(prop);}else if(walker.Blocked&&elapsed>5)ResetTask();return Active;
+  }
   if(Current==Phase.FetchGift){
    if(carried.held||prop.GetComponent<DiscoveryObject>()?.Owner!=null){ResetTask();return false;}
    if(walker.MoveTo(prop.transform.position,transform.lossyScale.y*1.6f,dt)){ownsGift=true;carried.held=true;prop.GetComponent<Collider>().enabled=false;motion?.Carry(prop.transform);motion?.Activity(0);Current=Phase.CarryGift;clock=0;walker.ResetRoute();}
    else if(walker.Blocked&&elapsed>5)ResetTask();
   }else if(Current==Phase.CarryGift){
    if(!carried.held||Vector3.Distance(creature.transform.position,meeting)>walker.world.Scale*24){ResetTask();return false;}
-   if(walker.MoveTo(meeting,transform.lossyScale.y*1.6f,dt)){motion?.Carry(null);motion?.Activity(5);if(prop.GetComponent<SharedRhythm>()!=null){var toward=creature.transform.position-meeting;toward.y=0;if(toward.sqrMagnitude<1e-10f)toward=-transform.forward;offeringPoint=meeting+toward.normalized*walker.world.Scale;giftRotation=Quaternion.LookRotation(toward.normalized);}offeringPoint=walker.world.ProjectFoot(offeringPoint,walker.world.creature)+Vector3.up*walker.world.Scale*(prop.GetComponent<SharedRhythm>()!=null?.3f:.7f);prop.transform.SetPositionAndRotation(offeringPoint,giftRotation);carried.held=false;ownsGift=false;prop.GetComponent<Collider>().enabled=true;Current=Phase.PresentGift;clock=0;motion?.LookAt(creature.transform);motion?.Signal(true,true,prop.transform.position);hybrid.Journal.Add(season().Hybrid.time,"invitation",prop.kind==CreatureAffordance.Kind.Food?CreatureAction.EatFood:CreatureAction.PlayWithToy,prop.GetComponent<HybridTarget>().id,GetComponent<HybridTarget>().id);}
+   if(walker.MoveTo(meeting,transform.lossyScale.y*1.6f,dt)){motion?.Carry(null);motion?.Activity(5);if(prop.GetComponent<SharedRhythm>()!=null){var toward=creature.transform.position-meeting;toward.y=0;if(toward.sqrMagnitude<1e-10f)toward=-transform.forward;offeringPoint=meeting+toward.normalized*walker.world.Scale;giftRotation=Quaternion.LookRotation(toward.normalized);}offeringPoint=walker.world.ProjectFoot(offeringPoint,walker.world.creature)+Vector3.up*walker.world.Scale*(prop.GetComponent<SharedRhythm>()!=null?.3f:.7f);prop.transform.SetPositionAndRotation(offeringPoint,giftRotation);carried.held=false;ownsGift=false;prop.GetComponent<Collider>().enabled=true;PresentOffering(prop);}
    else if(walker.Blocked&&elapsed>5)ResetTask();
   }else if(Current==Phase.PresentGift){
    Face();prop.GetComponent<SharedRhythm>()?.Offer(this,hybrid,dt);if(carried.held){ResetTask();return false;}
@@ -86,14 +92,14 @@ public sealed class VillagerSocial:MonoBehaviour {
   return Active;
  }
  public bool Accept(CreatureAffordance prop){if(prop!=Offering||!Ready)return false;Current=Phase.WatchGift;clock=0;motion?.Signal(false);motion?.Activity(6);return true;}
- public void SharedOutcome(CreatureAffordance prop,bool success){if(prop!=Offering||Current!=Phase.WatchGift)return;if(success){var memory=Memory;if(prop.GetComponent<SharedRhythm>()?.Completed==true){memory.rhythmGames=Math.Min(1000000,memory.rhythmGames+1);hybrid.Season.WorldPlay.rhythmGames=Math.Min(1000000,hybrid.Season.WorldPlay.rhythmGames+1);}if(prop.kind==CreatureAffordance.Kind.Food)memory.treatsOffered=Math.Min(1000000,memory.treatsOffered+1);else memory.sharedPlay=Math.Min(1000000,memory.sharedPlay+1);memory.trust=Mathf.Clamp01(memory.trust+.06f);memory.affinity=Mathf.Clamp01(memory.affinity+.04f);memory.lastSharedAt=season().Hybrid.time;hybrid.State.RememberBond(GetComponent<HybridTarget>().id,true);memory.nextInvitationAt=season().Hybrid.time+Mathf.Lerp(70,40,memory.boldness);hybrid.Journal.Add(season().Hybrid.time,"shared experience",prop.kind==CreatureAffordance.Kind.Food?CreatureAction.EatFood:CreatureAction.PlayWithToy,GetComponent<HybridTarget>().id,"Completed together");}ResetTask();if(success){IslandAudio.Cue(IslandSound.Content,transform.position,GetEntityId().GetHashCode(),.7f,1.25f);motion?.React();creature.NoticeGreeting(transform);}}
+ public void SharedOutcome(CreatureAffordance prop,bool success){if(prop!=Offering||Current!=Phase.WatchGift)return;if(success){var memory=Memory;if(prop.GetComponent<SharedRhythm>()?.Completed==true){RememberPlacePerformance();memory.rhythmGames=Math.Min(1000000,memory.rhythmGames+1);hybrid.Season.WorldPlay.rhythmGames=Math.Min(1000000,hybrid.Season.WorldPlay.rhythmGames+1);}if(prop.kind==CreatureAffordance.Kind.Food)memory.treatsOffered=Math.Min(1000000,memory.treatsOffered+1);else memory.sharedPlay=Math.Min(1000000,memory.sharedPlay+1);memory.trust=Mathf.Clamp01(memory.trust+.06f);memory.affinity=Mathf.Clamp01(memory.affinity+.04f);memory.lastSharedAt=season().Hybrid.time;hybrid.State.RememberBond(GetComponent<HybridTarget>().id,true);memory.nextInvitationAt=season().Hybrid.time+Mathf.Lerp(70,40,memory.boldness);hybrid.Journal.Add(season().Hybrid.time,"shared experience",prop.kind==CreatureAffordance.Kind.Food?CreatureAction.EatFood:CreatureAction.PlayWithToy,GetComponent<HybridTarget>().id,"Completed together");}ResetTask();if(success){IslandAudio.Cue(IslandSound.Content,transform.position,GetEntityId().GetHashCode(),.7f,1.25f);motion?.React();creature.NoticeGreeting(transform);}}
  void Face(){var at=creature.transform.position-transform.position;at.y=0;if(at.sqrMagnitude>1e-10f)transform.rotation=Quaternion.LookRotation(at);}
  public void RememberGreeting(){hybrid?.State.RememberBond(GetComponent<HybridTarget>().id,true);var m=Memory;m.greetings=Math.Min(1000000,m.greetings+1);m.trust=Mathf.Clamp01(m.trust+.08f);m.affinity=Mathf.Clamp01(m.affinity+.025f);}
  public void RememberRide(){hybrid?.State.RememberBond(GetComponent<HybridTarget>().id,true);var m=Memory;m.rides=Math.Min(1000000,m.rides+1);m.trust=Mathf.Clamp01(m.trust+.12f);m.affinity=Mathf.Clamp01(m.affinity+.08f);}
  public void RememberDispute(){hybrid?.State.RememberBond(GetComponent<HybridTarget>().id,false);var m=Memory;m.disputes=Math.Min(1000000,m.disputes+1);m.affinity=Mathf.Clamp01(m.affinity-.12f);}
  public void WitnessRide(){var m=Memory;m.witnessed=Math.Min(1000000,m.witnessed+1);m.trust=Mathf.Clamp01(m.trust+.03f);}
  public void Feedback(bool positive){Memory.affinity=Mathf.Clamp01(Memory.affinity+(positive?.08f:-.08f));}
- public void ResetTask(){if(!Active)return;if(Offering!=null){var prop=Offering;prop.GetComponent<SharedRhythm>()?.Cancel();if(ownsGift){prop.Item.held=false;prop.transform.SetPositionAndRotation(giftOrigin,giftRotation);prop.GetComponent<Collider>().enabled=true;motion?.Carry(null);}if(prop.host==this)prop.host=null;prop.GetComponent<DiscoveryObject>()?.Refresh();Memory.nextInvitationAt=Mathf.Max(Memory.nextInvitationAt,season().Hybrid.time+30);}Offering=null;ownsGift=false;Current=Phase.Idle;clock=elapsed=0;cooldown=Mathf.Lerp(65,25,Memory.boldness)*Mathf.Lerp(1.5f,.75f,Memory.trust);motion?.Signal(false);motion?.LookAt(null);motion?.Activity(0);walker?.ResetRoute();routine?.ResetTask();}
+ public void ResetTask(){if(!Active)return;if(Offering!=null){var prop=Offering;prop.GetComponent<SharedRhythm>()?.Cancel();if(ownsGift){prop.Item.held=false;prop.transform.SetPositionAndRotation(giftOrigin,giftRotation);prop.GetComponent<Collider>().enabled=true;motion?.Carry(null);}if(prop.host==this)prop.host=null;prop.GetComponent<DiscoveryObject>()?.Refresh();Memory.nextInvitationAt=Mathf.Max(Memory.nextInvitationAt,season().Hybrid.time+30);}Offering=null;musicPlace=null;ownsGift=false;Current=Phase.Idle;clock=elapsed=0;cooldown=Mathf.Lerp(65,25,Memory.boldness)*Mathf.Lerp(1.5f,.75f,Memory.trust);motion?.Signal(false);motion?.LookAt(null);motion?.Activity(0);walker?.ResetRoute();routine?.ResetTask();}
  void OnDisable(){ResetTask();}
 }
 }

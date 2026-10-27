@@ -1,6 +1,6 @@
 # Musical gatherings — first S4 increment
 
-Nearby villagers can watch an actual creature–villager chime performance. The existing host still fetches and offers the instrument, and the creature's existing utility decision can accept or decline it. There is no new command, guaranteed attendance or spectator AI motor.
+Nearby villagers can watch an actual creature–villager chime performance. The host retains the existing fetch/offer path for distant or unfamiliar instruments. At a familiar gathering site, the host can now invite the creature at the placed chime without moving it; see [PLACE_MUSIC.md](PLACE_MUSIC.md). The creature's existing utility decision can accept or decline it. There is no new command, guaranteed attendance or spectator AI motor.
 
 At performance start, the chime consults a cached adult registry and reserves at most three spectators. A spectator must be within 24 game units, facing a visible performer, unheld, healthy and free of existing leisure, gathering, household, worship and cathedral work. Critical water needs outside development focus block participation. Learned music interest and a saved 90-second cooldown affect willingness. No spectators spawn or teleport during ordinary play.
 
@@ -8,7 +8,7 @@ Spectators turn toward the instrument using their existing exploration controlle
 
 A comfortable performance lowers rest need and raises music interest. The listener also remembers the performer and gains a small creature trust increase. Exposed rain of 0.5 or above instead increases discomfort and reduces music interest; a supported construction shelter within two game units of the listener's actual position protects that benefit. A roof elsewhere does not count. Calm and sheltered listeners can therefore enjoy the same event that exposed listeners dislike. These are bounded authored rules, not a claim of uncoded learning or behavior discovery.
 
-Player contributions include arranging the instrument and creature near villagers, making comfortable covered resting spots, and responding to weather. The instrument's existing invitation can relocate it to the creature, so this does not yet establish a permanent settlement square. Music interest, attendance/disappointment counts and cooldowns persist; transient listener leases do not. Legacy social memories start with interest 0.5. Water and food observation settings are unchanged.
+Player contributions include arranging the instrument and creature near villagers, making comfortable covered resting spots, and responding to weather. The familiar-site invitation now preserves the arranged instrument position. Portable invitations elsewhere can still relocate it to the creature; attendance and site usefulness remain dependent on real actors and conditions. Music interest, attendance/disappointment counts and cooldowns persist; transient listener leases do not. Legacy social memories start with interest 0.5. Water and food observation settings are unchanged.
 
 ## Verification
 
