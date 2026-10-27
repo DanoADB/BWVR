@@ -7,11 +7,13 @@ public sealed class HumanoidMotion:MonoBehaviour {
  void LateUpdate(){if(animator==null)return;var delta=transform.position-previous;previous=transform.position;
   var item=GetComponentInParent<CarryItem>();bool carried=item!=null&&item.held;
   delta.y=0;bool moving=delta.magnitude/Mathf.Max(Time.deltaTime,.000001f)>transform.lossyScale.y*.05f;
-  if(item!=null&&item.kind!=Offering.Creature&&moving&&!carried&&!paused&&delta.sqrMagnitude>1e-12f)transform.rotation=Quaternion.LookRotation(delta);
+  if(item!=null&&item.kind!=Offering.Creature&&moving&&!carried&&!paused&&delta.sqrMagnitude>1e-12f)FaceMovement(transform,delta);
   bool walking=!paused&&!carried&&moving;
   // A held load owns the hands, not the legs. Movement supersedes stale work poses.
   animator.speed=paused?0:1;if(hands!=null)hands.paused=paused;animator.SetFloat("Speed",walking?1:0);animator.SetInteger("Activity",carried||walking?0:activity);
  }
+ // Normalize before LookRotation: tabletop movement can be below its native epsilon.
+ public static void FaceMovement(Transform actor,Vector3 direction){direction.y=0;direction=direction.normalized;if(direction.sqrMagnitude>.5f)actor.rotation=Quaternion.LookRotation(direction);}
  public void Shelter(bool value){if(hands!=null)hands.sheltering=value;}
  public void Pray(bool value){if(hands!=null)hands.praying=value;}
  public void Activity(int value){activity=value;}

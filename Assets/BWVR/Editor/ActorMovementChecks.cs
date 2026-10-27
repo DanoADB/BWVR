@@ -7,7 +7,7 @@ public static class ActorMovementChecks {
  static void Require(bool value,string message){if(!value)throw new Exception(message);}
  [MenuItem("BWVR/Verify actor movement and carrying (Play mode)")]
  public static void Verify(){
-  Require(Application.isPlaying,"Enter Play mode first");
+  Require(Application.isPlaying,"Enter Play mode first");VerifyFacing();
   var slice=UnityEngine.Object.FindAnyObjectByType<QuestSlice>();var nav=slice.GetComponentInChildren<IslandNavigation>();
   var origin=slice.GetComponentInChildren<BeachBall>().transform.position;
   var temporary=new GameObject("Temporary actor movement verification");temporary.transform.SetParent(slice.transform,false);
@@ -36,6 +36,18 @@ public static class ActorMovementChecks {
    CarryWalk(temporary.transform,nav,center);GroundedGorilla(temporary.transform);
    Debug.Log("BWVR_ACTOR_MOVEMENT_PASS: carrying walk/leg motion/hand pose/pause; gorilla walk sole alignment; swept cross-profile body clearance, placement, stationary detour, social reach, held exclusion and head-on passing");
   }finally{UnityEngine.Object.DestroyImmediate(temporary);}
+ }
+ public static void VerifyFacing(){
+  var actor=new GameObject("Temporary small movement facing check");int warnings=0;
+  void Log(string message,string stack,LogType type){if(message.Contains("Look rotation viewing vector is zero"))warnings++;}
+  Application.logMessageReceived+=Log;
+  try{
+   var initial=Quaternion.Euler(0,37,0);actor.transform.rotation=initial;
+   foreach(var direction in new[]{Vector3.zero,Vector3.up,new Vector3(.000002f,0,0)}){HumanoidMotion.FaceMovement(actor.transform,direction);Require(Quaternion.Angle(actor.transform.rotation,initial)<.01f,"Idle/tiny movement changed facing");}
+   HumanoidMotion.FaceMovement(actor.transform,new Vector3(.0001f,5,.0001f));
+   Require(Vector3.Angle(actor.transform.forward,new Vector3(1,0,1))<.01f&&warnings==0,"Tabletop movement lost facing or emitted zero-vector warnings");
+   Debug.Log("BWVR_SMALL_FACING_PASS: zero/vertical/sub-epsilon movement preserves heading; visible tiny movement turns horizontally without LookRotation errors");
+  }finally{Application.logMessageReceived-=Log;UnityEngine.Object.DestroyImmediate(actor);}
  }
  static void CarryWalk(Transform parent,IslandNavigation nav,Vector3 center){
   var go=UnityEngine.Object.Instantiate(Resources.Load<GameObject>("Villagers/Villager0"),parent);go.AddComponent<CarryItem>();go.transform.position=center;go.transform.localScale=Vector3.one*nav.Scale*1.661f*QuestSlice.VillagerScale;
