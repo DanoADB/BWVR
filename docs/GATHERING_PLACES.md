@@ -42,6 +42,8 @@ The older gathering fixture initially rejected its host because a resource job f
 
 Editor frame progression was verified (1330 to 14146) and a current yard/village view rendered successfully. This is a rendering smoke check, not validation of the comfort gestures or readability in a headset. The original user save is restored after testing; XR startup settings are restored and unrelated project settings excluded from the commit. No APK built.
 
+Nonverbal cover and beachball requests are now implemented; see [GATHERING_REQUESTS.md](GATHERING_REQUESTS.md).
+
 ## Remaining S4 work
 
-This increment connects remembered utility to existing places. It does not complete the integrated slice: broader nonverbal improvement requests, the read-only Book/contributor view, three distinct demonstrated player contributions and physical Quest playtesting remain open. These memories describe actual instrumented visits, not proof of a new emergent cultural discovery.
+This increment connects remembered utility to existing places. It does not complete the integrated slice: the read-only Book/contributor view, three distinct demonstrated player contributions and physical Quest playtesting remain open. These memories describe actual instrumented visits, not proof of a new emergent cultural discovery.

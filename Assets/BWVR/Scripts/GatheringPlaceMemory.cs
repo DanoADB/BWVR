@@ -3,8 +3,9 @@ using System.Linq;
 using UnityEngine;
 namespace BWVR {
 [Serializable] public sealed class GatheringPlaceMemory {
- public int slot,visits,uncomfortable;public float appeal=.5f,nextVisitAt;
- public bool Valid()=>slot>=0&&slot<3&&visits>=0&&visits<=1000000&&uncomfortable>=0&&uncomfortable<=visits&&HybridState.Number(appeal,0,1)&&HybridState.Number(nextVisitAt,0,100000300);
+ public int slot,visits,uncomfortable,requests,answers;public float appeal=.5f,nextVisitAt,nextRequestAt;
+ public bool Ask(float now){if(!HybridState.Number(now,0,100000000)||now<nextRequestAt||visits==0)return false;requests=Math.Min(1000000,requests+1);nextRequestAt=now+180;return true;}
+ public bool Valid()=>slot>=0&&slot<3&&visits>=0&&visits<=1000000&&uncomfortable>=0&&uncomfortable<=visits&&requests>=0&&requests<=1000000&&answers>=0&&answers<=requests&&HybridState.Number(nextRequestAt,0,100000300)&&HybridState.Number(appeal,0,1)&&HybridState.Number(nextVisitAt,0,100000300);
 }
 public sealed partial class SocialMemory {
  public GatheringPlaceMemory[] gatheringPlaces;
