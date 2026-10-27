@@ -18,13 +18,23 @@ public sealed partial class SocialMemory {
   place.visits=Math.Min(1000000,place.visits+1);if(!comfortable)place.uncomfortable=Math.Min(place.visits,place.uncomfortable+1);
   place.appeal=Mathf.Clamp01(place.appeal+(comfortable?.1f:-.2f));place.nextVisitAt=now+90;return true;
  }
+ public float PlacePlayBias(int slot,bool comfortable)=>Mathf.Clamp(((Place(slot)?.appeal??.5f)-.5f)*.3f+(comfortable?0:-.15f),-.15f,.15f);
  public bool WantsPlace(int slot,float now,bool comfortable){var place=Place(slot);if(!comfortable||place!=null&&now<place.nextVisitAt)return false;return restNeed>(place!=null&&place.appeal>=.6f?.35f:place!=null&&place.appeal<.4f?.9f:.65f);}
 }
 public sealed partial class VillagerExploration {
  bool CoveredAt(ConstructionSite site,Vector3 at)=>site!=null&&site.TryShelterSpot(nav.profile.radius+.08f,nav.profile.height,out var rest,out _)&&Vector3.Distance(rest,at)<nav.world.Scale*2;
  bool ComfortableAt(ConstructionSite site,Vector3 at)=>construction.GetComponent<CreatureHybrid>().Season.Weather.rain<.5f||CoveredAt(site,at);
- void RememberPlaceAt(ConstructionSite site,bool comfortable){var god=construction.GetComponent<CreatureHybrid>();if(social.Memory.RememberPlace(SiteSlot(site),comfortable,god.State.time))god.Journal.Add(god.State.time,"gathering place",CreatureAction.IdleOrObserve,GetComponent<HybridTarget>().id,comfortable?"Comfortable visit; more willing to return":"Exposed visit; less willing to return");}
- void RememberNearbyPlace(bool comfortable){var site=construction.sites.Where(s=>!s.IsBridge&&Vector3.Distance(s.transform.position,transform.position)<nav.world.Scale*18).OrderBy(s=>(s.transform.position-transform.position).sqrMagnitude).FirstOrDefault();if(site!=null)RememberPlaceAt(site,comfortable);}
+ bool RememberPlaceAt(ConstructionSite site,bool comfortable){var god=construction.GetComponent<CreatureHybrid>();bool remembered=social.Memory.RememberPlace(SiteSlot(site),comfortable,god.State.time);if(remembered)god.Journal.Add(god.State.time,"gathering place",CreatureAction.IdleOrObserve,GetComponent<HybridTarget>().id,comfortable?"Comfortable visit; more willing to return":"Exposed visit; less willing to return");return remembered;}
+ ConstructionSite NearbyPlace(Vector3 at)=>construction?.sites.Where(s=>!s.IsBridge&&Vector3.Distance(s.transform.position,at)<nav.world.Scale*18).OrderBy(s=>(s.transform.position-at).sqrMagnitude).FirstOrDefault();
+ bool RememberNearbyPlace(bool comfortable){var site=NearbyPlace(transform.position);return site!=null&&RememberPlaceAt(site,comfortable);}
+ float BallPlaceBias(BeachBall ball){var foot=nav.world.ProjectFoot(ball.transform.position,nav.profile);var site=NearbyPlace(foot);if(site==null)return 0;return social.Memory.PlacePlayBias(SiteSlot(site),ComfortableAt(site,foot));}
+ BeachBall rememberedPlayBall;int rememberedPlaySession=-1;
+ // Called only at the existing four-reception boundary; no credit for invitations or solo kicks.
+ public bool WitnessBallPlay(BeachBall ball){
+  if(Current!=Phase.Beachball||ball==null||playingBall!=ball||!ball.OwnsPlayer(this)||ball.RallyReceptions!=4||ball.Harmful||actor.held||ball.GetComponent<CarryItem>().held||ball.Playmate.Season.paused||rememberedPlayBall==ball&&rememberedPlaySession==ball.ObservationSession)return false;
+  rememberedPlayBall=ball;rememberedPlaySession=ball.ObservationSession;
+  var site=NearbyPlace(transform.position);return site!=null&&RememberPlaceAt(site,ComfortableAt(site,transform.position));
+ }
  bool WantsBench(ConstructionSite site){var god=construction.GetComponent<CreatureHybrid>();return social.Memory.WantsPlace(SiteSlot(site),god.State.time,ComfortableAt(site,site.World(new Vector3(0,0,-4))));}
 }
 }

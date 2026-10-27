@@ -70,7 +70,7 @@ public sealed partial class BeachBall {
   if(!HasPartner){if(passClock>2){PassPending=false;CreatureTurn=false;}return;}
   var receiver=Receiver(passFromCreature);float moved=Flat(Body.position-passOrigin).magnitude;
   if(moved<4||Flat(receiver-transform.position).magnitude>nav.Scale*(Radius+3)||Mathf.Abs(receiver.y-transform.position.y)>nav.Scale*(Radius+3)||Body.linearVelocity.magnitude>8)return;
-  FinishExperience();Body.linearVelocity=Vector3.zero;Body.angularVelocity*=.2f;PassPending=false;CreatureTurn=!passFromCreature;RallyReceptions++;if(RallyReceptions==4){NotifyObservers(true);PracticeParticipants();}if(RallyReceptions>=4&&!PeerGame)ConfirmedPartner=Player.GetComponent<HybridTarget>().id;
+  FinishExperience();Body.linearVelocity=Vector3.zero;Body.angularVelocity*=.2f;PassPending=false;CreatureTurn=!passFromCreature;RallyReceptions++;if(RallyReceptions==4){NotifyObservers(true);PracticeParticipants();Player.WitnessBallPlay(this);if(PeerGame)PeerPlayer.WitnessBallPlay(this);}if(RallyReceptions>=4&&!PeerGame)ConfirmedPartner=Player.GetComponent<HybridTarget>().id;
   if(PeerGame){CreditPeerReturn();return;}
   creature.GetComponent<CreatureCuriosity>().NoticeGreeting(Player.transform);Player.GetComponent<HumanoidMotion>()?.React();
   if(passFromCreature)creature.Season.WorldPlay.GentleBall.Practice(creature.State.time);

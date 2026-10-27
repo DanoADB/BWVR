@@ -70,7 +70,7 @@ Current implementation order, 2026-10-26. Implements [ROADMAP.md](ROADMAP.md). T
 
 ## S4 — Ship the shared gathering-place slice
 
-**Delivered increments:** visible, bounded musical audiences and saved context-sensitive enjoyment are implemented; see [MUSICAL_GATHERINGS.md](MUSICAL_GATHERINGS.md). Bench, shelter and nearby chime visits now produce individual place memories that influence return choices and weather-sensitive comfort; see [GATHERING_PLACES.md](GATHERING_PLACES.md). Ball/place integration, improvement requests, the Book and the complete gates below remain open.
+**Delivered increments:** visible, bounded musical audiences and saved context-sensitive enjoyment are implemented; see [MUSICAL_GATHERINGS.md](MUSICAL_GATHERINGS.md). Bench, shelter and nearby chime visits now produce individual place memories that influence return choices and weather-sensitive comfort; see [GATHERING_PLACES.md](GATHERING_PLACES.md). Completed creature/villager and villager/villager ball exchanges now also inform place memories and bounded autonomous play interest. Improvement requests, the Book and the complete gates below remain open.
 
 **Deliver:** connect rest, bench use, ball/chime play, shade/shelter and simple villager requests at one place. The player can improve it several ways. Creature choices compete with its other needs; villagers choose whether to return based on actual utility and experiences. Add the read-only Book shell with Creature, People and Provisions pages, plus a concise gathering-place/contributor record from S1 evidence.
 

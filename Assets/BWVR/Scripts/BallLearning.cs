@@ -10,6 +10,6 @@ namespace BWVR {
 public sealed partial class SocialMemory {
  public BallLearning ballLearning;public BallLearning BallLesson=>ballLearning??(ballLearning=new BallLearning());
  public float PeerPlayDrive=>Mathf.Clamp01(.2f+boldness*.15f+BallLesson.confidence*.6f);
- public bool WantsPeerPlay(int seed,int serial,string identity)=>(CreatureDecisionModel.Variation(seed,serial,CreatureAction.PlayWithToy,identity+"-peer-play")+1)*.5f<PeerPlayDrive;
+ public bool WantsPeerPlay(int seed,int serial,string identity,float placeBias=0)=>(CreatureDecisionModel.Variation(seed,serial,CreatureAction.PlayWithToy,identity+"-peer-play")+1)*.5f<Mathf.Clamp01(PeerPlayDrive+Mathf.Clamp(placeBias,-.15f,.15f));
 }
 }
