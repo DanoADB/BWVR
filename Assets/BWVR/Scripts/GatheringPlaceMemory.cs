@@ -24,7 +24,7 @@ public sealed partial class SocialMemory {
  public bool WantsPlace(int slot,float now,bool comfortable){var place=Place(slot);if(!comfortable||place!=null&&now<place.nextVisitAt)return false;return restNeed>(place!=null&&place.appeal>=.6f?.35f:place!=null&&place.appeal<.4f?.9f:.65f);}
 }
 public sealed partial class VillagerExploration {
- bool CoveredAt(ConstructionSite site,Vector3 at)=>site!=null&&site.TryShelterSpot(nav.profile.radius+.08f,nav.profile.height,out var rest,out _)&&Vector3.Distance(rest,at)<nav.world.Scale*2;
+ bool CoveredAt(ConstructionSite site,Vector3 at)=>site!=null&&site.ShelteredAt(nav.profile.radius+.08f,nav.profile.height,at);
  bool ComfortableAt(ConstructionSite site,Vector3 at)=>construction.GetComponent<CreatureHybrid>().Season.Weather.rain<.5f||CoveredAt(site,at);
  bool RememberPlaceAt(ConstructionSite site,bool comfortable){var god=construction.GetComponent<CreatureHybrid>();bool remembered=social.Memory.RememberPlace(SiteSlot(site),comfortable,god.State.time);if(remembered)god.Journal.Add(god.State.time,"gathering place",CreatureAction.IdleOrObserve,GetComponent<HybridTarget>().id,comfortable?"Comfortable visit; more willing to return":"Exposed visit; less willing to return");return remembered;}
  ConstructionSite NearbyPlace(Vector3 at)=>construction?.sites.Where(s=>!s.IsBridge&&Vector3.Distance(s.transform.position,at)<nav.world.Scale*18).OrderBy(s=>(s.transform.position-at).sqrMagnitude).FirstOrDefault();

@@ -46,6 +46,8 @@ Nonverbal cover and beachball requests are now implemented; see [GATHERING_REQUE
 
 The read-only Book shell is now implemented; see [CREATION_BOOK.md](CREATION_BOOK.md).
 
+Expanded shelters now allow a host to invite one neighbor to a separate safe covered spot; see [SHARED_SHELTERS.md](SHARED_SHELTERS.md).
+
 ## Remaining S4 work
 
 This increment connects remembered utility to existing places. It does not complete the integrated slice: three distinct demonstrated useful player contributions and physical Quest playtesting remain open. Confirmed block-placement and repair attribution is now implemented separately; see [PLACE_CONTRIBUTIONS.md](PLACE_CONTRIBUTIONS.md). Placement alone does not prove utility. These memories describe actual instrumented visits, not proof of a new emergent cultural discovery.

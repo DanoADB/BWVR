@@ -19,10 +19,10 @@ public sealed partial class VillagerExploration {
   shelterCheck-=dt;if(shelterCheck<=0&&!ShelterStillUseful()){social.Memory.buildDisappointments=System.Math.Min(1000000,social.Memory.buildDisappointments+1);ResetTask();return false;}if(shelterCheck<=0)shelterCheck=.25f;
   if(Current==Phase.ApproachStructure){if(nav.MoveTo(structureGoal,transform.lossyScale.y*1.6f,dt)){
     if(!shelterAtEntrance){shelterAtEntrance=true;structureGoal=shelterRest;nav.ResetRoute();}
-    else {var delta=transform.position-shelterRest;delta.y=0;if(delta.magnitude>structure.unit*.35f){ResetTask();return false;}Current=Phase.UseStructure;clock=0;motion?.Activity(0);}
+    else {var delta=transform.position-shelterRest;delta.y=0;if(delta.magnitude>structure.unit*.35f){ResetTask();return false;}Current=Phase.UseStructure;clock=0;motion?.Activity(0);InviteGathering();}
    }}
-  else if(Current==Phase.UseStructure){var delta=transform.position-shelterRest;delta.y=0;if(delta.magnitude>structure.unit*.35f){ResetTask();return false;}motion?.LookAt(structure.transform);shelteredClock+=dt;
-   if(shelteredClock>=6){if(!ShelterStillUseful()){ResetTask();return false;}CompleteRequestedPlaceUse(structure,PlaceImprovement.Cover);RememberPlaceAt(structure,true);var memory=social.Memory;memory.RememberShelter(shelteredClock,construction.GetComponent<CreatureHybrid>().Season.Weather.rain);memory.constructionUses=System.Math.Min(1000000,memory.constructionUses+1);
+  else if(Current==Phase.UseStructure){var delta=transform.position-shelterRest;delta.y=0;if(delta.magnitude>structure.unit*.35f){ResetTask();return false;}motion?.LookAt(gatheringGuest!=null?gatheringGuest.transform:structure.transform);shelteredClock+=dt;
+   if(shelteredClock>=6&&(gatheringGuest==null||clock>=24)){if(!ShelterStillUseful()){ResetTask();return false;}CompleteRequestedPlaceUse(structure,PlaceImprovement.Cover);RememberPlaceAt(structure,true);var memory=social.Memory;memory.RememberShelter(shelteredClock,construction.GetComponent<CreatureHybrid>().Season.Weather.rain);memory.constructionUses=System.Math.Min(1000000,memory.constructionUses+1);
     var god=construction.GetComponent<CreatureHybrid>();god.Journal.Add(god.State.time,"shelter rest",CreatureAction.IdleOrObserve,GetComponent<HybridTarget>().id,"Supported cover; rest relief; rain "+god.Season.Weather.rain.ToString("0.00"));ResetTask();Current=Phase.Celebrate;motion?.React();return true;
    }
   }if(nav.Blocked&&elapsed>5)ResetTask();return Active;
