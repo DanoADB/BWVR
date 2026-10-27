@@ -26,14 +26,15 @@ public sealed partial class ConstructionSite {
  public bool TryShelterSpot(float radius,float height,out Vector3 rest,out Vector3 entrance)=>FindShelterSpot(radius,height,default,0,default,float.PositiveInfinity,out rest,out entrance);
  public bool TryCompanionShelterSpot(float radius,float height,Vector3 host,float separation,out Vector3 rest,out Vector3 entrance)=>FindShelterSpot(radius,height,host,separation,host,unit*10,out rest,out entrance);
  public bool ShelteredAt(float radius,float height,Vector3 at)=>FindShelterSpot(radius,height,default,0,at,unit*2,out _,out _);
- bool FindShelterSpot(float radius,float height,Vector3 occupied,float separation,Vector3 near,float maxDistance,out Vector3 rest,out Vector3 entrance){
+ public bool TryNearbyShelterSpot(float radius,float height,Vector3 from,float distance,Func<Vector3,bool> available,out Vector3 rest)=>FindShelterSpot(radius,height,default,0,from,distance,out rest,out _,point=>ShelterLane(Local(from),Local(point),radius,height)&&(available==null||available(point)));
+ bool FindShelterSpot(float radius,float height,Vector3 occupied,float separation,Vector3 near,float maxDistance,out Vector3 rest,out Vector3 entrance,Func<Vector3,bool> available=null){
   rest=entrance=default;if(IsBridge||!HybridState.Number(radius,.1f,4)||!HybridState.Number(height,.5f,12))return false;
   foreach(var roof in blocks){if((roof.Shape!=ConstructionShape.Slab&&roof.Shape!=ConstructionShape.Beam)||!RoofSupported(roof))continue;var bounds=roof.PhysicsBounds;var point=new Vector3(bounds.center.x,0,bounds.center.z);
    var worldPoint=World(point);if(Vector3.Distance(worldPoint,near)>maxDistance||separation>0&&Vector3.Distance(worldPoint,occupied)<separation)continue;
    if(bounds.min.y<height+.2f||bounds.min.y>height+6||bounds.extents.x<radius+.2f||bounds.extents.z<radius+.2f)continue;
    foreach(var direction in new[]{Vector3.back,Vector3.forward,Vector3.left,Vector3.right}){var entry=point;if(direction.x!=0)entry.x=direction.x*(HalfSize.x+2);else entry.z=direction.z*(HalfSize.y+2);
     if(separation>0){var a=World(point);var line=World(entry)-a;line.y=0;var offset=occupied-a;offset.y=0;float t=line.sqrMagnitude>1e-12f?Mathf.Clamp01(Vector3.Dot(offset,line)/line.sqrMagnitude):0;if((offset-line*t).magnitude<separation)continue;}
-    if(!ShelterLane(point,entry,radius,height))continue;rest=World(point);entrance=World(entry);return true;
+    if(!ShelterLane(point,entry,radius,height))continue;if(available!=null&&!available(worldPoint))break;rest=World(point);entrance=World(entry);return true;
    }
   }return false;
  }
