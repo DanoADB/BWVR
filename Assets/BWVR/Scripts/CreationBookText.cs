@@ -18,7 +18,7 @@ public static class CreationBookText {
  static string Target(string id,IReadOnlyDictionary<string,string> names){if(names!=null&&id!=null&&names.TryGetValue(id,out var name))return Short(name,28);return id=="object-12"?"Beachball":id=="object-13"?"Chime":id=="wood-gift"?"Wood gift":id=="food-gift"?"Food gift":id=="cistern"?"Village water":id=="ground-rain-brush"?"Local rain":id=="ground-wind-fan"?"Wind fan":"Unidentified object";}
  public static CreationBookPage Read(SliceState s,CreationBookSection section,int page=0,string[] names=null,IReadOnlyDictionary<string,string> targets=null){
   if(s==null)return new CreationBookPage("No record","This season has no recorded state.");
-  switch(section){case CreationBookSection.Creature:return Creature(s,targets);case CreationBookSection.People:return People(s,page,names);case CreationBookSection.Provisions:return Provisions(s);default:return Places(s,page,targets);}
+  switch(section){case CreationBookSection.Creature:return Creature(s,targets);case CreationBookSection.People:return People(s,page,names);case CreationBookSection.Provisions:return Provisions(s);default:return Places(s,page,targets,names);}
  }
  static CreationBookPage Creature(SliceState s,IReadOnlyDictionary<string,string> targets){
   var h=s.hybrid;string activity=h?.intention==null?"Unknown":h.intention.active?ActionName(h.intention.action):"No active plan";
@@ -42,16 +42,23 @@ public static class CreationBookText {
   int fields=r.sources?.Count(x=>x!=null&&x.kind==VillageResource.Wheat&&x.growing)??0,trees=r.sources?.Count(x=>x!=null&&x.kind==VillageResource.Wood&&x.growing)??0;
   return new CreationBookPage("Village stores","Food stored "+N(r.wheat+r.freshFood)+" / "+N(r.Limit(VillageResource.Wheat))+"\nWood "+N(r.wood)+" / "+N(r.Limit(VillageResource.Wood))+"\nResin "+N(r.resin)+" / "+N(r.Limit(VillageResource.Resin))+"\n\nExposed food "+N(r.exposedWheat)+" · Spoiled "+N(r.spoiled)+"\nDeliveries "+r.deliveries+" · Store upgrades "+r.storageUpgrades+"\nGrowing fields "+fields+" · Trees regrowing "+trees+"\n\nPlayer gifts recorded\nFood "+N(r.giftedFood)+" · Wood "+N(r.giftedWood));
  }
- static CreationBookPage Places(SliceState s,int page,IReadOnlyDictionary<string,string> targets){
-  var memories=(s.relationships??Array.Empty<SocialMemory>()).Where(m=>m!=null).SelectMany(m=>m.gatheringPlaces??Array.Empty<GatheringPlaceMemory>()).Where(p=>p!=null).ToArray();var slots=memories.Select(p=>p.slot).Distinct().OrderBy(i=>i).ToArray();int places=Math.Max(1,slots.Length),count=places+1;page=Math.Max(0,Math.Min(page,count-1));
-  if(page==places){var ledger=s.hybrid?.evidence;var entries=ledger?.events?.Where(e=>e!=null&&(e.kind==EvidenceKind.ActionCompleted||e.kind==EvidenceKind.Miracle||e.kind==EvidenceKind.Provision)).Reverse().Take(2).ToArray();
+ static CreationBookPage Places(SliceState s,int page,IReadOnlyDictionary<string,string> targets,string[] names){
+  var memories=(s.relationships??Array.Empty<SocialMemory>()).Where(m=>m!=null).SelectMany(m=>m.gatheringPlaces??Array.Empty<GatheringPlaceMemory>()).Where(p=>p!=null).ToArray();var receipts=s.placeContributions?.records??Array.Empty<PlacePlacementReceipt>();var slots=memories.Select(p=>p.slot).Concat(receipts.Select(r=>r.site)).Distinct().OrderBy(i=>i).ToArray();int places=Math.Max(1,slots.Length),count=places*2+1;page=Math.Max(0,Math.Min(page,count-1));
+  if(page==places*2){var ledger=s.hybrid?.evidence;var entries=ledger?.events?.Where(e=>e!=null&&(e.kind==EvidenceKind.ActionCompleted||e.kind==EvidenceKind.Miracle||e.kind==EvidenceKind.Provision)).Reverse().Take(2).ToArray();
    string records=entries==null||entries.Length==0?"No saved outcome evidence yet.":string.Join("\n\n",entries.Select(e=>(e.actor=="creature"?"Creature":e.actor=="player"?"Player":"System")+" · "+(e.kind==EvidenceKind.Miracle?"Miracle":e.kind==EvidenceKind.Provision?"Gift":ActionName(e.action))+" · "+N(e.time)+"s\n"+Source(e.source)+": "+Target(e.target,targets)+"\n"+Short(e.outcome,42)));
    return new CreationBookPage("Latest island evidence",records+"\n\nEarlier history / place attribution: unknown.\nOnly the latest 96 entries are retained.",page,count);
   }
-  if(slots.Length==0)return new CreationBookPage("Gathering places","No person-visits recorded yet.\n\nPlace contributors: unknown.\nUse Next for saved island evidence.",page,count);
-  int slot=slots[page];var recordsForPlace=memories.Where(p=>p.slot==slot).ToArray();int visits=recordsForPlace.Sum(p=>p.visits),bad=recordsForPlace.Sum(p=>p.uncomfortable);
-  return new CreationBookPage(slot==0?"Shared gathering yard":"Former clearing "+slot,"Recorded person-visits "+visits+"\nComfortable "+(visits-bad)+" · Exposed "+bad+"\nMean remembered appeal "+P(recordsForPlace.Average(p=>p.appeal))+"\n\nRequests "+recordsForPlace.Sum(p=>p.requests)+" · Accepted "+recordsForPlace.Sum(p=>p.answers)+"\n\nPlace contributors: unknown.\nVisit totals count each participant.\nUse Next for saved island evidence.",page,count);
+  if(page%2==1)return Contributors(s,slots.Length==0?0:slots[page/2],page,count,names);
+  if(slots.Length==0)return new CreationBookPage("Gathering places","No person-visits recorded yet.\n\nPlace contributors: unknown.\nUse Next for contributor records.",page,count);
+  int slot=slots[page/2];var recordsForPlace=memories.Where(p=>p.slot==slot).ToArray();int visits=recordsForPlace.Sum(p=>p.visits),bad=recordsForPlace.Sum(p=>p.uncomfortable);
+  return new CreationBookPage(slot==0?"Shared gathering yard":"Former clearing "+slot,"Recorded person-visits "+visits+"\nComfortable "+(visits-bad)+" · Exposed "+bad+"\nMean remembered appeal "+(recordsForPlace.Length==0?"unknown":P(recordsForPlace.Average(p=>p.appeal)))+"\n\nRequests "+recordsForPlace.Sum(p=>p.requests)+" · Accepted "+recordsForPlace.Sum(p=>p.answers)+"\n\nUse Next for placement contributors.\nVisit totals count each participant.",page,count);
  }
+ static CreationBookPage Contributors(SliceState s,int slot,int page,int count,string[] names){
+  var records=(s.placeContributions?.records??Array.Empty<PlacePlacementReceipt>()).Where(r=>r.site==slot).ToArray();
+  string details=records.Length==0?"No placement contributors recorded yet.":string.Join("\n",records.GroupBy(r=>r.actor).OrderByDescending(g=>g.Max(r=>r.id)).Take(3).Select(g=>ContributorName(g.Key,names)+": "+g.Count()+" snaps · "+g.Count(r=>r.repair)+" repairs"));
+  return new CreationBookPage(slot==0?"Who placed blocks here":"Clearing "+slot+" contributors","Recent contributors (up to 3)\n"+details+"\n\nPlacement does not prove useful construction.\nEarlier contributors: unknown.\nLast 48 recorded placements retained.",page,count);
+ }
+ static string ContributorName(string id,string[] names)=>id=="player"?"Player":id=="creature"?"Creature":int.TryParse(id.Substring(9),out int index)?Person(index,names):"Unknown";
  static string Source(EvidenceSource s)=>s==EvidenceSource.PlayerGuidance?"Player-guided":s==EvidenceSource.PlayerPlacement?"Player placement":s==EvidenceSource.PlayerMiracle?"Direct intervention":"Autonomous";
 }
 }

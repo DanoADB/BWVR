@@ -90,17 +90,18 @@ public sealed partial class ConstructionSite:MonoBehaviour {
   for(int level=0;level<(IsBridge?8:24);level++){var candidate=new Vector3(x,block.size.y*.5f+level*LayerHeight,z);float distance=(candidate-point).sqrMagnitude;if(distance>best||!Support(candidate,block,out var under,aligned)||!Empty(block,candidate,aligned))continue;best=distance;target=candidate;support=under;}
   return best<.85f*.85f;
  }
- public bool Drop(ConstructionBlock block,Vector3 desired,Quaternion rotation,bool byCreature=false){
+ public bool Drop(ConstructionBlock block,Vector3 desired,Quaternion rotation,bool byCreature=false,string contributor=null,bool repair=false){
+  bool held=block.Item.held||block.wasHeld,attached=block.Attached;var prior=block.Body.position;var priorRotation=block.Body.rotation;
   block.Item.held=false;block.wasHeld=false;preview.enabled=false;
   bool snap=FindSnap(block,desired,rotation,out var at,out var facing,out var under);Detach(block);
   if(snap){Activate(block);block.Body.transform.SetPositionAndRotation(at,facing);block.Body.position=at;block.Body.rotation=facing;Connect(block,under);successfulSnaps++;}
   else {var p=Local(desired);if(!Contains(p,-1)||p.y<block.size.y*.5f-.1f)p=block.spawn;Activate(block);var q=Quaternion.Inverse(transform.rotation)*rotation;block.Body.transform.SetPositionAndRotation(p,q);block.Body.position=p;block.Body.rotation=q;}
   block.creatureBuilt=snap&&byCreature;if(block.creatureBuilt)LastCreatureBuildTime=Clock;
-  block.transform.SetPositionAndRotation(World(block.Body.position),transform.rotation*block.Body.rotation);if(snap)IslandAudio.Cue(IslandSound.Snap,block.transform.position,block.GetEntityId().GetHashCode());Changed?.Invoke();return snap;
+  block.transform.SetPositionAndRotation(World(block.Body.position),transform.rotation*block.Body.rotation);if(snap&&(held||!attached||(block.Body.position-prior).sqrMagnitude>.0001f||Quaternion.Angle(priorRotation,block.Body.rotation)>.1f))RecordConfirmedPlacement(block,byCreature?"creature":contributor,repair);if(snap)IslandAudio.Cue(IslandSound.Snap,block.transform.position,block.GetEntityId().GetHashCode());Changed?.Invoke();return snap;
  }
  bool RayPoint(ConstructionBlock block,Ray ray,out Vector3 point){foreach(var hit in Physics.RaycastAll(ray,10).OrderBy(h=>h.distance))if(hit.collider.GetComponentInParent<ConstructionBlock>()!=block&&((hit.collider.GetComponent<ConstructionFoundation>()!=null&&hit.collider.transform.parent==transform)||hit.collider.GetComponent<ConstructionBlock>()?.Site==this)){point=hit.point+Vector3.up*unit*block.size.y*.5f;return true;}point=World(block.spawn);return false;}
  public bool PlacementPoint(ConstructionBlock block,Ray ray,out Vector3 point){if(!RayPoint(block,ray,out point))return false;if(FindSnap(block,point,transform.rotation,out var local,out _,out _))point=World(local);return true;}
- public bool DropRay(ConstructionBlock block,Ray ray){RayPoint(block,ray,out var point);return Drop(block,point,transform.rotation);}
+ public bool DropRay(ConstructionBlock block,Ray ray){RayPoint(block,ray,out var point);return Drop(block,point,transform.rotation,false,"player");}
  public void PreviewRay(ConstructionBlock block,Ray ray){if(RayPoint(block,ray,out var point)&&FindSnap(block,point,transform.rotation,out var local,out var rotation,out _))ShowPreview(block,World(local),transform.rotation*rotation);else preview.enabled=false;}
  public void ShowPreview(ConstructionBlock block,Vector3 point,Quaternion rotation){
   preview.enabled=true;preview.startColor=preview.endColor=new Color(.35f,1,.55f);var half=block.size*.5f*unit;

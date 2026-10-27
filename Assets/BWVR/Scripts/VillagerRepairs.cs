@@ -46,7 +46,7 @@ public sealed partial class VillagerExploration {
    motion?.PlaceAt(repairPoint,repairRotation,clock/1.4f);
    if(clock>=1.4f){
     motion?.Carry(null);motion?.PlaceAt(default,Quaternion.identity,0);carryingRepair=false;
-    bool placed=site.Drop(block,repairPoint,repairRotation);
+    bool placed=site.Drop(block,repairPoint,repairRotation,false,GetComponent<HybridTarget>().id,!buildingGathering);
     if(placed){if(buildingGathering){social.Memory.builtPieces=Math.Min(1000000,social.Memory.builtPieces+1);if(site.RecipeComplete)social.Memory.gatheringsBuilt=Math.Min(1000000,social.Memory.gatheringsBuilt+1);}else social.Memory.repairs=Math.Min(1000000,social.Memory.repairs+1);var god=construction.GetComponent<CreatureHybrid>();god.Journal.Add(god.State.time,buildingGathering?"villager construction":"villager repair",CreatureAction.ConstructionPlay,GetComponent<HybridTarget>().id,site.Recipe.ToString());}
     ResetTask();if(placed){Current=Phase.Celebrate;motion?.React();}return Active;
    }

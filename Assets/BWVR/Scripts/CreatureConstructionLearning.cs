@@ -11,6 +11,7 @@ public sealed class CreatureConstructionLearning:MonoBehaviour {
  public void Initialize(CreatureHybrid god,ConstructionSite main,IslandDiscoveries island,Func<SliceState> current){
   creature=god;original=main;discoveries=island;season=current;sites.Add(main);main.Recipe=(BuildRecipe)Memory.mainRecipe;
   foreach(var point in island.points)if(point.construction!=null){sites.Add(point.construction);point.construction.Recipe=(BuildRecipe)Memory.cacheRecipes[point.id];}
+  foreach(var site in sites){var clearing=site.GetComponentInParent<DiscoveryPoint>();site.ConfigureContributions(site==main?0:clearing!=null?clearing.id+1:-1,season);}
   foreach(var site in sites)if(site.RecipeComplete)counted.Add(site);
   var nav=god.GetComponent<IslandNavigator>().world;var pointOfInterest=island.points.Find(p=>p.id==2);
   Bridge=CreatureBridge.Create(transform.parent,nav,main.transform.position);if(Bridge!=null){sites.Add(Bridge.Site);Bridge.Restore(Memory.bridge,Memory.Knows(BuildRecipe.Bridge));for(int i=0;i<Bridge.Site.blocks.Count;i++){var a=Bridge.Site.blocks[i].GetComponent<CreatureAffordance>();creature.RegisterObject(a,"bridge-block-"+i);var cue=a.gameObject.AddComponent<SpatialTarget>();var target=a.GetComponent<HybridTarget>();cue.invoke=()=>creature.Guide(GuidanceIntent.Investigate,target);}}

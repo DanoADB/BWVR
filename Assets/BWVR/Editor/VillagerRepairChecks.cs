@@ -11,7 +11,7 @@ public static class VillagerRepairChecks {
   var slice=UnityEngine.Object.FindAnyObjectByType<QuestSlice>();var god=UnityEngine.Object.FindAnyObjectByType<CreatureHybrid>();var learning=god.GetComponent<CreatureConstructionLearning>();var site=learning.sites[0];
   var field=typeof(QuestSlice).GetField("state",BindingFlags.Instance|BindingFlags.NonPublic);var original=(SliceState)field.GetValue(slice);var saved=site.Capture();var recipe=site.Recipe;
   var actors=slice.GetComponentsInChildren<VillagerExploration>();var actor=actors[0];var position=actor.transform.position;var nav=actor.GetComponent<IslandNavigator>();
-  god.Interrupt("Repair QA");foreach(var a in actors){a.ResetTask();a.GetComponent<VillagerSocial>().ResetTask();a.GetComponent<VillagerBlockPlay>().ResetTask();}
+  god.Interrupt("Repair QA");foreach(var a in actors){a.ResetTask();a.GetComponent<VillagerSocial>().ResetTask();a.GetComponent<VillagerResourceGathering>().Cancel();a.GetComponent<VillagerBlockPlay>().ResetTask();}
   var test=new SliceState{water=100,crops=100,developmentFocus=true};field.SetValue(slice,test);var memory=actor.GetComponent<VillagerSocial>().Memory;
   void Require(bool ok,string why){if(!ok)throw new Exception(why);}
   void Approach(){Require(nav.world.Sample(site.World(new Vector3(0,0,-12)),nav.profile,12,out var at),"No repair approach");actor.transform.position=nav.world.ProjectFoot(at,nav.profile);nav.ResetRoute();}
@@ -26,7 +26,7 @@ public static class VillagerRepairChecks {
    beam.Item.held=true;Require(!actor.TryRepair(site),"Player-held block stolen");beam.Item.held=false;
    float trustBefore=memory.trust;actor.Tick(36,false);Require(actor.Current==VillagerExploration.Phase.RepairFetch,"Idle villager did not autonomously choose known damaged bench");Require(!actors[1].TryRepair(site)&&site.Repairer==actor&&!beam.CanBuild,"Repair lease failed");
    var phase=actor.Current;actor.Tick(10,true);Require(actor.Current==phase&&!beam.Item.held,"Pause advanced repair");
-   Run();Require(memory.repairs==1&&site.RecipeComplete&&site.Repairer==null&&!beam.Item.held&&!beam.creatureBuilt,"Native fetch/carry/snap/cleanup or villager attribution failed");Require(memory.trust==trustBefore,"Repair changed trust unexpectedly");actor.ResetTask();
+   Run();Require(memory.repairs==1&&site.RecipeComplete&&site.Repairer==null&&!beam.Item.held&&!beam.creatureBuilt,"Native fetch/carry/snap/cleanup or villager attribution failed");Require(test.placeContributions?.records.Any(r=>r.actor==actor.GetComponent<HybridTarget>().id&&r.site==0&&r.repair)==true,"Native repair contribution missing");Require(memory.trust==trustBefore,"Repair changed trust unexpectedly");actor.ResetTask();
    // Remembered experience survives reload; a different form at the same site is unknown.
    var restored=JsonUtility.FromJson<SliceState>(JsonUtility.ToJson(test));Require(restored.Valid()&&restored.Social(0).repairs==1&&restored.Social(0).usefulStructures==known,"Repair memory did not round-trip");
    var corrupt=JsonUtility.FromJson<SliceState>(JsonUtility.ToJson(test));corrupt.Social(0).usefulStructures=65536;Require(!corrupt.Valid(),"Unbounded structure memory accepted");
