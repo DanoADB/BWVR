@@ -70,6 +70,8 @@ Current implementation order, 2026-10-26. Implements [ROADMAP.md](ROADMAP.md). T
 
 ## S4 — Ship the shared gathering-place slice
 
+**First increment:** visible, bounded musical audiences and saved context-sensitive enjoyment are implemented; see [MUSICAL_GATHERINGS.md](MUSICAL_GATHERINGS.md). The complete integrated place and Book gates below remain open.
+
 **Deliver:** connect rest, bench use, ball/chime play, shade/shelter and simple villager requests at one place. The player can improve it several ways. Creature choices compete with its other needs; villagers choose whether to return based on actual utility and experiences. Add the read-only Book shell with Creature, People and Provisions pages, plus a concise gathering-place/contributor record from S1 evidence.
 
 **Gate:** demonstrate three different useful player contributions, a declined creature suggestion, a villager-initiated encounter and progress without player intervention. Weather changes the value of a placement. A shared activity can have mixed social outcomes. Save/resume retains relationships and constructions. Book values match state, missing history is shown as unknown, and its opening neither commands actors nor silently pauses.

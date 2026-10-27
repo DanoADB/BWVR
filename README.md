@@ -109,3 +109,5 @@ Music has a separate volume/mute under **wrist sanctuary → Sound → Music**. 
 **Resource gifts:** Food and Wood in God tools give usable village stock at the aimed dry ground near villagers or stores. Hold to deliver at most one bundle every two simulation seconds. Villagers who see it gain a small saved faith increase and react with a heart. Full/reserved stores reject gifts. Only Help, Protect and Investigate place floating cues. See [gifts and religion](docs/PLAYER_PROVISIONS.md) and [open tool artwork](docs/GOD_TOOL_ART.md).
 
 **Creature cathedrals:** sustained village faith authorizes five permanent CC0 building stages. Up to two villagers carry paid timber from storage and contribute labor; fanaticism interrupts work. Save/resume retains stages and transit materials. See [religion and cathedrals](docs/RELIGION_AND_CATHEDRALS.md).
+
+**Musical gatherings:** up to three nearby, available villagers can watch a creature–villager chime performance and remember whether they enjoyed it. Rain and actual block shelter affect the experience. See [gathering behavior and checks](docs/MUSICAL_GATHERINGS.md).
