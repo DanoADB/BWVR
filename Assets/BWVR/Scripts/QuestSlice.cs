@@ -214,11 +214,11 @@ public sealed partial class QuestSlice:MonoBehaviour {
   throwMotion[side].Reset();held[side]=item;item.held=true;item.GetComponent<Collider>().enabled=false;item.GetComponent<ConstructionBlock>()?.Grab();IslandAudio.Cue(IslandSound.Grasp,item.transform.position,item.GetEntityId().GetHashCode());notice="Release the carry button over clear ground to place.";return true;
  }
  void Release(int i,Ray ray){var item=held[i];var toss=throwMotion[i].Velocity;if(!XRSettings.isDeviceActive&&Keyboard.current!=null&&Keyboard.current.spaceKey.isPressed)toss=ray.direction*(.5f*rig.localScale.x);throwMotion[i].Reset();held[i]=null;item.held=false;item.GetComponent<Collider>().enabled=true;var tool=item.GetComponent<DivineTool>();if(tool!=null){UseSpiritualTool(tool,ray);return;}var ball=item.GetComponent<BeachBall>();if(ball!=null&&!state.paused&&toss.magnitude>.12f*rig.localScale.x&&ball.PlayerToss(toss,rig.localScale.x)){notice="Tossed. The play circle marks its return spot.";return;}var block=item.GetComponent<ConstructionBlock>();if(block!=null){notice=block.Site.DropRay(block,ray)?"Blocks snapped together.":"Loose block released on the construction green.";hybrid.NoticePlaced(item);return;}Vector3 point;
-  if(!TryDropPoint(item,ray,out point)){item.transform.position=item.home;notice="Returned safely: place on dry, clear walking ground.";return;}
+  if(!TryDropPoint(item,ray,out point)){if(ball!=null)ball.ReturnHome();else item.transform.position=item.home;notice="Returned safely: place on dry, clear walking ground.";return;}
   if(item.kind==Offering.Villager||item.kind==Offering.Creature)item.GetComponent<IslandNavigator>()?.ResetRoute();
   if(item.GetComponent<SharedRhythm>()!=null)item.transform.rotation=Quaternion.Euler(0,item.transform.eulerAngles.y,0);
   IslandAudio.Cue(IslandSound.Place,point,item.GetEntityId().GetHashCode());
-  item.transform.position=point+Vector3.up*(item.kind==Offering.Villager||item.kind==Offering.Creature?0:item.GetComponent<SharedRhythm>()!=null?item.transform.lossyScale.y*.5f:Size(.04f,2));
+  if(ball!=null)ball.PlaceOnGround(point);else item.transform.position=point+Vector3.up*(item.kind==Offering.Villager||item.kind==Offering.Creature?0:item.GetComponent<SharedRhythm>()!=null?item.transform.lossyScale.y*.5f:Size(.04f,2));
   if(item.kind==Offering.Water&&Vector3.Distance(point,cistern)<Size(.18f,8)){DeliverWater();notice="Water delivered. Villagers celebrate their creature's gift.";item.transform.position=item.home;}
   else if(item.kind==Offering.Food&&Vector3.Distance(point,creature.position)<Size(.2f,8)){notice="Food offered. The creature can choose to investigate and eat.";}
   else {if(item.kind==Offering.Villager)item.home=item.transform.position;notice="Placed on the island.";}
