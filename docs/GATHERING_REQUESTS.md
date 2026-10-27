@@ -29,4 +29,4 @@ The user's original season save and XR startup settings are restored after verif
 
 ## Remaining S4 work
 
-The read-only Book and contributor/evidence presentation remain next. The full integrated gate still needs three distinct demonstrated useful player contributions, a declined creature suggestion, autonomous progress, mixed social outcomes and physical Quest readability/comfort checks. These authored affordance requests are not newly discovered behaviors.
+The read-only Book shell and island evidence presentation are now implemented; see [CREATION_BOOK.md](CREATION_BOOK.md). Place-specific contributor receipts remain open. The full integrated gate still needs three distinct demonstrated useful player contributions, a declined creature suggestion, autonomous progress, mixed social outcomes and physical Quest readability/comfort checks. These authored affordance requests are not newly discovered behaviors.

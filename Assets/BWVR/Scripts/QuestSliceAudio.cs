@@ -2,7 +2,7 @@ using UnityEngine;
 namespace BWVR {
 public sealed partial class QuestSlice {
  void ShowAudioSettings(bool show){
-  foreach(Transform child in panel.transform)if(child.gameObject!=audioSettings&&child.name!="Obsidian panel")child.gameObject.SetActive(!show);
+  foreach(Transform child in panel.transform)if(child.gameObject!=audioSettings&&child.name!="Obsidian panel")child.gameObject.SetActive(!show&&child.gameObject!=creationBook);
   audioSettings.SetActive(show);
  }
  void BuildAudioSettings(){

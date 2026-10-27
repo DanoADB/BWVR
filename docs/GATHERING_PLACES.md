@@ -44,6 +44,8 @@ Editor frame progression was verified (1330 to 14146) and a current yard/village
 
 Nonverbal cover and beachball requests are now implemented; see [GATHERING_REQUESTS.md](GATHERING_REQUESTS.md).
 
+The read-only Book shell is now implemented; see [CREATION_BOOK.md](CREATION_BOOK.md).
+
 ## Remaining S4 work
 
-This increment connects remembered utility to existing places. It does not complete the integrated slice: the read-only Book/contributor view, three distinct demonstrated player contributions and physical Quest playtesting remain open. These memories describe actual instrumented visits, not proof of a new emergent cultural discovery.
+This increment connects remembered utility to existing places. It does not complete the integrated slice: place-specific contributor receipts, three distinct demonstrated player contributions and physical Quest playtesting remain open. These memories describe actual instrumented visits, not proof of a new emergent cultural discovery.

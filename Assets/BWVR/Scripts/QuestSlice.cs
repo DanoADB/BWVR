@@ -119,7 +119,8 @@ public sealed partial class QuestSlice:MonoBehaviour {
   Button("Spirit: show / hide",new Vector3(140,-240,0),()=>spirit.SetVisible(!spirit.Visible));
   godTools=GodToolPalette.Build(transform,left,right,rig,eye,font,miracles,hybrid,navigation,groundCollider??ground.GetComponent<Collider>(),(accepted,message)=>{notice=message;if(XRSettings.isDeviceActive)InputDevices.GetDeviceAtXRNode(XRNode.RightHand).SendHapticImpulse(0,accepted?.25f:.08f,.08f);});
   soundscape=IslandAudio.Build(transform,navigation,eye.transform,rig,()=>state);
-  Button("Sound",new Vector3(140,-320,0),()=>ShowAudioSettings(true));BuildAudioSettings();
+  Button("Sound",new Vector3(140,-320,0),()=>ShowAudioSettings(true));BuildAudioSettings();BuildCreationBook();
+  Button("Book of Creation",new Vector3(0,315,0),()=>ShowCreationBook(true));
   Button("God tools",new Vector3(-140,-320,0),()=>{panel.SetActive(false);godTools.Toggle();});
   panel.SetActive(false);
   if(!XRSettings.isDeviceActive){eye.transform.localRotation=Quaternion.Euler(25,0,0);left.localPosition=new Vector3(-.6f,1.15f,1.05f);left.localRotation=Quaternion.Euler(0,0,0);panel.transform.localRotation=Quaternion.identity;}
@@ -155,10 +156,11 @@ public sealed partial class QuestSlice:MonoBehaviour {
   bool toolsOwnInput=godTools.Process(new Ray(toolPointer.position,toolPointer.forward),toolPressed,!xr||controllerHands[1].tracked,carryBusy||panel.activeSelf||state.paused||zoomHeld,Time.unscaledDeltaTime,xr);
   bool praise=xr?controllerHands[1].praise:Keyboard.current!=null&&Keyboard.current.digit1Key.isPressed;
   bool discourage=xr?controllerHands[1].discourage:Keyboard.current!=null&&Keyboard.current.digit2Key.isPressed;
-  if(!toolsOwnInput&&praise!=discourage&&((praise&&!praiseLast)||(discourage&&!discourageLast))){var pointer=xr?aims[1]:right;if((!xr||controllerHands[1].tracked)&&Physics.Raycast(pointer.position,pointer.forward,out var feedbackHit,8*rig.localScale.x)&&feedbackHit.collider.GetComponentInParent<CreatureCuriosity>()==curiosity)GiveFeedback(praise);}
+  if(!toolsOwnInput&&!CreationBookOpen&&praise!=discourage&&((praise&&!praiseLast)||(discourage&&!discourageLast))){var pointer=xr?aims[1]:right;if((!xr||controllerHands[1].tracked)&&Physics.Raycast(pointer.position,pointer.forward,out var feedbackHit,8*rig.localScale.x)&&feedbackHit.collider.GetComponentInParent<CreatureCuriosity>()==curiosity)GiveFeedback(praise);}
   praiseLast=praise;discourageLast=discourage;
   for(int i=0;i<2;i++){bool grip=xr&&i==1?controllerHands[i].trigger:controllerHands[i].grip,trigger=controllerHands[i].trigger;if(!xr){grip=i==1&&Keyboard.current!=null&&Keyboard.current.eKey.isPressed;trigger=i==1&&Keyboard.current!=null&&Keyboard.current.fKey.isPressed;}
-   var hand=i==0?left:right;var pointer=xr?aims[i]:hand;var ray=new Ray(pointer.position,pointer.forward);Physics.Raycast(ray,out var hit,8*rig.localScale.x);rays[i].SetPosition(0,ray.origin);rays[i].SetPosition(1,hit.collider?hit.point:ray.GetPoint(2*rig.localScale.x));rays[i].enabled=xr?controllerHands[i].tracked:i==1;
+   var hand=i==0?left:right;var pointer=xr?aims[i]:hand;var ray=new Ray(pointer.position,pointer.forward);Physics.Raycast(ray,out var hit,8*rig.localScale.x,Physics.DefaultRaycastLayers,CreationBookOpen?QueryTriggerInteraction.Collide:QueryTriggerInteraction.UseGlobal);rays[i].SetPosition(0,ray.origin);rays[i].SetPosition(1,hit.collider?hit.point:ray.GetPoint(2*rig.localScale.x));rays[i].enabled=xr?controllerHands[i].tracked:i==1;
+   if(BookPointer(i,trigger,lastTrigger[i],hit.collider,!xr||controllerHands[i].tracked)){pickupHands[i].gameObject.SetActive(false);lastGrip[i]=grip;lastTrigger[i]=trigger;continue;}
    if(toolsOwnInput&&held[i]==null){pickupHands[i].gameObject.SetActive(false);if(i==1&&godTools.Selected.HasValue)rays[i].SetPosition(1,godTools.PreviewPoint);lastGrip[i]=grip;lastTrigger[i]=trigger;continue;}
    if(grip&&!lastGrip[i]&&hit.collider)TryGrab(i,hit.collider.GetComponentInParent<CarryItem>());
    if(held[i]!=null){if(xr&&!controllerHands[i].tracked){var item=held[i];held[i]=null;item.held=false;item.transform.position=item.home;item.GetComponent<Collider>().enabled=true;}else{held[i].transform.position=hand.position+hand.forward*(.16f*rig.localScale.x);throwMotion[i].Sample(held[i].transform.position,Time.unscaledTime,rig.localScale.x);var block=held[i].GetComponent<ConstructionBlock>();if(block!=null)block.Site.PreviewRay(block,ray);if(!grip)Release(i,ray);}}
@@ -170,7 +172,7 @@ public sealed partial class QuestSlice:MonoBehaviour {
   bool menu=controllerHands[0].menu;if(!xr)menu=Keyboard.current!=null&&Keyboard.current.tabKey.isPressed;if(menu&&!menuLast){godTools.Cancel();panel.SetActive(!panel.activeSelf);}menuLast=menu;
   Simulate(Time.deltaTime);if(!developmentFocus&&state.Finished&&!outcomeShown){outcomeShown=true;panel.SetActive(true);}
   spirit.HandTracked=!xr||controllerHands[0].tracked;
-  status.text=SanctuaryText(xr);
+  status.text=SanctuaryText(xr);TickCreationBook(Time.unscaledDeltaTime);
   creatureLabel.transform.rotation=Quaternion.LookRotation(creatureLabel.transform.position-eye.transform.position);
   saveClock+=Time.deltaTime;if(saveClock>=15){saveClock=0;Save();}
  }
