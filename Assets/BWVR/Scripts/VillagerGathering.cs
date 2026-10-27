@@ -40,8 +40,8 @@ public sealed partial class VillagerExploration {
    if(Vector3.Distance(transform.position,host.transform.position)<nav.world.Scale*10)togetherClock+=dt;else togetherClock=0;
    if(togetherClock>=3){
     var god=construction.GetComponent<CreatureHybrid>();float time=god.State.time;
-    social.Memory.RememberPeer(host.GetComponent<HybridTarget>().id,true,time);host.social.Memory.RememberPeer(GetComponent<HybridTarget>().id,true,time);
-    foreach(var member in new[]{this,host}){member.social.Memory.sharedRests=Math.Min(1000000,member.social.Memory.sharedRests+1);member.social.Memory.restNeed=Mathf.Max(0,member.social.Memory.restNeed-.25f);member.social.Memory.nextGatheringAt=time+90;member.motion?.React();}
+    bool comfortable=ComfortableAt(host.structure,transform.position),hostComfortable=host.ComfortableAt(host.structure,host.transform.position);if(comfortable&&hostComfortable){social.Memory.RememberPeer(host.GetComponent<HybridTarget>().id,true,time);host.social.Memory.RememberPeer(GetComponent<HybridTarget>().id,true,time);}
+    foreach(var member in new[]{this,host}){member.social.Memory.sharedRests=Math.Min(1000000,member.social.Memory.sharedRests+1);bool pleasant=member==this?comfortable:hostComfortable;member.RememberPlaceAt(host.structure,pleasant);member.social.Memory.restNeed=Mathf.Clamp01(member.social.Memory.restNeed+(pleasant?-.25f:.05f));member.social.Memory.nextGatheringAt=time+90;if(pleasant)member.motion?.React();else member.motion?.Signal(false,true,host.structure.transform.position);}
     god.Journal.Add(time,"shared gathering",CreatureAction.SocialInteraction,GetComponent<HybridTarget>().id,host.GetComponent<HybridTarget>().id);
     ResetTask();Current=Phase.Celebrate;return true;
    }

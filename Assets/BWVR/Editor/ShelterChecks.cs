@@ -33,6 +33,7 @@ public static class ShelterChecks {
    actor.Tick(10,true);Require(memory.shelterRests==0&&site.Visitor==actor,"Paused visit changed state");test.Weather.rain=1;
    for(int i=0;i<3000&&memory.shelterRests==0;i++)actor.Tick(.05f,false);
    Require(memory.shelterRests==1&&memory.shelteredSeconds>=6&&memory.restNeed<.4f&&site.Visitor==null,"Native shelter visit did not complete with measured relief");
+   Require(memory.Place(0)?.visits==1&&memory.Place(0).uncomfortable==0,"Covered rest failed to improve place memory");
    var save=JsonUtility.FromJson<SliceState>(JsonUtility.ToJson(test));Require(save.Valid()&&save.Social(0).shelterRests==1,"Visit memory invalid after load");
    actor.ResetTask();actor.transform.position=entry;nav.ResetRoute();memory.restNeed=.95f;Require(actor.TryShelter(site),"Removal visit did not start");roof=site.blocks.First(b=>b.Shape==ConstructionShape.Slab&&b.Attached);roof.Grab();roof.Item.held=true;actor.Tick(.3f,false);Require(site.Visitor==null&&memory.shelterRests==1,"Removed roof retained benefit/lease");
    Reset();foreach(int x in new[]{-2,2}){Place(ConstructionShape.Cube,new Vector3(x,1.2f,-12));Place(ConstructionShape.Cube,new Vector3(x,3.6f,-12));}Place(ConstructionShape.Slab,new Vector3(0,5.4f,-12),true);
