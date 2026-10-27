@@ -5,6 +5,7 @@ namespace BWVR {
 public enum PlaceImprovement {None,Cover,BeachBall}
 // A short request on the existing leisure motor. The player and creature remain free to ignore it.
 public sealed partial class VillagerExploration {
+ ConstructionSite acceptedPlace;PlaceImprovement acceptedImprovement;BeachBall acceptedBall;SliceState acceptedSeason;
  PlaceImprovement placeRequest;BeachBall requestedBall;bool requestShown;float requestCheck;
  public PlaceImprovement GatheringRequest=>Current==Phase.PlaceRequest&&requestShown?placeRequest:PlaceImprovement.None;
  bool UsefulRequestCover(ConstructionSite site)=>site.TryShelterSpot(nav.profile.radius+.08f,nav.profile.height,out var rest,out var entry)&&world.Reachable(transform.position,entry,nav.profile)&&world.Reachable(entry,rest,nav.profile);
@@ -33,13 +34,19 @@ public sealed partial class VillagerExploration {
   if(!requestShown){if(nav.MoveTo(structureGoal,transform.lossyScale.y*1.6f,dt)){var memory=social.Memory.Place(SiteSlot(site));if(memory==null||!memory.Ask(god.State.time)){ResetTask();return false;}requestShown=true;clock=0;motion?.Activity(0);god.Journal.Add(god.State.time,"place improvement request",CreatureAction.IdleOrObserve,GetComponent<HybridTarget>().id,placeRequest.ToString());}else if(nav.Blocked&&elapsed>5){ResetTask();return false;}return true;}
   clock+=dt;
   if(requestCheck<=0){requestCheck=.25f;bool answered=placeRequest==PlaceImprovement.Cover?UsefulRequestCover(site):BallAtPlace(requestedBall,site);
-   if(answered){var memory=social.Memory.Place(SiteSlot(site));var need=placeRequest;var ball=requestedBall;ResetTask();bool accepted=need==PlaceImprovement.Cover?TryShelter(site):TryBall(ball);if(accepted){memory.answers=Math.Min(memory.requests,memory.answers+1);god.Journal.Add(god.State.time,"place improvement accepted",CreatureAction.IdleOrObserve,GetComponent<HybridTarget>().id,need.ToString());motion?.React();}return Active;}
+   if(answered){var memory=social.Memory.Place(SiteSlot(site));var need=placeRequest;var ball=requestedBall;ResetTask();bool accepted=need==PlaceImprovement.Cover?TryShelter(site):TryBall(ball);if(accepted){memory.answers=Math.Min(memory.requests,memory.answers+1);acceptedPlace=site;acceptedImprovement=need;acceptedBall=ball;acceptedSeason=god.Season;god.Journal.Add(god.State.time,"place improvement accepted",CreatureAction.IdleOrObserve,GetComponent<HybridTarget>().id,need.ToString());motion?.React();}return Active;}
   }
   if(clock>16){ResetTask();return false;}
   if(placeRequest==PlaceImprovement.Cover){bool overhead=clock%6<3;motion?.LookAt(god.transform);motion?.Shelter(overhead);motion?.Signal(false,!overhead,site.transform.position);}
   else {if(requestedBall==null){ResetTask();return false;}float cycle=clock%8;motion?.LookAt(cycle<5?requestedBall.transform:site.transform);motion?.Signal(cycle<2,cycle>=2,cycle<5?requestedBall.transform.position:site.transform.position);}
   return true;
  }
+ // A handoff is not a completed benefit. Keep only this live activity's pending receipt.
+ void CompleteRequestedPlaceUse(ConstructionSite site,PlaceImprovement improvement,BeachBall ball=null){
+  var god=construction.GetComponent<CreatureHybrid>();if(acceptedPlace!=site||acceptedImprovement!=improvement||!ReferenceEquals(acceptedSeason,god.Season)||god.Season.paused||actor.held||improvement==PlaceImprovement.BeachBall&&acceptedBall!=ball)return;
+  var memory=social.Memory.Place(SiteSlot(site));if(memory!=null&&memory.ConfirmRequestedUse(improvement))god.Journal.Add(god.State.time,"requested improvement used",CreatureAction.IdleOrObserve,GetComponent<HybridTarget>().id,improvement==PlaceImprovement.Cover?"Completed rest under requested cover":"Completed shared play with requested ball");ClearAcceptedPlaceUse();
+ }
+ void ClearAcceptedPlaceUse(){acceptedPlace=null;acceptedImprovement=PlaceImprovement.None;acceptedBall=null;acceptedSeason=null;}
  void ReleasePlaceRequest(){if(placeRequest==PlaceImprovement.None)return;placeRequest=PlaceImprovement.None;requestedBall=null;requestShown=false;motion?.Shelter(false);motion?.Signal(false);}
 }
 }

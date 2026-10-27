@@ -3,9 +3,10 @@ using System.Linq;
 using UnityEngine;
 namespace BWVR {
 [Serializable] public sealed class GatheringPlaceMemory {
- public int slot,visits,uncomfortable,requests,answers;public float appeal=.5f,nextVisitAt,nextRequestAt;
+ public int slot,visits,uncomfortable,requests,answers,coverUses,ballUses;public float appeal=.5f,nextVisitAt,nextRequestAt;
  public bool Ask(float now){if(!HybridState.Number(now,0,100000000)||now<nextRequestAt||visits==0)return false;requests=Math.Min(1000000,requests+1);nextRequestAt=now+180;return true;}
- public bool Valid()=>slot>=0&&slot<3&&visits>=0&&visits<=1000000&&uncomfortable>=0&&uncomfortable<=visits&&requests>=0&&requests<=1000000&&answers>=0&&answers<=requests&&HybridState.Number(nextRequestAt,0,100000300)&&HybridState.Number(appeal,0,1)&&HybridState.Number(nextVisitAt,0,100000300);
+ public bool ConfirmRequestedUse(PlaceImprovement improvement){if(coverUses+ballUses>=answers)return false;if(improvement==PlaceImprovement.Cover)coverUses++;else if(improvement==PlaceImprovement.BeachBall)ballUses++;else return false;return true;}
+ public bool Valid()=>slot>=0&&slot<3&&visits>=0&&visits<=1000000&&uncomfortable>=0&&uncomfortable<=visits&&requests>=0&&requests<=1000000&&answers>=0&&answers<=requests&&coverUses>=0&&coverUses<=answers&&ballUses>=0&&ballUses<=answers&&coverUses+ballUses<=answers&&HybridState.Number(nextRequestAt,0,100000300)&&HybridState.Number(appeal,0,1)&&HybridState.Number(nextVisitAt,0,100000300);
 }
 public sealed partial class SocialMemory {
  public GatheringPlaceMemory[] gatheringPlaces;
@@ -34,7 +35,7 @@ public sealed partial class VillagerExploration {
  public bool WitnessBallPlay(BeachBall ball){
   if(Current!=Phase.Beachball||ball==null||playingBall!=ball||!ball.OwnsPlayer(this)||ball.RallyReceptions!=4||ball.Harmful||actor.held||ball.GetComponent<CarryItem>().held||ball.Playmate.Season.paused||rememberedPlayBall==ball&&rememberedPlaySession==ball.ObservationSession)return false;
   rememberedPlayBall=ball;rememberedPlaySession=ball.ObservationSession;
-  var site=NearbyPlace(transform.position);return site!=null&&RememberPlaceAt(site,ComfortableAt(site,transform.position));
+  var site=NearbyPlace(transform.position);if(site!=null)CompleteRequestedPlaceUse(site,PlaceImprovement.BeachBall,ball);return site!=null&&RememberPlaceAt(site,ComfortableAt(site,transform.position));
  }
  bool WantsBench(ConstructionSite site){var god=construction.GetComponent<CreatureHybrid>();return social.Memory.WantsPlace(SiteSlot(site),god.State.time,ComfortableAt(site,site.World(new Vector3(0,0,-4))));}
 }

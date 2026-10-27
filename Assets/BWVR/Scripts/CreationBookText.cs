@@ -51,7 +51,7 @@ public static class CreationBookText {
   if(page%2==1)return Contributors(s,slots.Length==0?0:slots[page/2],page,count,names);
   if(slots.Length==0)return new CreationBookPage("Gathering places","No person-visits recorded yet.\n\nPlace contributors: unknown.\nUse Next for contributor records.",page,count);
   int slot=slots[page/2];var recordsForPlace=memories.Where(p=>p.slot==slot).ToArray();int visits=recordsForPlace.Sum(p=>p.visits),bad=recordsForPlace.Sum(p=>p.uncomfortable);
-  return new CreationBookPage(slot==0?"Shared gathering yard":"Former clearing "+slot,"Recorded person-visits "+visits+"\nComfortable "+(visits-bad)+" · Exposed "+bad+"\nMean remembered appeal "+(recordsForPlace.Length==0?"unknown":P(recordsForPlace.Average(p=>p.appeal)))+"\n\nRequests "+recordsForPlace.Sum(p=>p.requests)+" · Accepted "+recordsForPlace.Sum(p=>p.answers)+"\n\nUse Next for placement contributors.\nVisit totals count each participant.",page,count);
+  return new CreationBookPage(slot==0?"Shared gathering yard":"Former clearing "+slot,"Recorded person-visits "+visits+"\nComfortable "+(visits-bad)+" · Exposed "+bad+"\nMean remembered appeal "+(recordsForPlace.Length==0?"unknown":P(recordsForPlace.Average(p=>p.appeal)))+"\n\nRequests "+recordsForPlace.Sum(p=>p.requests)+" · Accepted "+recordsForPlace.Sum(p=>p.answers)+"\nUsed after request: cover "+recordsForPlace.Sum(p=>p.coverUses)+" · ball "+recordsForPlace.Sum(p=>p.ballUses)+"\n\nUse Next for placement contributors.\nVisit totals count each participant.",page,count);
  }
  static CreationBookPage Contributors(SliceState s,int slot,int page,int count,string[] names){
   var records=(s.placeContributions?.records??Array.Empty<PlacePlacementReceipt>()).Where(r=>r.site==slot).ToArray();
