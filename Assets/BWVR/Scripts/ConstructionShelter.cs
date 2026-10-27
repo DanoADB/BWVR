@@ -11,9 +11,10 @@ public sealed partial class ConstructionSite {
   var a=block.PhysicsBounds;var b=parent.PhysicsBounds;
   return Mathf.Abs(a.min.y-b.max.y)<.08f&&a.min.x<b.max.x-.05f&&a.max.x>b.min.x+.05f&&a.min.z<b.max.z-.05f&&a.max.z>b.min.z+.05f&&RootedCoverSupport(parent,depth+1);
  }
- bool RoofSupported(ConstructionBlock roof){
-  if(!RootedCoverSupport(roof))return false;var bounds=roof.PhysicsBounds;bool left=false,right=false,front=false,back=false;
-  foreach(var b in blocks){if(b==roof||!RootedCoverSupport(b))continue;var below=b.PhysicsBounds;
+ bool RoofSupported(ConstructionBlock roof)=>RootedCoverSupport(roof)&&BracedUnder(roof.PhysicsBounds,roof);
+ bool BracedUnder(Bounds bounds,ConstructionBlock ignore){
+  bool left=false,right=false,front=false,back=false;
+  foreach(var b in blocks){if(b==ignore||!RootedCoverSupport(b))continue;var below=b.PhysicsBounds;
    if(Mathf.Abs(below.max.y-bounds.min.y)>.08f||below.min.x>=bounds.max.x-.1f||below.max.x<=bounds.min.x+.1f||below.min.z>=bounds.max.z-.1f||below.max.z<=bounds.min.z+.1f)continue;
    left|=below.center.x<bounds.center.x-.5f;right|=below.center.x>bounds.center.x+.5f;front|=below.center.z<bounds.center.z-.5f;back|=below.center.z>bounds.center.z+.5f;
   }return (left&&right)||(front&&back);

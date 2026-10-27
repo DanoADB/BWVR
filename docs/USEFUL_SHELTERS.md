@@ -4,7 +4,7 @@ A shelter is detected from the existing construction pieces. It does not require
 
 ## Build and use
 
-In the main construction yard, pick up and snap two tall Column pieces four grid units apart, then bridge them with a flat Slab. A useful example is columns at local (-2, 2.4, -12) and (2, 2.4, -12), with the slab at (0, 5.4, -12). Leave the center and at least one straight corridor to the yard edge clear. Another supported arrangement uses two stacks of two Cube pieces and a quarter-turned slab at the same height. These are examples, not mandatory recipes. Other valid Beam/Slab arrangements can work.
+In the main construction yard, pick up and snap two tall Column pieces four grid units apart, then bridge them with a flat Slab. A useful example is columns at local (-2, 2.4, -12) and (2, 2.4, -12), with the slab at (0, 5.4, -12). With the player pointer, aim the held Slab at a column's inner top rim until the green outline spans the gap, then release; see [POINTER_SPANS.md](POINTER_SPANS.md). Leave the center and at least one straight corridor to the yard edge clear. Another supported arrangement uses two stacks of two Cube pieces and a quarter-turned slab at the same height. These are examples, not mandatory recipes. Other valid Beam/Slab arrangements can work.
 
 Rest-seeking villagers may choose usable cover through their existing leisure decision loop. They retain the choice of other activities. The visitor approaches the clear entrance, walks under the roof, rests for six simulation seconds and visibly reacts on completion. One host holds the visitor lease. An expanded shelter can now admit one invited neighbor to a separate safe covered spot; see [SHARED_SHELTERS.md](SHARED_SHELTERS.md). There are no new controls or permanent signs.
 
