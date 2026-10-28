@@ -17,6 +17,7 @@ public sealed partial class QuestSlice:MonoBehaviour {
  public bool developmentFocus=true;
  [Tooltip("In exploration development focus, pause automatic food work and meal consumption to observe other behaviors. Turn off to restore the food economy.")]
  public bool observeWithoutFoodWork=true;
+ PlayerRhythm[] playerMusic=Array.Empty<PlayerRhythm>();
  BeachBall[] balls=Array.Empty<BeachBall>();
  IslandAudio soundscape;GameObject audioSettings;
  VillageCathedral cathedral;VillageWorship worship;VillageTributes tributes;SpiritCompanion spirit;GodToolPalette godTools;bool toolsKeyLast;
@@ -91,6 +92,7 @@ public sealed partial class QuestSlice:MonoBehaviour {
   for(int i=0;i<items.Count;i++)if(items[i].GetComponent<HybridTarget>()==null)hybrid.Register(HybridTarget.Bind(items[i].gameObject,"resource-"+(i>=VillagePopulation.Adults?i-(VillagePopulation.Adults-3):i),HybridTargetKind.Object));
   foreach(var job in jobs)job.GetComponent<VillagerSocial>().ConfigureSharing(hybrid,affordances);
   balls=GetComponentsInChildren<BeachBall>();foreach(var ball in balls){ball.Configure(hybrid,jobs);ball.Chase.PlayerHolding=()=>held.Any(item=>item==ball.GetComponent<CarryItem>());ball.Chase.InteractionAllowed=()=>!MenuOpen&&!applicationSuspended&&(!XRSettings.isDeviceActive||(controllerHands[0].tracked&&controllerHands[1].tracked));}foreach(var job in jobs)job.GetComponent<VillagerExploration>().ConfigureBalls(balls);foreach(var job in jobs)job.GetComponent<VillagerExploration>().ConfigurePeers(jobs.Select(j=>j.GetComponent<VillagerExploration>()).ToArray());
+  playerMusic=GetComponentsInChildren<PlayerRhythm>();foreach(var music in playerMusic)music.Configure(hybrid,()=>!MenuOpen&&!applicationSuspended&&held.All(i=>i==null)&&(godTools==null||!godTools.ClaimsInput));
   treePlay=TreePlayWorld.Build(transform,navigation,hybrid);
   miracles=DivineIntervention.Build(transform,hybrid,navigation,cistern,jobs,()=>state);
   weather=IslandWeather.Build(transform,navigation,cistern,()=>state);
@@ -154,6 +156,7 @@ public sealed partial class QuestSlice:MonoBehaviour {
    var hand=i==0?left:right;var pointer=xr?aims[i]:hand;var ray=new Ray(pointer.position,pointer.forward);RaycastHit hit;if(MenuOpen)SanctuaryRaycast(ray,8*rig.localScale.x,out hit);else Physics.Raycast(ray,out hit,8*rig.localScale.x);rays[i].SetPosition(0,ray.origin);rays[i].SetPosition(1,hit.collider?hit.point:ray.GetPoint(2*rig.localScale.x));rays[i].enabled=xr?controllerHands[i].tracked:i==1;
    if(SanctuaryPointer(i,trigger,lastTrigger[i],hit.collider,!xr||controllerHands[i].tracked)){pickupHands[i].gameObject.SetActive(false);lastGrip[i]=grip;lastTrigger[i]=trigger;continue;}
    if(toolsOwnInput&&held[i]==null){pickupHands[i].gameObject.SetActive(false);if(i==1&&godTools.Selected.HasValue)rays[i].SetPosition(1,godTools.PreviewPoint);lastGrip[i]=grip;lastTrigger[i]=trigger;continue;}
+   if(ChimePointer(i,trigger,lastTrigger[i],hit.collider,!xr||controllerHands[i].tracked)){pickupHands[i].gameObject.SetActive(false);lastGrip[i]=grip;lastTrigger[i]=trigger;continue;}
    if(grip&&!lastGrip[i]&&hit.collider)TryGrab(i,hit.collider.GetComponentInParent<CarryItem>());
    if(held[i]!=null){if(xr&&!controllerHands[i].tracked){var item=held[i];held[i]=null;item.held=false;item.transform.position=item.home;item.GetComponent<Collider>().enabled=true;}else{held[i].transform.position=hand.position+hand.forward*(.16f*rig.localScale.x);throwMotion[i].Sample(held[i].transform.position,Time.unscaledTime,rig.localScale.x);var block=held[i].GetComponent<ConstructionBlock>();if(block!=null)block.Site.PreviewRay(block,ray);if(!grip)Release(i,ray);}}
    UpdatePickupHand(i,ray,hit,xr?controllerHands[i].tracked:i==1);
@@ -200,6 +203,7 @@ public sealed partial class QuestSlice:MonoBehaviour {
  void Pose(XRNode node,Transform target){var d=InputDevices.GetDeviceAtXRNode(node);if(d.TryGetFeatureValue(CommonUsages.devicePosition,out Vector3 p))target.localPosition=p;if(d.TryGetFeatureValue(CommonUsages.deviceRotation,out Quaternion r))target.localRotation=r;}
  void Desktop(){var k=Keyboard.current;var m=Mouse.current;if(k==null||m==null)return;if(m.rightButton.isPressed){var delta=m.delta.ReadValue()*.12f;var e=eye.transform.localEulerAngles;float pitch=Mathf.DeltaAngle(0,e.x);eye.transform.localRotation=Quaternion.Euler(Mathf.Clamp(pitch-delta.y,-65,65),e.y+delta.x,0);}var movement=new Vector3((k.dKey.isPressed?1:0)-(k.aKey.isPressed?1:0),0,(k.wKey.isPressed?1:0)-(k.sKey.isPressed?1:0));rig.position+=Quaternion.Euler(0,eye.transform.eulerAngles.y,0)*Vector3.ClampMagnitude(movement,1)*Mathf.Min(Time.deltaTime,.05f)*(QuestControls.TravelSpeed*rig.localScale.x);
   if(held[0]==null&&held[1]==null&&Mathf.Abs(m.scroll.ReadValue().y)>.01f){QuestControls.Zoom(rig,ZoomFocus(),m.scroll.ReadValue().y*QuestControls.WheelZoomSpeed);UpdateViewScale();}right.position=eye.transform.position-eye.transform.up*.08f;right.rotation=eye.transform.rotation;}
+ bool ChimePointer(int side,bool pressed,bool wasPressed,Collider hit,bool tracked){var key=hit!=null?hit.GetComponent<ChimeKey>():null;if(key==null||held.Any(i=>i!=null))return false;if(side==1&&tracked&&pressed&&!wasPressed)key.owner?.Tap(key.note);return true;}
  bool TryGrab(int side,CarryItem item){
   if(MenuOpen||godTools!=null&&godTools.ClaimsInput)return false;if(item==null||!item.gameObject.activeInHierarchy||!item.CanGrab||held[side]!=null||(item.kind==Offering.Creature&&side!=1))return false;
   if(item.kind==Offering.Creature){item.home=item.transform.position;hybrid.Interrupt("Picked up by the player");}
@@ -242,7 +246,7 @@ public sealed partial class QuestSlice:MonoBehaviour {
    state.developmentFocus=developmentFocus;state.observeWithoutFoodWork=developmentFocus&&observeWithoutFoodWork;
   if(dt<=0||float.IsNaN(dt)||float.IsInfinity(dt))return;bool paused=state.paused||applicationSuspended;soundscape?.SetFrozen(paused);
    if(construction!=null)construction.Paused=paused;if(learning!=null)foreach(var site in learning.sites)site.Paused=paused;discoveries?.Advance(dt,paused);
-  if(!paused){state.Hybrid.time=Mathf.Min(100000000,state.Hybrid.time+dt);state.Step(dt);learning?.Tick();tributes?.Tick(dt,false);AnimateVillage(dt);}families?.Advance(dt,paused);resources?.Advance(dt,paused);weather?.Advance(dt,paused);foreach(var ball in balls)ball.Advance(dt,paused);treePlay?.Advance(dt,paused);miracles?.Tick(paused?0:dt,paused);signals.Tick(paused?0:dt,state);soundscape?.Advance(dt,paused);
+  if(!paused){state.Hybrid.time=Mathf.Min(100000000,state.Hybrid.time+dt);state.Step(dt);learning?.Tick();tributes?.Tick(dt,false);AnimateVillage(dt);}families?.Advance(dt,paused);resources?.Advance(dt,paused);weather?.Advance(dt,paused);foreach(var ball in balls)ball.Advance(dt,paused);foreach(var music in playerMusic)music.Advance(paused?0:dt);treePlay?.Advance(dt,paused);miracles?.Tick(paused?0:dt,paused);signals.Tick(paused?0:dt,state);soundscape?.Advance(dt,paused);
  }
  void AnimateVillage(float dt){
   cathedral?.Advance(dt);worship?.Advance(dt);

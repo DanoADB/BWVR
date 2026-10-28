@@ -19,7 +19,7 @@ public sealed partial class SharedRhythm:MonoBehaviour {
  }
  public bool Begin(CreatureHybrid god){
   var person=GetComponent<CreatureAffordance>().host;
-  if(Active||person==null||person.Current!=VillagerSocial.Phase.WatchGift||!person.Willing||GetComponent<CarryItem>().held||god.Season.paused)return false;
+  if(GetComponent<PlayerRhythm>()?.Reserved==true||Active||person==null||person.Current!=VillagerSocial.Phase.WatchGift||!person.Willing||GetComponent<CarryItem>().held||god.Season.paused)return false;
   float unit=god.GetComponent<IslandNavigator>().world.Scale;
   if(Vector3.Distance(person.transform.position,transform.position)>unit*5||Vector3.Distance(god.transform.position,transform.position)>unit*9)return false;
   host=person;creature=god;hostMotion=person.GetComponentInChildren<HumanoidMotion>();guestMotion=god.GetComponentInChildren<HumanoidMotion>();Active=true;Completed=false;Beats=0;clock=0;nextBeat=.3f;InviteAudience();return true;
