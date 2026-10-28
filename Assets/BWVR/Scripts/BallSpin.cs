@@ -26,7 +26,7 @@ public sealed class CircleGesture {
  }
 }
 // A toy gesture invites a stationary turn. Curiosity remains the sole movement/action owner.
-public sealed class BallSpin {
+public sealed partial class BallSpin {
  readonly BeachBall ball;readonly CreatureHybrid god;readonly IslandNavigation nav;readonly CarryItem item;readonly CircleGesture gesture=new CircleGesture();
  static readonly Vector3[] Steps={Vector3.forward,Vector3.back,Vector3.left,Vector3.right};
  Vector3 anchor,lastPoint;bool havePoint;Quaternion frame,start;float sampleIn,until,cooldown,turned,safetyIn,verticalUntil;int direction;bool haveFrame,pending,noticed;
@@ -54,16 +54,16 @@ public sealed class BallSpin {
  }
  void NoticeCurve(){var mind=god.GetComponent<CreatureCuriosity>();if(mind.Current==CreatureCuriosity.Phase.ChaseBall)god.Interrupt("Curved toy motion superseded following");mind.NoticeAttention();}
  void ClearGesture(){gesture.Reset();haveFrame=havePoint=noticed=false;sampleIn=verticalUntil=0;}
- public bool Begin(){if(!Ready||!SafeSpot())return false;ball.CancelFetch();ball.CancelRally();ball.Goals?.Cancel();ball.Chase.End();ball.Chase.ClearCompletion();ball.JustFetched=false;Active=true;JustCompleted=false;turned=0;anchor=god.transform.position;start=god.transform.rotation;safetyIn=0;pending=false;ClearGesture();return true;}
+ public bool Begin(){if(!Ready||!SafeSpot())return false;ball.CancelFetch();ball.CancelRally();ball.Goals?.Cancel();ball.Chase.End();ball.Chase.ClearCompletion();ball.JustFetched=false;Active=true;JustCompleted=false;turned=0;anchor=god.transform.position;start=god.transform.rotation;safetyIn=0;pending=false;ClearGesture();InviteAudience();return true;}
  bool SafeSpot(){var navigator=god.GetComponent<IslandNavigator>();if(!navigator.CanPlace(god.transform.position,out var foot))return false;float radius=nav.creature.radius+.5f;foreach(var step in Steps)if(!nav.Sample(foot+step*radius*nav.Scale,nav.creature,1,out var edge)||Mathf.Abs(nav.ProjectFoot(edge,nav.creature).y-foot.y)>nav.Scale*1.25f)return false;return true;}
  public int Step(float dt){
   if(!Active||!Held||!Allowed||ball.Harmful||Vector3.Distance(ball.transform.position,anchor)>nav.Scale*28||Vector3.Distance(god.transform.position,anchor)>nav.Scale*.5f)return -1;
   if(god.Season.paused||dt<=0)return 0;safetyIn-=dt;if(safetyIn<=0){safetyIn=.1f;if(!SafeSpot())return -1;}turned=Mathf.Min(360,turned+Mathf.Min(dt,.1f)*120);god.transform.rotation=Quaternion.AngleAxis(direction*turned,Vector3.up)*start;
   if(turned<360)return 0;
   if(!god.CanSeeCue(ball.GetComponent<HybridTarget>(),true))return -1;
-  god.Season.WorldPlay.Spin.Complete(direction);JustCompleted=true;End();god.Journal.Add(god.State.time,"toy spin",CreatureAction.PlayWithToy,ball.StableId,"Completed a grounded turn from a witnessed toy circle");return 1;
+  god.Season.WorldPlay.Spin.Complete(direction);JustCompleted=true;FinishAudience(true);End();god.Journal.Add(god.State.time,"toy spin",CreatureAction.PlayWithToy,ball.StableId,"Completed a grounded turn from a witnessed toy circle");return 1;
  }
- public void End(){if(Active||pending)cooldown=god.State.time+12;Active=pending=false;ClearGesture();}
+ public void End(){FinishAudience(false);if(Active||pending)cooldown=god.State.time+12;Active=pending=false;ClearGesture();}
  public void Cancel(){End();JustCompleted=false;}
  public void ClearCompletion(){JustCompleted=false;}
  public void Reset(){End();JustCompleted=false;cooldown=until=turned=0;}

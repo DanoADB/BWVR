@@ -3,7 +3,7 @@ using UnityEngine;
 namespace BWVR {
 // An independent leisure intention: inspect, handle a play tool or taste a berry.
 public sealed partial class VillagerExploration:MonoBehaviour {
- public enum Phase{Idle,Approach,Inspect,Enjoy,Celebrate,ApproachBridge,CrossBridge,FetchTribute,CarryTribute,ApproachStructure,UseStructure,NeedApproach,ShowNeed,Beachball,WatchBall,RepairFetch,RepairCarry,RepairPlace,GatheringGuest,ComfortNeighbor,MusicAudience,PlaceRequest,EchoAudience}
+ public enum Phase{Idle,Approach,Inspect,Enjoy,Celebrate,ApproachBridge,CrossBridge,FetchTribute,CarryTribute,ApproachStructure,UseStructure,NeedApproach,ShowNeed,Beachball,WatchBall,RepairFetch,RepairCarry,RepairPlace,GatheringGuest,ComfortNeighbor,MusicAudience,PlaceRequest,EchoAudience,SpinAudience}
  public Phase Current{get;private set;}public bool Active=>Current!=Phase.Idle;public int discoveries{get;private set;}
  IslandDiscoveries world;VillagerSocial social;VillagerRoutine routine;IslandNavigator nav;HumanoidMotion motion;CarryItem actor;DiscoveryObject target;Vector3 original;Quaternion rotation;float cooldown,clock,elapsed;int identity;
  CreatureBridge bridge;Vector3 nearBank,farBank;
@@ -19,6 +19,7 @@ public sealed partial class VillagerExploration:MonoBehaviour {
  public bool Tick(float dt,bool paused){
   if(paused||dt<=0)return Active;
   if(actor.held){ResetTask();return false;}
+  if(Current==Phase.SpinAudience)return TickSpinAudience(dt);
   if(Current==Phase.EchoAudience)return TickEchoAudience(dt);
   if(Current==Phase.PlaceRequest)return TickPlaceRequest(dt);
   if(Current==Phase.MusicAudience)return TickMusic(dt);
@@ -37,7 +38,7 @@ public sealed partial class VillagerExploration:MonoBehaviour {
   else if(Current==Phase.Enjoy){if(!target.treat)motion?.Playful(clock);if(clock>2.5f){if(target.treat)target.Eat();if(target.point.Discover(identity)){discoveries++;social.Memory.discoveries=System.Math.Min(1000000,social.Memory.discoveries+1);social.Memory.boldness=Mathf.Clamp01(social.Memory.boldness+.025f);}ResetTask();Current=Phase.Celebrate;clock=elapsed=0;motion?.React();}}
   return Active;
  }
- public void ResetTask(){ClearAcceptedPlaceUse();if(!Active)return;ReleasePlaceRequest();ReleaseEchoAudience();ReleaseMusic();ReleaseComfort();ReleaseGathering();ReleaseRepair();ReleaseWatching();ReleaseBall();ReleaseStructure();motion?.Carry(null);motion?.Playful(0);motion?.LookAt(null);motion?.Activity(0);if(tribute!=null){if(ownsTribute){tribute.Basket.held=false;tribute.Basket.transform.position=tribute.Basket.home;tribute.Basket.GetComponent<Collider>().enabled=true;}tribute.Cancel(this);tribute=null;ownsTribute=false;}if(target!=null){if(Current==Phase.Enjoy){target.transform.SetPositionAndRotation(original,rotation);target.GetComponent<CarryItem>().held=false;}if(target.Owner==this)target.Owner=null;target.Refresh();}target=null;Current=Phase.Idle;clock=elapsed=0;cooldown=35;nav?.ResetRoute();routine?.ResetTask();}
+ public void ResetTask(){ClearAcceptedPlaceUse();if(!Active)return;ReleaseSpinAudience();ReleasePlaceRequest();ReleaseEchoAudience();ReleaseMusic();ReleaseComfort();ReleaseGathering();ReleaseRepair();ReleaseWatching();ReleaseBall();ReleaseStructure();motion?.Carry(null);motion?.Playful(0);motion?.LookAt(null);motion?.Activity(0);if(tribute!=null){if(ownsTribute){tribute.Basket.held=false;tribute.Basket.transform.position=tribute.Basket.home;tribute.Basket.GetComponent<Collider>().enabled=true;}tribute.Cancel(this);tribute=null;ownsTribute=false;}if(target!=null){if(Current==Phase.Enjoy){target.transform.SetPositionAndRotation(original,rotation);target.GetComponent<CarryItem>().held=false;}if(target.Owner==this)target.Owner=null;target.Refresh();}target=null;Current=Phase.Idle;clock=elapsed=0;cooldown=35;nav?.ResetRoute();routine?.ResetTask();}
  void OnDisable(){ResetTask();}
 }
 }
