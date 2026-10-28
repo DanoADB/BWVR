@@ -6,7 +6,7 @@ public sealed class CreatureCuriosity:MonoBehaviour {
  public enum Phase { Rest,Approach,Inspect,Lift,Play,CarryFriend,Place,BuildApproach,BuildPlace,ThrowBall,WatchBall,RallyBall,FetchCarry,FetchPlace,RhythmGame,ThrowTree,WatchTree }
  public int built{get;private set;}
  Vector3 buildPoint,buildApproach,buildStart;Quaternion buildRotation;
- bool buildCorrection;public int alignmentCorrections{get;private set;}bool fetching;int fetchTicket;bool constructionFocus,askedPlaymate;float inviteGestureUntil;
+ bool buildCorrection;public int alignmentCorrections{get;private set;}bool bowlingPlay;bool fetching;int fetchTicket;bool constructionFocus,askedPlaymate;float inviteGestureUntil;
  VillagerSocial lastFriend;
  public Phase Current{get;private set;}CreatureAffect.Mood affect,feedbackMood;float reaction,responseProtection;bool lastWater;
  public CreatureAffect.Mood Affect{get=>reaction>0?feedbackMood:affect;private set=>affect=value;}
@@ -26,7 +26,7 @@ public sealed class CreatureCuriosity:MonoBehaviour {
   var plannedBlock=candidate.GetComponent<ConstructionBlock>();if(plannedBlock!=null){if(GetComponent<CreatureConstructionLearning>()?.Memory.Knows(plannedBlock.Site.Recipe)==false)return false;constructionFocus=true;}
   if(candidate.host==null)candidate.GetComponent<SharedRhythm>()?.ResetOffer();
   if(candidate.host!=null&&!candidate.host.Accept(candidate))return false;
-  var playerBall=candidate.GetComponent<BeachBall>();if(playerBall!=null)playerBall.JustFetched=false;routine.ResetTask();navigator.ResetRoute();target=candidate;fetching=candidate.GetComponent<BeachBall>()?.FetchReady==true;fetchTicket=fetching?candidate.GetComponent<BeachBall>().FetchTicket:0;askedPlaymate=false;inviteGestureUntil=0;elapsed=clock=0;Current=Phase.Approach;motion?.LookAt(target.transform);Affect=CreatureAffect.Mood.Curious;return true;
+  var playerBall=candidate.GetComponent<BeachBall>();if(playerBall!=null)playerBall.JustFetched=false;routine.ResetTask();navigator.ResetRoute();target=candidate;bowlingPlay=candidate.GetComponent<BeachBall>()?.Bowling?.CanImitate(transform.position)==true;fetching=candidate.GetComponent<BeachBall>()?.FetchReady==true;fetchTicket=fetching?candidate.GetComponent<BeachBall>().FetchTicket:0;askedPlaymate=false;inviteGestureUntil=0;elapsed=clock=0;Current=Phase.Approach;motion?.LookAt(target.transform);Affect=CreatureAffect.Mood.Curious;return true;
  }
  public bool Tick(float dt,SliceState season,bool allowChoice=true){
   state=season;if(dt<=0||state.paused)return Current!=Phase.Rest;reaction=Mathf.Max(0,reaction-dt);responseProtection=Mathf.Max(0,responseProtection-dt);
@@ -52,7 +52,7 @@ public sealed class CreatureCuriosity:MonoBehaviour {
   }
   if(Current==Phase.Approach){
    var invited=target.GetComponent<BeachBall>();
-   if(!fetching&&invited!=null&&!invited.Inviting&&!askedPlaymate){askedPlaymate=true;if(invited.TryInvitePlaymate())inviteGestureUntil=elapsed+2.5f;}
+   if(!fetching&&!bowlingPlay&&invited!=null&&!invited.Inviting&&!askedPlaymate){askedPlaymate=true;if(invited.TryInvitePlaymate())inviteGestureUntil=elapsed+2.5f;}
    if(invited!=null&&invited.Inviting){motion?.Signal(elapsed<inviteGestureUntil,true,invited.transform.position);
     if(invited.MeetingPoint(out var meet)){if(navigator.MoveTo(meet,routine.speed,dt)&&invited.TryJoinCreature()){Current=Phase.RallyBall;clock=0;}return true;}
     Finish(false);return false;
@@ -92,8 +92,8 @@ public sealed class CreatureCuriosity:MonoBehaviour {
   else if(Current==Phase.FetchPlace){var ball=target.GetComponent<BeachBall>();motion?.PlaceAt(ball.FetchHome,Quaternion.identity,Mathf.Clamp01(clock));if(clock>1.1f){motion?.Carry(null);if(!ball.CompleteFetch(fetchTicket)){Finish(false);return false;}owned=null;played++;target.Discovered();lastWater=lastSocial=false;feedbackWindow=12;boredom=0;Finish(true);}}
   else if(Current==Phase.ThrowTree){var tree=target.GetComponent<ThrowableTree>();Affect=CreatureAffect.Mood.Excited;var direction=tree.World.Direction(transform);transform.rotation=Quaternion.RotateTowards(transform.rotation,Quaternion.LookRotation(direction),dt*180);var release=transform.position+direction*navigator.world.Scale*8+Vector3.up*navigator.world.Scale*9;motion?.PlaceAt(release,Quaternion.identity,Mathf.Clamp01(clock/1.2f));if(clock>1.3f){owned.transform.position=release;motion?.Carry(null);motion?.PlaceAt(default,Quaternion.identity,0);if(!tree.World.Throw(tree,direction)){Finish(false);return false;}owned=null;Current=Phase.WatchTree;clock=0;motion?.Activity(6);}}
   else if(Current==Phase.WatchTree){var tree=target.GetComponent<ThrowableTree>();Affect=tree.World.Harmful?CreatureAffect.Mood.Sad:CreatureAffect.Mood.Excited;motion?.LookAt(tree.transform);if(!tree.InFlight){played++;target.Discovered();lastWater=lastSocial=false;boredom=0;feedbackWindow=12;Finish(true);}}
-  else if(Current==Phase.ThrowBall){Affect=CreatureAffect.Mood.Excited;var ball=target.GetComponent<BeachBall>();var direction=ball.Direction(transform);transform.rotation=Quaternion.RotateTowards(transform.rotation,Quaternion.LookRotation(direction),dt*240);var release=transform.position+direction*navigator.world.Scale*8+Vector3.up*navigator.world.Scale*9;motion?.PlaceAt(release,Quaternion.identity,Mathf.Clamp01(clock/.8f));if(clock>.9f){owned.transform.position=release;motion?.Carry(null);motion?.PlaceAt(default,Quaternion.identity,0);ball.Throw(direction);owned=null;Current=Phase.WatchBall;clock=0;motion?.Activity(6);}}
-  else if(Current==Phase.WatchBall){var ball=target.GetComponent<BeachBall>();Affect=ball.Harmful?CreatureAffect.Mood.Sad:CreatureAffect.Mood.Excited;motion?.LookAt(ball.transform);if(clock>4.2f){ball.FinishExperience();played++;target.Discovered();lastWater=lastSocial=false;boredom=0;feedbackWindow=12;Finish(true);}}
+  else if(Current==Phase.ThrowBall){Affect=CreatureAffect.Mood.Excited;var ball=target.GetComponent<BeachBall>();var direction=bowlingPlay?ball.Bowling.Aim(transform.position):ball.Direction(transform);transform.rotation=Quaternion.RotateTowards(transform.rotation,Quaternion.LookRotation(direction),dt*240);var release=transform.position+direction*navigator.world.Scale*8+Vector3.up*navigator.world.Scale*9;motion?.PlaceAt(release,Quaternion.identity,Mathf.Clamp01(clock/.8f));if(clock>.9f){owned.transform.position=release;motion?.Carry(null);motion?.PlaceAt(default,Quaternion.identity,0);if(bowlingPlay){if(!ball.Bowling.TryCreatureRoll()){Finish(false);return false;}}else ball.Throw(direction);owned=null;Current=Phase.WatchBall;clock=0;motion?.Activity(6);}}
+  else if(Current==Phase.WatchBall){var ball=target.GetComponent<BeachBall>();Affect=ball.Harmful?CreatureAffect.Mood.Sad:CreatureAffect.Mood.Excited;motion?.LookAt(ball.transform);if(clock>4.2f&&ball.Bowling?.Active!=true){ball.FinishExperience();played++;target.Discovered();lastWater=lastSocial=false;boredom=0;feedbackWindow=12;Finish(true);}}
   else if(Current==Phase.Play){
    Affect=target.kind==CreatureAffordance.Kind.Food?CreatureAffect.Mood.Hungry:CreatureAffect.Mood.Excited;
    if(target.kind==CreatureAffordance.Kind.Food)motion?.Carry(owned.transform,true);

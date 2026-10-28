@@ -1,4 +1,10 @@
 # BWVR roadmap
+## Current priority — creature play (2026-10-28)
+
+Following the user's direction, defer the bench/shelter completion work and prioritize fun physical interactions. Giant bowling and witnessed creature imitation now have an Editor-verified playable implementation; see [GIANT_BOWLING.md](GIANT_BOWLING.md). The next task is the VR menu UI: review the existing wrist/tools/Book flows, simplify access and improve readability while retaining hidden-by-default presentation and controller ownership. No menu redesign has been implemented in this increment.
+
+After menu work, use headset playtesting to choose the next playful activity (demonstrated tricks, tug/chase or social chaos). The staged research sequence below remains a backlog; its unfinished shelter gates do not block this updated priority. Physical Quest performance/comfort remains unverified for the new bowling slice.
+
 
 Updated 2026-10-26 following research into immersive sims, emergent AI, god games and emergent city builders. This is the current priority and status index. Older dated entries in GAMEPLAY_DIRECTION.md record history; they are not the current delivery order. Follow [BUILD_SEQUENCE.md](BUILD_SEQUENCE.md) for implementation order and acceptance gates.
 

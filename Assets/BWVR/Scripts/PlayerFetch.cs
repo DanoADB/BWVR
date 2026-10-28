@@ -24,7 +24,7 @@ public sealed partial class BeachBall {
   CancelRally();transform.position=new Vector3(ground.x,Mathf.Clamp(transform.position.y,ground.y+Radius*nav.Scale,ground.y+30*nav.Scale),ground.z);
   Throw(velocity,false,velocity.magnitude);Body.linearVelocity=velocity+Vector3.up*3;
   fetchPending=true;fetchClaimed=false;fetchUntil=creature.State.time+90;FetchTicket=FetchTicket==int.MaxValue?1:FetchTicket+1;
-  GetComponent<CreatureAffordance>().cooldown=0;ShowFetchRing();return true;
+  GetComponent<CreatureAffordance>().cooldown=0;ShowFetchRing();if(Bowling?.TryPlayerRoll(velocity)==true)CancelFetch();return true;
  }
  void ShowFetchRing(){
   if(fetchRing==null){var go=new GameObject("Fetch return circle");go.transform.SetParent(transform.parent,false);fetchRing=go.AddComponent<LineRenderer>();fetchRing.useWorldSpace=true;fetchRing.sharedMaterial=material;fetchRing.loop=true;fetchRing.positionCount=32;fetchRing.widthMultiplier=nav.Scale*.4f;fetchRing.startColor=fetchRing.endColor=new Color(1,.8f,.25f);fetchRing.shadowCastingMode=UnityEngine.Rendering.ShadowCastingMode.Off;}
