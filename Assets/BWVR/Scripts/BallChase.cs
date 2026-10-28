@@ -11,7 +11,7 @@ public sealed class BallChase {
  readonly BeachBall ball;readonly CreatureHybrid god;readonly IslandNavigation nav;readonly CarryItem item;
  public Func<bool> PlayerHolding,InteractionAllowed;
  public bool Active{get;private set;}public bool JustCompleted{get;private set;}
- public bool Ready=>!ball.Harmful&&!Active&&visible&&warm>=.75f&&god.State.time>=cooldown&&Held&&Allowed;
+ public bool Ready=>ball.Goals?.Turns.Active!=true&&!ball.Harmful&&!Active&&visible&&warm>=.75f&&god.State.time>=cooldown&&Held&&Allowed;
  public float Distance{get;private set;}public Vector3 Goal{get;private set;}
  bool Held=>item.held&&PlayerHolding?.Invoke()==true;
  bool Allowed=>InteractionAllowed?.Invoke()==true&&god.GetComponent<CarryItem>()?.held!=true;

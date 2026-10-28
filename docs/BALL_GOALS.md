@@ -29,4 +29,4 @@ The runtime check exercises native goal grab/drop and native ball grab/toss/rele
 
 Targeted bowling, player rhythm/audience, shared activities, chase, sanctuary, pickup/drop and fetch checks also pass. A rendered Editor view was inspected. An existing scene-stop audio exception was also fixed by rejecting cues after the listener/rig is destroyed; destroyed-reference and existing audio checks pass, and the checked stop path has no new console errors. The user's existing save and XR startup settings are restored after testing. No APK or physical headset test was made for this increment.
 
-Next candidates: player/creature turn-taking through a course and further nonverbal creature tricks, followed by headset tuning of the growing play set. Benches/shelters remain deferred.
+Player/creature turn-taking is now implemented as an opt-in three-round game with a physical backstop and retrievals; see [SHARED_GOAL_TURNS.md](SHARED_GOAL_TURNS.md). Next candidates: further nonverbal creature tricks and headset tuning of the growing play set. Benches/shelters remain deferred.
