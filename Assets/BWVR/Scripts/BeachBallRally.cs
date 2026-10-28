@@ -13,7 +13,7 @@ public sealed partial class BeachBall {
  public CreatureHybrid Playmate=>creature;
  float rallyClock,passClock,nextMeeting; Vector3 passOrigin,soloGoal,meeting;bool passFromCreature;
  public bool ReservePlay(VillagerExploration villager){
-  if(Goals?.Turns.Active==true||FetchReserved||creature==null||Player!=null||villager==null||item.held||InFlight||Body.linearVelocity.magnitude>8||creature.Season.paused)return false;
+  if(Puzzle?.Active==true||Goals?.Turns.Active==true||FetchReserved||creature==null||Player!=null||villager==null||item.held||InFlight||Body.linearVelocity.magnitude>8||creature.Season.paused)return false;
   FinishExperience();thrown=false;Harmful=false;ConfirmedPartner="";ObservationSession=ObservationSession==int.MaxValue?1:ObservationSession+1;Player=villager;soloGoal=creature.transform.position;
   float apart=Flat(soloGoal-transform.position).magnitude/nav.Scale;
   if(apart<10||apart>40||!ClearLane(soloGoal)){bool found=false;for(int i=0;i<8;i++){var wanted=transform.position+Quaternion.Euler(0,i*45,0)*Vector3.forward*nav.Scale*16;if(nav.Sample(wanted,nav.villager,2,out var at)&&Mathf.Abs(at.y-transform.position.y+nav.Scale*Radius)<nav.Scale*3&&ClearLane(at)){soloGoal=at;found=true;break;}}if(!found){Player=null;return false;}}

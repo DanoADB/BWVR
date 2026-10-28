@@ -21,7 +21,7 @@ public sealed class GoalTurns {
  public bool Toggle(int index){
   if(InputAllowed?.Invoke()!=true||god.Season.paused||index<0||index>=course.Gates.Length)return false;
   if(Active&&GateIndex==index){Cancel("Invitation put away");return true;}
-  if(ball.GetComponent<CarryItem>().held||god.GetComponent<CreatureCuriosity>().HandlingBeachBall||ball.InFlight||ball.Inviting||ball.PeerGame||course.Active)return false;
+  if(ball.Puzzle?.Active==true||ball.GetComponent<CarryItem>().held||god.GetComponent<CreatureCuriosity>().HandlingBeachBall||ball.InFlight||ball.Inviting||ball.PeerGame||course.Active)return false;
   var gate=course.Gates[index];if(!gate.gameObject.activeInHierarchy||gate.GetComponent<CarryItem>().held)return false;
   Cancel("New invitation");GateIndex=index;Round=PlayerHits=CreatureHits=0;haveOrigin=false;ball.CancelFetch();course.Cancel();Enter(Phase.PlayerTurn,90);god.GetComponent<CreatureCuriosity>().NoticeAttention();IslandAudio.Cue(IslandSound.Chime,gate.transform.position,ball.GetEntityId().GetHashCode(),.7f);return true;
  }

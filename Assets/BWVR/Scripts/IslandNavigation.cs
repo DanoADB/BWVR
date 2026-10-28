@@ -68,6 +68,8 @@ public sealed class IslandNavigation:MonoBehaviour {
   var previous=villager.surface.navMeshData;villager.surface.RemoveData();villager.surface.navMeshData=data;villager.surface.AddData();if(previous!=null)Destroy(previous);
   foreach(var actor in GetComponentsInChildren<IslandNavigator>())if(actor.profile==villager){if(!crossing.Walkable&&crossing.OverWater(actor.transform.position))actor.transform.position=crossing.NearestBank(actor.transform.position);actor.ResetRoute();}
  }
+ // Fixed play structures share the existing bounded source/update pipeline.
+ public void AddToyBarrier(Vector3 centre,Vector3 size,Quaternion rotation){if(baseSources==null)return;Box(baseSources,centre,size,rotation);treesDirty=true;}
  public void SetTreeRooted(int line,bool rooted){if(!trunks.TryGetValue(line,out var source))return;if(rooted){if(!uprooted.Remove(line))return;baseSources.Add(source);obstacleCount++;}else{if(!uprooted.Add(line))return;baseSources.Remove(source);obstacleCount--;}treesDirty=true;}
  public void InvalidateRoutes(bool recover=false){foreach(var actor in GetComponentsInChildren<IslandNavigator>()){if(recover&&actor.GetComponent<CarryItem>()?.held!=true&&!Sample(actor.transform.position,actor.profile,.2f,out _)&&Sample(actor.transform.position,actor.profile,16,out var safe))actor.transform.position=ProjectFoot(safe,actor.profile);actor.ResetRoute();}}
  public void TreeObstacleChanged(){InvalidateRoutes();recoverFrame=Time.frameCount+3;}

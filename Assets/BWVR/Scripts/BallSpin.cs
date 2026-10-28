@@ -34,7 +34,7 @@ public sealed partial class BallSpin {
  public Vector3 Origin=>anchor;public Quaternion StartRotation=>start;
  public float Turned=>turned;public bool Drawing=>(gesture.Drawing||god.State.time<verticalUntil)&&!Active;
  bool Held=>item.held&&ball.Chase.PlayerHolding?.Invoke()==true;
- bool Allowed=>ball.Chase.InteractionAllowed?.Invoke()==true&&god.GetComponent<CarryItem>()?.held!=true&&ball.Goals?.Turns.Active!=true;
+ bool Allowed=>ball.Puzzle?.Active!=true&&ball.Chase.InteractionAllowed?.Invoke()==true&&god.GetComponent<CarryItem>()?.held!=true&&ball.Goals?.Turns.Active!=true;
  public bool Ready=>pending&&!Active&&Held&&Allowed&&!god.Season.paused&&god.State.time<until&&god.CanSeeCue(ball.GetComponent<HybridTarget>(),true);
  public BallSpin(BeachBall ball,CreatureHybrid god,IslandNavigation nav){this.ball=ball;this.god=god;this.nav=nav;item=ball.GetComponent<CarryItem>();}
  public void Advance(float dt){

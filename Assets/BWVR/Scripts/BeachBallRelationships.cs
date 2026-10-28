@@ -6,7 +6,7 @@ public sealed partial class BeachBall {
  public string ConfirmedPartner{get;private set;}="";
  public void RefreshPlaymate(){
   ProspectivePlayer=null;
-  if(Goals?.Turns.Active==true||creature==null||Player!=null||item.held||InFlight||creature.Season.paused||creature.Season.WorldPlay.rallyFun<=0||creature.State.time<creature.Season.WorldPlay.nextCreatureInvite)return;
+  if(Puzzle?.Active==true||Goals?.Turns.Active==true||creature==null||Player!=null||item.held||InFlight||creature.Season.paused||creature.Season.WorldPlay.rallyFun<=0||creature.State.time<creature.Season.WorldPlay.nextCreatureInvite)return;
   float best=float.NegativeInfinity;
   foreach(var target in creature.Targets){var resident=target.villager;if(resident==null)continue;var visitor=resident.GetComponent<VillagerExploration>();if(visitor==null||!visitor.CanReceivePlayInvite(this))continue;
    var bond=creature.State.Bond(target.id);if(bond!=null&&creature.State.time<bond.nextInviteAt)continue;
