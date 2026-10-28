@@ -2,7 +2,7 @@ using UnityEngine;
 namespace BWVR {
 // Movement stays with gameplay; the shared CC0 library supplies pose animation only.
 public sealed class HumanoidMotion:MonoBehaviour {
- public bool paused; Animator animator; HumanoidHands hands; Vector3 previous; int activity;
+ public bool paused; Animator animator; HumanoidHands hands; Vector3 previous; int activity;bool turning;
  void Awake(){animator=GetComponentInChildren<Animator>();previous=transform.position;if(animator!=null){hands=animator.GetComponent<HumanoidHands>();if(hands!=null)hands.actor=transform;}}
  void LateUpdate(){if(animator==null)return;var delta=transform.position-previous;previous=transform.position;
   var item=GetComponentInParent<CarryItem>();bool carried=item!=null&&item.held;
@@ -10,12 +10,13 @@ public sealed class HumanoidMotion:MonoBehaviour {
   if(item!=null&&item.kind!=Offering.Creature&&moving&&!carried&&!paused&&delta.sqrMagnitude>1e-12f)FaceMovement(transform,delta);
   bool walking=!paused&&!carried&&moving;
   // A held load owns the hands, not the legs. Movement supersedes stale work poses.
-  animator.speed=paused?0:1;if(hands!=null)hands.paused=paused;animator.SetFloat("Speed",walking?1:0);animator.SetInteger("Activity",carried||walking?0:activity);
+  animator.speed=paused?0:1;if(hands!=null)hands.paused=paused;animator.SetFloat("Speed",walking?1:!paused&&!carried&&turning?.65f:0);animator.SetInteger("Activity",carried||walking||turning?0:activity);
  }
  // Normalize before LookRotation: tabletop movement can be below its native epsilon.
  public static void FaceMovement(Transform actor,Vector3 direction){direction.y=0;direction=direction.normalized;if(direction.sqrMagnitude>.5f)actor.rotation=Quaternion.LookRotation(direction);}
  public void Shelter(bool value){if(hands!=null)hands.sheltering=value;}
  public void Pray(bool value){if(hands!=null)hands.praying=value;}
+ public void TurnInPlace(bool value){turning=value;}
  public void Activity(int value){activity=value;}
  public void Clap(float closure){if(hands!=null)hands.clap=Mathf.Clamp01(closure);}
  public void Touch(Transform target){if(hands!=null)hands.touchTarget=target;}
