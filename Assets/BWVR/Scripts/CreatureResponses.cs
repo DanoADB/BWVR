@@ -8,8 +8,8 @@ public sealed partial class CreatureHybrid {
  public string ResponseReason{get;private set;}="";
  public string ResponseDetails=>Response==CreatureResponse.None?"":Response+": "+ResponseReason;
  float responseStarted,responseUntil,nextCueCheck,busyAt;HybridTarget responseLook,busyTarget;bool responsePositive;EvidenceSource busySource;
- public bool CanSeeCue(HybridTarget target){
-  if(target==null||!target.gameObject.activeInHierarchy||target.GetComponent<CarryItem>()?.held==true)return false;
+ public bool CanSeeCue(HybridTarget target,bool allowHeldToy=false){
+  if(target==null||!target.gameObject.activeInHierarchy||(target.GetComponent<CarryItem>()?.held==true&&!allowHeldToy))return false;
   var direction=target.transform.position-transform.position;direction.y=0;float unit=nav.world.Scale;
   if(direction.magnitude>unit*45||direction.magnitude<unit*.5f||Vector3.Dot(transform.forward,direction.normalized)<.35f)return false;
   Physics.SyncTransforms();var collider=target.GetComponent<Collider>();var eye=transform.position+Vector3.up*unit*10;

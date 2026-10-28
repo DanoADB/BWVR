@@ -90,7 +90,7 @@ public sealed partial class QuestSlice:MonoBehaviour {
   hybrid=creature.gameObject.AddComponent<CreatureHybrid>();hybrid.Initialize(creatureRoutine,curiosity,godMotion,affordances,jobs,reservoir.gameObject,waterOffering,()=>state);
   for(int i=0;i<items.Count;i++)if(items[i].GetComponent<HybridTarget>()==null)hybrid.Register(HybridTarget.Bind(items[i].gameObject,"resource-"+(i>=VillagePopulation.Adults?i-(VillagePopulation.Adults-3):i),HybridTargetKind.Object));
   foreach(var job in jobs)job.GetComponent<VillagerSocial>().ConfigureSharing(hybrid,affordances);
-  balls=GetComponentsInChildren<BeachBall>();foreach(var ball in balls)ball.Configure(hybrid,jobs);foreach(var job in jobs)job.GetComponent<VillagerExploration>().ConfigureBalls(balls);foreach(var job in jobs)job.GetComponent<VillagerExploration>().ConfigurePeers(jobs.Select(j=>j.GetComponent<VillagerExploration>()).ToArray());
+  balls=GetComponentsInChildren<BeachBall>();foreach(var ball in balls){ball.Configure(hybrid,jobs);ball.Chase.PlayerHolding=()=>held.Any(item=>item==ball.GetComponent<CarryItem>());ball.Chase.InteractionAllowed=()=>!MenuOpen&&!applicationSuspended&&(!XRSettings.isDeviceActive||(controllerHands[0].tracked&&controllerHands[1].tracked));}foreach(var job in jobs)job.GetComponent<VillagerExploration>().ConfigureBalls(balls);foreach(var job in jobs)job.GetComponent<VillagerExploration>().ConfigurePeers(jobs.Select(j=>j.GetComponent<VillagerExploration>()).ToArray());
   treePlay=TreePlayWorld.Build(transform,navigation,hybrid);
   miracles=DivineIntervention.Build(transform,hybrid,navigation,cistern,jobs,()=>state);
   weather=IslandWeather.Build(transform,navigation,cistern,()=>state);
