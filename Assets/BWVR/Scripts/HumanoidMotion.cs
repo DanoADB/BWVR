@@ -17,6 +17,7 @@ public sealed class HumanoidMotion:MonoBehaviour {
  public void Shelter(bool value){if(hands!=null)hands.sheltering=value;}
  public void Pray(bool value){if(hands!=null)hands.praying=value;}
  public void Activity(int value){activity=value;}
+ public void Clap(float closure){if(hands!=null)hands.clap=Mathf.Clamp01(closure);}
  public void Touch(Transform target){if(hands!=null)hands.touchTarget=target;}
  public void Carry(Transform resource,bool drink=false){if(hands!=null){hands.resource=resource;hands.drinking=drink;}}
  public void Playful(float clock){if(hands!=null)hands.displayTilt=Mathf.Sin(clock*3)*28;}
