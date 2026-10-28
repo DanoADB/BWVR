@@ -36,7 +36,7 @@ public sealed partial class IslandAudio:MonoBehaviour {
  static bool Finite(float x)=>!float.IsNaN(x)&&!float.IsInfinity(x);
  public static bool Cue(IslandSound kind,Vector3 at,int emitter=0,float strength=1,float pitch=1)=>Current!=null&&Current.Emit(kind,at,emitter,strength,pitch);
  public bool Emit(IslandSound kind,Vector3 at,int emitter=0,float strength=1,float pitch=1){
-  int k=(int)kind;if(Frozen||k<0||k>=clips.Length||clips[k]==null||Master*Effects<=0||!Finite(strength)||!Finite(pitch)||!Finite(at.x)||!Finite(at.y)||!Finite(at.z))return false;
+  int k=(int)kind;if(!isActiveAndEnabled||head==null||rig==null||clips==null||Frozen||k<0||k>=clips.Length||clips[k]==null||Master*Effects<=0||!Finite(strength)||!Finite(pitch)||!Finite(at.x)||!Finite(at.y)||!Finite(at.z))return false;
   int slot=unchecked((emitter*397)^k)&63;float gate=kind==IslandSound.Step?.07f:kind==IslandSound.Ball?.1f:kind==IslandSound.Harvest?.2f:kind==IslandSound.Notice||kind==IslandSound.Content||kind==IslandSound.Uneasy?2:kind==IslandSound.Thunder?3:.07f;
   if((kind==IslandSound.Ball||kind==IslandSound.Place)&&clock<1)return false;
   if(clock<groupAt[k]||clock<emitterAt[slot]||Vector3.Distance(head.position,at)>FarDistance){Dropped++;return false;}

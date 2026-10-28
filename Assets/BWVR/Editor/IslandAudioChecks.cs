@@ -6,6 +6,11 @@ using UnityEngine;
 namespace BWVR.Editor {
 public static class IslandAudioChecks {
  static void Require(bool ok,string why){if(!ok)throw new Exception(why);}
+ public static void VerifyDestroyedListener(){
+  Require(EditorApplication.isPlaying&&IslandAudio.Current!=null,"Enter Play mode");var audio=IslandAudio.Current;
+  foreach(var name in new[]{"head","rig"}){var field=typeof(IslandAudio).GetField(name,BindingFlags.Instance|BindingFlags.NonPublic);var original=field.GetValue(audio);var temporary=new GameObject("Temporary destroyed audio reference");field.SetValue(audio,temporary.transform);UnityEngine.Object.DestroyImmediate(temporary);try{Require(!audio.Emit(IslandSound.Notice,Vector3.zero,991),"Audio accepted destroyed "+name);}finally{field.SetValue(audio,original);}}
+  Debug.Log("BWVR_AUDIO_LIFECYCLE_PASS: destroyed listener/rig reject cues without accessing retired transforms");
+ }
  [MenuItem("BWVR/Verify island audio (Play mode)")]
  public static void Verify(){
   Require(EditorApplication.isPlaying,"Enter Play mode");var audio=IslandAudio.Current;Require(audio!=null,"No soundscape");var slice=UnityEngine.Object.FindAnyObjectByType<QuestSlice>();var world=slice.GetComponentInChildren<VillageResources>();var state=world.Season;bool paused=state.paused;float master=audio.Master,ambience=audio.Ambience,effects=audio.Effects;
