@@ -108,20 +108,11 @@ public sealed partial class QuestSlice:MonoBehaviour {
   creatureLabel=Label("Creature intent",creature,new Vector3(0,Size(.44f,17),0),new Vector2(420,70),terrain!=null?.00007f:.0007f,22);creatureLabel.text="THEIR GOD · WATCHING";creatureLabel.gameObject.SetActive(false);
   panel=new GameObject("Wrist sanctuary");panel.transform.SetParent(left,false);panel.transform.localPosition=new Vector3(0,.13f,.12f);panel.transform.localRotation=Quaternion.Euler(25,0,0);
   var canvas=panel.AddComponent<Canvas>();canvas.renderMode=RenderMode.WorldSpace;var rect=panel.GetComponent<RectTransform>();rect.sizeDelta=new Vector2(600,740);panel.transform.localScale=Vector3.one*.0008f;
-  var bg=new GameObject("Obsidian panel",typeof(RectTransform),typeof(Image));bg.transform.SetParent(panel.transform,false);bg.GetComponent<RectTransform>().sizeDelta=rect.sizeDelta;bg.GetComponent<Image>().color=new Color(.035f,.095f,.11f,.96f);
-  status=Label("Season and guidance",panel.transform,new Vector3(0,130,0),new Vector2(540,260),1,25);status.alignment=TextAnchor.UpperLeft;
-  Button("Pause / resume",new Vector3(-140,-70,0),()=>{state.paused=!state.paused;notice=state.paused?"Season paused.":"Season resumed.";});
-  Button("Save season",new Vector3(140,-70,0),Save);
-  Button("Begin again",new Vector3(-140,-160,0),()=>{foreach(var job in jobs)job.GetComponent<VillagerSocial>().ResetTask();state=new SliceState{developmentFocus=developmentFocus};hybrid?.NewSeason();miracles?.ResetWorld();creatureTrip=0;outcomeShown=false;signals.ResetRequests();curiosity?.ResetTask();construction?.ResetConstruction();discoveries?.ResetWorld();learning?.ResetWorld();foreach(var ball in balls)ball.ResetWorld();treePlay?.ResetWorld();weather?.ResetWorld();resources?.ResetWorld();families?.ResetWorld();tributes?.ResetWorld();cathedral?.ResetWorld();creatureRoutine.ResetTask();foreach(var job in jobs){job.GetComponent<VillagerExploration>().ResetTask();job.GetComponent<VillagerSocial>().ResetTask();job.ResetTask();}notice="A new dry season begins.";});
-  Button("Close",new Vector3(140,-160,0),()=>panel.SetActive(false));
+  var bg=new GameObject("Obsidian panel",typeof(RectTransform),typeof(Image));bg.transform.SetParent(panel.transform,false);bg.GetComponent<RectTransform>().sizeDelta=new Vector2(810,990);bg.GetComponent<Image>().sprite=Resources.Load<Sprite>("GodToolScroll/parchment");bg.GetComponent<Image>().color=Color.white;bg.GetComponent<Image>().raycastTarget=false;
   spirit=SpiritCompanion.Build(transform,left,eye,rig,()=>state,()=>curiosity.Affect,font);
-  Button("Help / details",new Vector3(-140,-240,0),()=>SetHelp(!helpVisible));
-  Button("Spirit: show / hide",new Vector3(140,-240,0),()=>spirit.SetVisible(!spirit.Visible));
   godTools=GodToolPalette.Build(transform,left,right,rig,eye,font,miracles,hybrid,navigation,groundCollider??ground.GetComponent<Collider>(),(accepted,message)=>{notice=message;if(XRSettings.isDeviceActive)InputDevices.GetDeviceAtXRNode(XRNode.RightHand).SendHapticImpulse(0,accepted?.25f:.08f,.08f);});
   soundscape=IslandAudio.Build(transform,navigation,eye.transform,rig,()=>state);
-  Button("Sound",new Vector3(140,-320,0),()=>ShowAudioSettings(true));BuildAudioSettings();BuildCreationBook();
-  Button("Book of Creation",new Vector3(0,315,0),()=>ShowCreationBook(true));
-  Button("God tools",new Vector3(-140,-320,0),()=>{panel.SetActive(false);godTools.Toggle();});
+  BuildSanctuary();BuildAudioSettings();BuildCreationBook();sanctuaryColliders=panel.GetComponentsInChildren<Collider>(true);ShowSanctuaryPage(sanctuaryHome);
   panel.SetActive(false);
   if(!XRSettings.isDeviceActive){eye.transform.localRotation=Quaternion.Euler(25,0,0);left.localPosition=new Vector3(-.6f,1.15f,1.05f);left.localRotation=Quaternion.Euler(0,0,0);panel.transform.localRotation=Quaternion.identity;}
  }
@@ -147,7 +138,7 @@ public sealed partial class QuestSlice:MonoBehaviour {
    if(terrain!=null){float minimum=terrain.Project(eye.transform.position).y+.2f*rig.localScale.x;float y=Mathf.Clamp(eye.transform.position.y,minimum,Floor+3*rig.localScale.x);rig.position+=Vector3.up*(y-eye.transform.position.y);}
   }
   else Desktop();
-  bool toolsKey=!xr&&Keyboard.current!=null&&Keyboard.current.tKey.isPressed;
+  bool toolsKey=!MenuOpen&&!xr&&Keyboard.current!=null&&Keyboard.current.tKey.isPressed;
   if(toolsKey&&!toolsKeyLast&&held[0]==null&&held[1]==null){panel.SetActive(false);godTools.Toggle();}toolsKeyLast=toolsKey;
   if(!xr&&Keyboard.current!=null&&Keyboard.current.escapeKey.isPressed&&godTools.ClaimsInput)godTools.Cancel();
   bool carryBusy=held[0]!=null||held[1]!=null;
@@ -156,11 +147,12 @@ public sealed partial class QuestSlice:MonoBehaviour {
   bool toolsOwnInput=godTools.Process(new Ray(toolPointer.position,toolPointer.forward),toolPressed,!xr||controllerHands[1].tracked,carryBusy||panel.activeSelf||state.paused||zoomHeld,Time.unscaledDeltaTime,xr);
   bool praise=xr?controllerHands[1].praise:Keyboard.current!=null&&Keyboard.current.digit1Key.isPressed;
   bool discourage=xr?controllerHands[1].discourage:Keyboard.current!=null&&Keyboard.current.digit2Key.isPressed;
-  if(!toolsOwnInput&&!CreationBookOpen&&praise!=discourage&&((praise&&!praiseLast)||(discourage&&!discourageLast))){var pointer=xr?aims[1]:right;if((!xr||controllerHands[1].tracked)&&Physics.Raycast(pointer.position,pointer.forward,out var feedbackHit,8*rig.localScale.x)&&feedbackHit.collider.GetComponentInParent<CreatureCuriosity>()==curiosity)GiveFeedback(praise);}
+  if(!toolsOwnInput&&!MenuOpen&&praise!=discourage&&((praise&&!praiseLast)||(discourage&&!discourageLast))){var pointer=xr?aims[1]:right;if((!xr||controllerHands[1].tracked)&&Physics.Raycast(pointer.position,pointer.forward,out var feedbackHit,8*rig.localScale.x)&&feedbackHit.collider.GetComponentInParent<CreatureCuriosity>()==curiosity)GiveFeedback(praise);}
   praiseLast=praise;discourageLast=discourage;
+  if(MenuOpen)Physics.SyncTransforms();
   for(int i=0;i<2;i++){bool grip=xr&&i==1?controllerHands[i].trigger:controllerHands[i].grip,trigger=controllerHands[i].trigger;if(!xr){grip=i==1&&Keyboard.current!=null&&Keyboard.current.eKey.isPressed;trigger=i==1&&Keyboard.current!=null&&Keyboard.current.fKey.isPressed;}
-   var hand=i==0?left:right;var pointer=xr?aims[i]:hand;var ray=new Ray(pointer.position,pointer.forward);Physics.Raycast(ray,out var hit,8*rig.localScale.x,Physics.DefaultRaycastLayers,CreationBookOpen?QueryTriggerInteraction.Collide:QueryTriggerInteraction.UseGlobal);rays[i].SetPosition(0,ray.origin);rays[i].SetPosition(1,hit.collider?hit.point:ray.GetPoint(2*rig.localScale.x));rays[i].enabled=xr?controllerHands[i].tracked:i==1;
-   if(BookPointer(i,trigger,lastTrigger[i],hit.collider,!xr||controllerHands[i].tracked)){pickupHands[i].gameObject.SetActive(false);lastGrip[i]=grip;lastTrigger[i]=trigger;continue;}
+   var hand=i==0?left:right;var pointer=xr?aims[i]:hand;var ray=new Ray(pointer.position,pointer.forward);RaycastHit hit;if(MenuOpen)SanctuaryRaycast(ray,8*rig.localScale.x,out hit);else Physics.Raycast(ray,out hit,8*rig.localScale.x);rays[i].SetPosition(0,ray.origin);rays[i].SetPosition(1,hit.collider?hit.point:ray.GetPoint(2*rig.localScale.x));rays[i].enabled=xr?controllerHands[i].tracked:i==1;
+   if(SanctuaryPointer(i,trigger,lastTrigger[i],hit.collider,!xr||controllerHands[i].tracked)){pickupHands[i].gameObject.SetActive(false);lastGrip[i]=grip;lastTrigger[i]=trigger;continue;}
    if(toolsOwnInput&&held[i]==null){pickupHands[i].gameObject.SetActive(false);if(i==1&&godTools.Selected.HasValue)rays[i].SetPosition(1,godTools.PreviewPoint);lastGrip[i]=grip;lastTrigger[i]=trigger;continue;}
    if(grip&&!lastGrip[i]&&hit.collider)TryGrab(i,hit.collider.GetComponentInParent<CarryItem>());
    if(held[i]!=null){if(xr&&!controllerHands[i].tracked){var item=held[i];held[i]=null;item.held=false;item.transform.position=item.home;item.GetComponent<Collider>().enabled=true;}else{held[i].transform.position=hand.position+hand.forward*(.16f*rig.localScale.x);throwMotion[i].Sample(held[i].transform.position,Time.unscaledTime,rig.localScale.x);var block=held[i].GetComponent<ConstructionBlock>();if(block!=null)block.Site.PreviewRay(block,ray);if(!grip)Release(i,ray);}}
@@ -169,10 +161,10 @@ public sealed partial class QuestSlice:MonoBehaviour {
    bool interact=trigger&&!lastTrigger[i]&&held[i]==null;
    if(interact&&hit.collider)hit.collider.GetComponentInParent<SpatialTarget>()?.Activate();lastGrip[i]=grip;lastTrigger[i]=trigger;
   }
-  bool menu=controllerHands[0].menu;if(!xr)menu=Keyboard.current!=null&&Keyboard.current.tabKey.isPressed;if(menu&&!menuLast){godTools.Cancel();panel.SetActive(!panel.activeSelf);}menuLast=menu;
-  Simulate(Time.deltaTime);if(!developmentFocus&&state.Finished&&!outcomeShown){outcomeShown=true;panel.SetActive(true);}
+  bool menu=controllerHands[0].menu;if(!xr)menu=Keyboard.current!=null&&Keyboard.current.tabKey.isPressed;if(menu&&!menuLast)SetSanctuaryOpen(!MenuOpen);menuLast=menu;
+  Simulate(Time.deltaTime);if(!developmentFocus&&state.Finished&&!outcomeShown){outcomeShown=SetSanctuaryOpen(true);}
   spirit.HandTracked=!xr||controllerHands[0].tracked;
-  status.text=SanctuaryText(xr);TickCreationBook(Time.unscaledDeltaTime);
+  status.text=SanctuaryText(xr);RefreshSanctuary();TickCreationBook(Time.unscaledDeltaTime);
   creatureLabel.transform.rotation=Quaternion.LookRotation(creatureLabel.transform.position-eye.transform.position);
   saveClock+=Time.deltaTime;if(saveClock>=15){saveClock=0;Save();}
  }
@@ -209,7 +201,7 @@ public sealed partial class QuestSlice:MonoBehaviour {
  void Desktop(){var k=Keyboard.current;var m=Mouse.current;if(k==null||m==null)return;if(m.rightButton.isPressed){var delta=m.delta.ReadValue()*.12f;var e=eye.transform.localEulerAngles;float pitch=Mathf.DeltaAngle(0,e.x);eye.transform.localRotation=Quaternion.Euler(Mathf.Clamp(pitch-delta.y,-65,65),e.y+delta.x,0);}var movement=new Vector3((k.dKey.isPressed?1:0)-(k.aKey.isPressed?1:0),0,(k.wKey.isPressed?1:0)-(k.sKey.isPressed?1:0));rig.position+=Quaternion.Euler(0,eye.transform.eulerAngles.y,0)*Vector3.ClampMagnitude(movement,1)*Mathf.Min(Time.deltaTime,.05f)*(QuestControls.TravelSpeed*rig.localScale.x);
   if(held[0]==null&&held[1]==null&&Mathf.Abs(m.scroll.ReadValue().y)>.01f){QuestControls.Zoom(rig,ZoomFocus(),m.scroll.ReadValue().y*QuestControls.WheelZoomSpeed);UpdateViewScale();}right.position=eye.transform.position-eye.transform.up*.08f;right.rotation=eye.transform.rotation;}
  bool TryGrab(int side,CarryItem item){
-  if(godTools!=null&&godTools.ClaimsInput)return false;if(item==null||!item.gameObject.activeInHierarchy||!item.CanGrab||held[side]!=null||(item.kind==Offering.Creature&&side!=1))return false;
+  if(MenuOpen||godTools!=null&&godTools.ClaimsInput)return false;if(item==null||!item.gameObject.activeInHierarchy||!item.CanGrab||held[side]!=null||(item.kind==Offering.Creature&&side!=1))return false;
   if(item.kind==Offering.Creature){item.home=item.transform.position;hybrid.Interrupt("Picked up by the player");}
   throwMotion[side].Reset();held[side]=item;item.held=true;item.GetComponent<Collider>().enabled=false;item.GetComponent<ConstructionBlock>()?.Grab();IslandAudio.Cue(IslandSound.Grasp,item.transform.position,item.GetEntityId().GetHashCode());notice="Release the carry button over clear ground to place.";return true;
  }
@@ -272,22 +264,22 @@ public sealed partial class QuestSlice:MonoBehaviour {
   creatureLabel.text="THEIR GOD · "+(helpVisible?hybrid.Explanation+(hybrid.ResponseDetails.Length>0?" · "+hybrid.ResponseDetails:""):creatureRoutine.Current.ToString().ToUpperInvariant());
  }
  public bool HelpVisible=>helpVisible;
- public void SetHelp(bool enabled){helpVisible=enabled;spirit?.SetDetails(enabled);if(creatureLabel!=null)creatureLabel.gameObject.SetActive(enabled);if(status!=null){status.fontSize=enabled?20:25;status.rectTransform.sizeDelta=new Vector2(540,enabled?300:260);}}
+ public void SetHelp(bool enabled){helpVisible=enabled;spirit?.SetDetails(enabled);if(creatureLabel!=null)creatureLabel.gameObject.SetActive(enabled);}
  string SanctuaryText(bool xr){
   string title=developmentFocus?(state.paused?"EXPLORATION · Paused":"EXPLORATION"):("THE LONG DRY"+(state.Finished?(state.Won?" · Village safe":" · Village struggling"):state.paused?" · Paused":""));
   string energyLabel=miracles!=null&&miracles.UnlimitedEnergy?"unlimited":Mathf.FloorToInt(state.Hybrid.energy).ToString();
   if(!helpVisible)return title+"\nEnergy "+energyLabel+(saveError!=null?"\n"+saveError:"");
   var g=state.Hybrid.guidance;string reason=g.reason.Length>48?g.reason.Substring(0,48):g.reason;
-  return title+" · "+Mathf.CeilToInt(state.seconds)+"s\nReligion: "+(worship?.Description??"Balanced")+"\nWater "+Mathf.RoundToInt(state.water)+" · Crops "+Mathf.RoundToInt(state.crops)+" · Energy "+energyLabel+"\n"+hybrid.Explanation+(hybrid.ResponseDetails.Length>0?"\n"+hybrid.ResponseDetails:"")+"\nCue: "+g.status+(reason.Length>0?" · "+reason:"")+"\nRight front trigger: hold to carry the creature or objects · release to place\nMove and release a held ball to toss · A/B: teach\nGod tools: summon rain/healing or place a guidance sign\nTurn left wrist underside toward you, or X > God tools\nX menu · right grip + stick: zoom"+(xr?"":"\nDesktop: 1/2 teach · E carry · F select · Space + release E toss");
+  return title+" · Religion: "+(worship?.Description??"Balanced")+"\nWater "+Mathf.RoundToInt(state.water)+" · Crops "+Mathf.RoundToInt(state.crops)+" · Energy "+energyLabel+"\n"+hybrid.Explanation+(hybrid.ResponseDetails.Length>0?"\n"+hybrid.ResponseDetails:"")+"\nCue: "+g.status+(reason.Length>0?" · "+reason:"");
  }
  public bool GiveFeedback(bool positive){
-  if(state.paused||curiosity==null||held[0]!=null||held[1]!=null||Time.unscaledTime<feedbackReady)return false;
+  if(MenuOpen||state.paused||curiosity==null||held[0]!=null||held[1]!=null||Time.unscaledTime<feedbackReady)return false;
   feedbackReady=Time.unscaledTime+.5f;bool learned=hybrid!=null?hybrid.Feedback(positive):curiosity.Feedback(positive);godMotion?.Feedback(positive);
   if(XRSettings.isDeviceActive)InputDevices.GetDeviceAtXRNode(XRNode.RightHand).SendHapticImpulse(0,positive?.25f:.55f,.08f);
   notice=learned?(positive?"That action encouraged.":"That action discouraged."):"The creature feels your presence. No recent action to teach.";return true;
  }
  void DeliverWater(){int before=state.gifts;state.Deliver();if(state.gifts>before)signals?.WaterArrived();}
- void Save(){try{if(construction!=null)state.construction=construction.Capture();discoveries?.Capture();learning?.Capture();File.WriteAllText(SavePath+".tmp",JsonUtility.ToJson(state,true));File.Copy(SavePath+".tmp",SavePath,true);saveError=null;notice="Season saved on this device.";}catch(Exception e){saveError="Save failed. Please try again.";notice="Could not save: "+e.Message;if(panel!=null)panel.SetActive(true);Debug.LogError("BWVR_SAVE_FAILED: "+e.Message);}}
+ void Save(){try{if(construction!=null)state.construction=construction.Capture();discoveries?.Capture();learning?.Capture();File.WriteAllText(SavePath+".tmp",JsonUtility.ToJson(state,true));File.Copy(SavePath+".tmp",SavePath,true);saveError=null;notice="Season saved on this device.";}catch(Exception e){saveError="Save failed. Please try again.";notice="Could not save: "+e.Message;if(panel!=null)SetSanctuaryOpen(true);Debug.LogError("BWVR_SAVE_FAILED: "+e.Message);}}
  void Load(){if(!File.Exists(SavePath))return;try{var s=JsonUtility.FromJson<SliceState>(File.ReadAllText(SavePath));if(s==null||!s.Valid())throw new Exception("Invalid season data");state=s;state.paused=false;notice="Season restored.";}catch(Exception){saveError="Saved season unavailable. A fresh season is ready.";notice=saveError;}}
  void OnApplicationPause(bool paused){applicationSuspended=paused;soundscape?.Suspend(paused);if(paused)godTools?.Cancel();if(spirit!=null)spirit.Suspended=paused;if(miracles!=null){miracles.Suspended=paused;miracles.Tick(0,paused||state.paused);}hybrid?.Suspend(paused);foreach(var motion in humanoids)if(motion!=null)motion.paused=paused||state.paused;if(cowMotion!=null)cowMotion.paused=paused||state.paused;if(paused){if(jobs!=null)foreach(var job in jobs)job.GetComponent<VillagerSocial>().ResetTask();if(construction!=null)construction.Paused=true;if(learning!=null)foreach(var site in learning.sites)site.Paused=true;discoveries?.Advance(0,true);for(int i=0;i<2;i++)if(held[i]!=null){held[i].transform.position=held[i].home;held[i].held=false;held[i].GetComponent<Collider>().enabled=true;held[i]=null;}Save();}}
  void OnApplicationQuit(){Save();}

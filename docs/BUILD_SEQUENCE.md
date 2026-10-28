@@ -1,7 +1,7 @@
 # BWVR build sequence
 ## Current priority — creature play (2026-10-28)
 
-Following the user's direction, defer the bench/shelter completion work and prioritize fun physical interactions. Giant bowling and witnessed creature imitation now have an Editor-verified playable implementation; see [GIANT_BOWLING.md](GIANT_BOWLING.md). The next task is the VR menu UI: review the existing wrist/tools/Book flows, simplify access and improve readability while retaining hidden-by-default presentation and controller ownership. No menu redesign has been implemented in this increment.
+Following the user's direction, defer the bench/shelter completion work and prioritize fun physical interactions. Giant bowling and witnessed creature imitation now have an Editor-verified playable implementation; see [GIANT_BOWLING.md](GIANT_BOWLING.md). The VR menu increment now matches the God Tools scroll/stone style, simplifies wrist/tools/Book access, and isolates pointer input while remaining hidden by default; see [SANCTUARY_MENU.md](SANCTUARY_MENU.md). Editor verification covers menu routing and input ownership; physical Quest readability and comfort remain unverified.
 
 After menu work, use headset playtesting to choose the next playful activity (demonstrated tricks, tug/chase or social chaos). The staged research sequence below remains a backlog; its unfinished shelter gates do not block this updated priority. Physical Quest performance/comfort remains unverified for the new bowling slice.
 

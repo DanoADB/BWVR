@@ -2,8 +2,7 @@ using UnityEngine;
 namespace BWVR {
 public sealed partial class QuestSlice {
  void ShowAudioSettings(bool show){
-  foreach(Transform child in panel.transform)if(child.gameObject!=audioSettings&&child.name!="Obsidian panel")child.gameObject.SetActive(!show&&child.gameObject!=creationBook);
-  audioSettings.SetActive(show);
+  ShowSanctuaryPage(show?audioSettings:sanctuaryOptions);
  }
  void BuildAudioSettings(){
   audioSettings=new GameObject("Sound settings view",typeof(RectTransform));audioSettings.transform.SetParent(panel.transform,false);audioSettings.GetComponent<RectTransform>().sizeDelta=new Vector2(580,700);
@@ -16,7 +15,7 @@ public sealed partial class QuestSlice {
   ambience=Button("Ambience",new Vector3(0,-15,0),()=>{soundscape.SetMix(soundscape.Master,Next(soundscape.Ambience),soundscape.Effects);Refresh();},audioSettings.transform);
   effects=Button("Effects",new Vector3(0,-95,0),()=>{soundscape.SetMix(soundscape.Master,soundscape.Ambience,Next(soundscape.Effects));Refresh();},audioSettings.transform);
   music=Button("Music",new Vector3(0,-175,0),()=>{soundscape.SetMusic(Next(soundscape.Music));Refresh();},audioSettings.transform);
-  Button("Back",new Vector3(0,-275,0),()=>ShowAudioSettings(false),audioSettings.transform);Refresh();audioSettings.SetActive(false);
+  Button("Back",new Vector3(0,-275,0),()=>ShowAudioSettings(false),audioSettings.transform);Refresh();StyleSanctuarySubview(audioSettings);audioSettings.SetActive(false);
  }
 }
 }

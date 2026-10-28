@@ -21,7 +21,10 @@ public static class PlayerFetchChecks {
    test.paused=true;Require(!ball.PlayerToss(Vector3.right*.5f),"Paused toss accepted");test.paused=false;
    // Drive the real release handler with measured hand samples, rather than bypassing input dispatch.
    var held=(CarryItem[])typeof(QuestSlice).GetField("held",BindingFlags.Instance|BindingFlags.NonPublic).GetValue(slice);var motion=(ThrowMotion[])typeof(QuestSlice).GetField("throwMotion",BindingFlags.Instance|BindingFlags.NonPublic).GetValue(slice);held[1]=item;item.held=true;item.GetComponent<Collider>().enabled=false;
-   var rig=(Transform)typeof(QuestSlice).GetField("rig",BindingFlags.Instance|BindingFlags.NonPublic).GetValue(slice);var direction=ball.Direction(ball.transform);motion[1].Reset();for(int i=0;i<4;i++)motion[1].Sample(direction*i*.01f*rig.localScale.x,i*.02f,rig.localScale.x);
+   var rig=(Transform)typeof(QuestSlice).GetField("rig",BindingFlags.Instance|BindingFlags.NonPublic).GetValue(slice);var direction=ball.Direction(ball.transform);
+   // Aim this retrieval fixture away from the bowling lane: a lane-aligned toss deliberately starts bowling.
+   if(ball.Bowling?.Available==true&&Vector3.Dot(direction,ball.Bowling.Forward)>.8f)direction=-direction;
+   motion[1].Reset();for(int i=0;i<4;i++)motion[1].Sample(direction*i*.01f*rig.localScale.x,i*.02f,rig.localScale.x);
    typeof(QuestSlice).GetMethod("Release",BindingFlags.Instance|BindingFlags.NonPublic).Invoke(slice,new object[]{1,new Ray(ball.transform.position,Vector3.forward)});
    Require(held[1]==null&&!item.held&&ball.InFlight&&ball.FetchReserved,"Carry release did not launch player fetch toss");Require(test.WorldPlay.throws==0,"Player toss credited creature");int ticket=ball.FetchTicket;
    var before=ball.Body.position;ball.Advance(1,true);Require(ball.Body.position==before,"Paused toss moved");
