@@ -25,3 +25,7 @@ These are Editor checks with staged pointer/controller state; physical Quest rea
 Next: headset playtest the menu and bowling slice, then choose the next playful activity from demonstrated tricks, tug/chase or social chaos. Benches/shelters remain deferred.
 
 The fetch regression fixture now explicitly aims away from bowling: a reproduced lane-aligned throw correctly entered bowling instead of reserving fetch. This fixture correction leaves runtime throw routing unchanged; the full menu/Book/pickup/fetch check sequence passes.
+
+## Rounded rectangular controls (2026-10-29)
+
+Per user direction, Book/Sanctuary buttons now use straight-edged rounded rectangles instead of stretched circular disks. The shared stone shader derives physical aspect from UV/world derivatives so corner radii remain consistent on wide buttons and tilted VR panels. Stone texture, pointer targets, hover, tracking gates and menu ownership are retained. God Tools menu tiles and clear/close controls use matching rounded rectangles; their icons remain visible and their world-placed emblems retain the existing presentation. Book/Sanctuary/God Tools views were rendered and reviewed; menu/tool interaction checks pass in desktop Play mode. Headset readability remains unverified.

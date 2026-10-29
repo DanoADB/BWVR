@@ -17,7 +17,7 @@ public sealed partial class GodToolPalette:MonoBehaviour {
  GodToolEmblems emblems;DivineIntervention miracles;CreatureHybrid creature;IslandNavigation nav;Collider ground;
  Transform left,right,rig;Camera eye;Font font;GameObject view,wand,preview,sign;HybridTarget spot,probe;
  readonly Collider[] choices=new Collider[ToolCount+2];GameObject[] glyphs=new GameObject[3];
- UnityEngine.UI.Text energy,hint;UnityEngine.UI.Image energyFill;Material previewMaterial;
+ UnityEngine.UI.Text energy,hint;UnityEngine.UI.Image energyFill;Material previewMaterial,buttonStone;
  bool releaseGate,pressedLast,gestureLatched,gestureOpen;float dwell,previewTimer;int wandKind=-1;
  Vector3 desktopAnchor;Quaternion desktopRotation;
  SliceState plantStrokeSeason;float nextPlantAt;
@@ -28,20 +28,21 @@ public sealed partial class GodToolPalette:MonoBehaviour {
   var root=new GameObject("Summonable god tools");root.transform.SetParent(parent,false);var p=root.AddComponent<GodToolPalette>();p.left=left;p.right=right;p.rig=rig;p.eye=eye;p.font=font;p.miracles=miracles;p.creature=creature;p.nav=nav;p.ground=ground;p.feedback=feedback;p.Brush=WorldBrush.Build(root.transform,creature,miracles,nav);p.Build();return p;
  }
  void Build(){
-  emblems=new GodToolEmblems();
+  emblems=new GodToolEmblems();buttonStone=new Material(Resources.Load<Shader>("Sanctuary/StoneUI")){name="Rounded tool palette buttons",renderQueue=3000};
   int rows=(ToolCount+2)/3;float height=320+Mathf.Max(0,rows-2)*102;
   view=new GameObject("Underside wrist tool palette",typeof(UnityEngine.Canvas));view.transform.SetParent(transform,false);view.GetComponent<UnityEngine.Canvas>().renderMode=RenderMode.WorldSpace;view.GetComponent<RectTransform>().sizeDelta=new Vector2(510,height);
   var bg=Panel("CC0 painted scroll",view.transform,new Vector2(700,height+218),new Vector2(25,0),Color.white);bg.sprite=Resources.Load<Sprite>("GodToolScroll/parchment");bg.raycastTarget=false;
   Text("Title",view.transform,new Vector2(0,height*.5f-26),new Vector2(460,35),24).text="GOD TOOLS";
   for(int i=0;i<ToolCount;i++){int column=i%3;float x=(column-1)*158;if(i/3==rows-1&&ToolCount%3!=0)x=ToolCount%3==1?0:(column-.5f)*158;float y=height*.5f-102-(i/3)*102;var b=Panel((ToolKinds[i]).ToString(),view.transform,new Vector2(146,94),new Vector2(x,y),new Color(0,0,0,0));var hit=b.gameObject.AddComponent<BoxCollider>();hit.size=new Vector3(146,94,12);choices[i]=hit;
-   var symbol=Symbol(ToolKinds[i],b.transform);symbol.transform.localPosition=new Vector3(0,8,-16);symbol.transform.localScale=Vector3.one*18;
+   b.material=buttonStone;b.color=Color.white;var symbol=Symbol(ToolKinds[i],b.transform);foreach(Transform part in symbol.transform)if(part.name!="Open-source icon")part.gameObject.SetActive(false);symbol.transform.localPosition=new Vector3(0,8,-16);symbol.transform.localScale=Vector3.one*18;
    Text("Tool caption",b.transform,new Vector2(0,-32),new Vector2(140,24),17).text=Title(ToolKinds[i]);
   }
-  for(int i=ToolCount;i<ToolCount+2;i++){var b=Panel(i==ToolCount?"Clear cue":"Dismiss tools",view.transform,new Vector2(146,32),new Vector2((i==ToolCount?-1:1)*158,-height*.5f+33),new Color(.26f,.18f,.10f,.10f));var hit=b.gameObject.AddComponent<BoxCollider>();hit.size=new Vector3(146,32,12);choices[i]=hit;Text("Caption",b.transform,Vector2.zero,new Vector2(140,30),16).text=i==ToolCount?"Clear cue":"Close";}
+  for(int i=ToolCount;i<ToolCount+2;i++){var b=Panel(i==ToolCount?"Clear cue":"Dismiss tools",view.transform,new Vector2(146,32),new Vector2((i==ToolCount?-1:1)*158,-height*.5f+33),new Color(.26f,.18f,.10f,.10f));b.material=buttonStone;b.color=Color.white;var hit=b.gameObject.AddComponent<BoxCollider>();hit.size=new Vector3(146,32,12);choices[i]=hit;Text("Caption",b.transform,Vector2.zero,new Vector2(140,30),16).text=i==ToolCount?"Clear cue":"Close";}
   Text("Icon artwork credits",view.transform,new Vector2(0,-height*.5f+8),new Vector2(490,14),10).text=GodToolEmblems.Credit;
   energy=Text("Spiritual energy",view.transform,new Vector2(0,-height*.5f+51),new Vector2(155,25),16);
   Panel("Energy track",view.transform,new Vector2(140,6),new Vector2(0,-height*.5f+27),new Color(.2f,.3f,.3f));energyFill=Panel("Energy remaining",view.transform,new Vector2(140,6),new Vector2(0,-height*.5f+27),new Color(.5f,.85f,.75f));energyFill.rectTransform.pivot=new Vector2(0,.5f);energyFill.rectTransform.anchoredPosition=new Vector2(-70,-height*.5f+27);
   foreach(var label in view.GetComponentsInChildren<UnityEngine.UI.Text>())label.color=new Color(.19f,.12f,.065f);
+  foreach(var choice in choices)if(choice!=null)choice.GetComponentInChildren<UnityEngine.UI.Text>().color=new Color(.98f,.94f,.8f);
   var card=new GameObject("Selected tool hint",typeof(UnityEngine.Canvas));card.transform.SetParent(transform,false);card.GetComponent<UnityEngine.Canvas>().renderMode=RenderMode.WorldSpace;hint=Text("Use hint",card.transform,Vector2.zero,new Vector2(470,60),20);hint.transform.parent.localScale=Vector3.one*.00065f;hint.gameObject.SetActive(false);
   spot=HybridTarget.Bind(new GameObject("Saved guidance point"),SpotId,HybridTargetKind.Object);spot.transform.SetParent(transform,false);spot.transform.position=creature.transform.position;creature.Register(spot);
   probe=HybridTarget.Bind(new GameObject("Private placement probe"),"private-preview",HybridTargetKind.Object);probe.transform.SetParent(transform,false);
@@ -78,7 +79,7 @@ public sealed partial class GodToolPalette:MonoBehaviour {
   if(!pressed)releaseGate=false;bool edge=pressed&&!pressedLast&&!releaseGate;pressedLast=pressed;
   var scale=rig.localScale.x;
   view.transform.SetPositionAndRotation(xr?left.position+left.up*.08f*scale+left.forward*.08f*scale:rig.TransformPoint(desktopAnchor),xr?Quaternion.LookRotation(left.position-eye.transform.position):rig.rotation*desktopRotation);view.transform.localScale=Vector3.one*.0008f*scale;
-  if(Open){bool pointing=Physics.Raycast(ray,out var hit,8*scale);int hovered=pointing?Array.IndexOf(choices,hit.collider):-1;energy.text=miracles.UnlimitedEnergy?"Energy unlimited":$"Energy {Season.Hybrid.energy:0}";energyFill.rectTransform.sizeDelta=new Vector2(140*(miracles.UnlimitedEnergy?1:Mathf.Clamp01(Season.Hybrid.energy/Mathf.Max(1,miracles.tuning.maximum))),6);for(int i=0;i<ToolCount;i++){var kind=ToolKinds[i];float cost=kind==SpiritualTool.Rain?WorldBrush.RainCost:kind==SpiritualTool.Heal?miracles.tuning.healingCost:kind==SpiritualTool.RainBrush?WorldBrush.RainCost:kind==SpiritualTool.WindFan?WorldBrush.WindCost:kind==SpiritualTool.FoodGift||kind==SpiritualTool.WoodGift?WorldBrush.GiftCost:0;choices[i].GetComponentInChildren<UnityEngine.UI.Text>().color=miracles.CanAfford(cost)?new Color(.19f,.12f,.065f):new Color(.48f,.36f,.25f);choices[i].GetComponent<UnityEngine.UI.Image>().color=Color.clear;choices[i].transform.GetChild(0).localScale=Vector3.one*(i==hovered?19.2f:18);}
+  if(Open){bool pointing=Physics.Raycast(ray,out var hit,8*scale);int hovered=pointing?Array.IndexOf(choices,hit.collider):-1;energy.text=miracles.UnlimitedEnergy?"Energy unlimited":$"Energy {Season.Hybrid.energy:0}";energyFill.rectTransform.sizeDelta=new Vector2(140*(miracles.UnlimitedEnergy?1:Mathf.Clamp01(Season.Hybrid.energy/Mathf.Max(1,miracles.tuning.maximum))),6);for(int i=0;i<ToolCount;i++){var kind=ToolKinds[i];float cost=kind==SpiritualTool.Rain?WorldBrush.RainCost:kind==SpiritualTool.Heal?miracles.tuning.healingCost:kind==SpiritualTool.RainBrush?WorldBrush.RainCost:kind==SpiritualTool.WindFan?WorldBrush.WindCost:kind==SpiritualTool.FoodGift||kind==SpiritualTool.WoodGift?WorldBrush.GiftCost:0;choices[i].GetComponentInChildren<UnityEngine.UI.Text>().color=miracles.CanAfford(cost)?new Color(.98f,.94f,.8f):new Color(.58f,.55f,.49f);choices[i].GetComponent<UnityEngine.UI.Image>().color=i==hovered?new Color(1.12f,1.12f,1.06f):Color.white;choices[i].transform.GetChild(0).localScale=Vector3.one*(i==hovered?19.2f:18);}
    if(edge){int index=hovered;if(index<ToolCount&&index>=0)Select(ToolKinds[index]);else if(index==ToolCount){ClearSign();releaseGate=true;}else if(index==ToolCount+1)Cancel();}return true;
   }
   if(!Selected.HasValue)return owned;
@@ -113,6 +114,6 @@ public sealed partial class GodToolPalette:MonoBehaviour {
  void FanPreview(){var line=preview.GetComponent<LineRenderer>();line.loop=false;line.positionCount=7;var rotation=Quaternion.LookRotation(fanDirection);var p=new[]{Vector3.zero,new Vector3(0,0,22),new Vector3(-3,0,18),new Vector3(0,0,22),new Vector3(3,0,18),new Vector3(0,0,22),Vector3.zero};for(int i=0;i<7;i++)line.SetPosition(i,(rotation*p[i]+Vector3.up*.25f)*nav.Scale);}
  void PreviewShape(bool valid,float radius){var line=preview.GetComponent<LineRenderer>();line.loop=valid;line.positionCount=valid?40:4;if(valid){for(int i=0;i<40;i++){float a=i*Mathf.PI/20;line.SetPosition(i,new Vector3(Mathf.Cos(a),.25f,Mathf.Sin(a))*nav.Scale*radius);}}else{var p=new[]{new Vector3(-1,.25f,-1),new Vector3(1,.25f,1),new Vector3(-1,.25f,1),new Vector3(1,.25f,-1)};for(int i=0;i<4;i++)line.SetPosition(i,p[i]*nav.Scale*radius*.6f);}}
  void OnDisable(){SeedVisibility(false);Brush?.Stop();}
- void OnDestroy(){emblems?.Dispose();if(previewMaterial!=null)Destroy(previewMaterial);}
+ void OnDestroy(){if(buttonStone!=null)Destroy(buttonStone);emblems?.Dispose();if(previewMaterial!=null)Destroy(previewMaterial);}
 }
 }
