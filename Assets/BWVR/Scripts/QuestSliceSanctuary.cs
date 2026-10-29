@@ -7,15 +7,16 @@ public sealed partial class QuestSlice {
  GameObject sanctuaryHome,sanctuaryOptions,sanctuaryHelp,sanctuaryRestart;
  float sanctuarySavedUntil;TMP_Text sanctuarySummary,pauseCaption,saveCaption;Material sanctuaryStone,sanctuaryFont;UnityEngine.UI.Image sanctuaryHover;Color sanctuaryHoverColor;Collider[] sanctuaryColliders;
  public bool MenuOpen=>panel!=null&&panel.activeInHierarchy;
+ static readonly Vector2 MenuButtonSize=new Vector2(240,60);
  static readonly Color ParchmentInk=new Color(.19f,.12f,.065f),StoneInk=new Color(.98f,.94f,.80f);
  GameObject SanctuaryPage(string name){var go=new GameObject(name,typeof(RectTransform));go.transform.SetParent(panel.transform,false);go.GetComponent<RectTransform>().sizeDelta=new Vector2(580,720);return go;}
  TMP_Text SanctuaryLabel(string name,Transform parent,Vector2 at,Vector2 size,string text,int pixels,Color color){
   var go=new GameObject(name,typeof(RectTransform));go.SetActive(false);go.transform.SetParent(parent,false);var label=go.AddComponent<TextMeshProUGUI>();label.font=Resources.Load<TMP_FontAsset>("Fonts & Materials/LiberationSans SDF");label.fontSharedMaterial=sanctuaryFont;label.fontSize=pixels;label.color=color;label.alignment=TextAlignmentOptions.Center;label.richText=false;label.raycastTarget=false;label.text=text;label.rectTransform.sizeDelta=size;label.rectTransform.anchoredPosition=at;label.rectTransform.localPosition+=Vector3.back*48;go.SetActive(true);return label;
  }
  TMP_Text SanctuaryButton(string title,Transform parent,Vector2 at,Action action,bool primary=false){
-  var go=new GameObject(title,typeof(RectTransform),typeof(BoxCollider),typeof(SpatialTarget));go.transform.SetParent(parent,false);go.GetComponent<RectTransform>().anchoredPosition=at;var size=primary?new Vector2(220,190):new Vector2(240,68);go.GetComponent<RectTransform>().sizeDelta=size;var hit=go.GetComponent<BoxCollider>();hit.isTrigger=true;hit.center=Vector3.back*20;hit.size=new Vector3(size.x,size.y,55);go.GetComponent<SpatialTarget>().invoke=action;
+  var go=new GameObject(title,typeof(RectTransform),typeof(BoxCollider),typeof(SpatialTarget));go.transform.SetParent(parent,false);go.GetComponent<RectTransform>().anchoredPosition=at;var size=MenuButtonSize;go.GetComponent<RectTransform>().sizeDelta=size;var hit=go.GetComponent<BoxCollider>();hit.isTrigger=true;hit.center=Vector3.back*20;hit.size=new Vector3(size.x,size.y,55);go.GetComponent<SpatialTarget>().invoke=action;
   var disk=go.AddComponent<UnityEngine.UI.Image>();disk.material=sanctuaryStone;disk.raycastTarget=false;
-  return SanctuaryLabel("Caption",go.transform,Vector2.zero,primary?new Vector2(170,120):new Vector2(210,56),title,primary?28:23,StoneInk);
+  var caption=SanctuaryLabel("Caption",go.transform,Vector2.zero,MenuButtonSize-new Vector2(24,8),title.Replace("\n"," "),23,StoneInk);caption.enableAutoSizing=true;caption.fontSizeMin=18;caption.fontSizeMax=23;return caption;
  }
  void BuildSanctuary(){
   bookMaterial=new Material(Resources.Load<Shader>("Book/CreationBookUI")){name="Private parchment UI"};
@@ -26,12 +27,12 @@ public sealed partial class QuestSlice {
   var blocker=panel.AddComponent<BoxCollider>();blocker.isTrigger=true;blocker.center=new Vector3(0,0,20);blocker.size=new Vector3(600,740,8);
   SanctuaryLabel("Sanctuary title",sanctuaryHome.transform,new Vector2(0,305),new Vector2(540,45),"SANCTUARY",32,ParchmentInk);
   sanctuarySummary=SanctuaryLabel("Season summary",sanctuaryHome.transform,new Vector2(0,245),new Vector2(530,60),"",21,ParchmentInk);
-  SanctuaryButton("God tools",sanctuaryHome.transform,new Vector2(-135,100),()=>{SetSanctuaryOpen(false);godTools.Toggle();},true);
-  SanctuaryButton("Book of\nCreation",sanctuaryHome.transform,new Vector2(135,100),()=>ShowCreationBook(true),true);
-  pauseCaption=SanctuaryButton("Pause",sanctuaryHome.transform,new Vector2(-135,-115),()=>{state.paused=!state.paused;RefreshSanctuary();},true);
-  saveCaption=SanctuaryButton("Save",sanctuaryHome.transform,new Vector2(135,-115),()=>{Save();if(saveError==null)sanctuarySavedUntil=Time.unscaledTime+3;RefreshSanctuary();},true);
-  SanctuaryButton("Settings",sanctuaryHome.transform,new Vector2(-135,-285),()=>ShowSanctuaryPage(sanctuaryOptions));SanctuaryButton("Close",sanctuaryHome.transform,new Vector2(135,-285),()=>SetSanctuaryOpen(false));
-  SanctuaryLabel("Open hint",sanctuaryHome.transform,new Vector2(0,-345),new Vector2(540,30),"X opens / closes · point + right front trigger",17,ParchmentInk);
+  SanctuaryButton("God tools",sanctuaryHome.transform,new Vector2(-135,140),()=>{SetSanctuaryOpen(false);godTools.Toggle();},true);
+  SanctuaryButton("Book of\nCreation",sanctuaryHome.transform,new Vector2(135,140),()=>ShowCreationBook(true),true);
+  pauseCaption=SanctuaryButton("Pause",sanctuaryHome.transform,new Vector2(-135,20),()=>{state.paused=!state.paused;RefreshSanctuary();},true);
+  saveCaption=SanctuaryButton("Save",sanctuaryHome.transform,new Vector2(135,20),()=>{Save();if(saveError==null)sanctuarySavedUntil=Time.unscaledTime+3;RefreshSanctuary();},true);
+  SanctuaryButton("Settings",sanctuaryHome.transform,new Vector2(-135,-100),()=>ShowSanctuaryPage(sanctuaryOptions));SanctuaryButton("Close",sanctuaryHome.transform,new Vector2(135,-100),()=>SetSanctuaryOpen(false));
+  SanctuaryLabel("Open hint",sanctuaryHome.transform,new Vector2(0,-225),new Vector2(540,30),"X opens / closes · point + right front trigger",17,ParchmentInk);
   SanctuaryLabel("Settings title",sanctuaryOptions.transform,new Vector2(0,305),new Vector2(540,45),"SETTINGS",32,ParchmentInk);
   SanctuaryButton("Sound",sanctuaryOptions.transform,new Vector2(-135,160),()=>ShowAudioSettings(true));SanctuaryButton("Help / details",sanctuaryOptions.transform,new Vector2(135,160),()=>ShowSanctuaryPage(sanctuaryHelp));
   SanctuaryButton("Spirit: show / hide",sanctuaryOptions.transform,new Vector2(-135,50),()=>spirit.SetVisible(!spirit.Visible));SanctuaryButton("Begin again",sanctuaryOptions.transform,new Vector2(135,50),()=>ShowSanctuaryPage(sanctuaryRestart));

@@ -4,7 +4,7 @@ Delivered 2026-10-29 for desktop Editor testing. This increment gives the player
 
 ## How to play
 
-Open the Sanctuary, choose Book of Creation, then Outings. The Book uses rounded rectangular controls and initially opens to Outings; its other sections remain available. Choose Begin Play Day. Complete these experiments in any order, without a deadline:
+Open the Sanctuary and choose Book of Creation. It initially opens to Outings; use Sections to switch categories. The Book uses rounded rectangular controls and initially opens to Outings; its other sections remain available. Choose Begin Play Day. Complete these experiments in any order, without a deadline:
 
 1. Play a witnessed four-note phrase on the chime and let the creature complete an echo.
 2. Use a goal's jewel to invite shared turns. Complete three rounds containing both turns and physical returns. Misses count as shared play; incomplete turns do not. Rounds can span invitations.

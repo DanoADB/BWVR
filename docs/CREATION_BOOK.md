@@ -36,3 +36,7 @@ GodToolsChecks, FeedbackChecks, DevelopmentFocusChecks and CreatureCarryChecks p
 ## S4 status
 
 The Book shell is delivered for Editor testing. Confirmed block-placement and repair receipts are now implemented. The integrated three-useful-contribution/declined-suggestion/autonomous-progress/social-outcome scenario remains open, along with hardware validation. This increment does not mark the whole shared gathering-place milestone complete.
+
+## Navigation update (2026-10-29)
+
+Use Sections to choose Creature, People, Provisions, Places or Outings. Selecting a category returns to its reading page; Return to page keeps the current bookmark. All Book buttons share the same 240-by-60 size as the other Sanctuary menus. This replaces the earlier small-tab row and mixed button sizes.
