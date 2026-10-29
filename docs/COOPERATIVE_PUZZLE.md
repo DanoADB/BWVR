@@ -26,4 +26,12 @@ Unity 6000.6.7f1 compiles without errors/warnings. The repeatable Editor fixture
 
 Existing spin/training, trick audience, chime audience, goal-turn, pickup/drop, chase and sanctuary checks also pass. Normal Editor frames advance and a staged render was visually reviewed. This establishes a reproducible playable interaction, not a measured natural acceptance rate. Physical Quest throws, comfort, discoverability, art readability and frame-time performance still need headset playtesting. No APK was requested or built. The original user save and XR startup settings are restored after verification.
 
+## Nonverbal cues — 2026-10-28
+
+The empty socket slowly pulses blue. Docking the key highlights the matching paw pad; small colored beads travel along each powered input track. Once the creature is on the pad and the shutter is fully raised, a launch circle and forward chevron appear, one ready chime plays, and the creature points toward the launch spot while looking at the ball. The cue does not promise acceptance before the creature has chosen and arrived. The throw markers disappear after completion or cancellation. The jewel retains the confirmed solved state until rearming.
+
+`PuzzleCues` reads the existing authoritative state and simulation clock. It adds two short line renderers and two small visual beads, reuses existing materials, adds no colliders or lights and cannot grant resources, learning or completion. Sound is transition-driven with a cooldown; reset/load does not play a ready sound. Pause freezes cue motion and the action. The creature's existing visual component owns the pointing gesture; normal action cleanup releases it.
+
+The Editor fixture now also checks all logical cue stages, readiness/gesture/launch-marker agreement, one ready chime, pause, solved cleanup and key-removal reset. A ready-state render is inspected separately from the physical gameplay assertions. Headset readability and a new player's ability to infer the puzzle without instructions remain unverified.
+
 Next playtest focus: can a new player infer both inputs and complete a round without reading instructions? Tune the pad's acknowledgment, wait time and ball approach cues from that evidence before adding more puzzle types.

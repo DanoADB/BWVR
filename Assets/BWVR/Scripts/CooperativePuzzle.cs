@@ -11,7 +11,7 @@ namespace BWVR {
 public sealed class PuzzlePad:MonoBehaviour {public CooperativePuzzle puzzle;}
 // The player can use either hand's normal pickup/drop to dock this toy.
 public sealed class PuzzleKey:MonoBehaviour {public CooperativePuzzle puzzle;}
-public sealed class CooperativePuzzle {
+public sealed partial class CooperativePuzzle {
  public readonly Transform Root;public readonly PuzzlePad Pad;public readonly CarryItem Key;
  public bool Available{get;private set;}public bool Active{get;private set;}public bool Completed{get;private set;}
  public bool Docked{get;private set;}public float Lift{get;private set;}
@@ -62,7 +62,7 @@ public sealed class CooperativePuzzle {
   star=Shape(Root,"Shared discovery jewel",PrimitiveType.Sphere,new Vector3(0,21,0),Vector3.one*2.5f,glow).GetComponent<Renderer>();
   var key=GameObject.CreatePrimitive(PrimitiveType.Sphere);key.name="Blue key toy — drop into matching socket";key.transform.SetParent(Root,false);key.transform.localPosition=new Vector3(-27,2,-17);key.transform.localScale=Vector3.one*4;key.GetComponent<Renderer>().sharedMaterial=blue;Key=key.AddComponent<CarryItem>();Key.kind=Offering.Toy;Key.home=key.transform.position;key.AddComponent<PuzzleKey>().puzzle=this;
   if(Available){nav.AddToyBarrier(Root.position+Vector3.up*nav.Scale*10,new Vector3(28,20,4)*nav.Scale,Root.rotation);nav.AddToyBarrier(Root.TransformPoint(new Vector3(0,8,12)),new Vector3(28,16,.3f)*nav.Scale,Root.rotation);}
-  Root.gameObject.SetActive(Available);door.GetComponent<Collider>().enabled=Available;if(!Available)Debug.LogWarning("BWVR_PUZZLE_UNAVAILABLE: no clear level site for together gate");Reset();
+  BuildCues();Root.gameObject.SetActive(Available);door.GetComponent<Collider>().enabled=Available;if(!Available)Debug.LogWarning("BWVR_PUZZLE_UNAVAILABLE: no clear level site for together gate");Reset();
  }
  static float FlatDistance(Vector3 a,Vector3 b){a.y=b.y=0;return Vector3.Distance(a,b);}
  static Material Mat(Color color)=>new Material(Shader.Find("BWVR/GameSurface")){color=color,enableInstancing=true};
@@ -79,7 +79,7 @@ public sealed class CooperativePuzzle {
   if(Active&&!Allowed)Cancel();
   Lift=Mathf.MoveTowards(Lift,Active&&OnPad&&Docked&&Allowed?1:0,Mathf.Min(dt,.1f)*1.5f);
   shutter.localPosition=new Vector3(0,8+Lift*18,0);door.position=nav.ToNav(shutter.position);door.rotation=Root.rotation;
-  Tint(socketLight,Docked?Color.white:blue.color);Tint(padLight,OnPad?Color.white:gold.color);Tint(star,Completed?new Color(.5f,1,.7f):Open?gold.color:glow.color);
+  PaintCues(Mathf.Min(dt,.1f));
  }
  public bool Claim(){if(!Ready||!god.CanReach(Pad.transform.position))return false;Active=true;Completed=false;crossing=havePrevious=false;elapsed=settle=0;Memory.attempts=Math.Min(1000000,Memory.attempts+1);ball.CancelFetch();ball.CancelRally();ball.Goals.Cancel();ball.Chase.End();return true;}
  public int Step(IslandNavigator walker,float speed,float dt){
@@ -98,8 +98,8 @@ public sealed class CooperativePuzzle {
   if(crossing){if(now.z<0||ball.Harmful){crossing=false;settle=0;return;}settle+=dt;if(settle>=1){Completed=true;Active=false;Memory.Complete();god.Journal.Add(god.State.time,"cooperative puzzle",CreatureAction.PlayWithToy,Pad.GetComponent<HybridTarget>().id,"Player key, creature pad and safe physical ball passage completed together");IslandAudio.Cue(IslandSound.Discovery,Root.position,Key.GetEntityId().GetHashCode(),.8f,1.2f);}}
  }
  public void BallMoved(){havePrevious=crossing=false;settle=0;}
- public void Cancel(){if(Active||Completed)cooldown=god.State.time+12;Active=false;crossing=havePrevious=false;settle=0;}
- public void Reset(){Cancel();Completed=Docked=false;Lift=cooldown=elapsed=0;Key.held=false;Key.transform.position=Key.home;Key.GetComponent<Collider>().enabled=true;shutter.localPosition=new Vector3(0,8,0);door.position=nav.ToNav(shutter.position);}
+ public void Cancel(){if(Active||Completed)cooldown=god.State.time+12;Active=false;crossing=havePrevious=false;settle=0;PaintCues(0,false);}
+ public void Reset(){Cancel();Completed=Docked=false;Lift=cooldown=elapsed=0;Key.held=false;Key.transform.position=Key.home;Key.GetComponent<Collider>().enabled=true;shutter.localPosition=new Vector3(0,8,0);door.position=nav.ToNav(shutter.position);ResetCues();}
  public void Dispose(){foreach(var mat in new[]{stone,blue,gold,glow})if(mat!=null)UnityEngine.Object.Destroy(mat);if(Root!=null)UnityEngine.Object.Destroy(Root.gameObject);}
 }
 }
