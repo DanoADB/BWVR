@@ -41,32 +41,31 @@ public sealed partial class CooperativePuzzle {
    if(safe&&slope<1.25f&&slope<bestSlope){Root.position=foot;Available=true;bestSlope=slope;if(slope<.25f)break;}
   }
   Shape(Root,"Stone play threshold",PrimitiveType.Cube,new Vector3(0,.05f,0),new Vector3(28,.1f,9),stone);
-  for(int i=-1;i<=1;i+=2){Shape(Root,"Gate pier",PrimitiveType.Cube,new Vector3(i*12,9,0),new Vector3(3,18,4),stone);Proxy(physics,"Puzzle pier",new Vector3(i*12,9,0),new Vector3(3,18,4));}
-  Shape(Root,"Connecting lintel",PrimitiveType.Cube,new Vector3(0,19,0),new Vector3(28,2,4),stone);
-  shutter=Shape(Root,"Rising gold shutter",PrimitiveType.Cube,new Vector3(0,8,0),new Vector3(21,16,1),gold).transform;
+  SourcedPlayArt.Part("puzzle-frame",Root,"Sourced timber puzzle frame",new Vector3(0,10,0),new Vector3(28,20,4));
+  for(int i=-1;i<=1;i+=2)Proxy(physics,"Puzzle pier",new Vector3(i*12,9,0),new Vector3(3,18,4));
+  shutter=SourcedPlayArt.Part("shutter",Root,"Rising wooden shutter",new Vector3(0,8,0),new Vector3(21,16,1)).transform;
   door=Proxy(physics,"Puzzle shutter physics",new Vector3(0,8,0),new Vector3(21,16,1));
   // A modest flat sill avoids snagging the sphere on small sampled terrain differences.
   Proxy(physics,"Puzzle threshold physics",new Vector3(0,-.25f,0),new Vector3(28,.5f,9));
   Proxy(physics,"Puzzle catch net physics",new Vector3(0,8,12),new Vector3(28,16,.3f));
-  for(int i=0;i<=8;i++)Shape(Root,"Catch net rope",PrimitiveType.Cube,new Vector3(-14+i*3.5f,8,12),new Vector3(.16f,16,.16f),stone);
-  for(int i=0;i<=4;i++)Shape(Root,"Catch net rope",PrimitiveType.Cube,new Vector3(0,i*4,12),new Vector3(28,.16f,.16f),stone);
+  SourcedPlayArt.Part("backstop",Root,"Sourced puzzle catch backboard",new Vector3(0,8,12),new Vector3(28,16,.3f));
   var pad=Shape(Root,"Creature paw pad",PrimitiveType.Cylinder,new Vector3(19,.1f,-12),new Vector3(12,.1f,12),gold);padLight=pad.GetComponent<Renderer>();
   var padTarget=new GameObject("Stand here to help");padTarget.transform.SetParent(Root,false);padTarget.transform.localPosition=new Vector3(19,0,-12);Pad=padTarget.AddComponent<PuzzlePad>();Pad.puzzle=this;var padItem=padTarget.AddComponent<CarryItem>();padItem.kind=Offering.Toy;padItem.home=padTarget.transform.position;var area=padTarget.AddComponent<BoxCollider>();area.center=Vector3.up*.3f;area.size=new Vector3(12,.6f,12);
   var affordance=padTarget.AddComponent<CreatureAffordance>();affordance.kind=CreatureAffordance.Kind.Turn;god.RegisterObject(affordance,"together-gate-pad");
   Shape(Root,"Blue key socket",PrimitiveType.Cylinder,new Vector3(-19,.1f,-12),new Vector3(8,.1f,8),stone);
-  socketLight=Shape(Root,"Socket jewel",PrimitiveType.Sphere,new Vector3(-19,.5f,-12),new Vector3(3,.5f,3),blue).GetComponent<Renderer>();
+  var socketToken=SourcedPlayArt.Part("key",Root,"Matching blue key socket",new Vector3(-19,.5f,-12),new Vector3(3,3,.5f),blue);socketToken.transform.localRotation=Quaternion.Euler(90,0,0);socketLight=socketToken.GetComponent<Renderer>();
   // Coloured inset tracks connect each input to the same shutter.
   foreach(int sign in new[]{-1,1}){Shape(Root,"Input track",PrimitiveType.Cube,new Vector3(sign*19,.12f,-5),new Vector3(.5f,.15f,14),sign<0?blue:gold);Shape(Root,"Gate input track",PrimitiveType.Cube,new Vector3(sign*15,.12f,2),new Vector3(8,.15f,.5f),sign<0?blue:gold);}
   for(int i=0;i<4;i++){var toe=Shape(pad.transform,"Paw toe",PrimitiveType.Sphere,Vector3.zero,Vector3.one,stone);toe.transform.SetParent(Root,false);toe.transform.localPosition=new Vector3(16.3f+i*1.8f,.25f,-10);toe.transform.localScale=new Vector3(1.5f,.25f,1.5f);}
   Shape(Root,"Paw sole",PrimitiveType.Sphere,new Vector3(19,.25f,-13),new Vector3(4,.25f,3),stone);
   star=Shape(Root,"Shared discovery jewel",PrimitiveType.Sphere,new Vector3(0,21,0),Vector3.one*2.5f,glow).GetComponent<Renderer>();
-  var key=GameObject.CreatePrimitive(PrimitiveType.Sphere);key.name="Blue key toy — drop into matching socket";key.transform.SetParent(Root,false);key.transform.localPosition=new Vector3(-27,2,-17);key.transform.localScale=Vector3.one*4;key.GetComponent<Renderer>().sharedMaterial=blue;Key=key.AddComponent<CarryItem>();Key.kind=Offering.Toy;Key.home=key.transform.position;key.AddComponent<PuzzleKey>().puzzle=this;
+  var key=SourcedPlayArt.Part("key",Root,"Blue key token",Vector3.zero,Vector3.one);key.AddComponent<BoxCollider>();key.name="Blue key toy — drop into matching socket";key.transform.SetParent(Root,false);key.transform.localPosition=new Vector3(-27,2,-17);key.transform.localScale=new Vector3(4,4,.8f);key.GetComponent<Renderer>().sharedMaterial=blue;Key=key.AddComponent<CarryItem>();Key.kind=Offering.Toy;Key.home=key.transform.position;key.AddComponent<PuzzleKey>().puzzle=this;
   if(Available){nav.AddToyBarrier(Root.position+Vector3.up*nav.Scale*10,new Vector3(28,20,4)*nav.Scale,Root.rotation);nav.AddToyBarrier(Root.TransformPoint(new Vector3(0,8,12)),new Vector3(28,16,.3f)*nav.Scale,Root.rotation);}
   BuildCues();Root.gameObject.SetActive(Available);door.GetComponent<Collider>().enabled=Available;if(!Available)Debug.LogWarning("BWVR_PUZZLE_UNAVAILABLE: no clear level site for together gate");Reset();
  }
  static float FlatDistance(Vector3 a,Vector3 b){a.y=b.y=0;return Vector3.Distance(a,b);}
  static Material Mat(Color color)=>new Material(Shader.Find("BWVR/GameSurface")){color=color,enableInstancing=true};
- static GameObject Shape(Transform root,string name,PrimitiveType type,Vector3 at,Vector3 scale,Material material){var go=GameObject.CreatePrimitive(type);go.name=name;go.transform.SetParent(root,false);go.transform.localPosition=at;go.transform.localScale=scale;go.GetComponent<Renderer>().sharedMaterial=material;var collider=go.GetComponent<Collider>();collider.enabled=false;UnityEngine.Object.Destroy(collider);return go;}
+ static GameObject Shape(Transform root,string name,PrimitiveType type,Vector3 at,Vector3 scale,Material material)=>SourcedPlayArt.Part(name.Contains("jewel")?"token":type==PrimitiveType.Cube?"plate":"stud",root,name,at,type==PrimitiveType.Cylinder?Vector3.Scale(scale,new Vector3(1,2,1)):scale,material);
  Rigidbody Proxy(Scene scene,string name,Vector3 at,Vector3 size){var go=new GameObject(name);SceneManager.MoveGameObjectToScene(go,scene);var box=go.AddComponent<BoxCollider>();box.size=size;box.contactOffset=.01f;box.enabled=Available;var body=go.AddComponent<Rigidbody>();body.isKinematic=true;body.position=nav.ToNav(Root.TransformPoint(at));body.rotation=Root.rotation;return body;}
  void Tint(Renderer view,Color color){paint.SetColor("_Color",color);view.SetPropertyBlock(paint);}
  public void Advance(float dt){

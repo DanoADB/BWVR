@@ -1,6 +1,6 @@
 # Sourced models — replacement inventory
 
-Updated 2026-10-28. User direction: find open-source/CC0 models for every visible game item; do not create primitive placeholder artwork. This inventory covers the runtime item families and their remaining procedural visuals. **A candidate is not an imported or approved replacement.** Existing simulation/collision geometry must remain compatible while presentation changes.
+Updated 2026-10-29. User direction: find open-source/CC0 models for every visible game item; do not create primitive placeholder artwork. This inventory covers the runtime item families and their remaining procedural visuals. **A candidate is not an imported or approved replacement.** Existing simulation/collision geometry must remain compatible while presentation changes.
 
 ## Source evidence
 
@@ -44,14 +44,14 @@ Status: **In use** means an existing sourced mesh is used for that item family, 
 | Resin jars — ResinGathering | Kenney Survival `bottle`, `bottle-large` | Archive candidates; tint contents, do not change resource quantities. |
 | Covered stores, roof, posts, upgrades, shelves — VillageResources / ResourceStorage | Kenney Survival `structure`, `structure-floor`, `structure-roof`, `box`, `box-large`, `barrel` | Archive candidates. Fit art to the current collider footprint and keep visible fill/capacity affordances. |
 | Meal reserve crate and portions | Existing Kenney `box-open` + Food Kit produce | Crate in use; replace primitive portions after food import. |
-| Beachball / rolling toys — CreaturePlayground | Kenney Minigolf `ball-blue`, `ball-green`, `ball-red` | Archive candidates. Scale to the existing large gameplay diameter and fit the existing spherical collider; no tiny golf ball in the scene. |
-| Turning-block toy | Kenney Brick `bevel-lq-brick-2x2`, `bevel-lq-brick-2x6` | Meshes already imported; remove primitive toy cube assembly and preserve interaction root. |
-| Chime / rhythm instrument — CreaturePlayground / PlayerRhythm | Innerscene Xylophone | Page candidate. Two existing input zones must remain separately tappable; review Quest mesh cost and style before importing. |
-| Bowling targets and lane — BowlingLane | Kenney Survival `bottle` for wooden skittles; Minigolf track borders/supports | Archive candidates. Prefer recognizable skittle silhouettes over stacked primitive pins. Keep physical collision dimensions and scoring unchanged. |
-| Movable ball goals / backstop — GoalCourse | Kenney Minigolf `structure-gate`, `structure-gate-wide`, track/support pieces | Archive candidates. Fit posts around the existing opening; preserve scoring planes, carry roots and stable IDs. |
-| Cooperative key, socket, paw pad and gate — CooperativePuzzle | Minigolf `ball-blue`, `block-borders`, `structure-gate`; RPG key as alternative | Exact Minigolf archive candidates. Review socket/pad clarity; use sourced icon decals for instructions. Retain key matching and two-input physics puzzle. |
-| Construction bricks/beams/cubes/columns/slabs/ramps/cylinders — ConstructionPieces | Kenney Brick beveled bricks, round bricks, plates, slopes | Archive candidates for shapes beyond imported Brick/Beam. Fit meshes to existing dimensions; hidden collider/proxy geometry is retained. |
-| Construction arch, tray, foundation, example structures | Kenney Minigolf gate, Kenney Survival floor/plank/frame, sourced Quaternius stones | Archive candidates. Do not create new visible procedural arch/tray parts; preserve snap grid and block saves. |
+| Beachball / rolling toys — CreaturePlayground | Kenney Minigolf ball-blue | In use at existing large diameter, retaining striped material and spherical physics. |
+| Turning-block toy | Shared sourced construction yard | Decorative toy retired; physical block play retained. |
+| Chime / rhythm instrument — CreaturePlayground / PlayerRhythm | Innerscene Xylophone | In use: simplified frame/eight authored bars, two input groups, 492 triangles. |
+| Bowling targets and lane — BowlingLane | Tomcat94 Bowling Pin; Kenney studs/jewels for cues | In use, fitted to existing physical capsules; scoring/reset/imitative play retained. |
+| Movable ball goals / backstop — GoalCourse | Fitted Quaternius trim, Kenney Survival backboard and Brick/Platformer cues | In use; unchanged scoring opening, physical posts, carry roots and stable IDs. |
+| Cooperative key, socket, paw pad and gate — CooperativePuzzle | Kenney key/jewel/pads/studs; fitted Quaternius trim and door | In use; native key pickup, matching socket and two-input physics puzzle retained. |
+| Construction bricks/beams/cubes/columns/slabs/ramps/cylinders — ConstructionPieces | Kenney Brick beveled bricks, round bricks, plate and slope | In use across all eight shapes; existing dimensions, hidden physics and snap graph retained. |
+| Construction arch, tray, foundation, example structures | Fitted Quaternius trim; Kenney Survival floor | Arch/tray/foundation in use. Example structures and other legacy construction visuals remain an audit task. |
 | Exploration caches, boxes and tools — IslandDiscoveries | Kenney Survival `chest`, `box`, `bedroll-packed`, existing tool meshes | Archive candidates; preserve discovery attribution and player/creature reservations. |
 | Book of Creation | Existing scroll UI; Quaternius RPG book for physical book representation | UI already present; book mesh is a page candidate. Preserve the existing scroll/stone visual language. |
 | Relationship / mood / request icons | Existing attributed icon set, or licensed CC0 replacements from RPG/approved icon art | Replace generated heart mesh if used as a world item. Icon graphics need individual provenance; do not relabel CC BY icons CC0. |
@@ -108,3 +108,7 @@ The following runtime files contain primitive construction or generated meshes. 
 - `VillageToolmaking.cs`: lines 29.
 - `VillageTributes.cs`: lines 18.
 - `WaterVessel.cs`: lines 17.
+
+## Toy, goal, puzzle and yard batch
+
+Delivered source files, derivations, rebuilding and validation are recorded in [PLAY_ART.md](PLAY_ART.md). The procedural-art snapshot above predates this replacement: several listed sites now create invisible physics proxies only. Other item families remain open; this batch does not claim full island art replacement.

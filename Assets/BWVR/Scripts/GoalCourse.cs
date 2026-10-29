@@ -26,9 +26,8 @@ public sealed class GoalCourse {
    var gate=go.AddComponent<BallGoal>();gate.course=this;gate.index=i;Gates[i]=gate;go.AddComponent<CarryItem>().kind=Offering.Toy;
    // The coloured centre handle is the existing carry ray's hit surface.
    var handle=go.AddComponent<BoxCollider>();handle.center=new Vector3(0,17,0);handle.size=new Vector3(24,2,3);
-   Shape(go.transform,"Left post",new Vector3(-11,8,0),new Vector3(2,16,2),materials[0]);
-   Shape(go.transform,"Right post",new Vector3(11,8,0),new Vector3(2,16,2),materials[0]);
-   Shape(go.transform,"Colour crossbar — grab here",new Vector3(0,17,0),new Vector3(24,2,3),materials[i+1]);
+   SourcedPlayArt.Part("goal-frame",go.transform,"CC0 timber goal frame",new Vector3(0,9,0),new Vector3(24,18,3));
+   Shape(go.transform,"Colour crossbar — grab here",new Vector3(0,17,-1.55f),new Vector3(23,.4f,.15f),materials[i+1]);
    Shape(go.transform,"Left foot",new Vector3(-11,.5f,0),new Vector3(4,1,6),materials[0]);
    Shape(go.transform,"Right foot",new Vector3(11,.5f,0),new Vector3(4,1,6),materials[0]);
    badges[i]=Shape(go.transform,"Goal celebration — invite turns",new Vector3(0,19,0),new Vector3(2,2,.8f),materials[i+1]).GetComponent<Renderer>();
@@ -36,8 +35,7 @@ public sealed class GoalCourse {
    for(int light=0;light<8;light++){bool player=light<4;int bead=light%4;turnLights[i,light]=Shape(go.transform,(player?"Player":"Creature")+" turn bead "+bead,new Vector3((player?-1:1)*(2+bead*1.6f),19,0),Vector3.one*(bead==0?1.4f:.85f),materials[player?1:2]).GetComponent<Renderer>();}
    for(int j=0;j<3;j++){var proxy=new GameObject("Goal post physics "+i+"-"+j);SceneManager.MoveGameObjectToScene(proxy,physics);var box=proxy.AddComponent<BoxCollider>();box.size=j==2?new Vector3(24,2,3):new Vector3(2,16,2);box.contactOffset=.01f;var body=proxy.AddComponent<Rigidbody>();body.isKinematic=true;posts[i,j]=body;}
    nets[i]=new GameObject("Shared game backstop net").transform;nets[i].SetParent(go.transform,false);
-   for(int strand=0;strand<=8;strand++)Shape(nets[i],"Vertical rope",new Vector3(-12+strand*3,8,0),new Vector3(.15f,16,.15f),materials[0]);
-   for(int strand=0;strand<=5;strand++)Shape(nets[i],"Horizontal rope",new Vector3(0,strand*3.2f,0),new Vector3(24,.15f,.15f),materials[0]);
+   SourcedPlayArt.Part("backstop",nets[i],"Sourced shared-game backboard",new Vector3(0,8,0),new Vector3(24,16,.25f));
    var net=new GameObject("Shared goal net physics "+i);SceneManager.MoveGameObjectToScene(net,physics);net.AddComponent<BoxCollider>().size=new Vector3(24,16,.25f);netBodies[i]=net.AddComponent<Rigidbody>();netBodies[i].isKinematic=true;
    bool placed=false;for(int t=0;t<32&&!placed;t++){var want=origin+(right*(38+i*30)+forward*(20+t*3))*nav.Scale;go.transform.rotation=Quaternion.LookRotation(forward);placed=Place(gate,want,false);}
    if(!placed){go.SetActive(false);Debug.LogWarning("BWVR_GOAL_UNAVAILABLE: no safe site for goal "+i);}homes[i]=go.transform.position;homeRotations[i]=go.transform.rotation;go.GetComponent<CarryItem>().home=homes[i];
@@ -45,7 +43,7 @@ public sealed class GoalCourse {
   ResetWorld();
  }
  static Material Mat(Color color)=>new Material(Shader.Find("BWVR/GameSurface")){color=color,enableInstancing=true};
- static GameObject Shape(Transform parent,string name,Vector3 at,Vector3 size,Material mat){var go=GameObject.CreatePrimitive(PrimitiveType.Cube);go.name=name;go.transform.SetParent(parent,false);go.transform.localPosition=at;go.transform.localScale=size;go.GetComponent<Renderer>().sharedMaterial=mat;var c=go.GetComponent<Collider>();c.enabled=false;UnityEngine.Object.Destroy(c);return go;}
+ static GameObject Shape(Transform parent,string name,Vector3 at,Vector3 size,Material mat)=>SourcedPlayArt.Part(name.Contains("celebration")?"token":"stud",parent,name,at,size,mat);
  public bool Place(BallGoal gate,Vector3 point,bool capture=true){
   if(!restoring&&god.Season.paused||!nav.Sample(point,nav.villager,1,out var safe))return false;safe=nav.ProjectFoot(safe,nav.villager);var yaw=Quaternion.Euler(0,gate.transform.eulerAngles.y,0);
   foreach(float side in new[]{-11f,11f}){var foot=safe+yaw*Vector3.right*(side*nav.Scale);if(!nav.Sample(foot,nav.villager,1,out var edge)||Mathf.Abs(nav.ProjectFoot(edge,nav.villager).y-safe.y)>nav.Scale*1.5f)return false;}

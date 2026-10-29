@@ -1,0 +1,99 @@
+{
+  "sources": [
+    {
+      "title": "Kenney Minigolf Kit 3.1",
+      "creator": "Kenney",
+      "url": "https://kenney.nl/assets/minigolf-kit",
+      "license": "CC0-1.0",
+      "integrated": "2026-10-29",
+      "source_folder": "Assets/ThirdParty/KenneyPlay",
+      "selected": "ball-blue, block-borders"
+    },
+    {
+      "title": "Kenney Platformer Kit 4.1",
+      "creator": "Kenney",
+      "url": "https://kenney.nl/assets/platformer-kit",
+      "license": "CC0-1.0",
+      "integrated": "2026-10-29",
+      "source_folder": "Assets/ThirdParty/KenneyPlatformer",
+      "selected": "key, jewel"
+    },
+    {
+      "title": "Xylophone",
+      "creator": "Innerscene",
+      "url": "https://www.innerscene.com/tools/library/3d-parts/xylophone-5da5d32e",
+      "license": "CC0-1.0",
+      "integrated": "2026-10-29",
+      "source_folder": "ArtSources/Play",
+      "selected": "Xylophone.glb"
+    },
+    {
+      "title": "Bowling Pin",
+      "creator": "Tomcat94",
+      "url": "https://opengameart.org/content/bowling-pin",
+      "license": "CC0-1.0",
+      "integrated": "2026-10-29",
+      "source_folder": "ArtSources/Play",
+      "selected": "BowlingPin.blend"
+    },
+    {
+      "title": "Kenney Brick Kit 1.0",
+      "creator": "Kenney",
+      "url": "https://kenney.nl/assets/brick-kit",
+      "license": "CC0-1.0",
+      "integrated": "2026-10-29",
+      "source_folder": "Assets/ThirdParty/Kenney/ConstructionBlocks",
+      "selected": "bevel-lq-brick-2x2, bevel-lq-brick-2x6, bevel-lq-brick-1x1-round, bevel-lq-brick-slope-1x2, bevel-lq-plate-4x8"
+    },
+    {
+      "title": "Kenney Survival Kit 2.0",
+      "creator": "Kenney",
+      "url": "https://kenney.nl/assets/survival-kit",
+      "license": "CC0-1.0",
+      "integrated": "2026-10-29",
+      "source_folder": "Assets/ThirdParty/KenneySurvival",
+      "selected": "structure-floor"
+    },
+    {
+      "title": "Medieval Village MegaKit Standard",
+      "creator": "Quaternius",
+      "url": "https://quaternius.com/packs/medievalvillage.html",
+      "license": "CC0-1.0",
+      "integrated": "2026-10-29",
+      "source_folder": "Assets/ThirdParty/Quaternius/Village",
+      "selected": "DoorFrame_Flat_WoodDark, Door_1_Flat"
+    }
+  ],
+  "sha256": {
+    "Assets/ThirdParty/KenneyPlay/colormap.png": "0d4947d34ff32acf4a359c7f22ca784e057e7e72f622170a9a77b6fc88fdb70e",
+    "Assets/ThirdParty/KenneyPlay/License.txt": "1921de0377e3912e14fd2b9c76f92c530bd63794caabc3e411b97672d5a3951c",
+    "Assets/ThirdParty/KenneyPlay/Models/ball-blue.fbx": "a6a54e42f8ade50d4eab8275030659ff5b442ef95ac9aa0fefe698ba5d968627",
+    "Assets/ThirdParty/KenneyPlay/Models/block-borders.fbx": "7323336fdaa92a2177309edc19caf6db3778441d5307ea674340b6e3a4b334f9",
+    "Assets/ThirdParty/KenneyPlatformer/colormap.png": "439dfcac935cfd75dc16f28333a4c8284fffcc4b24f857c61cfb4c8a964a15bd",
+    "Assets/ThirdParty/KenneyPlatformer/License.txt": "e1185354d8f0f055c325c7204602326c8cf0c47ee5ae1db7ed16f0465b91bb9a",
+    "Assets/ThirdParty/KenneyPlatformer/Models/jewel.fbx": "94817c30d68036cc1439d5a218ede373ba7807fb64b36f1fa0cc81dbe7d3db47",
+    "Assets/ThirdParty/KenneyPlatformer/Models/key.fbx": "9cd17521df2c695495a5a8c441c8c5570085a4454290c31231dfe679b572a606",
+    "Assets/ThirdParty/PlayDerivatives/Models/backstop.fbx": "014b9f33090a3df3bb0a2c67c94c1b31e0aa403ce84c0f6ac8c1b35015cdcf36",
+    "Assets/ThirdParty/PlayDerivatives/Models/block-arch.fbx": "c72a0cd42c5d03ff256e04426333904df6fae4318d0e0fc1f40a500e5d3d97cc",
+    "Assets/ThirdParty/PlayDerivatives/Models/bowling-pin.fbx": "601182a692ac56ce9290fcacf38c38b33e61c07502326fef0cd17a878deaa754",
+    "Assets/ThirdParty/PlayDerivatives/Models/chime-body.fbx": "7757b065fbb82e3b16bf30f2149d76647db2b5aae1d314ce2d00a13f861d6111",
+    "Assets/ThirdParty/PlayDerivatives/Models/chime-high.fbx": "cd15f3f23899245ae50791835a0e8bfebf87cb8c5b8263293acda31bfacf1415",
+    "Assets/ThirdParty/PlayDerivatives/Models/chime-low.fbx": "43d325130f5c4b6d34c4e23a4737d6731d86c949714bbe1e3475e880e6fda510",
+    "Assets/ThirdParty/PlayDerivatives/Models/goal-frame.fbx": "401f73de27ae2e51bd232e2aab290130b97b7967b9f5267442d7e8af2c29ede0",
+    "Assets/ThirdParty/PlayDerivatives/Models/puzzle-frame.fbx": "c7e26f42b737230ae90bf06ec9d556c8f339f822d05dd30321b003018fad0262",
+    "Assets/ThirdParty/PlayDerivatives/Textures/music-redwood.png": "38b423cb3beedf320345ebf437e859f0dfb8a399719b4c49f05bd968fab80029",
+    "Assets/ThirdParty/PlayDerivatives/Textures/music-walnut.png": "ce6586e6b5f8e2977fc537fd1929d835302af4665db78f079be9d2cc0769bd93",
+    "ArtSources/Play/BowlingPin.blend": "439970c7a7cc59afe577bc5385a10bb6792e782b4b61f127bebbf2f3323e1ccc",
+    "ArtSources/Play/BowlingPin.blend.LICENSE.txt": "c658ddaaac0bb791d43624240c73ee95a55697a86623457c8bdf1ad606613aa6",
+    "ArtSources/Play/Xylophone.glb": "50f98e633991187460d83ab53cc4d8d41d7cadf9b50d011fb1f694f41cf354b9",
+    "ArtSources/Play/Xylophone.glb.LICENSE.txt": "7f0e7cf1c0f0c22bd1409653833521f7b961e9891e4ab843ca3f8b1366d8943c",
+    "Assets/ThirdParty/Kenney/ConstructionBlocks/bevel-lq-brick-2x2.fbx": "88ee3d1291b7eeca17bb0fa85c9362219f08ee16047ed4db61e39e98f6fe46a9",
+    "Assets/ThirdParty/Kenney/ConstructionBlocks/bevel-lq-brick-2x6.fbx": "d240b50ac4a509a07c8386389cf779b8c56bcb42512f7042d0ad9e8bb1261b98",
+    "Assets/ThirdParty/Kenney/ConstructionBlocks/bevel-lq-brick-1x1-round.fbx": "653e6f9d94f95241ac666e66d913e60e456cc85068380ee6e6f79558d891797b",
+    "Assets/ThirdParty/Kenney/ConstructionBlocks/bevel-lq-brick-slope-1x2.fbx": "599d837bce47f0940277e5caf165b09ca5cec9b66486a4cf85287f0d79224346",
+    "Assets/ThirdParty/Kenney/ConstructionBlocks/bevel-lq-plate-4x8.fbx": "0e44b16a8b168ccc7a186c0924340c220f58ed42a939a154cab4ce727023ded7",
+    "Assets/ThirdParty/KenneySurvival/Models/structure-floor.fbx": "f2c9a17cd5befd85bcc5fe7bcb15ab70a95c951f9efd47c28d06771c889f8c8a",
+    "Assets/ThirdParty/Quaternius/Village/Models/DoorFrame_Flat_WoodDark.fbx": "770daa08f225c262511f25b76555c2356e1feab568b617d47f180de638b24f35",
+    "Assets/ThirdParty/Quaternius/Village/Models/Door_1_Flat.fbx": "005faeb66d248874d7644053af41a114a4cf670394f32cb547a1bb4acea3604e"
+  }
+}

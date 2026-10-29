@@ -1,0 +1,7 @@
+Xylophone.glb
+Author: Innerscene
+Source: https://www.innerscene.com/tools/library/3d-parts/xylophone-5da5d32e
+Retrieved: 2026-10-29
+License: CC0 1.0 Universal / Public Domain. The original author/source page explicitly permits use, modification and redistribution.
+https://creativecommons.org/publicdomain/zero/1.0/
+SHA256: 50f98e633991187460d83ab53cc4d8d41d7cadf9b50d011fb1f694f41cf354b9

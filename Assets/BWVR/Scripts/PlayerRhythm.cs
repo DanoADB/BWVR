@@ -19,7 +19,7 @@ public sealed partial class PlayerRhythm:MonoBehaviour {
  int count;float lastTap=-100,expires,playClock,nextBeat;bool pending;
  static readonly Color[] Colors={new Color(.22f,.65f,.8f),new Color(1,.66f,.22f)};
  void Awake(){tint=new MaterialPropertyBlock();item=GetComponent<CarryItem>();affordance=GetComponent<CreatureAffordance>();shared=GetComponent<SharedRhythm>();foreach(var key in GetComponentsInChildren<ChimeKey>()){key.owner=this;bars[key.note]=key.GetComponent<Renderer>();Paint(bars[key.note],Colors[key.note]);}
-  for(int i=0;i<4;i++){var pip=GameObject.CreatePrimitive(PrimitiveType.Sphere);pip.name="Pattern bead "+i;pip.transform.SetParent(transform,false);pip.transform.localPosition=new Vector3((i-1.5f)*.23f,1.2f,-.55f);pip.transform.localScale=new Vector3(.11f,.7f,.18f);pip.GetComponent<Collider>().enabled=false;Destroy(pip.GetComponent<Collider>());pips[i]=pip.GetComponent<Renderer>();pips[i].sharedMaterial=GetComponent<Renderer>().sharedMaterial;Paint(pips[i],new Color(.23f,.21f,.16f));}
+  for(int i=0;i<4;i++){var pip=SourcedPlayArt.Part("stud",transform,"Pattern bead "+i,new Vector3((i-1.5f)*.23f,1.2f,-.55f),new Vector3(.11f,.7f,.18f),GetComponent<Renderer>().sharedMaterial);pips[i]=pip.GetComponent<Renderer>();Paint(pips[i],new Color(.23f,.21f,.16f));}
  }
  public void Configure(CreatureHybrid creature,Func<bool> inputAllowed){god=creature;allowed=inputAllowed;ConfigureEchoAudience();}
  void Paint(Renderer view,Color color){if(view==null)return;tint.Clear();tint.SetColor("_Color",color);view.SetPropertyBlock(tint);}

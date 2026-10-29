@@ -20,29 +20,21 @@ public sealed class BowlingLane {
   if(!Available){Debug.LogWarning("BWVR_BOWLING_UNAVAILABLE: no safe flat lane near the ball");return;}
   Target=Start+Forward*24*nav.Scale;root=new GameObject("Giant bowling — watch, roll, imitate").transform;root.SetParent(ball.transform.parent,false);root.position=Target;
   target=HybridTarget.Bind(root.gameObject,"bowling-"+ball.StableId,HybridTargetKind.Object);god.Register(target);
-  var wood=Mat(new Color(.88f,.76f,.48f));var red=Mat(new Color(.85f,.19f,.12f));var glow=Mat(new Color(.95f,.78f,.2f));var marking=Mat(new Color(.35f,.65f,.64f));
-  var pinMesh=PinMesh();meshes.Add(pinMesh);int index=0;for(int row=0;row<3;row++)for(int column=0;column<=row;column++){
+  var red=Mat(new Color(.85f,.19f,.12f));var glow=Mat(new Color(.95f,.78f,.2f));var marking=Mat(new Color(.35f,.65f,.64f));
+  int index=0;for(int row=0;row<3;row++)for(int column=0;column<=row;column++){
    var foot=nav.ProjectFoot(Target+(Right*(column-row*.5f)*6.4f+Forward*row*5.5f)*nav.Scale,nav.villager);origins[index]=nav.ToNav(foot)+Vector3.up*3;
    var proxy=new GameObject("Bowling pin physics "+index);SceneManager.MoveGameObjectToScene(proxy,physics);var collider=proxy.AddComponent<CapsuleCollider>();collider.radius=1.25f;collider.height=6;collider.contactOffset=.01f;
    var body=proxy.AddComponent<Rigidbody>();body.mass=1.2f;body.centerOfMass=Vector3.down*.6f;body.linearDamping=.15f;body.angularDamping=.2f;body.collisionDetectionMode=CollisionDetectionMode.ContinuousDynamic;body.position=origins[index];Pins[index]=body;
    var listener=proxy.AddComponent<BowlingPinCollision>();listener.lane=this;listener.ball=ball.Body;
    var view=new GameObject("Wooden bowling pin "+(index+1)).transform;view.SetParent(root,false);view.localScale=Vector3.one*nav.Scale;views[index]=view;
-   var carved=new GameObject("Carved bowling pin");carved.transform.SetParent(view,false);carved.AddComponent<MeshFilter>().sharedMesh=pinMesh;carved.AddComponent<MeshRenderer>().sharedMaterial=wood;
-   Shape("Red band",PrimitiveType.Cylinder,view,Vector3.up*1.2f,new Vector3(1.04f,.12f,1.04f),red);
-   Shape("Second red band",PrimitiveType.Cylinder,view,Vector3.up*1.55f,new Vector3(1.06f,.09f,1.06f),red);
+   SourcedPlayArt.Part("pin",view,"Tomcat94 CC0 bowling pin",Vector3.zero,new Vector3(2.5f,6,2.5f));
    lights[index]=Shape("Result glow",PrimitiveType.Sphere,root,Vector3.zero,Vector3.one*nav.Scale*1.1f,glow).GetComponent<Renderer>();lights[index].transform.position=foot+Vector3.up*nav.Scale*.5f;lights[index].enabled=false;index++;
   }
   for(int i=0;i<7;i++){var at=nav.ProjectFoot(Start+Forward*i*3*nav.Scale,nav.villager)+Vector3.up*nav.Scale*.15f;var dot=Shape("Aim pebble",PrimitiveType.Cylinder,root,Vector3.zero,new Vector3(.7f,.12f,.7f)*nav.Scale,marking);dot.transform.position=at;}
   var reset=Shape("Reset bowling rack",PrimitiveType.Sphere,root,Vector3.zero,Vector3.one*nav.Scale*4,red);reset.transform.position=nav.ProjectFoot(Start+Right*12*nav.Scale,nav.villager)+Vector3.up*nav.Scale*3;reset.AddComponent<SphereCollider>();reset.AddComponent<SpatialTarget>().invoke=()=>TryReset();bell=reset.GetComponent<Renderer>();ResetRack(false);
  }
- static Mesh PinMesh(){
-  float[] height={-3,-3,-2.8f,-2.1f,-1,0,.8f,1.4f,1.8f,2.2f,2.6f,2.9f,3},radius={0,.7f,1.1f,1.25f,1.2f,.85f,.52f,.45f,.6f,.85f,.8f,.5f,0};const int sides=16;
-  var vertices=new Vector3[height.Length*(sides+1)];var uv=new Vector2[vertices.Length];var triangles=new int[(height.Length-1)*sides*6];int t=0;
-  for(int ring=0;ring<height.Length;ring++)for(int side=0;side<=sides;side++){int index=ring*(sides+1)+side;float a=side*Mathf.PI*2/sides;vertices[index]=new Vector3(Mathf.Cos(a)*radius[ring],height[ring],Mathf.Sin(a)*radius[ring]);uv[index]=new Vector2(side/(float)sides,(height[ring]+3)/6);if(ring==height.Length-1||side==sides)continue;int next=index+sides+1;triangles[t++]=index;triangles[t++]=next;triangles[t++]=index+1;triangles[t++]=index+1;triangles[t++]=next;triangles[t++]=next+1;}
-  var mesh=new Mesh{name="Original low-poly carved bowling pin",vertices=vertices,uv=uv,triangles=triangles};mesh.RecalculateNormals();mesh.RecalculateBounds();return mesh;
- }
  Material Mat(Color color){var m=new Material(Shader.Find("BWVR/GameSurface")){color=color,enableInstancing=true};materials.Add(m);return m;}
- GameObject Shape(string name,PrimitiveType type,Transform parent,Vector3 local,Vector3 scale,Material mat){var go=GameObject.CreatePrimitive(type);go.name=name;go.transform.SetParent(parent,false);go.transform.localPosition=local;go.transform.localScale=scale;go.GetComponent<Renderer>().sharedMaterial=mat;var c=go.GetComponent<Collider>();c.enabled=false;UnityEngine.Object.Destroy(c);return go;}
+ GameObject Shape(string name,PrimitiveType type,Transform parent,Vector3 local,Vector3 scale,Material mat)=>SourcedPlayArt.Part(type==PrimitiveType.Sphere?"token":"stud",parent,name,local,type==PrimitiveType.Cylinder?Vector3.Scale(scale,new Vector3(1,2,1)):scale,mat);
  public bool CanImitate(Vector3 actor){if(!Available||Active||FallenMask==63||Memory.observedRolls==0||ball.FetchReserved||ball.PeerGame||Vector3.Distance(actor,Start)>nav.Scale*18)return false;foreach(var person in people){if(person==null||person.GetComponent<CarryItem>().held)continue;var delta=person.transform.position-Start;float forward=Vector3.Dot(delta,Forward)/nav.Scale;if(forward>5&&forward<40&&Mathf.Abs(Vector3.Dot(delta,Right))/nav.Scale<5)return false;}return true;}
  public float DemonstrationBias=>Mathf.Clamp01((demonstratedUntil-god.State.time)/60)*.7f;
  public void ClearDemonstration(){demonstratedUntil=0;}

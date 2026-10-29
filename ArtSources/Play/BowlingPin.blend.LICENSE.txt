@@ -1,0 +1,7 @@
+BowlingPin.blend
+Author: Tomcat94
+Source: https://opengameart.org/content/bowling-pin
+Retrieved: 2026-10-29
+License: CC0 1.0 Universal / Public Domain. The original author/source page explicitly permits use, modification and redistribution.
+https://creativecommons.org/publicdomain/zero/1.0/
+SHA256: 439970c7a7cc59afe577bc5385a10bb6792e782b4b61f127bebbf2f3323e1ccc

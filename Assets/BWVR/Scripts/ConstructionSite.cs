@@ -37,14 +37,14 @@ public sealed partial class ConstructionSite:MonoBehaviour {
   // Low tray edges keep loose pieces within this bounded toy sandbox.
   foreach(int side in new[]{-1,1})foreach(bool horizontal in new[]{false,true}){
    var position=horizontal?new Vector3(0,.35f,side*HalfSize.y):new Vector3(side*HalfSize.x,.35f,0);var dimensions=horizontal?new Vector3(HalfSize.x*2,1,.3f):new Vector3(.3f,1,HalfSize.y*2);
-   StaticBox("Tray edge",position,dimensions);var rail=GameObject.CreatePrimitive(PrimitiveType.Cube);rail.name="Wooden toy tray rim";rail.transform.SetParent(transform,false);rail.transform.localPosition=position*unit;rail.transform.localScale=dimensions*unit;rail.GetComponent<Renderer>().sharedMaterial=colors[0];Destroy(rail.GetComponent<Collider>());
+   StaticBox("Tray edge",position,dimensions);SourcedPlayArt.Part("deck",transform,"Sourced wooden toy tray rim",position*unit,dimensions*unit,colors[0]);
   }
   }
   CreatePieces();
   var p=new GameObject("Construction snap preview");p.transform.SetParent(transform,false);preview=p.AddComponent<LineRenderer>();preview.useWorldSpace=true;preview.positionCount=16;preview.startWidth=preview.endWidth=unit*.08f;preview.shadowCastingMode=UnityEngine.Rendering.ShadowCastingMode.Off;
   outlineMaterial=new Material(Resources.Load<Material>("ConstructionPreview"));preview.sharedMaterial=outlineMaterial;preview.enabled=false;
  }
- void Foundation(Vector3 position,Vector3 size){var pad=GameObject.CreatePrimitive(PrimitiveType.Cube);pad.name="Construction foundation - snap grid";pad.transform.SetParent(transform,false);pad.transform.localPosition=position*unit;pad.transform.localScale=size*unit;pad.GetComponent<Renderer>().sharedMaterial=colors[0];pad.GetComponent<BoxCollider>().contactOffset=unit*.02f;pad.AddComponent<ConstructionFoundation>();StaticBox("Foundation collider",position,size);}
+ void Foundation(Vector3 position,Vector3 size){var pad=GameObject.CreatePrimitive(PrimitiveType.Cube);pad.name="Construction foundation - snap grid";pad.transform.SetParent(transform,false);pad.transform.localPosition=position*unit;pad.transform.localScale=size*unit;pad.GetComponent<Renderer>().enabled=false;Destroy(pad.GetComponent<Renderer>());SourcedPlayArt.Part("deck",pad.transform,"Sourced construction platform",Vector3.zero,Vector3.one,colors[0]);pad.GetComponent<BoxCollider>().contactOffset=unit*.02f;pad.AddComponent<ConstructionFoundation>();StaticBox("Foundation collider",position,size);}
  void StaticBox(string label,Vector3 position,Vector3 size){var go=new GameObject(label);SceneManager.MoveGameObjectToScene(go,simulationScene);go.transform.position=position;var box=go.AddComponent<BoxCollider>();box.size=size;box.contactOffset=.005f;}
  void FixedUpdate(){Advance(Time.fixedDeltaTime);}
  public void Advance(float dt){

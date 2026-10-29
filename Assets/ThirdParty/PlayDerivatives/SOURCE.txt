@@ -1,0 +1,8 @@
+CC0 sourced play-art derivatives, integrated 2026-10-29.
+Quaternius: fitted DoorFrame_Flat_WoodDark goal, puzzle and construction arch.
+Innerscene: selected xylophone frame and eight bars, decimated; original walnut/redwood textures extracted unchanged.
+Tomcat94: Bowling Pin decimated, original white/red colors preserved.
+Kenney: Survival structure-floor rotated into a backboard.
+All source URLs, license records and hashes: ArtSources/Play/SOURCES.json.
+Full derivations/rebuild steps: docs/PLAY_ART.md; tools/prepare-play-art.py.
+License: CC0-1.0, https://creativecommons.org/publicdomain/zero/1.0/

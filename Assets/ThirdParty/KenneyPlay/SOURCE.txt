@@ -1,0 +1,5 @@
+Kenney Minigolf Kit 3.1 by Kenney
+https://kenney.nl/assets/minigolf-kit
+License: CC0-1.0; original bundled License.txt retained.
+Imported 2026-10-29. Selected original FBX: ball-blue, block-borders.
+Source hashes and full derivations: ArtSources/Play/SOURCES.json and docs/PLAY_ART.md.
