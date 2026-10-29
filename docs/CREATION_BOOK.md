@@ -39,7 +39,7 @@ The Book shell is delivered for Editor testing. Confirmed block-placement and re
 
 ## Navigation update (2026-10-29)
 
-Use Sections to choose Creature, People, Provisions, Places or Outings. Selecting a category returns to its reading page; Return to page keeps the current bookmark. All Book buttons share the same 240-by-60 size as the other Sanctuary menus. This replaces the earlier small-tab row and mixed button sizes.
+Use Sections to choose Creature, People, Provisions, Places, Outings or Finds. Selecting a category returns to its reading page; Return to page keeps the current bookmark. All Book buttons share the same 240-by-60 size as the other Sanctuary menus. This replaces the earlier small-tab row and mixed button sizes.
 
 ## Icon-backed buttons (2026-10-29)
 
@@ -48,3 +48,7 @@ Book section buttons now pair readable labels with a paw, people, package, map a
 Original Lucide SVGs, pinned source URLs, SHA256 hashes and full ISC/Feather MIT notices are retained in ArtSources/BookIcons. Runtime credits and full license notices are included in Resources/BookIcons. These open-source icons are not relabeled CC0. Rebuild the padded 512-by-512 atlas with Node.js plus sharp: node tools/render-book-icons.cjs. No runtime network or icon package is needed.
 
 Desktop compilation, Book/outing/Sanctuary interaction checks, uniform-size/hit-target audit and tracked section navigation passed. Rendered section and reading pages were inspected. Quest legibility remains unverified.
+
+## Island Finds (2026-10-29)
+
+The sixth section provides player exploration progress and earned food/tool sharing notes, with an optional Mark clearing action. It reads saved player-specific records rather than treating creature/villager visits as player discoveries. See [ISLAND_FINDS.md](ISLAND_FINDS.md).

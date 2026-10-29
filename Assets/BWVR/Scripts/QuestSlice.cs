@@ -116,7 +116,7 @@ public sealed partial class QuestSlice:MonoBehaviour {
   godTools=GodToolPalette.Build(transform,left,right,rig,eye,font,miracles,hybrid,navigation,groundCollider??ground.GetComponent<Collider>(),(accepted,message)=>{notice=message;if(XRSettings.isDeviceActive)InputDevices.GetDeviceAtXRNode(XRNode.RightHand).SendHapticImpulse(0,accepted?.25f:.08f,.08f);});
   soundscape=IslandAudio.Build(transform,navigation,eye.transform,rig,()=>state);
   Chapter=new StormChapter(transform,hybrid,navigation,weather,jobs,discoveries,()=>state);
-  BuildSanctuary();BuildAudioSettings();BuildCreationBook();sanctuaryColliders=panel.GetComponentsInChildren<Collider>(true);ShowSanctuaryPage(sanctuaryHome);
+  InitializeTreasureTrail();BuildSanctuary();BuildAudioSettings();BuildCreationBook();sanctuaryColliders=panel.GetComponentsInChildren<Collider>(true);ShowSanctuaryPage(sanctuaryHome);
   panel.SetActive(false);
   if(!XRSettings.isDeviceActive){eye.transform.localRotation=Quaternion.Euler(25,0,0);left.localPosition=new Vector3(-.6f,1.15f,1.05f);left.localRotation=Quaternion.Euler(0,0,0);panel.transform.localRotation=Quaternion.identity;}
  }
@@ -211,7 +211,7 @@ public sealed partial class QuestSlice:MonoBehaviour {
  bool TryGrab(int side,CarryItem item){
   if(MenuOpen||godTools!=null&&godTools.ClaimsInput)return false;if(item==null||!item.gameObject.activeInHierarchy||!item.CanGrab||held[side]!=null||(item.kind==Offering.Creature&&side!=1))return false;
   if(item.kind==Offering.Creature){item.home=item.transform.position;hybrid.Interrupt("Picked up by the player");}
-  Chapter?.PlayerPicked(item);item.GetComponent<BeachBall>()?.Puzzle?.BallMoved();item.GetComponent<BeachBall>()?.Goals?.Turns.PlayerGrab();item.GetComponent<BallGoal>()?.course.Turns.GateMoved(item.GetComponent<BallGoal>().index);throwMotion[side].Reset();held[side]=item;item.held=true;item.GetComponent<Collider>().enabled=false;item.GetComponent<ConstructionBlock>()?.Grab();IslandAudio.Cue(IslandSound.Grasp,item.transform.position,item.GetEntityId().GetHashCode());notice="Release the carry button over clear ground to place.";return true;
+  bool found=TreasurePicked(item);Chapter?.PlayerPicked(item);item.GetComponent<BeachBall>()?.Puzzle?.BallMoved();item.GetComponent<BeachBall>()?.Goals?.Turns.PlayerGrab();item.GetComponent<BallGoal>()?.course.Turns.GateMoved(item.GetComponent<BallGoal>().index);throwMotion[side].Reset();held[side]=item;item.held=true;item.GetComponent<Collider>().enabled=false;item.GetComponent<ConstructionBlock>()?.Grab();IslandAudio.Cue(IslandSound.Grasp,item.transform.position,item.GetEntityId().GetHashCode());notice=found?"Clearing found. Release near the creature to offer this find.":"Release the carry button over clear ground to place.";return true;
  }
  void Release(int i,Ray ray){var item=held[i];var toss=throwMotion[i].Velocity;if(!XRSettings.isDeviceActive&&Keyboard.current!=null&&Keyboard.current.spaceKey.isPressed)toss=ray.direction*(.5f*rig.localScale.x);throwMotion[i].Reset();held[i]=null;item.held=false;item.GetComponent<Collider>().enabled=true;var tool=item.GetComponent<DivineTool>();if(tool!=null){UseSpiritualTool(tool,ray);return;}var ball=item.GetComponent<BeachBall>();if(ball!=null&&!state.paused&&toss.magnitude>.12f*rig.localScale.x&&ball.PlayerToss(toss,rig.localScale.x)){notice="Tossed. The play circle marks its return spot.";return;}var goal=item.GetComponent<BallGoal>();if(goal!=null){var goalRotation=item.transform.rotation;var facing=ray.direction;facing.y=0;if(facing.sqrMagnitude>.0001f)item.transform.rotation=Quaternion.LookRotation(facing);if(TryDropPoint(item,ray,out var goalPoint)&&goal.Place(goalPoint))notice="Goal placed. Roll or throw the ball through the opening.";else{item.transform.SetPositionAndRotation(item.home,goalRotation);notice="Place goals on clear, level ground with room for both posts.";}return;}var block=item.GetComponent<ConstructionBlock>();if(block!=null){notice=block.Site.DropRay(block,ray)?"Blocks snapped together.":"Loose block released on the construction green.";hybrid.NoticePlaced(item);return;}Vector3 point;
   if(!TryDropPoint(item,ray,out point)){if(ball!=null)ball.ReturnHome();else item.transform.position=item.home;notice="Returned safely: place on dry, clear walking ground.";return;}
@@ -222,7 +222,7 @@ public sealed partial class QuestSlice:MonoBehaviour {
   if(item.kind==Offering.Water&&Vector3.Distance(point,cistern)<Size(.18f,8)){DeliverWater();notice="Water delivered. Villagers celebrate their creature's gift.";item.transform.position=item.home;}
   else if(item.kind==Offering.Food&&Vector3.Distance(point,creature.position)<Size(.2f,8)){notice="Food offered. The creature can choose to investigate and eat.";}
   else {if(item.kind==Offering.Villager)item.home=item.transform.position;notice="Placed on the island.";}
-  Chapter?.PlayerPlaced(item);hybrid.NoticePlaced(item);
+  Chapter?.PlayerPlaced(item);hybrid.NoticePlaced(item);TreasurePlaced(item);
  }
  bool TryDropPoint(CarryItem item,Ray ray,out Vector3 point){
   point=ray.GetPoint(2*rig.localScale.x);
@@ -251,7 +251,7 @@ public sealed partial class QuestSlice:MonoBehaviour {
   if(dt<=0||float.IsNaN(dt)||float.IsInfinity(dt))return;bool paused=state.paused||applicationSuspended;soundscape?.SetFrozen(paused);
    if(construction!=null)construction.Paused=paused;if(learning!=null)foreach(var site in learning.sites)site.Paused=paused;discoveries?.Advance(dt,paused);
   Chapter?.Advance(dt,paused);
-  if(!paused){state.Hybrid.time=Mathf.Min(100000000,state.Hybrid.time+dt);state.Step(dt);learning?.Tick();tributes?.Tick(dt,false);AnimateVillage(dt);}families?.Advance(dt,paused);resources?.Advance(dt,paused);weather?.Advance(dt,paused);foreach(var ball in balls)ball.Advance(dt,paused);foreach(var music in playerMusic)music.Advance(paused?0:dt);treePlay?.Advance(dt,paused);miracles?.Tick(paused?0:dt,paused);signals.Tick(paused?0:dt,state);soundscape?.Advance(dt,paused);AdvancePlayOuting(dt,paused);
+  if(!paused){state.Hybrid.time=Mathf.Min(100000000,state.Hybrid.time+dt);state.Step(dt);learning?.Tick();tributes?.Tick(dt,false);AnimateVillage(dt);}families?.Advance(dt,paused);resources?.Advance(dt,paused);weather?.Advance(dt,paused);foreach(var ball in balls)ball.Advance(dt,paused);foreach(var music in playerMusic)music.Advance(paused?0:dt);treePlay?.Advance(dt,paused);miracles?.Tick(paused?0:dt,paused);signals.Tick(paused?0:dt,state);soundscape?.Advance(dt,paused);AdvancePlayOuting(dt,paused);AdvanceTreasureTrail(paused);
  }
  void AnimateVillage(float dt){
   cathedral?.Advance(dt);worship?.Advance(dt);
