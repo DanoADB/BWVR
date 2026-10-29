@@ -40,3 +40,11 @@ The Book shell is delivered for Editor testing. Confirmed block-placement and re
 ## Navigation update (2026-10-29)
 
 Use Sections to choose Creature, People, Provisions, Places or Outings. Selecting a category returns to its reading page; Return to page keeps the current bookmark. All Book buttons share the same 240-by-60 size as the other Sanctuary menus. This replaces the earlier small-tab row and mixed button sizes.
+
+## Icon-backed buttons (2026-10-29)
+
+Book section buttons now pair readable labels with a paw, people, package, map and footprints. Previous/next, Sections/Return to page, Back, Begin/Mark/Replay and End use matching navigation/action symbols. Buttons remain 240-by-60 rounded rectangles, with a consistent 32-by-32 icon slot and text padding. God Tools and other menus are unchanged. Icons have no collider and do not intercept input.
+
+Original Lucide SVGs, pinned source URLs, SHA256 hashes and full ISC/Feather MIT notices are retained in ArtSources/BookIcons. Runtime credits and full license notices are included in Resources/BookIcons. These open-source icons are not relabeled CC0. Rebuild the padded 512-by-512 atlas with Node.js plus sharp: node tools/render-book-icons.cjs. No runtime network or icon package is needed.
+
+Desktop compilation, Book/outing/Sanctuary interaction checks, uniform-size/hit-target audit and tracked section navigation passed. Rendered section and reading pages were inspected. Quest legibility remains unverified.

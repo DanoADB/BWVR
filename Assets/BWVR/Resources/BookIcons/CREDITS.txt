@@ -1,0 +1,5 @@
+Book UI icons: Lucide Icons and Contributors. https://lucide.dev
+ISC license, with MIT notice for Feather-derived icons.
+Original SVGs, complete notices, pinned source URLs and hashes: ArtSources/BookIcons.
+BWVR adaptation: render white strokes into a padded atlas; runtime cream tint. No geometry edited.
+Rebuild: Node.js + sharp, node tools/render-book-icons.cjs. No runtime downloads.
