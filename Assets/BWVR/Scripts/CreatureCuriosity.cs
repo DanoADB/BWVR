@@ -3,7 +3,7 @@ using UnityEngine;
 namespace BWVR {
 // A bounded curiosity loop yields to drought work and owns at most one carried object.
 public sealed partial class CreatureCuriosity:MonoBehaviour {
- public enum Phase { Rest,Approach,Inspect,Lift,Play,CarryFriend,Place,BuildApproach,BuildPlace,ThrowBall,WatchBall,RallyBall,FetchCarry,FetchPlace,RhythmGame,ThrowTree,WatchTree,ChaseBall,EchoRhythm,SpinTrick,PuzzleAssist,StormRescue }
+ public enum Phase { Rest,Approach,Inspect,Lift,Play,CarryFriend,Place,BuildApproach,BuildPlace,ThrowBall,WatchBall,RallyBall,FetchCarry,FetchPlace,RhythmGame,ThrowTree,WatchTree,ChaseBall,EchoRhythm,SpinTrick,PuzzleAssist,StormRescue,StormSupply }
  public int built{get;private set;}
  Vector3 buildPoint,buildApproach,buildStart;Quaternion buildRotation;
  bool buildCorrection;public int alignmentCorrections{get;private set;}BallGoal goalTarget;bool echoPlay;bool goalPlay;bool bowlingPlay;bool fetching;int fetchTicket;bool constructionFocus,askedPlaymate;float inviteGestureUntil;
@@ -24,6 +24,7 @@ public sealed partial class CreatureCuriosity:MonoBehaviour {
  public bool TryBeginEcho(CreatureAffordance candidate){if(Current!=Phase.Rest||candidate==null||routine.Current!=CreatureRoutine.Task.SeekingWater||candidate.GetComponent<PlayerRhythm>()?.Claim()!=true)return false;routine.ResetTask();navigator.ResetRoute();target=candidate;owned=null;echoPlay=true;fetching=bowlingPlay=false;elapsed=clock=0;Current=Phase.Approach;motion?.LookAt(target.transform);Affect=CreatureAffect.Mood.Curious;return true;}
  public bool TryBeginChase(CreatureAffordance candidate){if(Current!=Phase.Rest||candidate==null||routine.Current!=CreatureRoutine.Task.SeekingWater||candidate.GetComponent<BeachBall>()?.Chase?.Begin()!=true)return false;routine.ResetTask();navigator.ResetRoute();target=candidate;owned=null;candidate.GetComponent<BeachBall>().Goals?.Cancel();candidate.GetComponent<BeachBall>().Spin?.ClearCompletion();goalPlay=false;fetching=bowlingPlay=false;elapsed=clock=0;Current=Phase.ChaseBall;motion?.LookAt(target.transform);Affect=CreatureAffect.Mood.Excited;return true;}
  public bool TryBegin(CreatureAffordance candidate){
+  if(candidate?.GetComponent<StormSupply>()!=null)return TryBeginStormSupply(candidate);
   if(candidate?.GetComponent<PuzzlePad>()!=null)return TryBeginPuzzle(candidate);
   if(Current!=Phase.Rest||candidate==null||!candidate.Available||routine.Current!=CreatureRoutine.Task.SeekingWater)return false;
   if(!navigator.world.Sample(candidate.transform.position,navigator.profile,12,out _))return false;
@@ -45,6 +46,7 @@ public sealed partial class CreatureCuriosity:MonoBehaviour {
    return Current!=Phase.Rest;
   }
   elapsed+=dt;clock+=dt;
+  if(Current==Phase.StormSupply)return TickStormSupply(dt);
   if(Current==Phase.StormRescue)return TickStormRescue(dt);
   if(Current==Phase.PuzzleAssist)return TickPuzzle(dt);
   if(Current==Phase.SpinTrick){int outcome=target?.GetComponent<BeachBall>()?.Spin?.Step(dt)??-1;Affect=CreatureAffect.Mood.Excited;if(outcome!=0){if(outcome>0){played++;lastWater=lastSocial=false;boredom=0;feedbackWindow=12;}Finish(outcome>0);if(outcome>0)motion?.React();return false;}return true;}
@@ -136,7 +138,7 @@ public sealed partial class CreatureCuriosity:MonoBehaviour {
  public bool Feedback(bool positive,bool allowLearning=true){if(state==null||state.paused)return false;bool learned=allowLearning&&feedbackWindow>0;if(learned){float change=positive?.12f:-.12f;if(lastWater)state.care=Mathf.Clamp01(state.care+change);else if(lastSocial){state.socialPreference=Mathf.Clamp01(state.socialPreference+change);lastFriend?.Feedback(positive);}else state.playPreference=Mathf.Clamp01(state.playPreference+change);feedbackWindow=0;}responseProtection=2;reaction=2;emotion=5;feedbackMood=recentMood=positive?CreatureAffect.Mood.Happy:CreatureAffect.Mood.Sad;Affect=recentMood;return learned;}
  public void ResetTask(){Finish(false);lastFriend=null;lastWater=false;reaction=responseProtection=0;constructionFocus=false;cooldown=7;boredom=emotion=feedbackWindow=0;Affect=CreatureAffect.Mood.Calm;}
  void Finish(bool success){
-  var finished=target;if(Current==Phase.StormRescue){rescueChapter?.ReleaseCreature();rescueChapter=null;}if(Current==Phase.PuzzleAssist)finished?.GetComponent<PuzzlePad>()?.puzzle.Cancel();if(Current==Phase.SpinTrick)finished?.GetComponent<BeachBall>()?.Spin?.End();motion?.TurnInPlace(false);if(!success){finished?.GetComponent<BeachBall>()?.Goals?.Turns.Cancel("Creature activity interrupted");finished?.GetComponent<BeachBall>()?.Goals?.Cancel();}goalPlay=false;goalTarget=null;if(echoPlay)finished?.GetComponent<PlayerRhythm>()?.Cancel(success);echoPlay=false;if(Current==Phase.ChaseBall)finished?.GetComponent<BeachBall>()?.Chase?.End();if(fetching)finished?.GetComponent<BeachBall>()?.CancelFetch(fetchTicket);fetching=false;
+  var finished=target;if(Current==Phase.StormSupply){supplyChapter?.ReleaseSupply();supplyChapter=null;}if(Current==Phase.StormRescue){rescueChapter?.ReleaseCreature();rescueChapter=null;}if(Current==Phase.PuzzleAssist)finished?.GetComponent<PuzzlePad>()?.puzzle.Cancel();if(Current==Phase.SpinTrick)finished?.GetComponent<BeachBall>()?.Spin?.End();motion?.TurnInPlace(false);if(!success){finished?.GetComponent<BeachBall>()?.Goals?.Turns.Cancel("Creature activity interrupted");finished?.GetComponent<BeachBall>()?.Goals?.Cancel();}goalPlay=false;goalTarget=null;if(echoPlay)finished?.GetComponent<PlayerRhythm>()?.Cancel(success);echoPlay=false;if(Current==Phase.ChaseBall)finished?.GetComponent<BeachBall>()?.Chase?.End();if(fetching)finished?.GetComponent<BeachBall>()?.CancelFetch(fetchTicket);fetching=false;
   if(Current==Phase.RallyBall)finished?.GetComponent<BeachBall>()?.CancelRally();
   if(!success)finished?.GetComponent<SharedRhythm>()?.Cancel();
   motion?.Touch(null);motion?.Signal(false);motion?.Carry(null);motion?.Playful(0);motion?.PlaceAt(default,Quaternion.identity,0);motion?.LookAt(null);motion?.Activity(0);navigator?.ResetRoute();

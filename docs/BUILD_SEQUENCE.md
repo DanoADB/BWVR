@@ -4,7 +4,11 @@
 
 Connect the playful systems into a complete chapter before adding more isolated toys. The first Editor-verified backbone is an opt-in calm → warning → wind/rain assistance → recovery → free-play sequence, with a physical creature rescue, native player rescue, independent villager evacuation, accurate outcome attribution and native Save/Load. Start through Sanctuary → Settings → Gathering Storm; End chapter preserves the island and learning. See [GATHERING_STORM.md](GATHERING_STORM.md) for controls, precise boundaries, validation and the V1–V5 build sequence.
 
-Next: displaced-object retrieval that transfers play skills into useful assistance, followed by bounded lightning/fire interventions, recovery/social consequences and Quest polish. The current roughly seven-minute backbone is the first increment toward the proposed 15–20 minute release; natural full-population behavior and headset validation remain open. Water/food chores remain deprioritized, and unlimited test energy remains enabled. Continue committing and pushing verified increments and safely synchronizing feature branches.
+Timber retrieval now transfers play skills into useful assistance: player/creature deliveries visibly add six wood, with capacity checks, attribution and grounded save/resume. Next: bounded lightning/fire interventions, recovery/social consequences and Quest polish. The current roughly seven-minute backbone is the first increment toward the proposed 15–20 minute release; natural full-population behavior and headset validation remain open. Water/food chores remain deprioritized, and unlimited test energy remains enabled. Continue committing and pushing verified increments and safely synchronizing feature branches.
+
+## Art requirement — sourced models (2026-10-28)
+
+Use open-source/CC0 meshes for visible items instead of self-made primitive artwork. [ASSET_SOURCING.md](ASSET_SOURCING.md) maps current item families to existing assets and verified candidate sources, lists remaining procedural-art sites, and defines replacement order. Candidates still need import, scale/collision review and render verification. Preserve source licenses; the purchased gorilla is identified as a commercial exception, and original terrain is separately identified. Start with high-contact toys, vessels, offerings and puzzle pieces while continuing the storm slice.
 
 ## Previous priority — creature play foundation (2026-10-28)
 
