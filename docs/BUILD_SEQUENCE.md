@@ -1,5 +1,12 @@
 # BWVR build sequence
-## Current priority — creature play (2026-10-28)
+
+## Current priority — The Gathering Storm vertical slice (2026-10-28)
+
+Connect the playful systems into a complete chapter before adding more isolated toys. The first Editor-verified backbone is an opt-in calm → warning → wind/rain assistance → recovery → free-play sequence, with a physical creature rescue, native player rescue, independent villager evacuation, accurate outcome attribution and native Save/Load. Start through Sanctuary → Settings → Gathering Storm; End chapter preserves the island and learning. See [GATHERING_STORM.md](GATHERING_STORM.md) for controls, precise boundaries, validation and the V1–V5 build sequence.
+
+Next: displaced-object retrieval that transfers play skills into useful assistance, followed by bounded lightning/fire interventions, recovery/social consequences and Quest polish. The current roughly seven-minute backbone is the first increment toward the proposed 15–20 minute release; natural full-population behavior and headset validation remain open. Water/food chores remain deprioritized, and unlimited test energy remains enabled. Continue committing and pushing verified increments and safely synchronizing feature branches.
+
+## Previous priority — creature play foundation (2026-10-28)
 
 Following the user's direction, defer the bench/shelter completion work and prioritize fun physical interactions. Giant bowling and witnessed creature imitation now have an Editor-verified playable implementation; see [GIANT_BOWLING.md](GIANT_BOWLING.md). The VR menu increment now matches the God Tools scroll/stone style, simplifies wrist/tools/Book access, and isolates pointer input while remaining hidden by default; see [SANCTUARY_MENU.md](SANCTUARY_MENU.md). Editor verification covers menu routing and input ownership; physical Quest readability and comfort remain unverified.
 

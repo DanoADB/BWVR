@@ -28,7 +28,7 @@ public sealed partial class QuestSlice {
  }
  void RefreshCreationBook(){if(creationBook==null)return;var page=CreationBookText.Read(state,bookSection,bookPage,bookPeople,bookTargets);bookPage=page.index;bookHeading.text=page.title;bookBody.text=page.text;bookPageNumber.text=(page.index+1)+" / "+page.count;for(int i=0;i<bookTabs.Length;i++)if(bookTabs[i]!=null)bookTabs[i].color=i==(int)bookSection?new Color(1.2f,1.14f,.85f):Color.white;bookRefresh=.5f;}
  void TickCreationBook(float dt){if(!CreationBookOpen)return;bookRefresh-=dt;if(bookRefresh<=0)RefreshCreationBook();}
- void OnDestroy(){if(sanctuaryStone!=null)Destroy(sanctuaryStone);if(sanctuaryFont!=null)Destroy(sanctuaryFont);if(bookMaterial!=null)Destroy(bookMaterial);}
+ void OnDestroy(){Chapter?.Dispose();if(sanctuaryStone!=null)Destroy(sanctuaryStone);if(sanctuaryFont!=null)Destroy(sanctuaryFont);if(bookMaterial!=null)Destroy(bookMaterial);}
  bool BookPointer(int side,bool pressed,bool wasPressed,Collider hit,bool tracked){if(!CreationBookOpen)return false;if(side==1&&tracked&&pressed&&!wasPressed&&hit!=null&&hit.transform.IsChildOf(creationBook.transform))hit.GetComponentInParent<SpatialTarget>()?.Activate();return true;}
 }
 }

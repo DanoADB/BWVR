@@ -14,6 +14,7 @@ public sealed class VillagerAffect:MonoBehaviour {
  }
  int Kindness()=>social.Memory.greetings+social.Memory.sharedPlay+social.Memory.rides+social.Memory.comfortReceived;
  public void ProvisionSeen(){if(world!=null&&!world.Season.paused)provisionUntil=world.Season.Hybrid.time+4;}
+ public void Reassured(){if(world!=null&&!world.Season.paused)loveUntil=world.Season.Hybrid.time+4;}
  public void EnjoyedTrick(){if(world!=null&&!world.Season.paused)loveUntil=world.Season.Hybrid.time+4;}
  public void EnjoyedMusic(){if(world!=null&&!world.Season.paused)loveUntil=world.Season.Hybrid.time+4;}
  public void Learned(){if(world!=null&&!world.Season.paused)learningUntil=world.Season.Hybrid.time+4;}
