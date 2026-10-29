@@ -8,7 +8,7 @@ Timber retrieval now transfers play skills into useful assistance: player/creatu
 
 ## Art requirement — sourced models (2026-10-28)
 
-Use open-source/CC0 meshes for visible items instead of self-made primitive artwork. [ASSET_SOURCING.md](ASSET_SOURCING.md) maps current item families to existing assets and verified candidate sources, lists remaining procedural-art sites, and defines replacement order. Candidates still need import, scale/collision review and render verification. Preserve source licenses; the purchased gorilla is identified as a commercial exception, and original terrain is separately identified. Start with high-contact toys, vessels, offerings and puzzle pieces while continuing the storm slice.
+Use open-source/CC0 meshes for visible items instead of self-made primitive artwork. [ASSET_SOURCING.md](ASSET_SOURCING.md) maps current item families to existing assets and verified candidate sources, lists remaining procedural-art sites, and defines replacement order. Candidates still need import, scale/collision review and render verification. Preserve source licenses; the purchased gorilla is identified as a commercial exception, and original terrain is separately identified. The first contact-art batch is Editor-verified: sourced water vessels/cistern, native apple/timber/water offerings, routine carried supplies and sack grain insert, with fitted pickup bounds and grounded release. Next: sourced toys, goals and puzzle pieces while continuing the storm slice. See the sourcing inventory for headset and animation limits.
 
 ## Previous priority — creature play foundation (2026-10-28)
 

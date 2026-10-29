@@ -11,7 +11,7 @@ Verified source pages, 2026-10-28:
 - [Kenney Survival Kit](https://kenney.nl/assets/survival-kit): CC0. The already-downloaded 2.0 archive was inspected for the exact FBX names below. `Assets/ThirdParty/KenneySurvival/License.txt` retains its license.
 - [Kenney Minigolf Kit](https://kenney.nl/assets/minigolf-kit): CC0. Local archive inspected for ball, gate, track and support models. These are scalable meshes; a minigolf ball need not stay golf-ball-sized.
 - [Kenney Brick Kit](https://kenney.nl/assets/brick-kit): local bundled CC0 license and exact beveled brick/slope/plate meshes inspected. Existing source record: `Assets/ThirdParty/Kenney/ConstructionBlocks/SOURCE.txt`.
-- [Kenney Food Kit](https://kenney.nl/assets/food-kit): creator page explicitly CC0, 200 models. Candidate source for recognizable produce, meals and tableware; selected files still need downloading and visual review.
+- [Kenney Food Kit](https://kenney.nl/assets/food-kit): creator page and downloaded 2.0 archive explicitly CC0. Apple and bowl-cereal source meshes/palette are imported with license and SHA-256 records in `Assets/ThirdParty/KenneyFood`. The sack fill reuses extracted authored cereal geometry; remaining produce/meal candidates still need selection.
 - [Quaternius Ultimate Crops](https://quaternius.com/packs/ultimatecrops.html): creator page explicitly CC0, 102 models and five growth stages. Candidate for crop visuals; inspect the actual archive before import.
 - [Quaternius Ultimate RPG](https://quaternius.com/packs/ultimaterpg.html): creator page explicitly CC0, 106 models. Candidate for a physical Book, key and heart icons; inspect filenames and archive license before selecting.
 - [Innerscene Xylophone](https://www.innerscene.com/tools/library/3d-parts/xylophone-5da5d32e): original model page explicitly CC0, downloadable GLB, 1.9 MB. Candidate for the chime. Mesh complexity, material count and detachable playable bars are not yet verified for Quest.
@@ -32,13 +32,13 @@ Status: **In use** means an existing sourced mesh is used for that item family, 
 | Cathedral stages — VillageCathedral | Existing SigilsVault Modular Cathedral Kit assemblies (CC0 archive license verified) | In use. Primitive foundation and custom triangle roof end caps in `tools/prepare-cathedrals.py` remain replacement tasks; use kit modules for those too. |
 | Trees, stumps, saplings, bushes, flowers, rocks, path stones — EnvironmentArt / TreePlayWorld | Existing Quaternius nature; `tree-trunk`, `tree-log`, `rock-a`, `rock-b`, `rock-c` from Kenney Survival for remaining props | Nature models in use; archive candidates for generated stumps/cairns. Preserve tree affordances and rooted navigation. |
 | Clouds and fog | Existing Quaternius Cloud and Kenney Smoke art | In use; fog/rain particles and shadows are effects, not physical item models. |
-| Timber bundles, planks, storm salvage — VillageResources / StormSupplies | Kenney Survival `resource-wood`, `resource-planks` | In use, including the new stranded bundle. Native initial wood offering still needs its primitive replaced. |
-| Grain/food sacks — VillageResources / VillagerRoutine | Existing Quaternius Bag Open (`food-sack`) | In use; verify all fallback carried loads use it. |
+| Timber bundles, planks, storm salvage — VillageResources / StormSupplies | Kenney Survival `resource-wood`, `resource-planks` | In use, including storm salvage, the native wood offering and forester routine loads. Grounded base pivots and native pickup/drop are verified in the Editor. |
+| Grain/food sacks — VillageResources / VillagerRoutine | Existing Quaternius Bag Open (`food-sack`) | In use, including farmer routine loads. The old primitive grain insert is replaced by combined copies of an authored Kenney cereal piece, with provenance retained. |
 | Axes, hoes, hammers, shovels, pickaxes, workbench — ResourceArt / VillageToolmaking | Existing Kenney Survival `tool-*`, `workbench` | In use/available; replace the small primitive resin binding with material tint or sourced accessory. |
 | Guidance signs — GodToolPalette / DivineIntervention | Existing Kenney `signpost`, `signpost-single`; existing licensed GodToolIcons | Meshes available. Replace remaining stick/disc assemblies with sourced sign or icon presentation. GodToolIcons include CC BY art: preserve attribution; they are not all CC0. |
-| Water offering and villager vessel — WaterVessel / VillagerRoutine | Kenney Survival `bucket`, `barrel-open`, `bottle` | Archive candidates. Keep fill level as an effect inside the sourced open container; retain carry animation attachment. |
-| Well/cistern | Existing well artwork if available; Kenney Survival `barrel-open` as recognizable open reservoir candidate | Audit active well and replace remaining generated container body. Retain source/delivery anchors and navigation footprint. |
-| Food offering, treats, individual gifts — QuestSlice / IslandDiscoveries | Kenney Food fruit, bread and vegetable models | Page candidate. Choose distinct readable silhouettes and preserve existing Offering/Discovery IDs. |
+| Water offering and villager vessel — WaterVessel / VillagerRoutine | Kenney Survival `bucket`, `barrel-open`; `bottle` remains an archive candidate | Bucket in use for the water offering and water gatherers; open barrel in use for the cistern. Empty/full effects, native delivery and hand attachment remain integrated. |
+| Well/cistern | Existing well artwork and Kenney Survival `barrel-open` reservoir | Cistern container body now sourced, fitted to its existing height/radius. Well art and spring effects remain separate; source/delivery anchors and navigation footprint are retained. |
+| Food offering, treats, individual gifts — QuestSlice / IslandDiscoveries | Kenney Food `apple` for the native offering; bread/vegetables for other gifts | Apple in use with existing Offering/Discovery IDs. Other treats/discovery/gift props remain a replacement task. |
 | Communal tribute — VillageTributes | Kenney Survival `box-open` + sourced Food Kit produce | Crate already imported; produce is a page candidate. Replace generated bowl/spheres without altering tribute ownership or costs. |
 | Wheat and other planted crops — ResourceArt / TurnipFarming | Quaternius Ultimate Crops growth-stage meshes | Page candidate. Replace generated stems/heads/turnips, retaining bounded crop state and batched rendering. |
 | Resin jars — ResinGathering | Kenney Survival `bottle`, `bottle-large` | Archive candidates; tint contents, do not change resource quantities. |
@@ -60,11 +60,19 @@ Status: **In use** means an existing sourced mesh is used for that item family, 
 
 ## What this changes now
 
-The timber retrieval increment uses the already-imported CC0 Kenney model and creates no primitive item mesh. The table records the wider replacement work; **it does not claim the island is already free of primitive artwork.** Remaining generation sites are inventoried below. Imported-model availability must not be treated as implemented gameplay or verified Quest performance.
+The first contact-art batch replaces the three native offerings, water containers, routine carried loads and sack insert with sourced art. Pickup bounds fit the model meshes, and base-pivot offerings sit on terrain when released. Source geometry, empty/full views, native pickup/drop, water delivery and controlled nonverbal/hybrid behavior are Editor-verified. The table records the wider replacement work; **it does not claim the island is already free of primitive artwork.** Remaining generation sites are inventoried below. Imported-model availability must not be treated as implemented gameplay or verified Quest performance.
 
 Replacement order: (1) high-contact objects: offerings, vessels, toys, chime, puzzle/key and goals; (2) construction shape coverage and physical stores; (3) crops, resin, tribute and discovery props; (4) fallback art, small accessories, hands and attribution cleanup. Each batch needs scale/pivot/material review, original-license retention, interaction/collider checks, a rendered view and relevant Editor tests before commit/push. Quest readability and frame-time remain a headset gate.
 
 Invisible colliders, NavMesh footprints, snap/physics proxies, particle quads, water/terrain surfaces and transient selection rings remain technical/effect geometry. They must not be used as rendered substitutes for physical item models. Original Black & White terrain/local legacy artwork is not CC0 and remains separately identified; this document does not convert it into open-source content.
+
+## Contact-art batch — limits and rebuild
+
+`SettlementPropImporter.BuildSelected` imports just the chosen source models without rebuilding unrelated props. Bucket/open-barrel prefabs use the existing Survival palette. Apple and the source cereal use a separate Food palette. `FoodSackImporter.Build` extracts only the original golden cereal faces by their palette UV column, preserves original topology/normals/UVs, normalizes them and combines nine copies into the sack insert. No bowl or spoon is carried inside the sack. The original FBX and derivation notes remain in the source folder.
+
+The only generated geometry in the new vessels is a sixteen-triangle liquid surface. Water updates remain visual state driven by the existing simulation. Cistern height/radius and villager scale are retained; the existing oversized-well layout is not redesigned in this art batch. Model bounds drive pickup colliders. Imported shared meshes/materials are never destroyed on pickup disposal. Native save data, stable target IDs, controls, resource accounting, water/food work preferences and unlimited test energy are unchanged.
+
+Verification includes a rendered model sheet with empty/half/full buckets, cistern, apple, timber and filled sack; live native pickup/drop and an actual player water delivery; controlled villager signaling/autonomous fill-delivery and creature hybrid checks. Navigation must finish before fixtures run. Frozen traffic is excluded or moved aside in focused movement checks. Headset readability, hand-pose polish and device performance remain unverified. No APK is built.
 
 ## Procedural-art audit snapshot
 
@@ -96,8 +104,7 @@ The following runtime files contain primitive construction or generated meshes. 
 - `VillageCathedral.cs`: lines 20.
 - `VillageFamilies.cs`: lines 13.
 - `VillageResources.cs`: lines 30.
-- `VillagerRoutine.cs`: lines 13.
 - `VillageSettlement.cs`: lines 98, 121, 126.
 - `VillageToolmaking.cs`: lines 29.
 - `VillageTributes.cs`: lines 18.
-- `WaterVessel.cs`: lines 8, 19.
+- `WaterVessel.cs`: lines 17.

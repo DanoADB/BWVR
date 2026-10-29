@@ -1,0 +1,13 @@
+Kenney Food Kit 2.0
+Creator: Kenney
+Source: https://kenney.nl/assets/food-kit
+Retrieved: 2026-10-28 (local task date)
+License: original bundled CC0 dedication retained as License.txt
+Selected source: Models/FBX format/apple.fbx and its colormap.png
+https://kenney.nl/assets/food-kit
+SHA256 cdad90853682499b94c9fda2f87678b24bfd8f3264e0ed323f6b6a27fd7c6f6f
+Models\apple.fbx SHA256 077ac7cafd0e03c14023649fc9098163a16a16d03c15377b1c9d7feac01fde9e
+colormap.png SHA256 75baf74d9483a0fc56ac21ceba346fbe16fc24a2a1bf0524c53e6bbe802e1153
+Additional selected source: Models/FBX format/bowl-cereal.fbx
+Models/bowl-cereal.fbx SHA256 86eaee6f05591861f5fc9b9b98aac8c55767ab74a4368cc9b2cf6698f0386d51
+Derived/SackGrainPile.asset: golden cereal region extracted from the original bowl-cereal.fbx using its palette UV column (0.70 < U < 0.75). Original authored face topology, normals and UVs retained; uniformly normalized, nine transformed copies combined into one mesh. No primitive geometry added. Rebuilt by BWVR.Editor.FoodSackImporter. Original author/license remain Kenney / CC0.
