@@ -14,7 +14,7 @@ public sealed partial class VillageResources {
  public int VisibleReserveMeals {get;private set;}
  void BuildFoodReserveMarker(){
   float u=Navigation.Scale;Prop("box-open","Meal reserve crate",Store+new Vector3(3,.3f,-1)*u,1.3f);
-  reserveMeals=new GameObject[8];for(int i=0;i<reserveMeals.Length;i++)reserveMeals[i]=Part("Reserved grain portion "+i,PrimitiveType.Sphere,Store+new Vector3(2.5f+(i%2)*.55f,1+(i/4)*.5f,-1.5f+(i%4/2)*.65f)*u,new Vector3(.5f,.6f,.6f),grain);
+  reserveMeals=new GameObject[8];for(int i=0;i<reserveMeals.Length;i++)reserveMeals[i]=StorePart("food-sack","Reserved grain portion "+i,Store+new Vector3(2.5f+(i%2)*.55f,1+(i/4)*.5f,-1.5f+(i%4/2)*.65f)*u,new Vector3(.5f,.6f,.6f));
  }
  void RefreshFoodReserve(){
   if(reserveMeals==null)return;VisibleReserveMeals=Mathf.CeilToInt(Mathf.Clamp01(MealGrain/Mathf.Max(1,FoodReserveTarget))*reserveMeals.Length);

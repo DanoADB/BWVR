@@ -41,9 +41,9 @@ Status: **In use** means an existing sourced mesh is used for that item family, 
 | Food offering, treats, individual gifts — QuestSlice / IslandDiscoveries | Kenney Food `apple` for the native offering; bread/vegetables for other gifts | Apple in use with existing Offering/Discovery IDs. Other treats/discovery/gift props remain a replacement task. |
 | Communal tribute — VillageTributes | Kenney Survival `box-open` + sourced Food Kit produce | Crate already imported; produce is a page candidate. Replace generated bowl/spheres without altering tribute ownership or costs. |
 | Wheat and other planted crops — ResourceArt / TurnipFarming | Quaternius Ultimate Crops growth-stage meshes | Page candidate. Replace generated stems/heads/turnips, retaining bounded crop state and batched rendering. |
-| Resin jars — ResinGathering | Kenney Survival `bottle`, `bottle-large` | Archive candidates; tint contents, do not change resource quantities. |
-| Covered stores, roof, posts, upgrades, shelves — VillageResources / ResourceStorage | Kenney Survival `structure`, `structure-floor`, `structure-roof`, `box`, `box-large`, `barrel` | Archive candidates. Fit art to the current collider footprint and keep visible fill/capacity affordances. |
-| Meal reserve crate and portions | Existing Kenney `box-open` + Food Kit produce | Crate in use; replace primitive portions after food import. |
+| Resin jars — ResinGathering | Kenney Survival barrel-open plus Kenney Platformer jewel | In use for storage, carried loads and tapping cups; amber chunk fill follows the existing resin amount. |
+| Covered stores, roof, posts, upgrades, shelves — VillageResources / ResourceStorage | Kenney Survival `structure`, `structure-floor`, `structure-roof`, `box`, `box-large`, `barrel` | Sourced timber frame, roof/floor, upgrade shelves and construction planks in use. Existing footprint and stock/capacity affordances retained. |
+| Meal reserve crate and portions | Existing Kenney `box-open` + Food Kit produce | Crate and filled-sack portions in use, driven by the existing eight-slot reserve display. |
 | Beachball / rolling toys — CreaturePlayground | Kenney Minigolf ball-blue | In use at existing large diameter, retaining striped material and spherical physics. |
 | Turning-block toy | Shared sourced construction yard | Decorative toy retired; physical block play retained. |
 | Chime / rhythm instrument — CreaturePlayground / PlayerRhythm | Innerscene Xylophone | In use: simplified frame/eight authored bars, two input groups, 492 triangles. |
@@ -112,3 +112,7 @@ The following runtime files contain primitive construction or generated meshes. 
 ## Toy, goal, puzzle and yard batch
 
 Delivered source files, derivations, rebuilding and validation are recorded in [PLAY_ART.md](PLAY_ART.md). The procedural-art snapshot above predates this replacement: several listed sites now create invisible physics proxies only. Other item families remain open; this batch does not claim full island art replacement.
+
+## Village storage art batch
+
+Sourced stores, upgrades, exposed grain, resin and reserve portions are delivered; see [STORAGE_ART.md](STORAGE_ART.md) for source records, fitting and live validation. Crop art, tribute produce and exploration gifts remain open.

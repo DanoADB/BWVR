@@ -1,0 +1,20 @@
+{
+  "creator": "Kenney",
+  "pack": "Survival Kit 2.0",
+  "source": "https://kenney.nl/assets/survival-kit",
+  "license": "CC0-1.0",
+  "license_file": "Assets/ThirdParty/KenneySurvival/License.txt",
+  "integrated": "2026-10-29",
+  "selection": "structure/frame, structure-roof, structure-floor; existing barrel-open and resource-planks reused",
+  "sha256": {
+    "Assets/ThirdParty/KenneySurvival/Models/structure.fbx": "9dd511f352b5c2023f795cd636414cc738002ce72c15f633047445acffecfd0c",
+    "Assets/ThirdParty/KenneySurvival/Models/structure-roof.fbx": "11a0e8239f85927ae92ca3f39c80f35de25852658c3344fedc4a205c1f73665b",
+    "Assets/ThirdParty/KenneySurvival/Models/structure-floor.fbx": "f2c9a17cd5befd85bcc5fe7bcb15ab70a95c951f9efd47c28d06771c889f8c8a",
+    "Assets/ThirdParty/KenneySurvival/Models/barrel-open.fbx": "5b19c494359c4dd5e0f8a41b35daec0d701c3494a75c0930f262a5a0a737e5d4",
+    "Assets/ThirdParty/KenneySurvival/Models/resource-planks.fbx": "3765f0a74ca24c0d268b38246d0f9e58e939c18b12c08737860af3085f240a92"
+  },
+  "reused_art": [
+    "SettlementProps/food-sack: Quaternius Bag Open plus sourced Kenney cereal, existing source/license records",
+    "PlayArt/token: Kenney Platformer jewel, tinted amber; ArtSources/Play/SOURCES.json"
+  ]
+}

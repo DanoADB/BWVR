@@ -28,7 +28,10 @@ public sealed partial class VillageResources:MonoBehaviour {
  }
  Material Material(Color color){var material=new Material(Shader.Find("BWVR/GameSurface")){color=color,enableInstancing=true};material.SetFloat("_Cutoff",0);return material;}
  GameObject Part(string name,PrimitiveType shape,Vector3 position,Vector3 size,Material material){var go=GameObject.CreatePrimitive(shape);go.name=name;go.transform.SetParent(transform,false);go.transform.position=position;go.transform.localScale=size*Navigation.Scale;go.GetComponent<Renderer>().sharedMaterial=material;var collider=go.GetComponent<Collider>();collider.enabled=false;Destroy(collider);return go;}
- void BuildStore(){float u=Navigation.Scale;Part("Covered stores floor",PrimitiveType.Cube,Store,new Vector3(10,.5f,8),timber);Part("Rain cover",PrimitiveType.Cube,Store+Vector3.up*u*5,new Vector3(11,.5f,9),roof);foreach(int x in new[]{-1,1})foreach(int z in new[]{-1,1})Part("Store post",PrimitiveType.Cube,Store+new Vector3(x*4.5f,2.5f,z*3.5f)*u,new Vector3(.4f,5,.4f),timber);
+ void BuildStore(){float u=Navigation.Scale;
+  StorePart("structure-floor","Covered stores floor",Store,new Vector3(10,.5f,8));
+  StorePart("structure","Timber store frame",Store+Vector3.up*u*2.5f,new Vector3(10,5,8));
+  StorePart("structure-roof","Rain cover",Store+Vector3.up*u*5.5f,new Vector3(11,1.5f,9));
   woodView=new Transform[12];wheatView=new Transform[12];for(int i=0;i<12;i++){woodView[i]=Prop("resource-wood","Stored timber",Store+new Vector3(-2+(i%2)*1.4f,.3f+(i/4)*.8f,-2+(i%4/2)*3)*u,.8f).transform;wheatView[i]=Prop("food-sack","Stored grain sack",Store+new Vector3(1.4f+(i%2)*1.5f,.3f+(i/4)*1.2f,-2+(i%4/2)*3)*u,1.2f).transform;}
   obstacle=new GameObject("Resource-store native navigation footprint");obstacle.transform.SetParent(transform,false);obstacle.transform.position=Navigation.ToNav(Store);var carve=obstacle.AddComponent<NavMeshObstacle>();carve.shape=NavMeshObstacleShape.Box;carve.size=new Vector3(10,6,8);carve.center=Vector3.up*3;carve.carving=true;carve.carveOnlyStationary=true;
  }
