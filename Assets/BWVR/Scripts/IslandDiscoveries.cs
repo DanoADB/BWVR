@@ -10,7 +10,7 @@ namespace BWVR {
 // A small fixed set of reachable clearings, not a per-frame world spawning system.
 public sealed class IslandDiscoveries:MonoBehaviour {
  public readonly List<DiscoveryPoint> points=new List<DiscoveryPoint>();
- Func<SliceState> season;Material[] materials;AudioClip reward;IslandNavigation nav;
+ Func<SliceState> season;AudioClip reward;IslandNavigation nav;
  public DiscoveryRecord Memory(int id){var s=season();if(s.discoveries==null||s.discoveries.Length==0){s.discoveries=new DiscoveryRecord[6];for(int i=0;i<6;i++)s.discoveries[i]=new DiscoveryRecord();}return s.discoveries[id];}
  public static bool Valid(DiscoveryRecord[] records){if(records==null||records.Length==0)return true;if(records.Length!=6)return false;for(int i=0;i<6;i++){var r=records[i];if(r==null||r.visitors<0||r.visitors>((1<<(VillagePopulation.Adults+1))-1)||float.IsNaN(r.restock)||float.IsInfinity(r.restock)||r.restock<0||r.restock>90||!ConstructionSite.Valid(r.blocks)||(r.blocks!=null&&r.blocks.Length!=0&&r.blocks.Length!=8))return false;if(i>=2&&r.blocks!=null&&r.blocks.Length!=0)return false;}return true;}
  public static IslandDiscoveries Build(Transform parent,IslandNavigation navigation,Vector3 village,ConstructionSite original,Func<SliceState> current){
@@ -20,7 +20,6 @@ public sealed class IslandDiscoveries:MonoBehaviour {
   nav=navigation;season=current;
   for(int cache=0;cache<2;cache++){original.ImportLegacyCache(cache,Memory(cache).blocks);Memory(cache).blocks=null;}
   if(season().relationships!=null)foreach(var memory in season().relationships){if(memory==null)continue;memory.usefulStructures=(memory.usefulStructures&0xF000)|((memory.usefulStructures|(memory.usefulStructures>>4)|(memory.usefulStructures>>8))&15);if(memory.gatheringSite==1||memory.gatheringSite==2)memory.gatheringSite=0;}
-  materials=new[]{new Color(.48f,.27f,.10f),new Color(.72f,.5f,.15f),new Color(.68f,.12f,.16f),new Color(.24f,.43f,.16f),new Color(.48f,.5f,.43f)}.Select(c=>{var m=new Material(Shader.Find("BWVR/GameSurface"));m.color=c;return m;}).ToArray();
   const int rate=22050;var samples=new float[rate/2];for(int i=0;i<samples.Length;i++){float t=i/(float)rate;samples[i]=Mathf.Sin(t*(t<.18f?660:880)*Mathf.PI*2)*Mathf.Exp(-t*7)*.16f;}reward=AudioClip.Create("Warm discovery notes",samples.Length,1,rate,false);reward.SetData(samples,0);
   for(int id=0;id<6;id++){
    bool placed=false;Vector3 at=default;
@@ -42,14 +41,12 @@ public sealed class IslandDiscoveries:MonoBehaviour {
     CreateObject(point,safe,i==1,id%2==0);
    }
    // Small, collider-free stones distinguish clearings without adding navigation obstacles.
-   for(int n=0;n<5;n++){float a=n*Mathf.PI*2/5;var position=root.transform.position+new Vector3(Mathf.Cos(a),0,Mathf.Sin(a))*(id<2?13:5)*nav.Scale;if(nav.Terrain!=null)position=nav.Terrain.Project(position);var stone=Part(root.transform,"Clearing stone",PrimitiveType.Sphere,Vector3.zero,Vector3.one,4);stone.transform.position=position;stone.transform.localScale=new Vector3(1.3f,.5f,1)*nav.Scale;}
+   for(int n=0;n<5;n++){float a=n*Mathf.PI*2/5;var position=root.transform.position+new Vector3(Mathf.Cos(a),0,Mathf.Sin(a))*(id<2?13:5)*nav.Scale;if(nav.Terrain!=null)position=nav.Terrain.Project(position);var stone=SourcedItemArt.Fit("SettlementProps/rock-"+(char)('a'+n%3),root.transform,"Clearing stone",Vector3.zero,Vector3.one);stone.transform.position=position;stone.transform.localScale=new Vector3(1.3f,.5f,1)*nav.Scale;}
   }
  }
- GameObject Part(Transform parent,string label,PrimitiveType shape,Vector3 position,Vector3 scale,int material){var go=GameObject.CreatePrimitive(shape);go.name=label;go.transform.SetParent(parent,false);go.transform.localPosition=position;go.transform.localScale=scale;go.GetComponent<Renderer>().sharedMaterial=materials[material];var collider=go.GetComponent<Collider>();collider.enabled=false;Destroy(collider);return go;}
  void CreateObject(DiscoveryPoint point,Vector3 at,bool treat,bool mallet){
-  float u=nav.Scale;var go=new GameObject(treat?"Berry treat":mallet?"Wooden play mallet":"Seed rattle");go.transform.SetParent(point.transform,false);go.transform.position=at+Vector3.up*u*(treat?.55f:1.1f);go.transform.localScale=Vector3.one*u*.55f;
-  if(treat){Part(go.transform,"Berry",PrimitiveType.Sphere,Vector3.zero,Vector3.one*2,2);Part(go.transform,"Leaf",PrimitiveType.Sphere,new Vector3(.4f,.9f,0),new Vector3(1,.25f,.45f),3);}
-  else {Part(go.transform,"Handle",PrimitiveType.Cylinder,new Vector3(0,-.4f,0),new Vector3(.45f,1.5f,.45f),0);Part(go.transform,mallet?"Mallet head":"Rattle head",mallet?PrimitiveType.Cube:PrimitiveType.Sphere,new Vector3(0,1.2f,0),mallet?new Vector3(2.8f,1.2f,1.3f):Vector3.one*2,1);}
+  float u=nav.Scale;var go=new GameObject(treat?"Strawberry treat":mallet?"Play hammer":"Seed shaker");go.transform.SetParent(point.transform,false);go.transform.position=at+Vector3.up*u*(treat?.55f:1.1f);go.transform.localScale=Vector3.one*u*.55f;
+  SourcedItemArt.Fit(treat?"FoodProps/strawberry":mallet?"SettlementProps/tool-hammer":"SettlementProps/bottle",go.transform,"CC0 discovery artwork",treat||mallet?Vector3.zero:Vector3.down*.3f,treat?Vector3.one*2:mallet?new Vector3(3,4,1.5f):new Vector3(2,3.4f,1.4f));
   var box=go.AddComponent<BoxCollider>();box.size=treat?Vector3.one*2:new Vector3(3,4,1.5f);box.contactOffset=u*.02f;
   var item=go.AddComponent<CarryItem>();item.kind=treat?Offering.Food:Offering.Toy;item.home=go.transform.position;
   var discovered=go.AddComponent<DiscoveryObject>();discovered.point=point;discovered.treat=treat;
@@ -62,6 +59,6 @@ public sealed class IslandDiscoveries:MonoBehaviour {
  public void Advance(float dt,bool paused){foreach(var p in points){if(p.construction!=null)p.construction.Paused=paused;if(!paused&&dt>0)p.Advance(dt);}}
  public void Capture(){foreach(var p in points)if(p.construction!=null)p.Record.blocks=p.construction.Capture();}
  public void ResetWorld(){foreach(var p in points){p.ResetPoint();p.construction?.ResetConstruction();}}
- void OnDestroy(){if(materials!=null)foreach(var m in materials)Destroy(m);if(reward!=null)Destroy(reward);}
+ void OnDestroy(){if(reward!=null)Destroy(reward);}
 }
 }

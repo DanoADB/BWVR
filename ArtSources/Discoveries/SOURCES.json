@@ -1,0 +1,46 @@
+[
+  {
+    "creator": "Kenney",
+    "pack": "Food Kit 2.0",
+    "url": "https://kenney.nl/assets/food-kit",
+    "license": "CC0-1.0",
+    "license_file": "Assets/ThirdParty/KenneyFood/License.txt",
+    "integrated": "2026-10-29",
+    "models": [
+      "strawberry",
+      "pear",
+      "orange",
+      "apple"
+    ],
+    "sha256": {
+      "Assets/ThirdParty/KenneyFood/Models/strawberry.fbx": "0c34ffe0344ad3da14aae118ff6489ba47a44253348bc1530998b0989f80eff8",
+      "Assets/ThirdParty/KenneyFood/Models/pear.fbx": "ac706f45a255cb311a84f8843599afc88ea24f0fa72f8c7ebcebe4a9fd3b72b6",
+      "Assets/ThirdParty/KenneyFood/Models/orange.fbx": "1ee58b3698ad920e66f73bc8c49e198836466fd72af9aa8e84bc26e8df50f437",
+      "Assets/ThirdParty/KenneyFood/Models/apple.fbx": "077ac7cafd0e03c14023649fc9098163a16a16d03c15377b1c9d7feac01fde9e"
+    }
+  },
+  {
+    "creator": "Kenney",
+    "pack": "Survival Kit 2.0",
+    "url": "https://kenney.nl/assets/survival-kit",
+    "license": "CC0-1.0",
+    "license_file": "Assets/ThirdParty/KenneySurvival/License.txt",
+    "integrated": "2026-10-29",
+    "models": [
+      "bottle",
+      "rock-a",
+      "rock-b",
+      "rock-c",
+      "tool-hammer",
+      "box-open"
+    ],
+    "sha256": {
+      "Assets/ThirdParty/KenneySurvival/Models/bottle.fbx": "d070862a5bb40b85aaa1859724be436b37fb41040260053c230c6dd0246d77c4",
+      "Assets/ThirdParty/KenneySurvival/Models/rock-a.fbx": "375ef413b45d9e6fcae2ebdc5a854814980393252c12f98d57454d38cf9e2fce",
+      "Assets/ThirdParty/KenneySurvival/Models/rock-b.fbx": "3da7bdd0af257b446e3f3b57d9281faafa93ffc3abdeeaf34a8617b280257264",
+      "Assets/ThirdParty/KenneySurvival/Models/rock-c.fbx": "e3d03820297336c01f10da7403d33c79d7eda3b0cd79045c0b24c1b37cb436f6",
+      "Assets/ThirdParty/KenneySurvival/Models/tool-hammer.fbx": "632fdb53fb8d78517c1c78bf63ec776ee5c90d47d0fe7732fe4433999baaf230",
+      "Assets/ThirdParty/KenneySurvival/Models/box-open.fbx": "77b49b0e03d9dab276522cfff813b0156e04b8adb948c56ee3ef21cc6ad88ad2"
+    }
+  }
+]

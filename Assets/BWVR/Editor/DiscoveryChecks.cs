@@ -17,7 +17,8 @@ public static class DiscoveryChecks {
   var phase=explorer.Current;explorer.Tick(10,true);if(explorer.Current!=phase)throw new Exception("Paused exploration advanced");
   for(int i=0;i<3500&&explorer.Active;i++)explorer.Tick(.02f,false);
   if(explorer.Active||explorer.discoveries!=before+1||tool.Owner!=null||tool.GetComponent<CarryItem>().held||explorer.GetComponent<VillagerSocial>().Memory.discoveries<1)throw new Exception("Explorer did not enjoy and remember finding");
-  if(point.Unseen(1)&&point.Unseen(2)&&point.Unseen(3))throw new Exception("Villager discovery not recorded");
+  int identity=(int)typeof(VillagerExploration).GetField("identity",System.Reflection.BindingFlags.Instance|System.Reflection.BindingFlags.NonPublic).GetValue(explorer);
+  if(point.Unseen(identity))throw new Exception("Villager discovery not recorded");
   if(!explorer.TryBegin(tool))throw new Exception("No interruption check");explorer.GetComponent<CarryItem>().held=true;explorer.Tick(.1f,false);explorer.GetComponent<CarryItem>().held=false;if(explorer.Active||tool.Owner!=null)throw new Exception("Carried explorer stranded object");
   var treat=world.points[3].objects.First(o=>o.treat);var offer=treat.GetComponent<CreatureAffordance>();offer.cooldown=0;
   if(!nav.world.Sample(treat.transform.position,nav.profile,8,out at))throw new Exception("No creature treat approach");mind.transform.position=nav.world.Terrain.Project(at);nav.ResetRoute();mind.ResetTask();water.ResetTask();

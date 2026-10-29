@@ -10,6 +10,14 @@ public static class SourcedItemArt {
   model.transform.localPosition=centered?Vector3.down*.5f:Vector3.zero;model.transform.localRotation=Quaternion.identity;model.transform.localScale=Vector3.one;
   root.transform.localScale=Vector3.one*height;root.transform.SetParent(parent,true);root.transform.position=position;return root;
  }
+ // Centered unit fitting for art attached to an existing interaction root.
+ public static GameObject Fit(string path,Transform parent,string label,Vector3 center,Vector3 size,Material tint=null){
+  var root=new GameObject(label);root.transform.SetParent(parent,false);root.transform.localPosition=center;root.transform.localScale=size;
+  var model=UnityEngine.Object.Instantiate(Prefab(path),root.transform);model.transform.localPosition=Vector3.zero;model.transform.localRotation=Quaternion.identity;model.transform.localScale=Vector3.one;
+  var bounds=LocalBounds(model);if(Mathf.Min(bounds.size.x,bounds.size.y,bounds.size.z)<=0)throw new InvalidOperationException("Degenerate sourced model: "+path);
+  var fit=new Vector3(1/bounds.size.x,1/bounds.size.y,1/bounds.size.z);model.transform.localScale=fit;model.transform.localPosition=-Vector3.Scale(bounds.center,fit);
+  if(tint!=null)foreach(var view in model.GetComponentsInChildren<Renderer>()){var slots=view.sharedMaterials;for(int i=0;i<slots.Length;i++)slots[i]=tint;view.sharedMaterials=slots;}return root;
+ }
  public static Bounds LocalBounds(GameObject root){
   bool found=false;var bounds=new Bounds();
   foreach(var filter in root.GetComponentsInChildren<MeshFilter>(true)){

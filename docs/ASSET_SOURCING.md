@@ -38,8 +38,8 @@ Status: **In use** means an existing sourced mesh is used for that item family, 
 | Guidance signs — GodToolPalette / DivineIntervention | Existing Kenney `signpost`, `signpost-single`; existing licensed GodToolIcons | Meshes available. Replace remaining stick/disc assemblies with sourced sign or icon presentation. GodToolIcons include CC BY art: preserve attribution; they are not all CC0. |
 | Water offering and villager vessel — WaterVessel / VillagerRoutine | Kenney Survival `bucket`, `barrel-open`; `bottle` remains an archive candidate | Bucket in use for the water offering and water gatherers; open barrel in use for the cistern. Empty/full effects, native delivery and hand attachment remain integrated. |
 | Well/cistern | Existing well artwork and Kenney Survival `barrel-open` reservoir | Cistern container body now sourced, fitted to its existing height/radius. Well art and spring effects remain separate; source/delivery anchors and navigation footprint are retained. |
-| Food offering, treats, individual gifts — QuestSlice / IslandDiscoveries | Kenney Food `apple` for the native offering; bread/vegetables for other gifts | Apple in use with existing Offering/Discovery IDs. Other treats/discovery/gift props remain a replacement task. |
-| Communal tribute — VillageTributes | Kenney Survival `box-open` + sourced Food Kit produce | Crate already imported; produce is a page candidate. Replace generated bowl/spheres without altering tribute ownership or costs. |
+| Food offering, treats, individual gifts — QuestSlice / IslandDiscoveries | Kenney Food `apple` for the native offering; bread/vegetables for other gifts | Apple offering and strawberry discovery treats in use with existing IDs. Spontaneous individual gifts remain a replacement task. |
+| Communal tribute — VillageTributes | Kenney Survival `box-open` + sourced Food Kit produce | In use: sourced crate with seven apples/pears/oranges; native courier, crop cost, consensus and motive tint retained. |
 | Wheat and other planted crops — ResourceArt / TurnipFarming | Quaternius Ultimate Crops growth-stage meshes | Page candidate. Replace generated stems/heads/turnips, retaining bounded crop state and batched rendering. |
 | Resin jars — ResinGathering | Kenney Survival barrel-open plus Kenney Platformer jewel | In use for storage, carried loads and tapping cups; amber chunk fill follows the existing resin amount. |
 | Covered stores, roof, posts, upgrades, shelves — VillageResources / ResourceStorage | Kenney Survival `structure`, `structure-floor`, `structure-roof`, `box`, `box-large`, `barrel` | Sourced timber frame, roof/floor, upgrade shelves and construction planks in use. Existing footprint and stock/capacity affordances retained. |
@@ -52,7 +52,7 @@ Status: **In use** means an existing sourced mesh is used for that item family, 
 | Cooperative key, socket, paw pad and gate — CooperativePuzzle | Kenney key/jewel/pads/studs; fitted Quaternius trim and door | In use; native key pickup, matching socket and two-input physics puzzle retained. |
 | Construction bricks/beams/cubes/columns/slabs/ramps/cylinders — ConstructionPieces | Kenney Brick beveled bricks, round bricks, plate and slope | In use across all eight shapes; existing dimensions, hidden physics and snap graph retained. |
 | Construction arch, tray, foundation, example structures | Fitted Quaternius trim; Kenney Survival floor | Arch/tray/foundation in use. Example structures and other legacy construction visuals remain an audit task. |
-| Exploration caches, boxes and tools — IslandDiscoveries | Kenney Survival `chest`, `box`, `bedroll-packed`, existing tool meshes | Archive candidates; preserve discovery attribution and player/creature reservations. |
+| Exploration caches, boxes and tools — IslandDiscoveries | Kenney Survival `chest`, `box`, `bedroll-packed`, existing tool meshes | Discovery play hammer, seed-shaker bottle, strawberry and clearing rocks in use. Discovery attribution and reservations retained; separate cache/box art remains an audit task. |
 | Book of Creation | Existing scroll UI; Quaternius RPG book for physical book representation | UI already present; book mesh is a page candidate. Preserve the existing scroll/stone visual language. |
 | Relationship / mood / request icons | Existing attributed icon set, or licensed CC0 replacements from RPG/approved icon art | Replace generated heart mesh if used as a world item. Icon graphics need individual provenance; do not relabel CC BY icons CC0. |
 | Pickup hand / controller presence — PickupHand | Hand mesh from existing CC0 Quaternius base-character rig, exported as a sourced derivative | Candidate processing task; preserve pointer pose, valid/invalid cues and accessibility. Not implemented. |
@@ -116,3 +116,7 @@ Delivered source files, derivations, rebuilding and validation are recorded in [
 ## Village storage art batch
 
 Sourced stores, upgrades, exposed grain, resin and reserve portions are delivered; see [STORAGE_ART.md](STORAGE_ART.md) for source records, fitting and live validation. Crop art, tribute produce and exploration gifts remain open.
+
+## Tribute and discovery art batch
+
+Discovery toys/treats, clearing stones and communal tribute artwork now use selected CC0 models. See [DISCOVERY_ART.md](DISCOVERY_ART.md) for adaptations, source hashes, rebuilding and native interaction checks. Crops and individual gift visuals remain open.
