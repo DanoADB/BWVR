@@ -19,7 +19,7 @@ public sealed partial class QuestSlice {
  }
  void BuildSanctuary(){
   bookMaterial=new Material(Resources.Load<Shader>("Book/CreationBookUI")){name="Private parchment UI"};
-  sanctuaryStone=new Material(Resources.Load<Shader>("Sanctuary/StoneUI")){name="Shared private menu stone disks"};
+  sanctuaryStone=new Material(Resources.Load<Shader>("Sanctuary/StoneUI")){name="Shared private menu rounded stone buttons"};
   sanctuaryFont=new Material(Resources.Load<Material>("Sanctuary/TextOverlay")){name="Private sanctuary SDF text"};
   panel.transform.Find("Obsidian panel").GetComponent<UnityEngine.UI.Image>().material=bookMaterial;
   sanctuaryHome=SanctuaryPage("Sanctuary home");sanctuaryOptions=SanctuaryPage("Sanctuary options");sanctuaryHelp=SanctuaryPage("Sanctuary help");sanctuaryRestart=SanctuaryPage("Confirm new season");
@@ -48,7 +48,7 @@ public sealed partial class QuestSlice {
  }
  void ShowSanctuaryPage(GameObject page){SetSanctuaryHover(null);foreach(Transform child in panel.transform)if(child.name!="Obsidian panel")child.gameObject.SetActive(child.gameObject==page);RefreshSanctuary();}
  public bool SetSanctuaryOpen(bool show){if(show&&held.Any(i=>i!=null))return false;if(show){godTools?.Cancel();ShowSanctuaryPage(sanctuaryHome);}panel.SetActive(show);SetSanctuaryHover(null);return true;}
- void RefreshSanctuary(){if(sanctuarySummary==null)return;sanctuarySummary.text=(Chapter!=null&&Chapter.State.phase!=StormPhase.Dormant?Chapter.Description:developmentFocus?"Exploration":"The Long Dry")+(state.paused?" · Paused":"")+" · Energy "+(miracles.UnlimitedEnergy?"unlimited":Mathf.FloorToInt(state.Hybrid.energy).ToString())+(saveError==null?"":"\n"+saveError);pauseCaption.text=state.paused?"Resume":"Pause";saveCaption.text=Time.unscaledTime<sanctuarySavedUntil?"Saved":"Save";}
+ void RefreshSanctuary(){if(sanctuarySummary==null)return;sanctuarySummary.text=(Chapter!=null&&Chapter.State.phase!=StormPhase.Dormant?Chapter.Description:developmentFocus?"Exploration":"The Long Dry")+(state.paused?" · Paused":"")+" · Energy "+(miracles.UnlimitedEnergy?"unlimited":Mathf.FloorToInt(state.Hybrid.energy).ToString())+(state.playOuting?.phase==PlayOutingPhase.Active?" · Play Day "+state.playOuting.Count+"/3":state.playOuting?.phase==PlayOutingPhase.Complete?" · Play Day complete":"")+(saveError==null?"":"\n"+saveError);pauseCaption.text=state.paused?"Resume":"Pause";saveCaption.text=Time.unscaledTime<sanctuarySavedUntil?"Saved":"Save";}
  // Private world-space UI retains the game's physical ray/SpatialTarget input path.
  // Consume both hands even when pointing off the scroll. Tracking and edge gates prevent click-through.
  bool SanctuaryPointer(int side,bool pressed,bool wasPressed,Collider hit,bool tracked){

@@ -1,5 +1,9 @@
 # BWVR roadmap
 
+## Player engagement priority — Play Day (2026-10-29)
+
+The user has shifted priority from asset replacement back to active play and optional reading. [PLAY_DAY.md](PLAY_DAY.md) adds an opt-in Book outing linking the existing rhythm echo, shared goal turns and Together gate, with instructions, optional location beacons, saved progress and earned field notes. Desktop model, runtime, native-activity source checks and Book/menu layout checks pass; natural full-island/headset playtesting remains open. This is a guided way to engage existing gameplay, not a claim that new AI abilities or another puzzle type were added. Keep art-gap work as a backlog while developing player agency and feedback.
+
 ## Current priority — The Gathering Storm vertical slice (2026-10-28)
 
 Connect the playful systems into a complete chapter before adding more isolated toys. The first Editor-verified backbone is an opt-in calm → warning → wind/rain assistance → recovery → free-play sequence, with a physical creature rescue, native player rescue, independent villager evacuation, accurate outcome attribution and native Save/Load. Start through Sanctuary → Settings → Gathering Storm; End chapter preserves the island and learning. See [GATHERING_STORM.md](GATHERING_STORM.md) for controls, precise boundaries, validation and the V1–V5 build sequence.
