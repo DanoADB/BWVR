@@ -4,8 +4,8 @@ using UnityEngine;
 namespace BWVR {
 // Only completed, deposited loads become history. Runtime invitations own no stock.
 [Serializable] public sealed class TimberRelayMemory {
- public int count,cutter,carrier;public string source="";public float amount,time;
- public bool Valid()=>count==0?cutter==0&&carrier==0&&string.IsNullOrEmpty(source)&&amount==0&&time==0:count>0&&count<=1000000&&cutter>=0&&cutter<VillagePopulation.Adults&&carrier>=0&&carrier<VillagePopulation.Adults&&cutter!=carrier&&!string.IsNullOrEmpty(source)&&source.Length<=160&&HybridState.Number(amount,.001f,3)&&HybridState.Number(time,0,100000000);
+ public bool creature;public int count,cutter,carrier;public string source="";public float amount,time;
+ public bool Valid()=>count==0?!creature&&cutter==0&&carrier==0&&string.IsNullOrEmpty(source)&&amount==0&&time==0:count>0&&count<=1000000&&cutter>=0&&cutter<VillagePopulation.Adults&&(creature?carrier==-1:carrier>=0&&carrier<VillagePopulation.Adults&&cutter!=carrier)&&!string.IsNullOrEmpty(source)&&source.Length<=160&&HybridState.Number(amount,.001f,3)&&HybridState.Number(time,0,100000000);
 }
 public sealed partial class ResourceState {
  public bool TransferTimber(int from,int to){
@@ -23,18 +23,18 @@ public sealed partial class VillagerResourceGathering {
  bool RelayVisible(VillagerResourceGathering other)=>Vector3.Distance(transform.position,other.transform.position)<=world.Navigation.Scale*18&&world.ProvisionVisible(social,other.transform.position,other.transform);
  bool OfferTimber(){
   if(Source?.kind!=VillageResource.Wood||practiceKind!=1||!ToolMemory.axeOwned||Cargo.amount<=0||world.FoodEmergency||world.State.NeedsStorage)return false;
-  Physics.SyncTransforms();if(!world.Gatherers.Any(a=>a.RelayFree&&a.RelayWilling(this)&&a.RelayVisible(this)))return false;
+  Physics.SyncTransforms();if(!world.Gatherers.Any(a=>a.RelayFree&&a.RelayWilling(this)&&a.RelayVisible(this))&&!CreatureCanNotice())return false;
   Current=Phase.OfferWood;clock=0;motion?.LookAt(null);motion?.Signal(true);return true;
  }
  public bool TryTimberRelay(){
-  if(world.Season.paused||!RelayFree||!world.Gatherers.Any(a=>a.Current==Phase.OfferWood&&a.relayHelper==null))return false;Physics.SyncTransforms();
-  foreach(var worker in world.Gatherers.Where(a=>a.Current==Phase.OfferWood&&a.relayHelper==null&&a.Cargo.amount>0&&a.Source?.owner==a&&RelayWilling(a)&&RelayVisible(a)).OrderBy(a=>(a.transform.position-transform.position).sqrMagnitude)){
+  if(world.Season.paused||!RelayFree||!world.Gatherers.Any(a=>a.Current==Phase.OfferWood&&!a.CreatureTimberClaimed&&a.relayHelper==null))return false;Physics.SyncTransforms();
+  foreach(var worker in world.Gatherers.Where(a=>a.Current==Phase.OfferWood&&!a.CreatureTimberClaimed&&a.relayHelper==null&&a.Cargo.amount>0&&a.Source?.owner==a&&RelayWilling(a)&&RelayVisible(a)).OrderBy(a=>(a.transform.position-transform.position).sqrMagnitude)){
    if(!world.GetComponentInParent<QuestSlice>().GetComponentInChildren<IslandDiscoveries>().Reachable(transform.position,worker.transform.position,nav.profile))continue;
    relayWorker=worker;worker.relayHelper=this;Source=worker.Source;Reserved=0;routine.BeginHandsFreeActivity();nav.ResetRoute();clock=elapsed=0;Current=Phase.RelayApproach;motion?.LookAt(worker.transform);worker.motion?.LookAt(transform);return true;
   }return false;
  }
  bool TickTimberRelay(float dt){
-  if(Current==Phase.OfferWood){if(clock>(relayHelper==null?6:20)){ReleaseTimberRelay();Current=Phase.Carry;clock=0;motion?.Signal(false);nav.ResetRoute();}return Active;}
+  if(Current==Phase.OfferWood){if(CreatureTimberClaimed){if(clock>120)Cancel();return Active;}if(clock>=2&&relayHelper==null)motion?.Signal(false,true,world.StoreApproach);if(clock>(relayHelper==null?6:20)){ReleaseTimberRelay();Current=Phase.Carry;clock=0;motion?.Signal(false);nav.ResetRoute();}return Active;}
   var worker=relayWorker;
   if(worker==null||worker.Current!=Phase.OfferWood||worker.relayHelper!=this||worker.actor.held||worker.Busy||worker.Source!=Source||worker.Cargo.amount<=0||elapsed>20||!RelayWilling(worker)){Cancel();return false;}
   if(Current==Phase.RelayApproach){
@@ -47,7 +47,7 @@ public sealed partial class VillagerResourceGathering {
   }return Active;
  }
  void ReleaseTimberRelay(){
-  bool involved=relayHelper!=null||relayWorker!=null||relayCutter>=0||Current==Phase.OfferWood||Current==Phase.RelayApproach||Current==Phase.RelayTake;var helper=relayHelper;var worker=relayWorker;relayHelper=relayWorker=null;relayCutter=-1;if(involved){motion?.Touch(null);motion?.Signal(false);}
+  ClearCreatureTimber();bool involved=relayHelper!=null||relayWorker!=null||relayCutter>=0||Current==Phase.OfferWood||Current==Phase.RelayApproach||Current==Phase.RelayTake;var helper=relayHelper;var worker=relayWorker;relayHelper=relayWorker=null;relayCutter=-1;if(involved){motion?.Touch(null);motion?.Signal(false);}
   if(worker!=null&&worker.relayHelper==this){worker.relayHelper=null;worker.motion?.LookAt(null);if(worker.Current==Phase.OfferWood)worker.motion?.Signal(true);}
   if(helper!=null&&helper.relayWorker==this){helper.relayWorker=null;helper.Cancel();}
  }

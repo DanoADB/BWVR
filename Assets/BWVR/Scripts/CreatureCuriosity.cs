@@ -3,7 +3,7 @@ using UnityEngine;
 namespace BWVR {
 // A bounded curiosity loop yields to drought work and owns at most one carried object.
 public sealed partial class CreatureCuriosity:MonoBehaviour {
- public enum Phase { Rest,Approach,Inspect,Lift,Play,CarryFriend,Place,BuildApproach,BuildPlace,ThrowBall,WatchBall,RallyBall,FetchCarry,FetchPlace,RhythmGame,ThrowTree,WatchTree,ChaseBall,EchoRhythm,SpinTrick,PuzzleAssist,StormRescue,StormSupply,ToolDelivery }
+ public enum Phase { Rest,Approach,Inspect,Lift,Play,CarryFriend,Place,BuildApproach,BuildPlace,ThrowBall,WatchBall,RallyBall,FetchCarry,FetchPlace,RhythmGame,ThrowTree,WatchTree,ChaseBall,EchoRhythm,SpinTrick,PuzzleAssist,StormRescue,StormSupply,ToolDelivery,TimberAssist }
  public int built{get;private set;}
  Vector3 buildPoint,buildApproach,buildStart;Quaternion buildRotation;
  bool buildCorrection;public int alignmentCorrections{get;private set;}BallGoal goalTarget;bool echoPlay;bool goalPlay;bool bowlingPlay;bool knockdownPlay;bool fetching;int fetchTicket;bool constructionFocus,askedPlaymate;float inviteGestureUntil;
@@ -47,6 +47,7 @@ public sealed partial class CreatureCuriosity:MonoBehaviour {
    return Current!=Phase.Rest;
   }
   elapsed+=dt;clock+=dt;
+  if(Current==Phase.TimberAssist)return TickTimberAssist(dt);
   if(Current==Phase.ToolDelivery)return TickToolDelivery(dt);
   if(Current==Phase.StormSupply)return TickStormSupply(dt);
   if(Current==Phase.StormRescue)return TickStormRescue(dt);
@@ -139,7 +140,7 @@ public sealed partial class CreatureCuriosity:MonoBehaviour {
  internal void PrepareFeedback(ActionReceipt receipt,SliceState season,VillagerSocial friend){state=season;lastWater=receipt.action==CreatureAction.WaterDelivery;lastSocial=receipt.action==CreatureAction.SocialInteraction||(receipt.action==CreatureAction.RespondToGuidance&&friend!=null);lastFriend=lastSocial?friend:null;feedbackWindow=12;}
  public bool Feedback(bool positive,bool allowLearning=true){if(state==null||state.paused)return false;bool learned=allowLearning&&feedbackWindow>0;if(learned){float change=positive?.12f:-.12f;if(lastWater)state.care=Mathf.Clamp01(state.care+change);else if(lastSocial){state.socialPreference=Mathf.Clamp01(state.socialPreference+change);lastFriend?.Feedback(positive);}else state.playPreference=Mathf.Clamp01(state.playPreference+change);feedbackWindow=0;}responseProtection=2;reaction=2;emotion=5;feedbackMood=recentMood=positive?CreatureAffect.Mood.Happy:CreatureAffect.Mood.Sad;Affect=recentMood;return learned;}
  public void ResetTask(){Finish(false);lastFriend=null;lastWater=false;reaction=responseProtection=0;constructionFocus=false;cooldown=7;boredom=emotion=feedbackWindow=0;Affect=CreatureAffect.Mood.Calm;}
- void Finish(bool success,string failureReason="Interaction interrupted or unavailable"){ReleaseToolDelivery();
+ void Finish(bool success,string failureReason="Interaction interrupted or unavailable"){ReleaseTimberAssist();ReleaseToolDelivery();
   var finished=target;if(Current==Phase.StormSupply){supplyChapter?.ReleaseSupply();supplyChapter=null;}if(Current==Phase.StormRescue){rescueChapter?.ReleaseCreature();rescueChapter=null;}if(Current==Phase.PuzzleAssist)finished?.GetComponent<PuzzlePad>()?.puzzle.Cancel();if(Current==Phase.SpinTrick)finished?.GetComponent<BeachBall>()?.Spin?.End();motion?.TurnInPlace(false);if(!success){finished?.GetComponent<BeachBall>()?.Goals?.Turns.Cancel("Creature activity interrupted");finished?.GetComponent<BeachBall>()?.Goals?.Cancel();}knockdownPlay=false;goalPlay=false;goalTarget=null;if(echoPlay)finished?.GetComponent<PlayerRhythm>()?.Cancel(success);echoPlay=false;if(Current==Phase.ChaseBall)finished?.GetComponent<BeachBall>()?.Chase?.End();if(fetching)finished?.GetComponent<BeachBall>()?.CancelFetch(fetchTicket);fetching=false;
   if(Current==Phase.RallyBall)finished?.GetComponent<BeachBall>()?.CancelRally();
   if(!success)finished?.GetComponent<SharedRhythm>()?.Cancel();

@@ -1,5 +1,9 @@
 # BWVR build sequence
 
+## S5 creature assistance — unanswered timber offers (2026-10-30)
+
+A visible unanswered cutter offer can become a scored creature-help opportunity. The existing coordinator/curiosity motor performs native approach, face/reach, take, carry and actual deposit; finite cargo, source reservation, interruption recovery, contextual teaching and saved cutter/carrier attribution stay distinct. The original villager helper retains first opportunity. See [CREATURE_TIMBER_ASSIST.md](CREATURE_TIMBER_ASSIST.md). Next: combine these bounded capabilities into a player-led shared project with an observable useful result and optional Book goal, rather than adding another resource chore. Quest testing stays deferred; food/water remain deprioritized.
+
 ## S5 timber teamwork — one cuts, another carries (2026-10-30)
 
 Equipped cutters can offer a real harvested bundle to a willing nearby villager. The helper chooses a native approach/take/carry/deposit task; finite cargo moves once, canceled work recovers safely, and only actual stored wood creates a shared outcome. Book -> Provisions shows cutter/carrier attribution, while existing peer memory and matching tool-use evidence update without free resources or creature credit. See [TIMBER_RELAY.md](TIMBER_RELAY.md). Food/water remain deprioritized. Next: let the creature recognize and assist a visible stalled shared task using the existing guidance/utility/coordinator boundaries. Physical Quest validation stays deferred.
