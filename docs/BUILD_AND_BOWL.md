@@ -70,5 +70,6 @@ the reused motors and UI layout. Quest input feel, natural full-population
 participation and performance remain deferred to the user's headset playtest.
 No APK is built for this increment.
 
-Next candidate: a creature return turn after a player shot, preserving native
-fetch, safe aim, source attribution and the creature's choice to participate.
+Safe shots now offer voluntary physical retrieval to a clear nearby shooting
+spot; see [BUILD_BOWL_RETURNS.md](BUILD_BOWL_RETURNS.md). Confirmed returns save
+separately, and use the existing fetch motor and teaching.

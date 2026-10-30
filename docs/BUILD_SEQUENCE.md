@@ -1,5 +1,9 @@
 # BWVR build sequence
 
+## S5 Build & Bowl returns — keep the shared game moving (2026-10-30)
+
+A confirmed safe shot can now invite the creature to physically fetch and return the ball near the player's shooting spot. Existing utility selection, tickets, carry/place, feedback and cleanup are reused; offers grant no completion or reward. Clear sampled destinations, pause/stale-save guards, saved one-shot return counts and Book progress support rebuilding and replay. See [BUILD_BOWL_RETURNS.md](BUILD_BOWL_RETURNS.md) for staged verification limits. Next candidate: visible, voluntary shared-course rebuilding invitations. Physical Quest/full-population testing stays deferred.
+
 ## S5 Build & Bowl — player-arranged cooperative toy course (2026-10-30)
 
 Book → Projects now offers Build & Bowl after the gateway pages. Fresh native player/creature placements create a shared course; actual player-toss ball contacts must detach one piece from each contributor safely. Rebuild between shots, with no supply chore. Confirmed source hits and completions persist; provisional shots freeze on pause and cancel on harm, pickup, wind, reset, ownership changes or reload. Begin/end preserve the layout, and player shots create no creature lessons. See [BUILD_AND_BOWL.md](BUILD_AND_BOWL.md) for fixture limits and verification. Next candidate: voluntary creature return turns through the existing fetch/aim motors. Physical Quest/full-population testing stays deferred.
