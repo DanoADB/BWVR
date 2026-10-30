@@ -19,7 +19,7 @@ public sealed partial class VillagerExploration {
    if(soloNudges==0){
     if(!ball.ApproachPass(nav,transform.lossyScale.y*1.6f,dt,false)){motion?.Signal(false);if(nav.Blocked&&elapsed>8){ResetTask();return false;}return true;}
     ballInviteClock+=dt;motion?.Signal(true,true,ball.transform.position);
-    if(!ballInvitationOffered){ballInvitationOffered=true;var memory=social.Memory;memory.ballInvitations=System.Math.Min(1000000,memory.ballInvitations+1);memory.nextBallInvitationAt=ball.Playmate.State.time+90;ball.Playmate.Journal.Add(ball.Playmate.State.time,"villager beckons to ball",CreatureAction.PlayWithToy,GetComponent<HybridTarget>().id,"Gaze, wave and a gentle rolling invitation");}
+    if(!ballInvitationOffered){ballInvitationOffered=true;var memory=social.Memory;memory.ballInvitations=System.Math.Min(1000000,memory.ballInvitations+1);memory.nextBallInvitationAt=ball.Playmate.State.time+90;RecordStormInvitation(ball);ball.Playmate.Journal.Add(ball.Playmate.State.time,"villager beckons to ball",CreatureAction.PlayWithToy,GetComponent<HybridTarget>().id,"Gaze, wave and a gentle rolling invitation");}
     if(ballInviteClock<2)return true;
    }else {if(Vector3.Distance(transform.position,ball.transform.position)>nav.world.Scale*12)nav.MoveTo(ball.transform.position,transform.lossyScale.y*1.6f,dt);motion?.Activity(0);motion?.Signal(Mathf.Repeat(elapsed,8)<2,true,ball.transform.position);if(nav.Blocked&&elapsed>8){ResetTask();return false;}return true;}
   }else motion?.LookAt(ball.transform);
@@ -28,6 +28,6 @@ public sealed partial class VillagerExploration {
   else {motion?.Activity(0);motion?.Signal(!ball.HasPartner,true,peer?(side?ball.Player.transform.position:ball.PeerPlayer.transform.position):ball.Playmate.transform.position);}
   if(nav.Blocked&&elapsed>8){ResetTask();return false;}return true;
  }
- void ReleaseBall(){if(playingBall!=null){if(ballInvitationOffered&&!ballInvitationAccepted&&!actor.held&&!playingBall.GetComponent<CarryItem>().held&&elapsed>=60)social.Memory.unansweredBallInvitations=System.Math.Min(1000000,social.Memory.unansweredBallInvitations+1);if(playingBall.OwnsPlayer(this))playingBall.CancelRally();}playingBall=null;ballInvitationOffered=ballInvitationAccepted=false;ballInviteClock=0;motion?.Signal(false);}
+ void ReleaseBall(){recoveryChapter=null;if(playingBall!=null){if(ballInvitationOffered&&!ballInvitationAccepted&&!actor.held&&!playingBall.GetComponent<CarryItem>().held&&elapsed>=60)social.Memory.unansweredBallInvitations=System.Math.Min(1000000,social.Memory.unansweredBallInvitations+1);if(playingBall.OwnsPlayer(this))playingBall.CancelRally();}playingBall=null;ballInvitationOffered=ballInvitationAccepted=false;ballInviteClock=0;motion?.Signal(false);}
 }
 }

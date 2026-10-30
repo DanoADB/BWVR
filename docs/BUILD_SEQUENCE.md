@@ -1,5 +1,9 @@
 # BWVR build sequence
 
+## Gathering Storm V4 — remembered recovery and return to play (2026-10-30)
+
+Confirmed survivors remember the storm, thank the creature in person only for its actual rescue, and can offer a physical ball-game invitation once conditions are safe. These use the existing villager motor, gestures, ball reservations and autonomous creature decisions. Pending/completed receipts survive native Save/Load without duplicate memories or retained interaction ownership. Book → Lore → After the storm reports actual completion; damage and injuries persist. See [GATHERING_STORM.md](GATHERING_STORM.md) for the bounded encounter, attribution and staged verification limits. Next: V5 physical Quest playtest of the complete play → storm assistance → recovery loop, followed by tuning nonverbal cues, participation and performance. Reconstruction and a broader celebration remain future expansions.
+
 ## Gathering Storm V3 — localized fire and villager water response (2026-10-29)
 
 The warning can ignite one isolated reachable tree. Players can suppress it with the existing Rain tool, while an available villager can independently fetch, fill, carry and pour a sourced bucket using village water. The actual material model retains damage; saved receipts distinguish player, villager and weather outcomes in Book → Lore. Native Editor checks cover the complete response, weather integration, ownership/pause, old saves and pending Save/Load; existing storm, timber, weather, rain-tool and Book regressions pass. See [GATHERING_STORM.md](GATHERING_STORM.md) for site limits, staged test conditions and remaining Quest gates. Next: V4 lasting recovery, social acknowledgment and return-to-play invitations, followed by a physical Quest playtest.

@@ -1,6 +1,6 @@
 # The Gathering Storm — vertical-slice backbone
 
-The larger target is a 15–20 minute Quest experience: play builds a relationship, weather tests it, and the village remembers the outcome. The first three increments connect a complete chapter sequence to physical villager assistance, useful timber retrieval and one bounded lightning/fire incident. It is a roughly seven-minute prototype backbone, not the finished storm/fire/recovery release.
+The larger target is a 15–20 minute Quest experience: play builds a relationship, weather tests it, and the village remembers the outcome. The current increments connect a complete chapter sequence to physical villager assistance, useful timber retrieval, one bounded lightning/fire incident and a remembered return to play. It is a roughly seven-minute prototype backbone, not the finished storm/fire/recovery release.
 
 ## Play
 
@@ -32,7 +32,7 @@ Pending and delivered state, source, destination and last grounded bundle positi
 
 `StormChapter` owns chapter/weather transitions. `StormRescue` extends the existing curiosity and exploration intentions, and CreatureHybrid remains the only creature action coordinator. One participant's ordinary jobs, family, worship and leisure reservations yield for the assistance opportunity. Other villagers remain autonomous. Navigation, pickup/drop, held-object protection, interruption, feedback and cleanup use the established systems. Matching Help guidance becomes obsolete if somebody else solves the problem. During a pending rescue it offers the actual assistance action, rather than a generic visit or a water job inferred from the participant's occupation. Ending the chapter safely releases any creature-held villager and restores weather autonomy without a success award.
 
-This storm uses wind, localized lightning and rain. Independent timber couriers, multi-person emergency coordination and a recovery celebration remain later milestones. Water and food work remain deprioritized in development focus; the existing unlimited-energy test setting remains unchanged. There is no new energy economy, possession, AI service, compulsory HUD or camera movement.
+This storm uses wind, localized lightning and rain. Independent timber couriers, multi-person emergency coordination and a broader recovery celebration remain later milestones. Water and food work remain deprioritized in development focus; the existing unlimited-energy test setting remains unchanged. There is no new energy economy, possession, AI service, compulsory HUD or camera movement.
 
 ## V3 — a tree fire and independent bucket response
 
@@ -52,12 +52,28 @@ Save/resume restores material state and the incident receipt, never another bolt
 
 Existing chapter/rescue, timber supplies, weather, rain brush and Book model/runtime checks also passed. All four populated Lore pages were rendered, with the storm recap visually inspected and text fit checked even at bounded maximum counters. User save and XR startup flags are restored after tests. Physical Quest controls, bucket-pose readability, natural full-population participation and on-device performance remain unverified. No APK is built here.
 
+## V4 — remembered survival and return to play
+
+Newly started chapters opt into recovery memory. Once a confirmed survivor reaches Recovery (or Complete), their stable identity records one survived storm and, only for an actual creature rescue, one creature rescue. The earlier rescue remains the sole trust/bond award; gratitude does not add a duplicate reward, healing, repairs or another trainable creature receipt. Player and independent assistance never earn creature-rescue gratitude. Weather damage is not blamed on the creature.
+
+For 180 simulation seconds after this record, the survivor can seek a recovery encounter. It waits for rain below 25%, no active fires, a healthy/unfrightened/unheld survivor, a nearby unheld creature, free actor ownership and a reachable route. Busy jobs/social activities are not forcibly canceled. Attempts use a five-second cooldown. When the creature performed the rescue, the villager first approaches and performs a two-second acknowledgment gesture with the existing gaze, affect and greeting systems. Interrupted approaches award nothing.
+
+After gratitude, or directly after player/independent survival, the villager can approach an available nearby beachball using the existing invitation/rally controller. The recovery invitation is recorded only when the villager physically reaches the passing approach and beckons; starting a walk is insufficient. The creature retains its normal action selection and can ignore the invitation. Actual shared-play enjoyment and relationships remain owned by the existing rally system. A successful invitation can continue as ordinary play after its recovery encounter closes.
+
+Book → Lore → After the storm shows who survived, the real rescue source, completed acknowledgment and offered invitation. Bounded individual survival/rescue/thanks/invitation counters persist across subsequent chapters. Old saves without the new optional recovery state do not receive retroactive memories or gestures. Pending save/resume releases transient gesture/ball ownership without repeating survival credit; completed receipts do not replay. Pickup, injury, fright, blocked routes, timeout, expiry, chapter changes and stopping release incomplete activities. Ending a chapter never removes existing fire damage or injury.
+
+### V4 verification
+
+`StormRecoveryChecks.VerifyModel/VerifyRuntime` passed in Unity 6000.6.7f1. The staged fixture performs an actual utility-selected creature rescue, enters recovery, completes the gratitude motor/gesture, then uses the normal ball approach and beckoning receipt. Checks cover pause, duplicate attribution, unavailable/held actors, pending and completed native Save/Load, pickup cancellation, stopping while paused, expiry, actual player rescue, independent evacuation and historical completed saves. The fixture shortens phase waits, positions actors near reachable testing areas, removes unrelated actor traffic and cools competing creature offers. It verifies capability and ownership, not natural frequency or a full-population playthrough.
+
+Existing storm rescue, supplies, fire, rain superstition, ball rally, neighbor comfort and Book checks passed. The saint-witness regression initially hit an unrelated beachball occluding its staging point; it passed with that ball temporarily moved out of the sightline and restored afterward. This fixture isolation does not alter production visibility rules. All five populated Lore pages rendered within the reading panel, and After the storm was visually inspected. User save and XR startup flags are restored after verification. Physical Quest readability, gesture feel, natural invitation frequency and device performance remain unverified; no APK is built here.
+
 ## Build sequence
 
 1. **V1: chapter and one complete assistance loop** — this increment: opt-in/end controls, phase/weather orchestration, player/creature/independent arrival, contextual training, grounded save/resume and outcome attribution.
 2. **V2: play skills become useful** — Editor-verified timber retrieval, physical player/creature delivery, visible six-wood stock increase, contextual teaching, capacity protection and grounded save/resume. Natural discovery/readability still needs Quest playtesting.
 3. **V3: bounded environmental pressure** — Editor-verified isolated-tree lightning, native rain-tool suppression, independent bucket fill/carry/pour, persistent material damage and a saved Book recap. Healing remains the existing separate tool for injuries. Natural participation and Quest readability remain unverified.
-4. **V4: recovery and lasting consequences** — help/harm memories, social acknowledgment, return-to-play invitations and concise saved chapter evidence in the Book.
+4. **V4: recovery and lasting consequences** — Editor-verified survivor/rescue memories, source-specific in-person gratitude, physical return-to-play invitations and a saved Book recap. Existing damage/injuries remain; reconstruction and broader village celebrations are future work.
 5. **V5: Quest release gate** — nonverbal onboarding, art/audio polish, comfort, physical controller playthrough, frame-time/memory profiling and a requested APK build. Tune toward the complete 15–20 minute experience using playtest evidence.
 
 ## Verification
