@@ -32,7 +32,8 @@ public sealed partial class QuestSlice {
   pauseCaption=SanctuaryButton("Pause",sanctuaryHome.transform,new Vector2(-135,20),()=>{state.paused=!state.paused;RefreshSanctuary();},true);
   saveCaption=SanctuaryButton("Save",sanctuaryHome.transform,new Vector2(135,20),()=>{Save();if(saveError==null)sanctuarySavedUntil=Time.unscaledTime+3;RefreshSanctuary();},true);
   SanctuaryButton("Settings",sanctuaryHome.transform,new Vector2(-135,-100),()=>ShowSanctuaryPage(sanctuaryOptions));SanctuaryButton("Close",sanctuaryHome.transform,new Vector2(135,-100),()=>SetSanctuaryOpen(false));
-  SanctuaryLabel("Open hint",sanctuaryHome.transform,new Vector2(0,-225),new Vector2(540,30),"X opens / closes · point + right front trigger",17,ParchmentInk);
+  SanctuaryButton("Start here",sanctuaryHome.transform,new Vector2(0,-210),()=>ShowFirstSteps(0));
+  SanctuaryLabel("Open hint",sanctuaryHome.transform,new Vector2(0,-300),new Vector2(540,30),"X opens / closes · point + right front trigger",17,ParchmentInk);
   SanctuaryLabel("Settings title",sanctuaryOptions.transform,new Vector2(0,305),new Vector2(540,45),"SETTINGS",32,ParchmentInk);
   SanctuaryButton("Sound",sanctuaryOptions.transform,new Vector2(-135,160),()=>ShowAudioSettings(true));SanctuaryButton("Help / details",sanctuaryOptions.transform,new Vector2(135,160),()=>ShowSanctuaryPage(sanctuaryHelp));
   SanctuaryButton("Spirit: show / hide",sanctuaryOptions.transform,new Vector2(-135,50),()=>spirit.SetVisible(!spirit.Visible));SanctuaryButton("Begin again",sanctuaryOptions.transform,new Vector2(135,50),()=>ShowSanctuaryPage(sanctuaryRestart));
@@ -46,6 +47,7 @@ public sealed partial class QuestSlice {
   SanctuaryLabel("Restart title",sanctuaryRestart.transform,new Vector2(0,245),new Vector2(520,60),"BEGIN A NEW SEASON?",30,ParchmentInk);
   SanctuaryLabel("Restart warning",sanctuaryRestart.transform,new Vector2(0,90),new Vector2(500,155),"This replaces your current season and its learned history.\n\nYour next save will contain the new season.",25,ParchmentInk);
   SanctuaryButton("Keep playing",sanctuaryRestart.transform,new Vector2(-135,-110),()=>ShowSanctuaryPage(sanctuaryOptions));SanctuaryButton("Start new season",sanctuaryRestart.transform,new Vector2(135,-110),()=>{RestartSeason();ShowSanctuaryPage(sanctuaryHome);});
+  BuildFirstSteps();
  }
  void ShowSanctuaryPage(GameObject page){SetSanctuaryHover(null);foreach(Transform child in panel.transform)if(child.name!="Obsidian panel")child.gameObject.SetActive(child.gameObject==page);RefreshSanctuary();}
  public bool SetSanctuaryOpen(bool show){if(show&&held.Any(i=>i!=null))return false;if(show){godTools?.Cancel();ShowSanctuaryPage(sanctuaryHome);}panel.SetActive(show);SetSanctuaryHover(null);return true;}
