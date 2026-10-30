@@ -57,7 +57,7 @@ public sealed partial class CreatureHybrid {
   motion?.RespondTo(responseLook!=null?responseLook.transform:null,Response==CreatureResponse.Chosen||(Response==CreatureResponse.Completed&&responsePositive),
    Response==CreatureResponse.Noticed?0:progress);
  }
- void FailAction(string reason){var target=Find(State.intention.target);Interrupt(reason);Respond(CreatureResponse.Unavailable,target,reason);}
+ void FailAction(string reason){var target=Find(State.intention.target);RememberFailure(State.intention,target,reason);Interrupt(reason);Respond(CreatureResponse.Unavailable,target,reason);}
  void ClearResponse(){Response=CreatureResponse.None;ResponseTarget=ResponseReason="";responseLook=null;motion?.RespondTo(null,false,0);}
  void ResetResponses(){ClearResponse();busyTarget=null;nextCueCheck=0;}
 }

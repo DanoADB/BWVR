@@ -60,7 +60,7 @@ public sealed partial class CreatureCuriosity:MonoBehaviour {
    Affect=CreatureAffect.Mood.Happy;motion?.Signal(false);motion?.LookAt(ball.transform);
    if(ball.RallyReceptions>=4){played++;target.Discovered();lastWater=lastSocial=false;boredom=0;feedbackWindow=12;Finish(true);return false;}
    if(ball.CreatureTurn&&!ball.PassPending){if(ball.ApproachPass(navigator,routine.speed*.65f,dt,true)){motion?.Activity(5);ball.TryPass(true);navigator.ResetRoute();}}else{motion?.Activity(6);}
-   if(navigator.Blocked&&elapsed>8)Finish(false);return Current!=Phase.Rest;
+   if(navigator.Blocked&&elapsed>8)Finish(false,"Target unreachable");return Current!=Phase.Rest;
   }
   if(Current==Phase.Approach){
    var invited=target.GetComponent<BeachBall>();
@@ -71,7 +71,7 @@ public sealed partial class CreatureCuriosity:MonoBehaviour {
    }
    Affect=CreatureAffect.Mood.Curious;var destination=target.transform.position;var rhythm=target.GetComponent<SharedRhythm>();if(target.host!=null&&rhythm!=null&&!rhythm.ApproachPoint(GetComponent<CreatureHybrid>(),out destination)){Finish(false);return false;}
    if(navigator.MoveTo(destination,routine.speed,dt)){Current=Phase.Inspect;clock=0;motion?.Activity(6);}
-   else if(navigator.Blocked){Affect=CreatureAffect.Mood.Sad;if(elapsed>5)Finish(false);}
+   else if(navigator.Blocked){Affect=CreatureAffect.Mood.Sad;if(elapsed>5)Finish(false,"Target unreachable");}
   }else if(Current==Phase.Inspect){
    if(clock>1.8f){if(echoPlay){if(!target.GetComponent<PlayerRhythm>().Begin()){Finish(false);return false;}Current=Phase.EchoRhythm;clock=0;return true;}var rhythm=target.GetComponent<SharedRhythm>();if(target.host!=null&&rhythm!=null){if(!rhythm.Begin(GetComponent<CreatureHybrid>())){Finish(false);return false;}Current=Phase.RhythmGame;clock=0;return true;}if(fetching&&!target.GetComponent<BeachBall>().ClaimFetch(fetchTicket)){Finish(false);return false;}if(target.GetComponent<DiscoveryObject>()?.Owner!=null){Finish(false);return false;}var social=target.GetComponent<VillagerSocial>();if(social!=null&&!social.Willing){Finish(false);return false;}social?.ResetTask();owned=target.Item;if(owned.GetComponent<ThrowableTree>() is ThrowableTree rooted&&!rooted.Lift()){owned=null;Finish(false);return false;}original=owned.transform.position;originalRotation=owned.transform.rotation;owned.held=true;owned.GetComponent<Collider>().enabled=false;
     owned.GetComponent<ConstructionBlock>()?.Grab();
@@ -138,7 +138,7 @@ public sealed partial class CreatureCuriosity:MonoBehaviour {
  internal void PrepareFeedback(ActionReceipt receipt,SliceState season,VillagerSocial friend){state=season;lastWater=receipt.action==CreatureAction.WaterDelivery;lastSocial=receipt.action==CreatureAction.SocialInteraction||(receipt.action==CreatureAction.RespondToGuidance&&friend!=null);lastFriend=lastSocial?friend:null;feedbackWindow=12;}
  public bool Feedback(bool positive,bool allowLearning=true){if(state==null||state.paused)return false;bool learned=allowLearning&&feedbackWindow>0;if(learned){float change=positive?.12f:-.12f;if(lastWater)state.care=Mathf.Clamp01(state.care+change);else if(lastSocial){state.socialPreference=Mathf.Clamp01(state.socialPreference+change);lastFriend?.Feedback(positive);}else state.playPreference=Mathf.Clamp01(state.playPreference+change);feedbackWindow=0;}responseProtection=2;reaction=2;emotion=5;feedbackMood=recentMood=positive?CreatureAffect.Mood.Happy:CreatureAffect.Mood.Sad;Affect=recentMood;return learned;}
  public void ResetTask(){Finish(false);lastFriend=null;lastWater=false;reaction=responseProtection=0;constructionFocus=false;cooldown=7;boredom=emotion=feedbackWindow=0;Affect=CreatureAffect.Mood.Calm;}
- void Finish(bool success){
+ void Finish(bool success,string failureReason="Interaction interrupted or unavailable"){
   var finished=target;if(Current==Phase.StormSupply){supplyChapter?.ReleaseSupply();supplyChapter=null;}if(Current==Phase.StormRescue){rescueChapter?.ReleaseCreature();rescueChapter=null;}if(Current==Phase.PuzzleAssist)finished?.GetComponent<PuzzlePad>()?.puzzle.Cancel();if(Current==Phase.SpinTrick)finished?.GetComponent<BeachBall>()?.Spin?.End();motion?.TurnInPlace(false);if(!success){finished?.GetComponent<BeachBall>()?.Goals?.Turns.Cancel("Creature activity interrupted");finished?.GetComponent<BeachBall>()?.Goals?.Cancel();}knockdownPlay=false;goalPlay=false;goalTarget=null;if(echoPlay)finished?.GetComponent<PlayerRhythm>()?.Cancel(success);echoPlay=false;if(Current==Phase.ChaseBall)finished?.GetComponent<BeachBall>()?.Chase?.End();if(fetching)finished?.GetComponent<BeachBall>()?.CancelFetch(fetchTicket);fetching=false;
   if(Current==Phase.RallyBall)finished?.GetComponent<BeachBall>()?.CancelRally();
   if(!success)finished?.GetComponent<SharedRhythm>()?.Cancel();
@@ -157,7 +157,7 @@ public sealed partial class CreatureCuriosity:MonoBehaviour {
   }
   if(!success&&target!=null)target.SetCooldown(12);
   owned=null;target=null;Current=Phase.Rest;clock=elapsed=0;cooldown=success?(constructionFocus?3:8):4;emotion=success?5:3;recentMood=success?CreatureAffect.Mood.Happy:CreatureAffect.Mood.Sad;Affect=recentMood;
-  if(finished!=null){var host=finished.host;if(success)Completed?.Invoke(finished);else Failed?.Invoke("Interaction interrupted or unavailable");host?.SharedOutcome(finished,success);}
+  if(finished!=null){var host=finished.host;if(success)Completed?.Invoke(finished);else Failed?.Invoke(failureReason);host?.SharedOutcome(finished,success);}
  }
  void OnDisable(){Finish(false);}
 }

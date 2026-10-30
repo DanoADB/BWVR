@@ -1,5 +1,9 @@
 # BWVR build sequence
 
+## S5 first increment — failure-aware creature attempts (2026-10-30)
+
+The user deferred headset testing and requested further roadmap development. The creature now backs off from repeated route/timeout failures, considers other opportunities and can reconsider a target moved to a new location. Success clears the streak; player interruption does not create failure learning. Optional Book → Creature pages distinguish existing knowledge, motor practice, willingness and recent outcomes. See [CREATURE_ATTEMPTS.md](CREATURE_ATTEMPTS.md) for limits and Editor verification. S5 remains partial: next is a small reusable multi-step capability using these existing executors, not a competing AI framework. The Gathering Storm Quest release gate remains deferred, not passed.
+
 ## Gathering Storm V4 — remembered recovery and return to play (2026-10-30)
 
 Confirmed survivors remember the storm, thank the creature in person only for its actual rescue, and can offer a physical ball-game invitation once conditions are safe. These use the existing villager motor, gestures, ball reservations and autonomous creature decisions. Pending/completed receipts survive native Save/Load without duplicate memories or retained interaction ownership. Book → Lore → After the storm reports actual completion; damage and injuries persist. See [GATHERING_STORM.md](GATHERING_STORM.md) for the bounded encounter, attribution and staged verification limits. Next: V5 physical Quest playtest of the complete play → storm assistance → recovery loop, followed by tuning nonverbal cues, participation and performance. Reconstruction and a broader celebration remain future expansions.
@@ -132,6 +136,8 @@ Current implementation order, 2026-10-26. Implements [ROADMAP.md](ROADMAP.md). T
 **Milestone:** first integrated playable delivery. Evaluate whether users can identify a need, choose an intervention, see a response and understand the result before adding breadth.
 
 ## S5 — Deepen learning and reusable problem solving
+
+**First increment:** failure-aware attempts and optional knowledge/skill/willingness pages are Editor-verified; see [CREATURE_ATTEMPTS.md](CREATURE_ATTEMPTS.md). Existing practiced building/ball execution remains intact. Reusable multi-step extensions and full S5 gates remain open.
 
 **Deliver:** separate knowledge, practiced capability and willingness for a small set of construction/tool/social actions. Add short bounded plans using existing executors, explicit preconditions, costs and timeouts. Curiosity can prefer an achievable improvement opportunity; repeated mastery reduces its novelty, while failed impossible tasks stop attracting retries. Do not globally retune behavior without comparative evidence.
 
