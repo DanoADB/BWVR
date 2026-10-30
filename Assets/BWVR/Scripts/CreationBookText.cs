@@ -3,7 +3,7 @@ using System.Globalization;
 using System.Collections.Generic;
 using System.Linq;
 namespace BWVR {
-public enum CreationBookSection {Creature,People,Provisions,Places,Outings,Finds}
+public enum CreationBookSection {Creature,People,Provisions,Places,Outings,Finds,Lore}
 public readonly struct CreationBookPage {
  public readonly string title,text;public readonly int index,count;
  public CreationBookPage(string title,string text,int index=0,int count=1){this.title=title;this.text=text;this.index=index;this.count=count;}
@@ -18,7 +18,7 @@ public static class CreationBookText {
  static string Target(string id,IReadOnlyDictionary<string,string> names){if(names!=null&&id!=null&&names.TryGetValue(id,out var name))return Short(name,28);return id=="object-12"?"Beachball":id=="object-13"?"Chime":id=="wood-gift"?"Wood gift":id=="food-gift"?"Food gift":id=="cistern"?"Village water":id=="ground-rain-brush"?"Local rain":id=="ground-wind-fan"?"Wind fan":"Unidentified object";}
  public static CreationBookPage Read(SliceState s,CreationBookSection section,int page=0,string[] names=null,IReadOnlyDictionary<string,string> targets=null){
   if(s==null)return new CreationBookPage("No record","This season has no recorded state.");
-  switch(section){case CreationBookSection.Finds:return TreasureTrailText.Read(s,page);case CreationBookSection.Outings:return PlayOutingText.Read(s,page);case CreationBookSection.Creature:return Creature(s,targets);case CreationBookSection.People:return People(s,page,names);case CreationBookSection.Provisions:return Provisions(s);default:return Places(s,page,targets,names);}
+  switch(section){case CreationBookSection.Lore:return CulturalBookText.Read(s,page,names);case CreationBookSection.Finds:return TreasureTrailText.Read(s,page);case CreationBookSection.Outings:return PlayOutingText.Read(s,page);case CreationBookSection.Creature:return Creature(s,targets);case CreationBookSection.People:return People(s,page,names);case CreationBookSection.Provisions:return Provisions(s);default:return Places(s,page,targets,names);}
  }
  static CreationBookPage Creature(SliceState s,IReadOnlyDictionary<string,string> targets){
   var h=s.hybrid;string activity=h?.intention==null?"Unknown":h.intention.active?ActionName(h.intention.action):"No active plan";

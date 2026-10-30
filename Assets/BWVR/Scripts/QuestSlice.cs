@@ -116,7 +116,7 @@ public sealed partial class QuestSlice:MonoBehaviour {
   godTools=GodToolPalette.Build(transform,left,right,rig,eye,font,miracles,hybrid,navigation,groundCollider??ground.GetComponent<Collider>(),(accepted,message)=>{notice=message;if(XRSettings.isDeviceActive)InputDevices.GetDeviceAtXRNode(XRNode.RightHand).SendHapticImpulse(0,accepted?.25f:.08f,.08f);});
   soundscape=IslandAudio.Build(transform,navigation,eye.transform,rig,()=>state);
   Chapter=new StormChapter(transform,hybrid,navigation,weather,jobs,discoveries,()=>state);
-  InitializeTreasureTrail();BuildSanctuary();BuildAudioSettings();BuildCreationBook();sanctuaryColliders=panel.GetComponentsInChildren<Collider>(true);ShowSanctuaryPage(sanctuaryHome);
+  InitializeCulture();InitializeTreasureTrail();BuildSanctuary();BuildAudioSettings();BuildCreationBook();sanctuaryColliders=panel.GetComponentsInChildren<Collider>(true);ShowSanctuaryPage(sanctuaryHome);
   panel.SetActive(false);
   if(!XRSettings.isDeviceActive){eye.transform.localRotation=Quaternion.Euler(25,0,0);left.localPosition=new Vector3(-.6f,1.15f,1.05f);left.localRotation=Quaternion.Euler(0,0,0);panel.transform.localRotation=Quaternion.identity;}
  }

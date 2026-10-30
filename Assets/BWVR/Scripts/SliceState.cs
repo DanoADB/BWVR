@@ -2,7 +2,7 @@ using System;
 using UnityEngine;
 namespace BWVR {
 [Serializable] public sealed class SliceState {
- public TreasureTrailState treasureTrail;
+ public CultureMemory culture;public TreasureTrailState treasureTrail;
  public PlayOutingState playOuting;
  public StormChapterState stormChapter;public StormChapterState StormChapter=>stormChapter??(stormChapter=new StormChapterState());
  public int version=1; public float seconds=180, water=52, crops=66, trust=20, care=0.25f; public int gifts; public bool paused;
@@ -30,7 +30,7 @@ namespace BWVR {
  public void Step(float dt){if(developmentFocus||paused||Finished||float.IsNaN(dt)||float.IsInfinity(dt)||dt<=0)return;dt=Mathf.Min(dt,seconds);seconds-=dt;water=Mathf.Clamp(water-dt*.27f,0,100);crops=Mathf.Clamp(crops-dt*(water<25?.2f:.04f),0,100);RememberOutcome();}
  public void Deliver(){if(Finished)return;water=Mathf.Min(100,water+8);gifts++;trust=Mathf.Min(100,trust+4);}
  public void Praise(){if(Finished)return;care=Mathf.Min(1,care+.12f);trust=Mathf.Min(100,trust+3);}
- public bool Valid()=>version==1&&(treasureTrail==null||treasureTrail.Valid())&&(playOuting==null||playOuting.Valid())&&(stormChapter==null||stormChapter.Valid())&&(placeContributions==null||placeContributions.Valid(hybrid?.time??0))&&(cathedral==null||cathedral.Valid())&&(religion==null||religion.Valid())&&(tools==null||tools.Valid())&&(families==null||families.Valid())&&(resources==null||resources.Valid())&&(weather==null||weather.Valid())&&Finite(seconds,0,180)&&Finite(water,0,100)&&Finite(crops,0,100)&&Finite(trust,0,100)&&Finite(care,0,1)&&Finite(hunger,0,1)&&Finite(playPreference,0,1)&&Finite(socialPreference,0,1)&&ConstructionSite.Valid(construction)&&SocialValid()&&IslandDiscoveries.Valid(discoveries)&&(hybrid==null||hybrid.Valid())&&(building==null||building.Valid())&&(worldPlay==null||worldPlay.Valid())&&(tribute==null||tribute.Valid())&&creatureDiscoveries>=0&&creatureDiscoveries<=6&&gifts>=0&&gifts<=10000;
+ public bool Valid()=>version==1&&(culture==null||culture.Valid())&&(treasureTrail==null||treasureTrail.Valid())&&(playOuting==null||playOuting.Valid())&&(stormChapter==null||stormChapter.Valid())&&(placeContributions==null||placeContributions.Valid(hybrid?.time??0))&&(cathedral==null||cathedral.Valid())&&(religion==null||religion.Valid())&&(tools==null||tools.Valid())&&(families==null||families.Valid())&&(resources==null||resources.Valid())&&(weather==null||weather.Valid())&&Finite(seconds,0,180)&&Finite(water,0,100)&&Finite(crops,0,100)&&Finite(trust,0,100)&&Finite(care,0,1)&&Finite(hunger,0,1)&&Finite(playPreference,0,1)&&Finite(socialPreference,0,1)&&ConstructionSite.Valid(construction)&&SocialValid()&&IslandDiscoveries.Valid(discoveries)&&(hybrid==null||hybrid.Valid())&&(building==null||building.Valid())&&(worldPlay==null||worldPlay.Valid())&&(tribute==null||tribute.Valid())&&creatureDiscoveries>=0&&creatureDiscoveries<=6&&gifts>=0&&gifts<=10000;
  static bool Finite(float n,float min,float max)=>!float.IsNaN(n)&&!float.IsInfinity(n)&&n>=min&&n<=max;
 }
 }

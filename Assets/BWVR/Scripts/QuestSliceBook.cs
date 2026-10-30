@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 namespace BWVR {
 public sealed partial class QuestSlice {
- Material bookMaterial;Dictionary<string,string> bookTargets;GameObject creationBook;UnityEngine.UI.Text bookHeading,bookBody,bookPageNumber;readonly UnityEngine.UI.Image[] bookTabs=new UnityEngine.UI.Image[6];CreationBookSection bookSection=CreationBookSection.Outings;int bookPage;float bookRefresh;string[] bookPeople;
+ Material bookMaterial;Dictionary<string,string> bookTargets;GameObject creationBook;UnityEngine.UI.Text bookHeading,bookBody,bookPageNumber;readonly UnityEngine.UI.Image[] bookTabs=new UnityEngine.UI.Image[7];CreationBookSection bookSection=CreationBookSection.Outings;int bookPage;float bookRefresh;string[] bookPeople;
  GameObject outingGo,outingEnd,bookPrevious,bookNext,bookSections;bool bookIndexOpen;UnityEngine.UI.Text outingGoCaption,bookReadNote;
  public bool CreationBookOpen=>creationBook!=null&&creationBook.activeInHierarchy;
  public bool ShowCreationBook(bool show){
@@ -32,7 +32,7 @@ public sealed partial class QuestSlice {
  }
  void RefreshCreationBook(){if(creationBook==null)return;var page=CreationBookText.Read(state,bookSection,bookPage,bookPeople,bookTargets);bookPage=page.index;bookReadNote.text=bookSection==CreationBookSection.Places&&bookPage>=page.count-2?"Physical play · creature chooses independently":"Recorded history · earlier events may be unknown";bookHeading.text=page.title;bookBody.text=page.text;bookPageNumber.text=(page.index+1)+" / "+page.count;for(int i=0;i<bookTabs.Length;i++)if(bookTabs[i]!=null){bookTabs[i].gameObject.SetActive(bookIndexOpen);bookTabs[i].color=i==(int)bookSection?new Color(1.2f,1.14f,.85f):Color.white;}bookHeading.gameObject.SetActive(!bookIndexOpen);bookBody.gameObject.SetActive(!bookIndexOpen);bookPageNumber.gameObject.SetActive(!bookIndexOpen);bookPrevious.SetActive(!bookIndexOpen);bookNext.SetActive(!bookIndexOpen);bookSections.GetComponentInChildren<UnityEngine.UI.Text>().text=bookIndexOpen?"Return to page":"Sections";bool outing=!bookIndexOpen&&bookSection==CreationBookSection.Outings;bool finds=!bookIndexOpen&&bookSection==CreationBookSection.Finds;bookReadNote.gameObject.SetActive(!bookIndexOpen&&!outing&&!finds);outingGo.SetActive(outing||finds);outingEnd.SetActive(outing&&state.playOuting?.phase==PlayOutingPhase.Active);outingGoCaption.text=finds?(state.paused?"Resume to mark":"Mark clearing"):state.paused?"Resume to begin / mark":state.playOuting?.phase==PlayOutingPhase.Active?"Mark activity":state.playOuting?.phase==PlayOutingPhase.Complete?"Play again":"Begin Play Day";RefreshBookIcons();bookRefresh=.5f;}
  void TickCreationBook(float dt){if(!CreationBookOpen)return;bookRefresh-=dt;if(bookRefresh<=0)RefreshCreationBook();}
- void OnDestroy(){DisposeTreasureTrail();DisposePlayOuting();Chapter?.Dispose();if(sanctuaryStone!=null)Destroy(sanctuaryStone);if(sanctuaryFont!=null)Destroy(sanctuaryFont);if(bookMaterial!=null)Destroy(bookMaterial);}
+ void OnDestroy(){culture?.Dispose();DisposeTreasureTrail();DisposePlayOuting();Chapter?.Dispose();if(sanctuaryStone!=null)Destroy(sanctuaryStone);if(sanctuaryFont!=null)Destroy(sanctuaryFont);if(bookMaterial!=null)Destroy(bookMaterial);}
  bool BookPointer(int side,bool pressed,bool wasPressed,Collider hit,bool tracked){if(!CreationBookOpen)return false;if(side==1&&tracked&&pressed&&!wasPressed&&hit!=null&&hit.transform.IsChildOf(creationBook.transform))hit.GetComponentInParent<SpatialTarget>()?.Activate();return true;}
 }
 }
