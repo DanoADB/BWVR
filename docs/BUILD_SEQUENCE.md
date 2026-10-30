@@ -1,5 +1,9 @@
 # BWVR build sequence
 
+## S5 tool handoff — a useful multi-step task (2026-10-30)
+
+Known workshop designs can offer a paid axe/hoe for a nearby forester/farmer. The creature can choose a bounded pickup/carry/follow/place plan; the player can perform the same handoff. Equipment and design knowledge arrive only after real placement, with exact existing material costs and source-specific teaching. Optional Book → Creature shows the recipient/status. See [TOOL_HANDOFFS.md](TOOL_HANDOFFS.md) for reservations, expiry, persistence and test limits. Next: connect delivered skills to observed useful outcomes and voluntary cooperation; keep the deferred Quest gate open. This is one existing-executor plan, not a general planner or completion of all S5 requirements.
+
 ## S5 first increment — failure-aware creature attempts (2026-10-30)
 
 The user deferred headset testing and requested further roadmap development. The creature now backs off from repeated route/timeout failures, considers other opportunities and can reconsider a target moved to a new location. Success clears the streak; player interruption does not create failure learning. Optional Book → Creature pages distinguish existing knowledge, motor practice, willingness and recent outcomes. See [CREATURE_ATTEMPTS.md](CREATURE_ATTEMPTS.md) for limits and Editor verification. S5 remains partial: next is a small reusable multi-step capability using these existing executors, not a competing AI framework. The Gathering Storm Quest release gate remains deferred, not passed.

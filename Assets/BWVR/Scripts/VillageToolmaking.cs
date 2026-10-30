@@ -4,7 +4,7 @@ namespace BWVR {
 public sealed partial class VillageResources {
  public float ReservedToolWood=>Gatherers==null?0:Gatherers.Count(a=>a.Toolmaking)*2;
  public float ReservedToolResin=>Gatherers==null?0:Gatherers.Where(a=>a.Toolmaking).Sum(a=>ToolTechnologyState.ResinCost(a.PlannedTool));
- public float FreeResin=>Mathf.Max(0,State.resin-ReservedToolResin);
+ public float FreeResin=>Mathf.Max(0,State.resin-ReservedToolResin-DeliveryResin);
  public void ToolPractice(int identity,int work){if(Season.Tools.Practice(identity,work))ToolReceipt(identity,"tool-insight",work==1?VillageTool.BoundAxe:VillageTool.CultivatingHoe);}
  void ToolReceipt(int identity,string kind,VillageTool tool){if(kind=="tool-insight"||kind=="tool-observed"||kind=="tool-use-observed")Gatherers[identity].GetComponent<VillagerAffect>()?.Learned();var god=Navigation.GetComponentInChildren<CreatureHybrid>();god?.Journal.Add(Season.Hybrid.time,kind,CreatureAction.IdleOrObserve,"villager-"+identity,tool.ToString());}
  // Called only after a successful equipped harvest. Learning is knowledge, not inventory.
@@ -43,7 +43,7 @@ public sealed partial class VillagerResourceGathering {
   // The more practiced capability wins when two designs are available.
   var first=ToolMemory.farmPractice>=ToolMemory.woodPractice?VillageTool.CultivatingHoe:VillageTool.BoundAxe;return TryMakeTool(first)||TryMakeTool(first==VillageTool.BoundAxe?VillageTool.CultivatingHoe:VillageTool.BoundAxe);
  }
- public bool TryMakeTool(VillageTool tool){if(world.Season.paused||world.FoodEmergency||Active||Busy||world.Gatherers.Any(a=>a.ToolAction)||!world.Season.Tools.CanCraft(world.State,identity,tool)||world.FreeWood<2||world.FreeResin<ToolTechnologyState.ResinCost(tool))return false;
+ public bool TryMakeTool(VillageTool tool){if(world.Season.paused||world.FoodEmergency||Active||Busy||world.ToolDeliveryWaiting(identity)||world.Gatherers.Any(a=>a.ToolAction)||!world.Season.Tools.CanCraft(world.State,identity,tool)||world.FreeWood<2||world.FreeResin<ToolTechnologyState.ResinCost(tool))return false;
   PlannedTool=tool;routine.ResetTask();nav.ResetRoute();clock=elapsed=0;timber.SetActive(true);motion?.Carry(timber.transform);Current=Phase.ToolApproach;return true;
  }
  bool TickTool(float dt){if(Current==Phase.ToolCelebrate){if(clock>=2.2f)Cancel();return Active;}if(Current==Phase.ToolApproach){motion?.Activity(0);if(nav.MoveTo(world.StoreApproach,transform.lossyScale.y*1.6f,dt)){timber.SetActive(false);motion?.Carry(null);motion?.Activity(4);Current=Phase.ToolCraft;clock=0;}else if(nav.Blocked&&elapsed>5)Cancel();}

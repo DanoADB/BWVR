@@ -15,7 +15,7 @@ public sealed partial class ResourceState {
 }
 public sealed partial class VillageResources {
  public float ReservedFarmWood=>Gatherers==null?0:Gatherers.Count(a=>a.PreparingFarm)*2;
- public float FreeWood=>Mathf.Max(0,State.wood-ReservedFarmWood-ReservedToolWood);
+ public float FreeWood=>Mathf.Max(0,State.wood-ReservedFarmWood-ReservedToolWood-DeliveryWood);
  public float FutureHarvest=>sources.Where(s=>s.kind==VillageResource.Wheat).Sum(s=>{var r=State.Find(s.id);return r==null?0:r.growing?ResourceState.SourceYield(r):r.remaining;});
  public bool NeedsPlanting=>FutureHarvest<FoodReserveTarget*2&&sources.Count(s=>s.kind==VillageResource.Wheat&&(State.Find(s.id)?.growing==true||s.owner?.Sowing==true))<3;
  bool FarmSite(Vector3 at){

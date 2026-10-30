@@ -18,17 +18,17 @@ public static partial class CreationBookText {
  static string Target(string id,IReadOnlyDictionary<string,string> names){if(names!=null&&id!=null&&names.TryGetValue(id,out var name))return Short(name,28);return id=="object-12"?"Beachball":id=="object-13"?"Chime":id=="wood-gift"?"Wood gift":id=="food-gift"?"Food gift":id=="cistern"?"Village water":id=="ground-rain-brush"?"Local rain":id=="ground-wind-fan"?"Wind fan":"Unidentified object";}
  public static CreationBookPage Read(SliceState s,CreationBookSection section,int page=0,string[] names=null,IReadOnlyDictionary<string,string> targets=null){
   if(s==null)return new CreationBookPage("No record","This season has no recorded state.");
-  switch(section){case CreationBookSection.Lore:return CulturalBookText.Read(s,page,names);case CreationBookSection.Finds:return TreasureTrailText.Read(s,page);case CreationBookSection.Outings:return PlayOutingText.Read(s,page);case CreationBookSection.Creature:return Creature(s,page,targets);case CreationBookSection.People:return People(s,page,names);case CreationBookSection.Provisions:return Provisions(s);default:return Places(s,page,targets,names);}
+  switch(section){case CreationBookSection.Lore:return CulturalBookText.Read(s,page,names);case CreationBookSection.Finds:return TreasureTrailText.Read(s,page);case CreationBookSection.Outings:return PlayOutingText.Read(s,page);case CreationBookSection.Creature:return Creature(s,page,targets,names);case CreationBookSection.People:return People(s,page,names);case CreationBookSection.Provisions:return Provisions(s);default:return Places(s,page,targets,names);}
  }
- static CreationBookPage Creature(SliceState s,int page,IReadOnlyDictionary<string,string> targets){
-  page=Math.Max(0,Math.Min(page,2));if(page==1)return CreaturePractice(s);if(page==2)return CreatureAttempts(s,targets);
+ static CreationBookPage Creature(SliceState s,int page,IReadOnlyDictionary<string,string> targets,string[] names){
+  page=Math.Max(0,Math.Min(page,3));if(page==3)return CreatureToolHandoff(s,names);if(page==1)return CreaturePractice(s);if(page==2)return CreatureAttempts(s,targets);
   var h=s.hybrid;string activity=h?.intention==null?"Unknown":h.intention.active?ActionName(h.intention.action):"No active plan";
   var favorite=h?.interests?.Where(i=>i!=null&&i.experiences>0).OrderByDescending(i=>i.appeal).FirstOrDefault();
   string needs=h?.motivation==null?"Curiosity / boredom: not recorded":"Curiosity "+P(h.motivation.curiosity)+" · Boredom "+P(h.motivation.boredom);
   var learned=h?.associations?.Where(a=>a!=null&&a.samples>0).OrderByDescending(a=>a.samples).Take(2).ToArray();
   string lessons=learned==null||learned.Length==0?"No reinforced lessons recorded.":string.Join("\n",learned.Select(a=>ActionName(a.action)+": preference "+P(a.preference)+" ("+a.samples+")"));
   string forms=s.building==null?"Unknown":string.Join(", ",Enum.GetValues(typeof(BuildRecipe)).Cast<BuildRecipe>().Where(r=>s.building.Knows(r)).Select(r=>r.ToString()));
-  return new CreationBookPage("Their god","Plan: "+activity+"\nHunger "+P(s.hunger)+"\n"+needs+"\nFavorite: "+(favorite==null?"not recorded":Target(favorite.target,targets))+"\nKnown forms: "+(forms.Length==0?"none recorded":forms)+"\nPhysical placements: "+(s.building?.practice==null?"unknown":s.building.practice.placements.ToString())+"\n\nLearned preferences (samples)\n"+lessons,0,3);
+  return new CreationBookPage("Their god","Plan: "+activity+"\nHunger "+P(s.hunger)+"\n"+needs+"\nFavorite: "+(favorite==null?"not recorded":Target(favorite.target,targets))+"\nKnown forms: "+(forms.Length==0?"none recorded":forms)+"\nPhysical placements: "+(s.building?.practice==null?"unknown":s.building.practice.placements.ToString())+"\n\nLearned preferences (samples)\n"+lessons,0,4);
  }
  static CreationBookPage People(SliceState s,int page,string[] names){
   int adults=s.relationships?.Length??s.families?.adults?.Length??0,children=s.families?.children?.Length??0,count=adults+children;if(count==0)return new CreationBookPage("People","Individual records are not available yet.");page=Math.Max(0,Math.Min(page,count-1));

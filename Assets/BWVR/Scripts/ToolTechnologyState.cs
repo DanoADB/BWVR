@@ -8,7 +8,7 @@ public enum VillageTool { BoundAxe, CultivatingHoe }
  public bool Valid()=>woodPractice>=0&&woodPractice<=1000000&&farmPractice>=0&&farmPractice<=1000000&&(!axeKnown||woodPractice>=3||sawAxe)&&(!hoeKnown||farmPractice>=3||sawHoe)&&(!axeOwned||axeKnown)&&(!hoeOwned||hoeKnown)&&(!sawAxe||axeKnown)&&(!sawHoe||hoeKnown);
 }
 // Stable adult identities, two bounded capabilities, no general research tree.
-[Serializable] public sealed class ToolTechnologyState {
+[Serializable] public sealed partial class ToolTechnologyState {
  public ToolLearner[] learners=VillagePopulation.Create(i=>new ToolLearner());public int woodSpent,resinSpent;
  public void EnsurePopulation()=>VillagePopulation.Expand(ref learners,i=>new ToolLearner());
  public static int ResinCost(VillageTool tool)=>tool==VillageTool.BoundAxe?2:1;
@@ -16,6 +16,6 @@ public enum VillageTool { BoundAxe, CultivatingHoe }
  public bool Observe(int student,int maker,VillageTool tool){if(student<0||student>=learners.Length||maker<0||maker>=learners.Length||student==maker||!Enum.IsDefined(typeof(VillageTool),tool)||!learners[maker].Owns(tool)||learners[student].Knows(tool))return false;var p=learners[student];if(tool==VillageTool.BoundAxe){p.axeKnown=p.sawAxe=true;}else{p.hoeKnown=p.sawHoe=true;}return true;}
  public bool CanCraft(ResourceState resources,int actor,VillageTool tool)=>actor>=0&&actor<learners.Length&&Enum.IsDefined(typeof(VillageTool),tool)&&learners[actor].Knows(tool)&&!learners[actor].Owns(tool)&&resources.wood>=2&&resources.resin>=ResinCost(tool);
  public bool Craft(ResourceState resources,int actor,VillageTool tool){if(!CanCraft(resources,actor,tool))return false;resources.wood-=2;resources.resin-=ResinCost(tool);woodSpent+=2;resinSpent+=ResinCost(tool);if(tool==VillageTool.BoundAxe)learners[actor].axeOwned=true;else learners[actor].hoeOwned=true;return true;}
- public bool Valid(){if(learners==null||!VillagePopulation.Supported(learners.Length))return false;int wood=0,resin=0;foreach(var p in learners){if(p==null||!p.Valid())return false;if(p.axeOwned){wood+=2;resin+=2;}if(p.hoeOwned){wood+=2;resin++;}}return woodSpent==wood&&resinSpent==resin;}
+ public bool Valid(){if(!DeliveryValid()||learners==null||!VillagePopulation.Supported(learners.Length))return false;int wood=0,resin=0;foreach(var p in learners){if(p==null||!p.Valid())return false;if(p.axeOwned){wood+=2;resin+=2;}if(p.hoeOwned){wood+=2;resin++;}}return woodSpent==wood&&resinSpent==resin;}
 }
 }
