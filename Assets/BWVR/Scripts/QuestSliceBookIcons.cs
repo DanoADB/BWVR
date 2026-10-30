@@ -11,6 +11,6 @@ public sealed partial class QuestSlice {
  }
  static void SetBookIcon(UnityEngine.UI.RawImage image,string name){int index=Array.IndexOf(BookIconNames,name);if(index<0)throw new ArgumentOutOfRangeException(nameof(name));image.uvRect=new Rect((index%4)*.25f,1-(index/4+1)*.25f,.25f,.25f);}
  void LayoutBookIcons(){foreach(var target in creationBook.GetComponentsInChildren<SpatialTarget>(true)){var text=target.GetComponentInChildren<UnityEngine.UI.Text>();text.rectTransform.localPosition=new Vector3(20,0,-48);text.rectTransform.sizeDelta=new Vector2(166,52);}}
- void RefreshBookIcons(){SetBookIcon(outingGoIcon,bookSection==CreationBookSection.Projects?(state.gatewayProject?.phase==GatewayPhase.Active?"map-pin":state.gatewayProject?.phase==GatewayPhase.Complete?"rotate-ccw":"play"):bookSection==CreationBookSection.Finds?"map-pin":state.playOuting?.phase==PlayOutingPhase.Active?"map-pin":state.playOuting?.phase==PlayOutingPhase.Complete?"rotate-ccw":"play");SetBookIcon(bookSectionsIcon,bookIndexOpen?"book-open":"layout-grid");}
+ void RefreshBookIcons(){SetBookIcon(outingGoIcon,bookSection==CreationBookSection.Projects?(SelectedProjectActive?"map-pin":SelectedProjectComplete?"rotate-ccw":"play"):bookSection==CreationBookSection.Finds?"map-pin":state.playOuting?.phase==PlayOutingPhase.Active?"map-pin":state.playOuting?.phase==PlayOutingPhase.Complete?"rotate-ccw":"play");SetBookIcon(bookSectionsIcon,bookIndexOpen?"book-open":"layout-grid");}
 }
 }

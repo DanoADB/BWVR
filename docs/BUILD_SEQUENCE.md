@@ -1,5 +1,9 @@
 # BWVR build sequence
 
+## S5 Build & Bowl — player-arranged cooperative toy course (2026-10-30)
+
+Book → Projects now offers Build & Bowl after the gateway pages. Fresh native player/creature placements create a shared course; actual player-toss ball contacts must detach one piece from each contributor safely. Rebuild between shots, with no supply chore. Confirmed source hits and completions persist; provisional shots freeze on pause and cancel on harm, pickup, wind, reset, ownership changes or reload. Begin/end preserve the layout, and player shots create no creature lessons. See [BUILD_AND_BOWL.md](BUILD_AND_BOWL.md) for fixture limits and verification. Next candidate: voluntary creature return turns through the existing fetch/aim motors. Physical Quest/full-population testing stays deferred.
+
 ## S5 deliberate attention — point back to a shared build (2026-10-30)
 
 Point at your recorded placed block and tap the right front trigger to renew the creature invitation without moving it; hold at least 0.32 seconds for native pickup. Desktop F invites and E carries. The gesture has its own guidance evidence/cooldown, preserves active motor ownership and completed-action teaching, and introduces no new placement or reward. Native input, causal construction, save/reload and existing guidance/project/Book checks pass. See [BUILD_ATTENTION.md](BUILD_ATTENTION.md). The user will test in Quest tomorrow; keep that gate deferred. Next development option: a player-arranged cooperative construction challenge using these physical invitations and the existing ball/blocks, rather than another supply job.

@@ -17,7 +17,7 @@ public sealed partial class VillagerExploration {
  void RememberStructure(ConstructionSite site){social.Memory.usefulStructures|=StructureBit(site);}
  bool ChooseRepair(){if(construction==null)return false;foreach(var site in construction.sites.OrderBy(s=>(s.transform.position-transform.position).sqrMagnitude))if(TryRepair(site))return true;return false;}
  public bool TryRepair(ConstructionSite site){
-  if(!CanStartStructure||construction==null||site==null||site.Paused||site.Locked||site.RecipeComplete||site.Snapped==0||site.Repairer!=null||site.Visitor!=null||site.Requester!=null||social.Memory.injury>0||social.RecentFright)return false;
+  if(!CanStartStructure||construction==null||site==null||site.BuildBowlReserved||site.Paused||site.Locked||site.RecipeComplete||site.Snapped==0||site.Repairer!=null||site.Visitor!=null||site.Requester!=null||social.Memory.injury>0||social.RecentFright)return false;
   var god=construction.GetComponent<CreatureHybrid>();
   if(god.Season.paused||god.State.time<social.Memory.nextRepairAt||(social.Memory.usefulStructures&StructureBit(site))==0||site.Clock<site.LastCreatureBuildTime+20||god.GetComponent<CreatureCuriosity>().UsingConstruction(site)||site.blocks.Any(b=>b.Item.held||b.VillagerOwner!=null))return false;
   return StartBlockPlacement(site,false);

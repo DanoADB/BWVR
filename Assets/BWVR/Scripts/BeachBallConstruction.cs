@@ -34,7 +34,7 @@ public sealed partial class BeachBall {
   float speed=collision.relativeVelocity.magnitude;if(speed<.7f||collision.impulse.sqrMagnitude<.0001f)return;
   // Apply the opposite of the impulse on the ball, converted to the yard's coordinates.
   var impulse=Quaternion.Inverse(block.Site.transform.rotation)*-collision.impulse;
-  if(speed>=9&&block.Attached){block.Site.Detach(block);if(creatureThrow&&thrown)knockedThisThrow=true;}
+  if(speed>=9&&block.Attached){BuildBowlContact(block);block.Site.Detach(block);if(creatureThrow&&thrown)knockedThisThrow=true;}
   impulse=Vector3.ClampMagnitude(impulse,speed>=9?1.5f:.35f);var point=block.Site.Local(nav.ToWorld(collision.GetContact(0).point));block.Body.AddForceAtPosition(impulse,point,ForceMode.Impulse);block.Body.WakeUp();
  }
 }
