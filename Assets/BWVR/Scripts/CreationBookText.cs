@@ -35,7 +35,7 @@ public static class CreationBookText {
   var m=s.relationships!=null&&page<s.relationships.Length?s.relationships[page]:null;if(m==null)return new CreationBookPage(Person(page,names),"Individual memories are not recorded.",page,count);
   var tool=s.tools?.learners!=null&&page<s.tools.learners.Length?s.tools.learners[page]:null;
   string skills=tool==null?"Tool practice: unknown":"Wood work "+tool.woodPractice+" · Farming "+tool.farmPractice+"\nAxe: "+(tool.axeOwned?"equipped":tool.axeKnown?"learned":"not learned")+" · Hoe: "+(tool.hoeOwned?"equipped":tool.hoeKnown?"learned":"not learned");
-  return new CreationBookPage(Person(page,names),"Trust "+P(m.trust)+" · Affection "+P(m.affinity)+"\nFaith "+P(m.faith)+" · Rest need "+P(m.restNeed)+"\nInjury "+P(m.injury)+"\n\nBall games "+(m.ballGames+m.peerGames)+" · Music visits "+m.musicGatherings+"\nShared rests "+m.sharedRests+" · Shelter rests "+m.shelterRests+"\nConstruction uses "+m.constructionUses+"\n\n"+skills,page,count);
+  return new CreationBookPage(Person(page,names),"Trust "+P(m.trust)+" · Affection "+P(m.affinity)+"\nFaith "+P(m.faith)+" · Rest need "+P(m.restNeed)+"\nInjury "+P(m.injury)+"\n\nBall games "+(m.ballGames+m.peerGames)+" · Music visits "+m.musicGatherings+"\nShared rests "+m.sharedRests+" · Shelter rests "+m.shelterRests+"\nConstruction uses "+m.constructionUses+" · Thanks "+m.buildThanks+"\n\n"+skills,page,count);
  }
  static CreationBookPage Provisions(SliceState s){
   var r=s.resources;if(r==null)return new CreationBookPage("Provisions","Resource stocks are not recorded yet.");

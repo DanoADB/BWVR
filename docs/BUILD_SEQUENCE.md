@@ -1,5 +1,9 @@
 # BWVR build sequence
 
+## Useful joint builds and villager gratitude (2026-10-29)
+
+Villager first-use construction credit now scales with the creature's actual share of the recipe, so a joint player/creature build can help their relationship. Nearby villagers can approach and thank the creature after comfortable use; player-only work, exposed benches and repeated forms do not earn creature credit. See [BUILDING_THANKS.md](BUILDING_THANKS.md) for boundaries, persistence and staged Editor verification. Next: full-population/Quest playtests of the build → use → acknowledgment loop, then tune participation rather than adding another checklist.
+
 ## Shared construction invitation (2026-10-29)
 
 Player snaps witnessed by the creature now invite normal utility-selected building in the same yard for 45 simulation seconds. The player can build alongside the creature and withdraw by taking the invitation block back. This uses native physical pieces, action ownership and placement receipts; no guaranteed command or extra checklist. See [SHARED_BUILDING.md](SHARED_BUILDING.md) for exact limits and staged verification. Next: tune natural participation on Quest and connect actual shared-structure use to consequences.
