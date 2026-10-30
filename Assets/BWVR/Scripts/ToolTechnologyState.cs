@@ -1,11 +1,11 @@
 using System;
 namespace BWVR {
 public enum VillageTool { BoundAxe, CultivatingHoe }
-[Serializable] public sealed class ToolLearner {
+[Serializable] public sealed partial class ToolLearner {
  public int woodPractice,farmPractice;public bool axeKnown,hoeKnown,sawAxe,sawHoe,axeOwned,hoeOwned;
  public bool Knows(VillageTool tool)=>tool==VillageTool.BoundAxe?axeKnown:hoeKnown;
  public bool Owns(VillageTool tool)=>tool==VillageTool.BoundAxe?axeOwned:hoeOwned;
- public bool Valid()=>woodPractice>=0&&woodPractice<=1000000&&farmPractice>=0&&farmPractice<=1000000&&(!axeKnown||woodPractice>=3||sawAxe)&&(!hoeKnown||farmPractice>=3||sawHoe)&&(!axeOwned||axeKnown)&&(!hoeOwned||hoeKnown)&&(!sawAxe||axeKnown)&&(!sawHoe||hoeKnown);
+ public bool Valid()=>UsesValid()&&woodPractice>=0&&woodPractice<=1000000&&farmPractice>=0&&farmPractice<=1000000&&(!axeKnown||woodPractice>=3||sawAxe)&&(!hoeKnown||farmPractice>=3||sawHoe)&&(!axeOwned||axeKnown)&&(!hoeOwned||hoeKnown)&&(!sawAxe||axeKnown)&&(!sawHoe||hoeKnown);
 }
 // Stable adult identities, two bounded capabilities, no general research tree.
 [Serializable] public sealed partial class ToolTechnologyState {

@@ -1,5 +1,9 @@
 # BWVR build sequence
 
+## S5 useful tool outcomes — work, witnesses and storage (2026-10-30)
+
+New axe recipients can choose a needed wood-gathering trip through the existing scheduler. Equipped work has physical sightline-based learning, and the Book separates receiving a tool, using it, teaching a neighbor and stocking its produce. Native Editor checks verify an actual handoff/work/canceled-carry/salvage-delivery loop, correct costs/source, occluded witnesses, pause, duplicate protection and saved evidence. See [TOOL_USE_AND_LEARNING.md](TOOL_USE_AND_LEARNING.md). Food remains deprioritized. Next: a bounded two-villager cooperative task with a visible shared result, preserving independent choice and actual contributions. Quest validation stays deferred.
+
 ## S5 tool handoff — a useful multi-step task (2026-10-30)
 
 Known workshop designs can offer a paid axe/hoe for a nearby forester/farmer. The creature can choose a bounded pickup/carry/follow/place plan; the player can perform the same handoff. Equipment and design knowledge arrive only after real placement, with exact existing material costs and source-specific teaching. Optional Book → Creature shows the recipient/status. See [TOOL_HANDOFFS.md](TOOL_HANDOFFS.md) for reservations, expiry, persistence and test limits. Next: connect delivered skills to observed useful outcomes and voluntary cooperation; keep the deferred Quest gate open. This is one existing-executor plan, not a general planner or completion of all S5 requirements.

@@ -8,15 +8,15 @@ public sealed partial class VillageResources {
  public void ToolPractice(int identity,int work){if(Season.Tools.Practice(identity,work))ToolReceipt(identity,"tool-insight",work==1?VillageTool.BoundAxe:VillageTool.CultivatingHoe);}
  void ToolReceipt(int identity,string kind,VillageTool tool){if(kind=="tool-insight"||kind=="tool-observed"||kind=="tool-use-observed")Gatherers[identity].GetComponent<VillagerAffect>()?.Learned();var god=Navigation.GetComponentInChildren<CreatureHybrid>();god?.Journal.Add(Season.Hybrid.time,kind,CreatureAction.IdleOrObserve,"villager-"+identity,tool.ToString());}
  // Called only after a successful equipped harvest. Learning is knowledge, not inventory.
- public void ToolUsed(int maker,VillageTool tool){
-  if(Season.paused||maker<0||maker>=Gatherers.Length||!Season.Tools.learners[maker].Owns(tool))return;
-  var teacher=Gatherers[maker];var at=teacher.transform.position;
+ public int ToolUsed(int maker,VillageTool tool){
+  if(Season.paused||maker<0||maker>=Gatherers.Length||!Season.Tools.learners[maker].Owns(tool))return 0;
+  var teacher=Gatherers[maker];var at=teacher.transform.position;int learned=0;Physics.SyncTransforms();
   for(int i=0;i<Gatherers.Length;i++){var student=Gatherers[i];if(i==maker||!student.CanWatchTools||Vector3.Distance(student.transform.position,at)>Navigation.Scale*18)continue;
-   var toward=at-student.transform.position;toward.y=0;if(toward.sqrMagnitude<1e-10f||Vector3.Dot(student.transform.forward,toward.normalized)<.25f||!Navigation.SegmentClear(student.transform.position,at,Navigation.villager))continue;
+   var toward=at-student.transform.position;toward.y=0;if(toward.sqrMagnitude<1e-10f||Vector3.Dot(student.transform.forward,toward.normalized)<.25f||!ProvisionVisible(student.GetComponent<VillagerSocial>(),at,teacher.transform))continue;
    if(!Season.Tools.Observe(i,maker,tool))continue;
-   student.GetComponent<VillagerRoutine>().Celebrate(teacher.transform);student.GetComponent<HumanoidMotion>()?.React();ToolReceipt(i,"tool-use-observed",tool);
+   learned++;student.GetComponent<VillagerRoutine>().Celebrate(teacher.transform);student.GetComponent<HumanoidMotion>()?.React();ToolReceipt(i,"tool-use-observed",tool);
   }
- }
+ return learned;}
  public void ToolCompleted(int maker,VillageTool tool){
   ToolReceipt(maker,"tool-crafted",tool);
   for(int i=0;i<Gatherers.Length;i++){var actor=Gatherers[i];if(i==maker||actor.GetComponent<CarryItem>().held||Vector3.Distance(actor.transform.position,StoreApproach)>Navigation.Scale*18||!Navigation.SegmentClear(actor.transform.position,StoreApproach,Navigation.villager))continue;
