@@ -1,5 +1,9 @@
 # BWVR build sequence
 
+## S5 gateway cues and participation (2026-10-30)
+
+The active project now has read-only progress rings, a feasible loose-piece highlight and placement outline, and a ready entrance cue. A bounded project-only invitation helps the creature make its missing contribution, then withdraws. Free, healthy nearby villagers consider a visible finished project earlier in their leisure chooser while retaining shelter/task ownership. Native project/save, cue-budget, ordinary shared-building and independent-village checks pass. See [GATEWAY_CUES.md](GATEWAY_CUES.md). Next: the deferred Quest interaction/playtest gate for this full loop: targeting and beam span, cue readability, invitation acceptance and controller comfort. Further content can follow observed friction rather than adding another chore chain.
+
 ## S5 player-led project — village gateway (2026-10-30)
 
 Book -> Projects now offers an untimed goal: new real timber relay stock, distinct physical player/creature arch placements, then an actual villager walkthrough. It reuses existing actors, known forms, reusable blocks, native receipt attribution and private location beacon. Begin/end preserve the world; pause, removal, old receipts and partial/completed native saves are validated. See [GATEWAY_PROJECT.md](GATEWAY_PROJECT.md). Next: improve the project's nonverbal in-world invitation/progress cues and participation tuning, then run the deferred Quest interaction gate. Avoid adding another chore chain before this loop feels good.

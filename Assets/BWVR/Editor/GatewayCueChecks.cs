@@ -1,0 +1,19 @@
+using System;
+using System.Linq;
+using UnityEngine;
+namespace BWVR.Editor {
+public static class GatewayCueChecks {
+ static void Check(bool ok,string why){if(!ok)throw new Exception(why);}
+ public static void VerifyModel(){Check(GatewayCues.Progress(null)==0,"Missing project has progress");var p=new GatewayProject();p.Begin(0,1,0);Check(GatewayCues.Progress(p)==0,"Empty project has progress");p.supplied=3;p.playerPieces=1;p.creaturePieces=2;Check(GatewayCues.Progress(p)==7,"Milestone projection incorrect");p.Use(0,1,true,false);Check(GatewayCues.Progress(p)==15,"Completed use missing");Debug.Log("BWVR_GATEWAY_CUE_MODEL_PASS: four observed milestone bits");}
+ public static void VerifyRuntime(Action<GatewayCues,ConstructionSite,SliceState> capture=null){
+  Check(Application.isPlaying,"Enter Play mode");var slice=UnityEngine.Object.FindAnyObjectByType<QuestSlice>();var site=slice.GetComponentInChildren<CreatureConstructionLearning>().sites[0];var geometry=site.Capture();var recipe=site.Recipe;bool paused=site.Paused,locked=site.Locked;GatewayCues cues=null;var s=new SliceState();s.Hybrid.time=100;s.gatewayProject=new GatewayProject();s.gatewayProject.Begin(0,1,100);
+  try{
+   site.Paused=site.Locked=false;site.ResetConstruction();site.Recipe=BuildRecipe.Arch;cues=new GatewayCues(slice.transform);var root=(GameObject)typeof(GatewayCues).GetField("root",System.Reflection.BindingFlags.Instance|System.Reflection.BindingFlags.NonPublic).GetValue(cues);Check(root.GetComponentsInChildren<Collider>().Length==0&&root.GetComponentsInChildren<LineRenderer>().Length==6&&root.GetComponentsInChildren<LineRenderer>().Sum(l=>l.positionCount)==144,"Cue geometry exceeded its fixed budget or gained colliders");string before=JsonUtility.ToJson(s);cues.Refresh(s,site,false);Check(cues.VisibleMilestones==4&&cues.ShowingPlacement&&cues.SuggestedPiece!=null&&!cues.ShowingEntrance,"Missing next-piece cues");var candidate=cues.SuggestedPiece;Check(!candidate.Item.held&&!candidate.Attached&&candidate.CanBuild,"Cue reserved or invented a piece");Check(before==JsonUtility.ToJson(s),"Rendering awarded project progress");capture?.Invoke(cues,site,s);
+   candidate.Item.held=true;cues.Refresh(s,site,false);Check(!cues.ShowingPlacement&&cues.SuggestedPiece==null,"Held piece competed with pickup preview");candidate.Item.held=false;cues.Refresh(s,site,true);Check(!cues.ShowingPlacement&&cues.VisibleMilestones==4,"Motor-owned placement competed with cue");s.paused=true;cues.Refresh(s,site,false);Check(cues.VisibleMilestones==0,"Paused cues visible");s.paused=false;site.Locked=true;cues.Refresh(s,site,false);Check(cues.VisibleMilestones==0,"Locked yard cued");site.Locked=false;
+   foreach(var plan in ConstructionPatterns.Plan(BuildRecipe.Arch)){var b=site.blocks.First(b=>!b.Attached&&b.RecipePiece&&(b.Shape==ConstructionShape.Beam)==plan.beam);Check(site.Drop(b,site.World(plan.position),site.transform.rotation),"Cue arch fixture failed");for(int i=0;i<5;i++)site.Advance(.02f);}s.gatewayProject.supplied=3;s.gatewayProject.playerPieces=1;s.gatewayProject.creaturePieces=2;cues.Refresh(s,site,false);Check(cues.ShowingEntrance&&!cues.ShowingPlacement&&cues.SuggestedPiece==null,"Ready gate did not show entrance");capture?.Invoke(cues,site,s);
+   s.gatewayProject.Use(0,100,true,false);s.Hybrid.time=109;cues.Refresh(s,site,false);Check(cues.VisibleMilestones==0&&!cues.ShowingEntrance,"Completion cues never expired");s.gatewayProject.phase=GatewayPhase.Ended;cues.Refresh(s,site,false);Check(cues.VisibleMilestones==0,"Ended project retained cues");
+   Debug.Log("BWVR_GATEWAY_CUE_RUNTIME_PASS: real feasible-piece/slot projection, no progress mutation or reservations, player/motor preview exclusion, pause/lock, ready entrance and bounded completion/ended visibility");
+  }finally{cues?.Dispose();foreach(var b in site.blocks)b.Item.held=false;site.Recipe=recipe;site.Restore(geometry);site.Paused=paused;site.Locked=locked;}
+ }
+}
+}
