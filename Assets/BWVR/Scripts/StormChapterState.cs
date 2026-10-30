@@ -13,7 +13,7 @@ public enum RescueSource {None,Player,Creature,Independent}
  static bool Point(Vector3 p)=>HybridState.Number(p.x,-10000,10000)&&HybridState.Number(p.y,-10000,10000)&&HybridState.Number(p.z,-10000,10000);
 }
 [Serializable]public sealed class StormChapterState {
- public StormSupplyState supply;
+ public StormFireState fire;public StormSupplyState supply;
  public StormPhase phase;public float elapsed,distress;public int episode,villager=-1;
  public bool opportunity,resolved,playerArrivalPending,previousAutomatic=true;public RescueSource source;
  public Vector3 refuge,actorPoint;public float frightAt;
@@ -21,7 +21,7 @@ public enum RescueSource {None,Player,Creature,Independent}
  public static float Duration(StormPhase p)=>p==StormPhase.Calm?180:p==StormPhase.Warning?35:p==StormPhase.Storm?150:p==StormPhase.Recovery?45:0;
  public void Step(float dt,bool paused){if(!Active||paused||!HybridState.Number(dt,0,1000000)||dt<=0)return;elapsed+=Mathf.Min(dt,1);if(elapsed>=Duration(phase)){elapsed=0;phase=(StormPhase)((int)phase+1);}}
  public bool Resolve(RescueSource by){if(!opportunity||resolved||by==RescueSource.None||!Enum.IsDefined(typeof(RescueSource),by))return false;resolved=true;playerArrivalPending=false;source=by;return true;}
- public bool Valid()=>(supply==null||supply.Valid())&&Enum.IsDefined(typeof(StormPhase),phase)&&Enum.IsDefined(typeof(RescueSource),source)&&HybridState.Number(elapsed,0,Duration(phase))&&HybridState.Number(distress,0,100000000)&&episode>=0&&episode<=1000000&&villager>=-1&&villager<VillagePopulation.Adults&&HybridState.Number(frightAt,0,100000000)&&Point(refuge)&&Point(actorPoint)&&(!opportunity||villager>=0)&&(!resolved||opportunity)&&(!playerArrivalPending||opportunity&&!resolved)&&((source!=RescueSource.None)==resolved);
+ public bool Valid()=>(fire==null||fire.Valid())&&(supply==null||supply.Valid())&&Enum.IsDefined(typeof(StormPhase),phase)&&Enum.IsDefined(typeof(RescueSource),source)&&HybridState.Number(elapsed,0,Duration(phase))&&HybridState.Number(distress,0,100000000)&&episode>=0&&episode<=1000000&&villager>=-1&&villager<VillagePopulation.Adults&&HybridState.Number(frightAt,0,100000000)&&Point(refuge)&&Point(actorPoint)&&(!opportunity||villager>=0)&&(!resolved||opportunity)&&(!playerArrivalPending||opportunity&&!resolved)&&((source!=RescueSource.None)==resolved);
  static bool Point(Vector3 p)=>HybridState.Number(p.x,-10000,10000)&&HybridState.Number(p.y,-10000,10000)&&HybridState.Number(p.z,-10000,10000);
 }
 }

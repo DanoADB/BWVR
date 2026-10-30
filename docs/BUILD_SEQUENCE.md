@@ -1,5 +1,9 @@
 # BWVR build sequence
 
+## Gathering Storm V3 — localized fire and villager water response (2026-10-29)
+
+The warning can ignite one isolated reachable tree. Players can suppress it with the existing Rain tool, while an available villager can independently fetch, fill, carry and pour a sourced bucket using village water. The actual material model retains damage; saved receipts distinguish player, villager and weather outcomes in Book → Lore. Native Editor checks cover the complete response, weather integration, ownership/pause, old saves and pending Save/Load; existing storm, timber, weather, rain-tool and Book regressions pass. See [GATHERING_STORM.md](GATHERING_STORM.md) for site limits, staged test conditions and remaining Quest gates. Next: V4 lasting recovery, social acknowledgment and return-to-play invitations, followed by a physical Quest playtest.
+
 ## Village culture — chosen survivors, rituals and discovered games (2026-10-29)
 
 Witnessed storm survival can inspire saint stories and real visits; music/rain coincidences can motivate fallible four-note rituals; repeated safe physical knockdowns can lead the creature to discover and invite a remembered game. All three use existing actor controllers, bounded saved memory and Book → Lore. Combined staged Editor checks pass. See [ISLAND_CULTURE.md](ISLAND_CULTURE.md) for triggers, safety/ownership, learning, persistence and verification limits. Next: return to the user's storm/fire incident and lasting recovery items (Gathering Storm V3/V4), with physical Quest tuning still an open gate.

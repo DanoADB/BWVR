@@ -1,13 +1,13 @@
 # The Gathering Storm — vertical-slice backbone
 
-The larger target is a 15–20 minute Quest experience: play builds a relationship, weather tests it, and the village remembers the outcome. The first two increments connect a complete chapter sequence to physical villager assistance and useful timber retrieval. It is a roughly seven-minute prototype backbone, not the finished storm/fire/recovery release.
+The larger target is a 15–20 minute Quest experience: play builds a relationship, weather tests it, and the village remembers the outcome. The first three increments connect a complete chapter sequence to physical villager assistance, useful timber retrieval and one bounded lightning/fire incident. It is a roughly seven-minute prototype backbone, not the finished storm/fire/recovery release.
 
 ## Play
 
 Open the Sanctuary, choose Settings, then Gathering Storm. Starting retains your island, learned preferences, population and stores. Historical saves remain in free exploration until you opt in. Choosing the entry again during a chapter returns to play without restarting it. End chapter returns to free play without erasing learning; Begin again remains the separate destructive new-season action.
 
 - **Calm — 180 seconds:** existing ball games, chimes, tricks and the cooperative gate remain available for play and teaching.
-- **Warning — 35 seconds:** the existing weather system brings wind, with a contextual gust cue.
+- **Warning — 35 seconds:** wind brings a contextual gust cue; after five seconds, lightning may ignite one isolated, reachable tree.
 - **Storm — 150 seconds:** rain begins. One healthy adult at their actual position becomes frightened and seeks a clear gathering point. They beckon and indicate its green arrival ring. A suitable point must be reachable for both actor sizes; no participant is teleported into danger.
 - **Recovery — 45 seconds:** the weather clears. An unresolved participant can still reach safety. Confirmed help remains recorded.
 - **Complete:** normal weather autonomy and free play resume. The Sanctuary summary retains the chapter phase and the source of any assistance.
@@ -32,13 +32,31 @@ Pending and delivered state, source, destination and last grounded bundle positi
 
 `StormChapter` owns chapter/weather transitions. `StormRescue` extends the existing curiosity and exploration intentions, and CreatureHybrid remains the only creature action coordinator. One participant's ordinary jobs, family, worship and leisure reservations yield for the assistance opportunity. Other villagers remain autonomous. Navigation, pickup/drop, held-object protection, interruption, feedback and cleanup use the established systems. Matching Help guidance becomes obsolete if somebody else solves the problem. During a pending rescue it offers the actual assistance action, rather than a generic visit or a water job inferred from the participant's occupation. Ending the chapter safely releases any creature-held villager and restores weather autonomy without a success award.
 
-This first storm uses wind and rain. Existing island weather/material systems still exist, but a new scenario-specific lightning/fire challenge, independent supply courier, autonomous multi-person emergency response, recovery celebration and new Book chapter pages are later milestones. Water and food work remain deprioritized in development focus; the existing unlimited-energy test setting remains unchanged. There is no new energy economy, possession, AI service, compulsory HUD or camera movement.
+This storm uses wind, localized lightning and rain. Independent timber couriers, multi-person emergency coordination and a recovery celebration remain later milestones. Water and food work remain deprioritized in development focus; the existing unlimited-energy test setting remains unchanged. There is no new energy economy, possession, AI service, compulsory HUD or camera movement.
+
+## V3 — a tree fire and independent bucket response
+
+Five seconds into Warning, the chapter searches up to 512 nearby registered trees within 300 island units of the cistern. It needs an unheld/unharvested tree with less than 35% damage, at least 16 units of clearance from other tree/building footprints, a navigable approach and a complete route from the water point. There is no guaranteed incident if the island lacks a suitable target. An attempted strike happens once per chapter; wet timber or the existing fire/material budget may prevent ignition. There is no new fire-spread implementation or second creature action controller.
+
+Use the existing held Rain tool at the tree's ground footprint. Actual paid/limited rain pulses (or the existing unlimited-energy development setting) cool its real material state. Only a confirmed burning-to-extinguished transition records player suppression. Fire suppression never creates a creature lesson or creature-specific social credit. Healing remains available for an injured villager; it does not suppress fire or undo damaged timber.
+
+One available, healthy adult may independently respond while normal food/water work remains deprioritized. They must reach the cistern approach, fill a visible imported Kenney bucket, spend two village-water units, carry it along the normal navigation route to a safe work point, then pour eight bounded doses before refilling if needed. Bucket water is not an unlimited free cooling loop. Injury, fright, pickup, blocked travel, timeout, ending the chapter and reload release temporary ownership. Existing rescue participants keep their separate evacuation priority. No actor is teleported as part of gameplay and existing busy activities are not forcibly replaced.
+
+The latest chapter records its tree ID, before/after damage, water drawn, rain/bucket doses, source and resolution time. Player rain, villager water, ambient suppression, exhausted fuel, moved/unavailable targets and stopped/unresolved chapters remain distinguishable. A successful villager remembers one fire helped and gains a small confidence increase; this is independent initiative, not creature work. Book → Lore → Weathering the storm presents the saved recap without initializing historical state. Existing material damage remains in the world after rain; this is the foundation for V4 recovery, not a completed reconstruction system.
+
+Save/resume restores material state and the incident receipt, never another bolt or another award. An in-flight bucket is released and hidden; already spent water stays spent, and a later responder must refill. Ending the chapter does not magically erase a live fire.
+
+### V3 verification
+
+`StormFireChecks.VerifyModel/VerifyRuntime` passed in Unity 6000.6.7f1: legacy opt-in, source validation, actual island site selection/strike, one-time ignition, pause, native WorldBrush rain extinction, independent bucket approach/fill/carry/pour, water consumption, exactly-once rewards, no false creature teaching, natural-weather attribution, pending native Save/Load, stop and moved-tree cleanup. A timed case advances the actual wind/rain and material model alongside a staged responder: villager water extinguished the tree at 34.7 simulation seconds after ignition, spending two water and retaining 26.8% damage. This is a reproducible staged capability check, not a full-population success-rate claim; the fixture places the worker at the water approach and moves unrelated actors aside.
+
+Existing chapter/rescue, timber supplies, weather, rain brush and Book model/runtime checks also passed. All four populated Lore pages were rendered, with the storm recap visually inspected and text fit checked even at bounded maximum counters. User save and XR startup flags are restored after tests. Physical Quest controls, bucket-pose readability, natural full-population participation and on-device performance remain unverified. No APK is built here.
 
 ## Build sequence
 
 1. **V1: chapter and one complete assistance loop** — this increment: opt-in/end controls, phase/weather orchestration, player/creature/independent arrival, contextual training, grounded save/resume and outcome attribution.
 2. **V2: play skills become useful** — Editor-verified timber retrieval, physical player/creature delivery, visible six-wood stock increase, contextual teaching, capacity protection and grounded save/resume. Natural discovery/readability still needs Quest playtesting.
-3. **V3: bounded environmental pressure** — one localized lightning/fire incident, direct rain/healing intervention where relevant, multiple feasible responses and autonomous villager reactions.
+3. **V3: bounded environmental pressure** — Editor-verified isolated-tree lightning, native rain-tool suppression, independent bucket fill/carry/pour, persistent material damage and a saved Book recap. Healing remains the existing separate tool for injuries. Natural participation and Quest readability remain unverified.
 4. **V4: recovery and lasting consequences** — help/harm memories, social acknowledgment, return-to-play invitations and concise saved chapter evidence in the Book.
 5. **V5: Quest release gate** — nonverbal onboarding, art/audio polish, comfort, physical controller playthrough, frame-time/memory profiling and a requested APK build. Tune toward the complete 15–20 minute experience using playtest evidence.
 

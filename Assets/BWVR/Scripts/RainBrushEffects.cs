@@ -17,7 +17,7 @@ public sealed partial class IslandWeather {
    var material=State.Find(target.id);bool hot=material!=null&&(material.burning||material.heat>.25f);if(hot!=(pass==0))continue;if(material==null&&State.materials.Length+newMaterials>=WeatherState.MaterialLimit)continue;
    if((material?.wetness??State.wetness)>=.999f&&(material?.heat??0)<=.001f)continue;
    brushTargets[count++]=target;if(material==null)newMaterials++;
-  }if(apply)for(int i=0;i<count;i++){var target=brushTargets[i];var material=State.Find(target.id)??State.Touch(target.id);material?.RainDose(dose,WeatherMaterialProperties.For(target.kind));}return count;
+  }if(apply)for(int i=0;i<count;i++){var target=brushTargets[i];var material=State.Find(target.id)??State.Touch(target.id);bool burning=material?.burning==true;material?.RainDose(dose,WeatherMaterialProperties.For(target.kind));RainBrushed?.Invoke(target.id,burning&&material?.burning==false);}return count;
  }
 }
 public sealed partial class VillageResources {
