@@ -13,12 +13,12 @@ namespace BWVR {
 }
 public sealed partial class SocialMemory {
  public SaintBelief saint;
- bool CultureValid()=>saint==null||saint.Valid();
+ bool CultureValid()=>(saint==null||saint.Valid())&&(rainBelief==null||rainBelief.Valid());
 }
 // Bounded evidence and social interpretation; this service never owns an actor motor.
 public sealed partial class VillageCulture {
- readonly CreatureHybrid god;readonly VillageResources world;readonly VillagerRoutine[] jobs;readonly StormChapter chapter;
- public VillageCulture(CreatureHybrid creature,VillageResources resources,VillagerRoutine[] people,StormChapter storm){god=creature;world=resources;jobs=people;chapter=storm;chapter.SafeArrival+=Survival;foreach(var job in jobs)job.GetComponent<VillagerExploration>().ConfigureCulture(this);}
+ readonly CreatureHybrid god;readonly VillageResources world;readonly VillagerRoutine[] jobs;readonly StormChapter chapter;readonly PlayerRhythm[] musicSources;
+ public VillageCulture(CreatureHybrid creature,VillageResources resources,VillagerRoutine[] people,StormChapter storm){god=creature;world=resources;jobs=people;chapter=storm;chapter.SafeArrival+=Survival;god.GetComponent<CreatureCuriosity>().Completed+=Music;musicSources=god.GetComponentInParent<QuestSlice>().GetComponentsInChildren<PlayerRhythm>();foreach(var source in musicSources)source.Demonstrated+=Music;foreach(var job in jobs)job.GetComponent<VillagerExploration>().ConfigureCulture(this);}
  public SliceState Season=>god.Season;public CreatureHybrid Creature=>god;
  public VillagerSocial Person(int index)=>index>=0&&index<jobs.Length?jobs[index].GetComponent<VillagerSocial>():null;
  void Survival(VillagerSocial person,RescueSource source,int episode){
@@ -32,6 +32,6 @@ public sealed partial class VillageCulture {
   foreach(var job in jobs){var listener=job.GetComponent<VillagerSocial>();if(listener==visitor||listener==survivor||listener.GetComponent<CarryItem>().held||listener.Memory.saint?.confidence>=.5f||!world.ProvisionVisible(listener,visitor.transform.position,visitor.transform)||!world.ProvisionVisible(listener,survivor.transform.position,survivor.transform))continue;var heard=listener.Memory.saint??(listener.Memory.saint=new SaintBelief());heard.Hear(index);listener.GetComponent<VillagerAffect>()?.Learned();break;}
   god.Journal.Add(god.State.time,"survivor visit",CreatureAction.SocialInteraction,visitor.GetComponent<HybridTarget>().id,"Visited a villager believed chosen by the creature");
  }
- public void Dispose(){chapter.SafeArrival-=Survival;}
+ public void Dispose(){chapter.SafeArrival-=Survival;god.GetComponent<CreatureCuriosity>().Completed-=Music;foreach(var source in musicSources)if(source!=null)source.Demonstrated-=Music;}
 }
 }

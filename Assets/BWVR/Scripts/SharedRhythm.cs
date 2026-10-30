@@ -19,7 +19,7 @@ public sealed partial class SharedRhythm:MonoBehaviour {
  }
  public bool Begin(CreatureHybrid god){
   var person=GetComponent<CreatureAffordance>().host;
-  if(GetComponent<PlayerRhythm>()?.Reserved==true||Active||person==null||person.Current!=VillagerSocial.Phase.WatchGift||!person.Willing||GetComponent<CarryItem>().held||god.Season.paused)return false;
+  if(GetComponent<PlayerRhythm>()?.Reserved==true||Ritualist!=null||Active||person==null||person.Current!=VillagerSocial.Phase.WatchGift||!person.Willing||GetComponent<CarryItem>().held||god.Season.paused)return false;
   float unit=god.GetComponent<IslandNavigator>().world.Scale;
   if(Vector3.Distance(person.transform.position,transform.position)>unit*5||Vector3.Distance(god.transform.position,transform.position)>unit*9)return false;
   host=person;creature=god;hostMotion=person.GetComponentInChildren<HumanoidMotion>();guestMotion=god.GetComponentInChildren<HumanoidMotion>();Active=true;Completed=false;Beats=0;clock=0;nextBeat=.3f;InviteAudience();return true;
@@ -42,7 +42,7 @@ public sealed partial class SharedRhythm:MonoBehaviour {
  }
  void Fade(float dt){if(flash<=0)return;flash=Mathf.Max(0,flash-dt);if(flash<=0){visual?.SetPropertyBlock(original);if(!Active){hostMotion?.Touch(null);hostMotion?.Activity(0);if(creature!=null)hostMotion?.LookAt(creature.transform);hostMotion?.Signal(true,true,transform.position);}}}
  void ClearPose(){hostMotion?.Touch(null);guestMotion?.Touch(null);hostMotion?.Activity(0);guestMotion?.Activity(0);visual?.SetPropertyBlock(original);if(sound!=null){sound.Stop();sound.pitch=1;}flash=0;}
- public void Cancel(){Active=false;FinishAudience(false);ClearPose();host=null;creature=null;hostMotion=guestMotion=null;}
+ public void Cancel(){ReleaseRitual(Ritualist);Active=false;FinishAudience(false);ClearPose();host=null;creature=null;hostMotion=guestMotion=null;}
  void OnDisable(){Cancel();}
 }
 }

@@ -251,7 +251,7 @@ public sealed partial class QuestSlice:MonoBehaviour {
   if(dt<=0||float.IsNaN(dt)||float.IsInfinity(dt))return;bool paused=state.paused||applicationSuspended;soundscape?.SetFrozen(paused);
    if(construction!=null)construction.Paused=paused;if(learning!=null)foreach(var site in learning.sites)site.Paused=paused;discoveries?.Advance(dt,paused);
   Chapter?.Advance(dt,paused);
-  if(!paused){state.Hybrid.time=Mathf.Min(100000000,state.Hybrid.time+dt);state.Step(dt);learning?.Tick();tributes?.Tick(dt,false);AnimateVillage(dt);}families?.Advance(dt,paused);resources?.Advance(dt,paused);weather?.Advance(dt,paused);foreach(var ball in balls)ball.Advance(dt,paused);foreach(var music in playerMusic)music.Advance(paused?0:dt);treePlay?.Advance(dt,paused);miracles?.Tick(paused?0:dt,paused);signals.Tick(paused?0:dt,state);soundscape?.Advance(dt,paused);AdvancePlayOuting(dt,paused);AdvanceTreasureTrail(paused);
+  if(!paused){state.Hybrid.time=Mathf.Min(100000000,state.Hybrid.time+dt);state.Step(dt);learning?.Tick();tributes?.Tick(dt,false);AnimateVillage(dt);}families?.Advance(dt,paused);resources?.Advance(dt,paused);weather?.Advance(dt,paused);foreach(var ball in balls)ball.Advance(dt,paused);foreach(var music in playerMusic)music.Advance(paused?0:dt);treePlay?.Advance(dt,paused);miracles?.Tick(paused?0:dt,paused);signals.Tick(paused?0:dt,state);soundscape?.Advance(dt,paused);AdvancePlayOuting(dt,paused);AdvanceTreasureTrail(paused);if(!paused)culture?.Advance();
  }
  void AnimateVillage(float dt){
   cathedral?.Advance(dt);worship?.Advance(dt);

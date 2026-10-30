@@ -11,10 +11,11 @@ public sealed class ChimeKey:MonoBehaviour {public int note;public PlayerRhythm 
 // The player performs a four-note invitation; the existing curiosity controller executes its echo.
 public sealed partial class PlayerRhythm:MonoBehaviour {
  CreatureHybrid god;CarryItem item;CreatureAffordance affordance;SharedRhythm shared;HumanoidMotion performer;Func<bool> allowed;
+ public event Action<CreatureAffordance> Demonstrated;
  public bool Claimed{get;private set;}public bool Active{get;private set;}public bool Completed{get;private set;}public int Played{get;private set;}
  public int[] PlayedNotes{get;private set;}=Array.Empty<int>();public float[] PlayedTimes{get;private set;}=Array.Empty<float>();
  public bool Reserved=>count>0||Claimed||Active;
- public bool Ready=>god!=null&&count==4&&!Claimed&&!Active&&!item.held&&affordance.host==null&&!shared.Active&&!god.Season.paused&&god.State.time<expires&&god.CanSeeCue(GetComponent<HybridTarget>(),false,true);
+ public bool Ready=>god!=null&&shared.Ritualist==null&&count==4&&!Claimed&&!Active&&!item.held&&affordance.host==null&&!shared.Active&&!god.Season.paused&&god.State.time<expires&&god.CanSeeCue(GetComponent<HybridTarget>(),false,true);
  readonly int[] notes=new int[4];readonly float[] intervals=new float[3],flashes=new float[2];readonly Renderer[] bars=new Renderer[2],pips=new Renderer[4];MaterialPropertyBlock tint;
  int count;float lastTap=-100,expires,playClock,nextBeat;bool pending;
  static readonly Color[] Colors={new Color(.22f,.65f,.8f),new Color(1,.66f,.22f)};
@@ -24,12 +25,12 @@ public sealed partial class PlayerRhythm:MonoBehaviour {
  public void Configure(CreatureHybrid creature,Func<bool> inputAllowed){god=creature;allowed=inputAllowed;ConfigureEchoAudience();}
  void Paint(Renderer view,Color color){if(view==null)return;tint.Clear();tint.SetColor("_Color",color);view.SetPropertyBlock(tint);}
  public bool Tap(int note){
-  if(god==null||note<0||note>1||god.Season.paused||allowed?.Invoke()!=true||item.held||affordance.host!=null||shared.Active||Claimed||Active||god.State.time-lastTap<.15f||(god.Owner!=CreatureHybrid.ActionOwner.None&&god.State.intention.target==GetComponent<HybridTarget>().id))return false;
+  if(god==null||note<0||note>1||god.Season.paused||allowed?.Invoke()!=true||item.held||affordance.host!=null||shared.Active||shared.Ritualist!=null||Claimed||Active||god.State.time-lastTap<.15f||(god.Owner!=CreatureHybrid.ActionOwner.None&&god.State.intention.target==GetComponent<HybridTarget>().id))return false;
   float now=god.State.time;float gap=now-lastTap;lastTap=now;Play(note,null);
   if(!god.CanSeeCue(GetComponent<HybridTarget>(),false,true)){Cancel();return true;}
   if(count==4||gap>2.5f){FinishEchoAudience(false);count=0;pending=false;ClearBeads();}Completed=false;
   if(count>0)intervals[count-1]=Mathf.Clamp(gap,.2f,1.2f);notes[count]=note;Paint(pips[count],Colors[note]);count++;expires=now+(count==4?25:2.5f);
-  if(count==4){AudienceSession=AudienceSession==int.MaxValue?1:AudienceSession+1;nextAudience=0;pending=true;god.Season.WorldPlay.Echo.demonstrations=Math.Min(1000000,god.Season.WorldPlay.Echo.demonstrations+1);god.GetComponent<CreatureCuriosity>().NoticeAttention();}return true;
+  if(count==4){AudienceSession=AudienceSession==int.MaxValue?1:AudienceSession+1;nextAudience=0;pending=true;god.Season.WorldPlay.Echo.demonstrations=Math.Min(1000000,god.Season.WorldPlay.Echo.demonstrations+1);god.GetComponent<CreatureCuriosity>().NoticeAttention();Demonstrated?.Invoke(affordance);}return true;
  }
  public void Advance(float dt){if(god==null||god.Season.paused||dt<=0)return;for(int i=0;i<2;i++)if(flashes[i]>0){flashes[i]=Mathf.Max(0,flashes[i]-dt);if(flashes[i]==0)Paint(bars[i],Colors[i]);}if(Reserved&&(item.held||affordance.host!=null||shared.Active||god.State.time>=expires))Cancel();AdvanceEchoAudience();}
  public bool Claim(){if(!Ready)return false;Claimed=true;Completed=false;expires=god.State.time+35;return true;}
