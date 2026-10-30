@@ -11,7 +11,7 @@ public sealed class CreatureConstructionLearning:MonoBehaviour {
  public void Initialize(CreatureHybrid god,ConstructionSite main,IslandDiscoveries island,Func<SliceState> current){
   creature=god;original=main;discoveries=island;season=current;sites.Add(main);main.Recipe=(BuildRecipe)Memory.mainRecipe;
   foreach(var point in island.points)if(point.construction!=null){sites.Add(point.construction);point.construction.Recipe=(BuildRecipe)Memory.cacheRecipes[point.id];}
-  foreach(var site in sites){var clearing=site.GetComponentInParent<DiscoveryPoint>();site.ConfigureContributions(site==main?0:clearing!=null?clearing.id+1:-1,season);}
+  foreach(var site in sites){var clearing=site.GetComponentInParent<DiscoveryPoint>();site.ConfigureContributions(site==main?0:clearing!=null?clearing.id+1:-1,season);site.PlayerPlaced+=creature.NoticePlayerBuild;site.BlockDetached+=creature.SharedBuildDetached;}
   foreach(var site in sites)if(site.RecipeComplete)counted.Add(site);
   var nav=god.GetComponent<IslandNavigator>().world;var pointOfInterest=island.points.Find(p=>p.id==2);
   Bridge=CreatureBridge.Create(transform.parent,nav,main.transform.position);if(Bridge!=null){sites.Add(Bridge.Site);Bridge.Restore(Memory.bridge,Memory.Knows(BuildRecipe.Bridge));for(int i=0;i<Bridge.Site.blocks.Count;i++){var a=Bridge.Site.blocks[i].GetComponent<CreatureAffordance>();creature.RegisterObject(a,"bridge-block-"+i);var cue=a.gameObject.AddComponent<SpatialTarget>();var target=a.GetComponent<HybridTarget>();cue.invoke=()=>creature.Guide(GuidanceIntent.Investigate,target);}}
@@ -26,6 +26,6 @@ public sealed class CreatureConstructionLearning:MonoBehaviour {
  public void Reinforce(BuildRecipe recipe,bool positive){int index=(int)recipe;Memory.preference[index]=Mathf.Clamp01(Memory.preference[index]+(positive?.12f:-.12f));}
  public void Capture(){Memory.mainRecipe=(int)original.Recipe;foreach(var point in discoveries.points)if(point.construction!=null)Memory.cacheRecipes[point.id]=(int)point.construction.Recipe;if(Bridge!=null)Memory.bridge=Bridge.Site.Capture();}
  public void ResetWorld(){counted.Clear();foreach(var site in sites){site.Recipe=site.IsBridge?BuildRecipe.Bridge:BuildRecipe.Arch;if(site.IsBridge){site.ResetConstruction();site.Locked=!Memory.Knows(BuildRecipe.Bridge);}}AssignEmptySites();}
- void OnDestroy(){if(cairnMaterial!=null)Destroy(cairnMaterial);}
+ void OnDestroy(){foreach(var site in sites)if(site!=null&&creature!=null){site.PlayerPlaced-=creature.NoticePlayerBuild;site.BlockDetached-=creature.SharedBuildDetached;}if(cairnMaterial!=null)Destroy(cairnMaterial);}
 }
 }

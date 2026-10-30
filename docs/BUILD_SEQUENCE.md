@@ -1,5 +1,9 @@
 # BWVR build sequence
 
+## Shared construction invitation (2026-10-29)
+
+Player snaps witnessed by the creature now invite normal utility-selected building in the same yard for 45 simulation seconds. The player can build alongside the creature and withdraw by taking the invitation block back. This uses native physical pieces, action ownership and placement receipts; no guaranteed command or extra checklist. See [SHARED_BUILDING.md](SHARED_BUILDING.md) for exact limits and staged verification. Next: tune natural participation on Quest and connect actual shared-structure use to consequences.
+
 ## Demo entry — optional first steps (2026-10-29)
 
 Sanctuary → Start here now offers three short orientation pages, a chime-location shortcut and direct access to the Play Day overview. Existing saves/progress remain intact and menus stay hidden by default. See [FIRST_STEPS.md](FIRST_STEPS.md) for behavior and Editor verification. Next: first-time headset playtests and clearer in-world invitations where players get stuck. This increment does not establish campaign readiness or commercial asset clearance.

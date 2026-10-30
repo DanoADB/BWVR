@@ -18,12 +18,13 @@ namespace BWVR {
  public bool Valid(float now){if(!HybridState.Number(now,0,100000000)||nextId<1||nextId>1000000000||records==null||records.Length>Capacity)return false;int id=0;float time=0;foreach(var r in records){if(r==null||r.id<=id||r.id>=nextId||!FieldsValid(r.site,r.block,r.actor,r.repair,r.time)||r.time<time||r.time>now)return false;id=r.id;time=r.time;}return true;}
 }
 public sealed partial class ConstructionSite {
+ public event Action<ConstructionBlock> PlayerPlaced;
  Func<SliceState> contributionSeason;int contributionSlot=-1;
  public void ConfigureContributions(int slot,Func<SliceState> season){contributionSlot=slot;contributionSeason=season;}
  void RecordConfirmedPlacement(ConstructionBlock block,string actor,bool repair){
   if(Paused||Locked||contributionSlot<0||contributionSeason==null)return;var state=contributionSeason();if(state==null||state.paused)return;int index=blocks.IndexOf(block);float now=state.hybrid?.time??0;
   if(!PlaceContributionLog.FieldsValid(contributionSlot,index,actor,repair,now))return;
-  if(state.placeContributions==null)state.placeContributions=new PlaceContributionLog();state.placeContributions.Add(contributionSlot,index,actor,repair,now);
+  if(state.placeContributions==null)state.placeContributions=new PlaceContributionLog();if(state.placeContributions.Add(contributionSlot,index,actor,repair,now)&&actor=="player")PlayerPlaced?.Invoke(block);
  }
 }
 }

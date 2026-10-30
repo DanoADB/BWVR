@@ -13,6 +13,7 @@ public sealed partial class ConstructionSite:MonoBehaviour {
  BuildRecipe recipe;BrickPlacement[] plan;public BuildRecipe Recipe{get=>recipe;set{recipe=value;plan=null;}}public bool IsBridge{get;private set;}public bool Locked;
  public float LayerHeight{get;private set;}=1.2f;public float Clock{get;private set;}
  public event System.Action Changed;
+ public event System.Action<ConstructionBlock> BlockDetached;
  public VillagerExploration Visitor,Requester,Repairer;
  BrickPlacement[] Pattern=>plan??(plan=ConstructionPatterns.Plan(Recipe,LayerHeight));
  bool Matches(ConstructionBlock block,BrickPlacement p)=>block.Attached&&!block.Item.held&&block.RecipePiece&&(block.Shape==ConstructionShape.Beam)==p.beam&&Vector3.Distance(block.Body.position,p.position)<.09f&&Quaternion.Angle(block.Body.rotation,Quaternion.identity)<4;
@@ -58,6 +59,7 @@ public sealed partial class ConstructionSite:MonoBehaviour {
   Changed?.Invoke();
  }
  public void Detach(ConstructionBlock block){
+  BlockDetached?.Invoke(block);
   foreach(var piece in blocks)if(piece.Connection!=null&&(piece==block||piece.Connection.connectedBody==block.Body)){piece.Connection.xMotion=piece.Connection.yMotion=piece.Connection.zMotion=ConfigurableJointMotion.Free;piece.Connection.angularXMotion=piece.Connection.angularYMotion=piece.Connection.angularZMotion=ConfigurableJointMotion.Free;Destroy(piece.Connection);piece.Connection=null;}
   Changed?.Invoke();
  }
