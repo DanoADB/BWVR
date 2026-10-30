@@ -1,5 +1,9 @@
 # BWVR build sequence
 
+## S5 player-led project — village gateway (2026-10-30)
+
+Book -> Projects now offers an untimed goal: new real timber relay stock, distinct physical player/creature arch placements, then an actual villager walkthrough. It reuses existing actors, known forms, reusable blocks, native receipt attribution and private location beacon. Begin/end preserve the world; pause, removal, old receipts and partial/completed native saves are validated. See [GATEWAY_PROJECT.md](GATEWAY_PROJECT.md). Next: improve the project's nonverbal in-world invitation/progress cues and participation tuning, then run the deferred Quest interaction gate. Avoid adding another chore chain before this loop feels good.
+
 ## S5 creature assistance — unanswered timber offers (2026-10-30)
 
 A visible unanswered cutter offer can become a scored creature-help opportunity. The existing coordinator/curiosity motor performs native approach, face/reach, take, carry and actual deposit; finite cargo, source reservation, interruption recovery, contextual teaching and saved cutter/carrier attribution stay distinct. The original villager helper retains first opportunity. See [CREATURE_TIMBER_ASSIST.md](CREATURE_TIMBER_ASSIST.md). Next: combine these bounded capabilities into a player-led shared project with an observable useful result and optional Book goal, rather than adding another resource chore. Quest testing stays deferred; food/water remain deprioritized.

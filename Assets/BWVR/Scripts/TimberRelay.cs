@@ -56,7 +56,7 @@ public sealed partial class VillagerResourceGathering {
   int cutter=relayCutter;relayCutter=-1;var prior=world.Season.timberRelay;
   world.Season.timberRelay=new TimberRelayMemory{count=Math.Min(1000000,(prior?.count??0)+1),cutter=cutter,carrier=identity,source=Source.id,amount=amount,time=world.Season.Hybrid.time};
   social.Memory.RememberPeer("villager-"+cutter,true,world.Season.Hybrid.time);world.Gatherers[cutter].social.Memory.RememberPeer("villager-"+identity,true,world.Season.Hybrid.time);
-  world.RecordRelayedToolProduce(cutter,Source.id,amount);world.Navigation.GetComponentInChildren<CreatureHybrid>().Journal.Add(world.Season.Hybrid.time,"timber relay stored",CreatureAction.IdleOrObserve,"villager-"+identity,amount+" wood; cut by villager-"+cutter);GetComponent<VillagerAffect>()?.Reassured();
+  world.Season.gatewayProject?.Supply(world.Season.timberRelay,world.Season.paused);world.RecordRelayedToolProduce(cutter,Source.id,amount);world.Navigation.GetComponentInChildren<CreatureHybrid>().Journal.Add(world.Season.Hybrid.time,"timber relay stored",CreatureAction.IdleOrObserve,"villager-"+identity,amount+" wood; cut by villager-"+cutter);GetComponent<VillagerAffect>()?.Reassured();
  }
 }
 public sealed partial class VillageResources {

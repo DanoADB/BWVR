@@ -24,7 +24,7 @@ public sealed partial class ConstructionSite {
  void RecordConfirmedPlacement(ConstructionBlock block,string actor,bool repair){
   if(Paused||Locked||contributionSlot<0||contributionSeason==null)return;var state=contributionSeason();if(state==null||state.paused)return;int index=blocks.IndexOf(block);float now=state.hybrid?.time??0;
   if(!PlaceContributionLog.FieldsValid(contributionSlot,index,actor,repair,now))return;
-  if(state.placeContributions==null)state.placeContributions=new PlaceContributionLog();if(state.placeContributions.Add(contributionSlot,index,actor,repair,now)&&actor=="player")PlayerPlaced?.Invoke(block);
+  if(state.placeContributions==null)state.placeContributions=new PlaceContributionLog();if(state.placeContributions.Add(contributionSlot,index,actor,repair,now)){RecordGatewayPlacement(state,block,actor,state.placeContributions.nextId-1);if(actor=="player")PlayerPlaced?.Invoke(block);}
  }
 }
 }
