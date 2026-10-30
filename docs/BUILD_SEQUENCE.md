@@ -1,5 +1,9 @@
 # BWVR build sequence
 
+## S5 timber teamwork — one cuts, another carries (2026-10-30)
+
+Equipped cutters can offer a real harvested bundle to a willing nearby villager. The helper chooses a native approach/take/carry/deposit task; finite cargo moves once, canceled work recovers safely, and only actual stored wood creates a shared outcome. Book -> Provisions shows cutter/carrier attribution, while existing peer memory and matching tool-use evidence update without free resources or creature credit. See [TIMBER_RELAY.md](TIMBER_RELAY.md). Food/water remain deprioritized. Next: let the creature recognize and assist a visible stalled shared task using the existing guidance/utility/coordinator boundaries. Physical Quest validation stays deferred.
+
 ## S5 useful tool outcomes — work, witnesses and storage (2026-10-30)
 
 New axe recipients can choose a needed wood-gathering trip through the existing scheduler. Equipped work has physical sightline-based learning, and the Book separates receiving a tool, using it, teaching a neighbor and stocking its produce. Native Editor checks verify an actual handoff/work/canceled-carry/salvage-delivery loop, correct costs/source, occluded witnesses, pause, duplicate protection and saved evidence. See [TOOL_USE_AND_LEARNING.md](TOOL_USE_AND_LEARNING.md). Food remains deprioritized. Next: a bounded two-villager cooperative task with a visible shared result, preserving independent choice and actual contributions. Quest validation stays deferred.

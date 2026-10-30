@@ -25,6 +25,7 @@ public sealed partial class VillagerResourceGathering {
  }
 }
 public sealed partial class VillageResources {
- public bool RecordToolProduce(int actor,string source,float amount){var d=Delivery;var p=d?.proof;if(Season.paused||d?.status!=ToolDeliveryStatus.Delivered||actor!=d.recipient||p?.used!=true||p.stored||p.source!=source||Season.Hybrid.time<p.at||Season.Hybrid.time-p.at>180||!HybridState.Number(amount,.001f,3)||Gatherers[actor].Current!=VillagerResourceGathering.Phase.Deposit||State.cargo[actor].amount>0)return false;p.stored=true;p.amount=amount;Navigation.GetComponentInChildren<CreatureHybrid>().Journal.Add(Season.Hybrid.time,"tool produce stored",CreatureAction.IdleOrObserve,"villager-"+actor,amount+" from "+source+" reached existing stores");return true;}
+ public bool RecordToolProduce(int actor,string source,float amount){if(actor<0||actor>=Gatherers.Length||Gatherers[actor].Current!=VillagerResourceGathering.Phase.Deposit||State.cargo[actor].amount>0)return false;return RecordDeliveredToolStock(actor,source,amount);}
+ bool RecordDeliveredToolStock(int actor,string source,float amount){var d=Delivery;var p=d?.proof;if(Season.paused||d?.status!=ToolDeliveryStatus.Delivered||actor!=d.recipient||p?.used!=true||p.stored||p.source!=source||Season.Hybrid.time<p.at||Season.Hybrid.time-p.at>180||!HybridState.Number(amount,.001f,3))return false;p.stored=true;p.amount=amount;Navigation.GetComponentInChildren<CreatureHybrid>().Journal.Add(Season.Hybrid.time,"tool produce stored",CreatureAction.IdleOrObserve,"villager-"+actor,amount+" from "+source+" reached existing stores");return true;}
 }
 }
