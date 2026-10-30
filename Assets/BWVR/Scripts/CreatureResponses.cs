@@ -7,7 +7,7 @@ public sealed partial class CreatureHybrid {
  public string ResponseTarget{get;private set;}="";
  public string ResponseReason{get;private set;}="";
  public string ResponseDetails=>Response==CreatureResponse.None?"":Response+": "+ResponseReason;
- float responseStarted,responseUntil,nextCueCheck,busyAt;HybridTarget responseLook,busyTarget;bool responsePositive;EvidenceSource busySource;
+ float responseStarted,responseUntil,nextCueCheck,busyAt;HybridTarget responseLook,busyTarget;bool responsePositive;EvidenceSource busySource;int busyEvidenceId;
  public bool CanSeeCue(HybridTarget target,bool allowHeldToy=false,bool closeCue=false){
   if(target==null||!target.gameObject.activeInHierarchy||(target.GetComponent<CarryItem>()?.held==true&&!allowHeldToy))return false;
   var direction=target.transform.position-transform.position;direction.y=0;float unit=nav.world.Scale;
@@ -21,7 +21,7 @@ public sealed partial class CreatureHybrid {
    return false;
   }return true;
  }
- void Respond(CreatureResponse kind,HybridTarget target,string reason,bool mustSee=false,bool positive=true,EvidenceSource source=EvidenceSource.Autonomous){
+ void Respond(CreatureResponse kind,HybridTarget target,string reason,bool mustSee=false,bool positive=true,EvidenceSource source=EvidenceSource.Autonomous,int relatedId=0){
   if(Season.paused||suspended||GetComponent<CarryItem>()?.held==true||(mustSee&&!CanSeeCue(target)))return;
   if(kind==CreatureResponse.Noticed||kind==CreatureResponse.Chosen||kind==CreatureResponse.Unavailable||kind==CreatureResponse.Completed)IslandAudio.Cue(kind==CreatureResponse.Unavailable||kind==CreatureResponse.Completed&&!positive?IslandSound.Uneasy:kind==CreatureResponse.Noticed?IslandSound.Notice:IslandSound.Content,transform.position,GetEntityId().GetHashCode());
   Response=kind;ResponseTarget=target!=null?target.id:"";ResponseReason=reason;responseStarted=State.time;responsePositive=positive;
@@ -32,11 +32,11 @@ public sealed partial class CreatureHybrid {
   else if(kind==CreatureResponse.Completed){curiosity.NoticeResponse(positive?CreatureAffect.Mood.Happy:CreatureAffect.Mood.Sad,1.5f);if(positive&&!curiosity.FeedbackProtected)motion?.React();}
   if(kind==CreatureResponse.Noticed||kind==CreatureResponse.Busy)
    State.Evidence.Add(State.time,kind==CreatureResponse.Noticed?EvidenceKind.Noticed:EvidenceKind.Busy,
-    source,CreatureAction.RespondToGuidance,ResponseTarget,reason,source==EvidenceSource.PlayerGuidance?State.guidance.evidenceId:0);
+    source,CreatureAction.RespondToGuidance,ResponseTarget,reason,source==EvidenceSource.PlayerGuidance?(relatedId>0?relatedId:State.guidance.evidenceId):0);
  }
- void NoticeCue(HybridTarget target,string reason,EvidenceSource source){
-  Respond(CreatureResponse.Noticed,target,reason,true,true,source);
-  if(Owner!=ActionOwner.None&&State.intention.target!=target.id){busyTarget=target;busyAt=State.time+1.3f;busySource=source;}
+ void NoticeCue(HybridTarget target,string reason,EvidenceSource source,int relatedId=0){
+  Respond(CreatureResponse.Noticed,target,reason,true,true,source,relatedId);
+  if(Owner!=ActionOwner.None&&State.intention.target!=target.id){busyTarget=target;busyAt=State.time+1.3f;busySource=source;busyEvidenceId=relatedId;}
  }
  void NoticeGuidance(){
   if(Season.paused||suspended||GetComponent<CarryItem>()?.held==true)return;
@@ -47,7 +47,7 @@ public sealed partial class CreatureHybrid {
   if(State.time>=nextCueCheck){nextCueCheck=State.time+.25f;NoticeGuidance();}
   if(busyTarget!=null&&State.time>=busyAt){var target=busyTarget;busyTarget=null;
    bool current=(target==placedAttention&&State.time<attentionUntil)||(State.guidance.status==GuidanceStatus.Active&&State.guidance.target==target.id);
-   if(current&&Owner!=ActionOwner.None&&State.intention.target!=target.id)Respond(CreatureResponse.Busy,target,"Continuing my current activity",true,true,busySource);
+   if(current&&Owner!=ActionOwner.None&&State.intention.target!=target.id)Respond(CreatureResponse.Busy,target,"Continuing my current activity",true,true,busySource,busyEvidenceId);
   }
   if(Response==CreatureResponse.None)return;
   if(State.time>=responseUntil){ClearResponse();return;}

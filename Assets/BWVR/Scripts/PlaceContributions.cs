@@ -19,7 +19,7 @@ namespace BWVR {
 }
 public sealed partial class ConstructionSite {
  public event Action<ConstructionBlock> PlayerPlaced;
- Func<SliceState> contributionSeason;int contributionSlot=-1;
+ Func<SliceState> contributionSeason;int contributionSlot=-1;internal int ContributionSlot=>contributionSlot;
  public void ConfigureContributions(int slot,Func<SliceState> season){contributionSlot=slot;contributionSeason=season;}
  void RecordConfirmedPlacement(ConstructionBlock block,string actor,bool repair){
   if(Paused||Locked||contributionSlot<0||contributionSeason==null)return;var state=contributionSeason();if(state==null||state.paused)return;int index=blocks.IndexOf(block);float now=state.hybrid?.time??0;

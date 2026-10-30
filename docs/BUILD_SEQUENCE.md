@@ -1,5 +1,9 @@
 # BWVR build sequence
 
+## S5 deliberate attention — point back to a shared build (2026-10-30)
+
+Point at your recorded placed block and tap the right front trigger to renew the creature invitation without moving it; hold at least 0.32 seconds for native pickup. Desktop F invites and E carries. The gesture has its own guidance evidence/cooldown, preserves active motor ownership and completed-action teaching, and introduces no new placement or reward. Native input, causal construction, save/reload and existing guidance/project/Book checks pass. See [BUILD_ATTENTION.md](BUILD_ATTENTION.md). The user will test in Quest tomorrow; keep that gate deferred. Next development option: a player-arranged cooperative construction challenge using these physical invitations and the existing ball/blocks, rather than another supply job.
+
 ## S5 gateway cues and participation (2026-10-30)
 
 The active project now has read-only progress rings, a feasible loose-piece highlight and placement outline, and a ready entrance cue. A bounded project-only invitation helps the creature make its missing contribution, then withdraws. Free, healthy nearby villagers consider a visible finished project earlier in their leisure chooser while retaining shelter/task ownership. Native project/save, cue-budget, ordinary shared-building and independent-village checks pass. See [GATEWAY_CUES.md](GATEWAY_CUES.md). Next: the deferred Quest interaction/playtest gate for this full loop: targeting and beam span, cue readability, invitation acceptance and controller comfort. Further content can follow observed friction rather than adding another chore chain.
