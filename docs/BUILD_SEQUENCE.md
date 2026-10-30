@@ -1,5 +1,9 @@
 # BWVR build sequence
 
+## Physical knockdown play (2026-10-29)
+
+The beachball now contacts construction pieces through a bounded 16-proxy physics connection. Loose blocks can be nudged; hard hits can detach snapped builds, with existing interrupted-use reactions from villagers. Book → Places includes a knockdown guide. See [KNOCKDOWN_PLAY.md](KNOCKDOWN_PLAY.md) for the two-scene approximation, protection rules, staged verification and corrected target-specific ball fixture. Next: physical Quest playtest/tune this hands-on build-and-rebuild loop before adding scoring or demolition AI.
+
 ## Useful joint builds and villager gratitude (2026-10-29)
 
 Villager first-use construction credit now scales with the creature's actual share of the recipe, so a joint player/creature build can help their relationship. Nearby villagers can approach and thank the creature after comfortable use; player-only work, exposed benches and repeated forms do not earn creature credit. See [BUILDING_THANKS.md](BUILDING_THANKS.md) for boundaries, persistence and staged Editor verification. Next: full-population/Quest playtests of the build → use → acknowledgment loop, then tune participation rather than adding another checklist.
