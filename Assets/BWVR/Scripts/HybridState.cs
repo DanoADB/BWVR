@@ -14,7 +14,7 @@ public enum GuidanceStatus {None,Active,Completed,Rejected,Expired,Superseded,Ab
 }
 [Serializable] public sealed class ActionReceipt {
  public CreatureAction action;public CreatureSituation situation;public string target="",partner="";public float completedAt;public bool eligible,consumed;
- public int constructionRecipe=-1;public bool fetched,gentleRally,rhythmGame,bowling,chased,echoed,goal,spin;
+ public int constructionRecipe=-1;public bool knockdown,fetched,gentleRally,rhythmGame,bowling,chased,echoed,goal,spin;
 }
 [Serializable] public sealed class CreatureIntention {
  public bool active,chase,echo,spin;public CreatureAction action;public CreatureSituation situation;public string target="",partner="";public float startedAt,deadline;
@@ -44,6 +44,7 @@ public enum GuidanceStatus {None,Active,Completed,Rejected,Expired,Superseded,Ab
   if(interests==null||interests.Length>128)return false;ids.Clear();foreach(var value in interests)if(value==null||!Text(value.target)||!ids.Add(value.target)||!Number(value.appeal,0,1)||!Number(value.lastUsed,0,time)||value.experiences<0||value.experiences>1000000)return false;
   if(!Enum.IsDefined(typeof(GuidanceIntent),guidance.intention)||!Enum.IsDefined(typeof(GuidanceStatus),guidance.status)||!Text(guidance.target)||!Text(guidance.reason)||!Number(guidance.requestedAt,0,time)||!Number(guidance.expiresAt,0,100000060)||!Number(guidance.spot.x,-10000,10000)||!Number(guidance.spot.y,-10000,10000)||!Number(guidance.spot.z,-10000,10000))return false;
   if(intention.spin&&(intention.action!=CreatureAction.PlayWithToy||intention.chase||intention.echo))return false;
+  if(receipt.knockdown&&(receipt.action!=CreatureAction.PlayWithToy||receipt.spin||receipt.goal||receipt.echoed||receipt.chased||receipt.fetched||receipt.gentleRally||receipt.rhythmGame||receipt.bowling))return false;
   if(receipt.spin&&(receipt.action!=CreatureAction.PlayWithToy||receipt.goal||receipt.echoed||receipt.chased||receipt.fetched||receipt.gentleRally||receipt.rhythmGame||receipt.bowling))return false;
   if((intention.echo&&(intention.chase||intention.action!=CreatureAction.PlayWithToy))||(intention.chase&&intention.action!=CreatureAction.PlayWithToy)||!Enum.IsDefined(typeof(CreatureAction),intention.action)||!Enum.IsDefined(typeof(CreatureSituation),intention.situation)||!Text(intention.target)||!Text(intention.partner)||!Number(intention.startedAt,0,time)||!Number(intention.deadline,0,100000300))return false;
   if(receipt.goal&&(receipt.action!=CreatureAction.PlayWithToy||receipt.echoed||receipt.chased||receipt.fetched||receipt.gentleRally||receipt.rhythmGame||receipt.bowling))return false;

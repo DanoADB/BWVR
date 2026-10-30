@@ -1,5 +1,9 @@
 # BWVR build sequence
 
+## Village culture — chosen survivors, rituals and discovered games (2026-10-29)
+
+Witnessed storm survival can inspire saint stories and real visits; music/rain coincidences can motivate fallible four-note rituals; repeated safe physical knockdowns can lead the creature to discover and invite a remembered game. All three use existing actor controllers, bounded saved memory and Book → Lore. Combined staged Editor checks pass. See [ISLAND_CULTURE.md](ISLAND_CULTURE.md) for triggers, safety/ownership, learning, persistence and verification limits. Next: return to the user's storm/fire incident and lasting recovery items (Gathering Storm V3/V4), with physical Quest tuning still an open gate.
+
 ## Physical knockdown play (2026-10-29)
 
 The beachball now contacts construction pieces through a bounded 16-proxy physics connection. Loose blocks can be nudged; hard hits can detach snapped builds, with existing interrupted-use reactions from villagers. Book → Places includes a knockdown guide. See [KNOCKDOWN_PLAY.md](KNOCKDOWN_PLAY.md) for the two-scene approximation, protection rules, staged verification and corrected target-specific ball fixture. Next: physical Quest playtest/tune this hands-on build-and-rebuild loop before adding scoring or demolition AI.
