@@ -4,8 +4,8 @@ namespace BWVR {
 [Serializable] public sealed class CathedralState {
  public int level,authorized;public float faithSeconds,timber,work;public bool sited;public Vector3 site;
  public float[] cargo=VillagePopulation.Create(i=>0f);
- public static readonly float[] Faith={.35f,.45f,.55f,.65f,.75f};
- public static readonly float[] Timber={6,12,18,24,32},Labor={20,40,65,90,120};
+ public static readonly float[] Faith={.25f,.45f,.55f,.65f,.75f};
+ public static readonly float[] Timber={6,12,18,24,32},Labor={120,180,240,360,480};
  public bool Building=>authorized>level;
  public float Remaining=>Building?Mathf.Max(0,Timber[level]-timber-Transit):0;
  public float Transit{get{float sum=0;foreach(float n in cargo)sum+=n;return sum;}}

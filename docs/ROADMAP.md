@@ -152,3 +152,7 @@ These sources support the attributes; specific BWVR mechanics and sequence are o
 ## Definition of emergence
 
 Recognize repeated choices among feasible alternatives, useful combinations and independently transmitted practices. An authored recipe, a random animation or forced repetition is not sufficient evidence of invention. Record observations, developing patterns and established patterns separately, with provenance and bounded evidence. See BOOK_OF_CREATION.md. Simulation truth must precede narrative claims.
+
+Cathedral update (2026-10-31): the first shrine now qualifies at 25% sustained
+faith, with longer paid labor and visible rising masonry/scaffolding. Progress
+uses saved work and survives resume. See [RELIGION_AND_CATHEDRALS.md](RELIGION_AND_CATHEDRALS.md).

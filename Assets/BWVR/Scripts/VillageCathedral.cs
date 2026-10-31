@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.AI;
 namespace BWVR {
 // Scheduler-owned building work. Transit timber is saved per stable villager identity.
-public sealed class VillageCathedral:MonoBehaviour {
+public sealed partial class VillageCathedral:MonoBehaviour {
  public static readonly string[] Stages={"Shrine","Chapel","VillageChurch","GothicChurch","GrandCathedral"};
  public CathedralState State=>world.Season.Cathedral;
  public Vector3 Entrance{get;private set;}public Vector3 PlotSize{get;private set;}
@@ -17,7 +17,7 @@ public sealed class VillageCathedral:MonoBehaviour {
   loads=new GameObject[jobs.Length];for(int i=0;i<jobs.Length;i++){loads[i]=world.CreateLoad(VillageResource.Wood);loads[i].name="Cathedral builder timber";loads[i].SetActive(false);}
   piles=new GameObject[12];for(int i=0;i<piles.Length;i++){piles[i]=world.CreateLoad(VillageResource.Wood);piles[i].name="Delivered cathedral timber";piles[i].SetActive(false);}
   obstacle=new GameObject("Reserved cathedral native footprint");obstacle.transform.SetParent(transform,false);var carve=obstacle.AddComponent<NavMeshObstacle>();carve.shape=NavMeshObstacleShape.Box;carve.size=new Vector3(PlotSize.x,100,PlotSize.z);carve.center=Vector3.up*40;carve.carving=true;carve.carveOnlyStationary=true;
-  plot=GameObject.CreatePrimitive(PrimitiveType.Cube);plot.name="Cathedral foundation";plot.transform.SetParent(transform,false);Destroy(plot.GetComponent<Collider>());stone=new Material(Shader.Find("BWVR/GameSurface")){color=new Color(.53f,.49f,.4f),enableInstancing=true};stone.SetFloat("_Cutoff",0);plot.GetComponent<Renderer>().sharedMaterial=stone;ResetWorld();
+  stone=new Material(Shader.Find("BWVR/GameSurface")){color=new Color(.53f,.49f,.4f),enableInstancing=true};stone.SetFloat("_Cutoff",0);plot=SourcedItemArt.Fit("SettlementProps/structure-floor",transform,"Cathedral foundation",Vector3.zero,Vector3.one,stone);BuildConstructionView();ResetWorld();
  }
  bool FindSite(Vector3 village,out Vector3 site){var nav=world.Navigation;float u=nav.Scale;var discoveries=nav.GetComponentInChildren<IslandDiscoveries>();
   for(int i=0;i<320;i++){float angle=i*137.5f*Mathf.Deg2Rad;var center=village+new Vector3(Mathf.Cos(angle),0,Mathf.Sin(angle))*(40+i*.4f)*u;float low=float.MaxValue,high=float.MinValue;bool clear=true;
@@ -48,7 +48,7 @@ public sealed class VillageCathedral:MonoBehaviour {
   return true;
  }
  public void Cancel(VillagerRoutine job){int i=Array.IndexOf(jobs,job);if(i<0||phase==null||phase[i]==0)return;phase[i]=0;elapsed[i]=0;if(loads!=null)loads[i].SetActive(false);if(job.BuildingCathedral){job.GetComponent<HumanoidMotion>().Carry(null);job.ResetTask();}}
- void Refresh(){if(models==null)return;var s=State;if(shown!=s.level){for(int i=0;i<5;i++)models[i].SetActive(s.level==i+1);shown=s.level;}bool occupied=s.level>0||s.Building;if(obstacle.activeSelf!=occupied){obstacle.SetActive(occupied);world.Navigation.TreeObstacleChanged();}plot.SetActive(occupied);float u=world.Navigation.Scale;int foundationStage=Mathf.Clamp((s.Building?s.authorized:s.level)-1,0,4);var foundationSize=models[foundationStage].GetComponent<BoxCollider>().size;plot.transform.localScale=new Vector3(foundationSize.x+2,1,foundationSize.z+2)*u;plot.transform.position=view.position+Vector3.forward*foundationSize.z*.5f*u-Vector3.up*.5f*u;for(int i=0;i<piles.Length;i++){piles[i].SetActive(s.Building&&s.timber>i*3);piles[i].transform.position=Entrance+new Vector3(-3+(i%3)*2,.6f+(i/6)*.8f,-3+(i%6/3)*2)*u;}}
- void OnDestroy(){if(stone!=null)Destroy(stone);if(loads!=null)foreach(var load in loads)if(load!=null)Destroy(load);if(piles!=null)foreach(var pile in piles)if(pile!=null)Destroy(pile);}
+ void Refresh(){if(models==null)return;var s=State;if(shown!=s.level){for(int i=0;i<5;i++)models[i].SetActive(s.level==i+1);shown=s.level;}bool occupied=s.level>0||s.Building;if(obstacle.activeSelf!=occupied){obstacle.SetActive(occupied);world.Navigation.TreeObstacleChanged();}plot.SetActive(occupied);float u=world.Navigation.Scale;int foundationStage=Mathf.Clamp((s.Building?s.authorized:s.level)-1,0,4);var foundationSize=models[foundationStage].GetComponent<BoxCollider>().size;plot.transform.localScale=new Vector3(foundationSize.x+2,1,foundationSize.z+2)*u;plot.transform.position=view.position+Vector3.forward*foundationSize.z*.5f*u-Vector3.up*.5f*u;for(int i=0;i<piles.Length;i++){piles[i].SetActive(s.Building&&s.timber>i*3);piles[i].transform.position=Entrance+new Vector3(-3+(i%3)*2,.6f+(i/6)*.8f,-3+(i%6/3)*2)*u;}RefreshConstructionView();}
+ void OnDestroy(){DisposeConstructionView();if(stone!=null)Destroy(stone);if(loads!=null)foreach(var load in loads)if(load!=null)Destroy(load);if(piles!=null)foreach(var pile in piles)if(pile!=null)Destroy(pile);}
 }
 }
