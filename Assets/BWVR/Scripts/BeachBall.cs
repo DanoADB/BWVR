@@ -47,6 +47,6 @@ if(item.held){CancelBuildBowlShot();if(BowlCreaturePending||creature.GetComponen
  // Explicit handoff also covers a grab/release occurring between simulation ticks.
  public void PlaceOnGround(Vector3 groundPoint,bool keepGoalGame=false){var rotation=transform.rotation;ReturnHome(keepGoalGame);Body.position=nav.ToNav(groundPoint)+Vector3.up*Radius;Body.rotation=rotation;transform.SetPositionAndRotation(nav.ToWorld(Body.position),rotation);Body.WakeUp();contactReady=false;refresh=0;blockRefresh=0;}
  public void ResetWorld(){Puzzle?.Reset();Spin?.Reset();Goals?.ResetWorld();Chase?.Reset();InFlight=false;ReturnHome();Bowling?.ResetRack(false);Bowling?.ClearDemonstration();foreach(var target in targets)if(target!=null)target.Apply(creature.Season.WorldPlay.Damage(target.id));}
- void OnDestroy(){Puzzle?.Dispose();Goals?.Dispose();Bowling?.Dispose();if(fetchRing!=null)Destroy(fetchRing.gameObject);if(material!=null)Destroy(material);if(stripes!=null)Destroy(stripes);if(rubber!=null)Destroy(rubber);if(ground!=null)Destroy(ground);if(scene.IsValid()&&scene.isLoaded)SceneManager.UnloadSceneAsync(scene);}
+ void OnDestroy(){handoffCues?.Dispose();Puzzle?.Dispose();Goals?.Dispose();Bowling?.Dispose();if(fetchRing!=null)Destroy(fetchRing.gameObject);if(material!=null)Destroy(material);if(stripes!=null)Destroy(stripes);if(rubber!=null)Destroy(rubber);if(ground!=null)Destroy(ground);if(scene.IsValid()&&scene.isLoaded)SceneManager.UnloadSceneAsync(scene);}
 }
 }

@@ -1,5 +1,9 @@
 # BWVR build sequence
 
+## S5 in-world course handoffs (2026-10-31)
+
+Gold ball guides identify player availability, blue guides show a creature invitation/approach, and amber double rings show a settling shot. A fixed read-only view follows native turn state without changing ownership, progress, time, energy or teaching. Native four-stage projection and carry/pause guards pass, and phase renders were inspected. See [BOWL_HANDOFF_CUES.md](BOWL_HANDOFF_CUES.md). Course spacing, aim and natural turn participation now need the deferred Quest playtest; broader S5 cooperation can continue independently.
+
 ## S5 creature turn at a rebuilt course (2026-10-30)
 
 A real ball return followed by a fresh witnessed player snap can offer one creature roll at that piece. The existing utility chooser and curiosity motor handle pickup, carry to a sampled clear approach, gesture, roll and watch. Actual target detachment and a 12-second harm window produce separate saved creature attempts/hits; player objectives remain unchanged. Carry cancellation does not fall back to an unrelated throw. See [BOWL_CREATURE_TURNS.md](BOWL_CREATURE_TURNS.md) for native fixtures and limits. Next candidate: clearer in-world turn handoffs, then course/aim tuning from Quest playtests. Physical Quest/full-population testing stays deferred.

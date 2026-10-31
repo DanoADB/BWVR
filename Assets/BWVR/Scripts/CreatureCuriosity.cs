@@ -10,7 +10,7 @@ public sealed partial class CreatureCuriosity:MonoBehaviour {
  VillagerSocial lastFriend;
  public Phase Current{get;private set;}CreatureAffect.Mood affect,feedbackMood;float reaction,responseProtection;bool lastWater;
  public CreatureAffect.Mood Affect{get=>reaction>0?feedbackMood:affect;private set=>affect=value;}
- public bool Responding=>reaction>0;
+ public bool Responding=>reaction>0;public bool TakingBowlTurn=>bowlCoursePlay&&Current!=Phase.Rest;
  public bool FeedbackProtected=>responseProtection>0;
  public event System.Action<CreatureAffordance> Completed;public event System.Action<string> Failed;
  public int played{get;private set;}public int friendsCarried{get;private set;}public CarryItem Holding=>owned;
