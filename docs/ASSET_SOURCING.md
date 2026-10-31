@@ -120,3 +120,27 @@ Sourced stores, upgrades, exposed grain, resin and reserve portions are delivere
 ## Tribute and discovery art batch
 
 Discovery toys/treats, clearing stones and communal tribute artwork now use selected CC0 models. See [DISCOVERY_ART.md](DISCOVERY_ART.md) for adaptations, source hashes, rebuilding and native interaction checks. Crops and individual gift visuals remain open.
+
+## Polyfork initial review — 2026-10-31
+
+**Free custom-license candidates, not CC0 or unrestricted open-source assets.** [Polyfork licensing](https://polyfork.dev/licensing) allows modified assets in shipped games but restricts standalone asset redistribution. The user plans to make BWVR private. Repository privacy has not been verified, and no Polyfork model files have been imported or committed during this review. Preserve a dated license record with any future download and keep original assets out of public repositories.
+
+Reviewed primary catalog/API metadata and the farmhouse, oak and water-mill hero renders. The farmhouse's timber frame, green shutters and warm roof suit the stylized village direction. The oak has a clear faceted canopy; the mill provides a distinct tall silhouette and visible wheel. These are preview observations, not an in-game visual approval.
+
+Relevant collections: [Medieval Village](https://polyfork.dev/kit/medieval-village-kit-ca0b43), [Nature & Forest](https://polyfork.dev/kit/nature-forest-kit-f29d6a), and [Cozy Farm](https://polyfork.dev/kit/cozy-farm-cc979f). The table records values returned by each model's `/api/assets/{id}` endpoint on the review date. Draw calls are source-reported values, not measured Unity or Quest results; all listed candidates reported `free: true`.
+
+| Candidate | Triangles | Reported draw calls | Possible BWVR use / review decision |
+| --- | ---: | ---: | --- |
+| [Gabled Farmhouse](https://polyfork.dev/asset/gabled-farmhouse-c7534f) | 908 | 2 | First house-variation import candidate; preview inspected. |
+| [Thatched Cottage](https://polyfork.dev/asset/thatched-cottage-0e63f5) | 1,764 | 2 | Contrasting house shape; metadata reviewed, visual review pending. |
+| [Broadleaf Oak](https://polyfork.dev/asset/broadleaf-oak-997c22) | 457 | 1 | First forest comparison candidate; preview inspected. |
+| [Tall Pine Tree](https://polyfork.dev/asset/tall-pine-tree-ab4108) | 350 | 1 | Complementary forest silhouette; visual review pending. |
+| [Water Mill](https://polyfork.dev/asset/water-mill-b31972) | 1,758 | 2 | Future technology landmark; preview inspected. API lists a wheel rig and a ten-second `tick` clip; Unity animation compatibility untested. |
+| [Stilted Granary](https://polyfork.dev/asset/stilted-granary-3e7d7d) | 1,424 | 3 | Storage progression candidate; visual review pending. |
+| [Blacksmith Forge](https://polyfork.dev/asset/blacksmith-forge-09fa85) | 1,668 | 3 | Toolmaking landmark candidate; visual review pending. |
+| [Orchard Apple Tree](https://polyfork.dev/asset/orchard-apple-tree-b21f85) | 736 | 7 | Interactive orchard candidate; avoid mass placement before material/draw-call audit. |
+| [Beehive](https://polyfork.dev/asset/beehive-2e70bf) | 420 | 7 | Discovery/resource prop candidate; low triangle count alone does not establish suitability for dense placement. |
+
+Import sequence: compare one farmhouse with existing houses, then one oak/pine cluster, then a gameplay-relevant storage or technology prop. Keep the current gorilla, villagers and original island terrain. No character replacement is justified before rig, expression and animation compatibility checks.
+
+For each selected import: retain source URL/date/license and file hash; inspect actual meshes, material slots, scale and pivots; use the existing model-conversion pipeline; preserve stable gameplay IDs, colliders, navigation, carry anchors and save compatibility; compare a rendered island view; run relevant interaction validation; and profile representative Quest density before expanding placement. Catalog parameter variations do not imply Unity runtime customization. This review adds sourcing evidence only and changes no gameplay.
