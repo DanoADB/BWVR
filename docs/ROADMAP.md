@@ -1,6 +1,14 @@
 # BWVR roadmap
 
-## Current development — hands-on physics play (2026-10-31)
+## Current development — charged lightning (2026-10-31)
+
+Lightning adds a charge-and-release scenery miracle. A filled electric halo and
+ready chime precede the released bolt. Real wetness, ignition, fuel/damage and
+rain extinguishing determine the aftermath; player casts do not train the
+creature. See [LIGHTNING.md](LIGHTNING.md) for controls and bounded scope.
+Unlimited energy remains available for testing; hardware validation is pending.
+
+### Previous increment — hands-on physics play
 
 The player requested completely new functionality instead of another musical
 increment. Whirlwind adds a held ground tool that lifts and spins free toys and

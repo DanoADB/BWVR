@@ -109,3 +109,6 @@ or rerun as a passing full suite in this interaction-focused update.
 
 Whirlwind adds a tenth scroll choice for held lift-and-spin physics play with free
 balls and loose blocks. See [WHIRLWIND.md](WHIRLWIND.md) for controls and limits.
+
+Lightning adds an eleventh choice: charge for 1.2 seconds at standing scenery,
+then release to strike. See [LIGHTNING.md](LIGHTNING.md) for material interactions.

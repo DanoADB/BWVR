@@ -5,8 +5,8 @@ using UnityEngine.Rendering;
 namespace BWVR {
 // A private, bounded tool context. No tool preview participates in actor perception.
 public sealed partial class GodToolPalette:MonoBehaviour {
- public const int ToolCount=10;
- static readonly SpiritualTool[] ToolKinds={SpiritualTool.Help,SpiritualTool.Protect,SpiritualTool.Investigate,SpiritualTool.Rain,SpiritualTool.Heal,SpiritualTool.WindFan,SpiritualTool.PlantSeeds,SpiritualTool.FoodGift,SpiritualTool.WoodGift,SpiritualTool.Whirlwind};
+ public const int ToolCount=11;
+ static readonly SpiritualTool[] ToolKinds={SpiritualTool.Help,SpiritualTool.Protect,SpiritualTool.Investigate,SpiritualTool.Rain,SpiritualTool.Heal,SpiritualTool.WindFan,SpiritualTool.PlantSeeds,SpiritualTool.FoodGift,SpiritualTool.WoodGift,SpiritualTool.Whirlwind,SpiritualTool.Lightning};
  public WorldBrush Brush{get;private set;}
  public const string SpotId="player-guidance-spot";
  public bool Open{get;private set;}public SpiritualTool? Selected{get;private set;}
@@ -79,7 +79,7 @@ public sealed partial class GodToolPalette:MonoBehaviour {
   if(!pressed)releaseGate=false;bool edge=pressed&&!pressedLast&&!releaseGate;pressedLast=pressed;
   var scale=rig.localScale.x;
   view.transform.SetPositionAndRotation(xr?left.position+left.up*.08f*scale+left.forward*.08f*scale:rig.TransformPoint(desktopAnchor),xr?Quaternion.LookRotation(left.position-eye.transform.position):rig.rotation*desktopRotation);view.transform.localScale=Vector3.one*.0008f*scale;
-  if(Open){bool pointing=Physics.Raycast(ray,out var hit,8*scale);int hovered=pointing?Array.IndexOf(choices,hit.collider):-1;energy.text=miracles.UnlimitedEnergy?"Energy unlimited":$"Energy {Season.Hybrid.energy:0}";energyFill.rectTransform.sizeDelta=new Vector2(140*(miracles.UnlimitedEnergy?1:Mathf.Clamp01(Season.Hybrid.energy/Mathf.Max(1,miracles.tuning.maximum))),6);for(int i=0;i<ToolCount;i++){var kind=ToolKinds[i];float cost=kind==SpiritualTool.Whirlwind?WorldBrush.WhirlwindCost:kind==SpiritualTool.Rain?WorldBrush.RainCost:kind==SpiritualTool.Heal?miracles.tuning.healingCost:kind==SpiritualTool.RainBrush?WorldBrush.RainCost:kind==SpiritualTool.WindFan?WorldBrush.WindCost:kind==SpiritualTool.FoodGift||kind==SpiritualTool.WoodGift?WorldBrush.GiftCost:0;choices[i].GetComponentInChildren<UnityEngine.UI.Text>().color=miracles.CanAfford(cost)?new Color(.19f,.12f,.065f):new Color(.48f,.36f,.25f);choices[i].GetComponent<UnityEngine.UI.Image>().color=Color.clear;choices[i].transform.GetChild(0).localScale=Vector3.one*(i==hovered?19.2f:18);}
+  if(Open){bool pointing=Physics.Raycast(ray,out var hit,8*scale);int hovered=pointing?Array.IndexOf(choices,hit.collider):-1;energy.text=miracles.UnlimitedEnergy?"Energy unlimited":$"Energy {Season.Hybrid.energy:0}";energyFill.rectTransform.sizeDelta=new Vector2(140*(miracles.UnlimitedEnergy?1:Mathf.Clamp01(Season.Hybrid.energy/Mathf.Max(1,miracles.tuning.maximum))),6);for(int i=0;i<ToolCount;i++){var kind=ToolKinds[i];float cost=kind==SpiritualTool.Lightning?WorldBrush.LightningCost:kind==SpiritualTool.Whirlwind?WorldBrush.WhirlwindCost:kind==SpiritualTool.Rain?WorldBrush.RainCost:kind==SpiritualTool.Heal?miracles.tuning.healingCost:kind==SpiritualTool.RainBrush?WorldBrush.RainCost:kind==SpiritualTool.WindFan?WorldBrush.WindCost:kind==SpiritualTool.FoodGift||kind==SpiritualTool.WoodGift?WorldBrush.GiftCost:0;choices[i].GetComponentInChildren<UnityEngine.UI.Text>().color=miracles.CanAfford(cost)?new Color(.19f,.12f,.065f):new Color(.48f,.36f,.25f);choices[i].GetComponent<UnityEngine.UI.Image>().color=Color.clear;choices[i].transform.GetChild(0).localScale=Vector3.one*(i==hovered?19.2f:18);}
    if(edge){int index=hovered;if(index<ToolCount&&index>=0)Select(ToolKinds[index]);else if(index==ToolCount){ClearSign();releaseGate=true;}else if(index==ToolCount+1)Cancel();}return true;
   }
   if(!Selected.HasValue)return owned;
@@ -87,6 +87,7 @@ public sealed partial class GodToolPalette:MonoBehaviour {
   hint.gameObject.SetActive(true);hint.transform.parent.SetPositionAndRotation(right.position+right.forward*.23f*scale-right.up*.07f*scale,Quaternion.LookRotation(right.position-eye.transform.position));hint.transform.parent.localScale=Vector3.one*.00065f*scale;
   previewTimer-=dt;if(previewTimer<=0||edge){previewTimer=.1f;Aim(ray);}
   if(Selected==SpiritualTool.Rain||Selected==SpiritualTool.RainBrush){if(pressed&&!releaseGate&&Brush.PulseReady)Aim(ray);bool applied=Brush.ProcessRain(PreviewPoint,pressed&&!releaseGate,dt,PreviewValid);if(applied)Uses++;hint.text="Rain · "+(Brush.Active?"Raining":PreviewValid?"Hold trigger over ground":Reason);return true;}
+  if(Selected==SpiritualTool.Lightning)return LightningPointer(ray,pressed,dt);
   if(Selected==SpiritualTool.Whirlwind){bool applied=Brush.ProcessWhirlwind(PreviewPoint,pressed&&!releaseGate,dt,PreviewValid);if(applied)Uses++;hint.text="Whirlwind · "+(Brush.Active?"Hold to spin · release to scatter":PreviewValid?"Hold over loose toys and blocks":Brush.Reason.Length>0?Brush.Reason:Reason);return true;}
   if(Selected==SpiritualTool.WindFan){if(pressed&&!releaseGate&&Brush.PulseReady)Aim(ray);bool applied=Brush.ProcessWind(PreviewPoint,fanDirection,pressed&&!releaseGate,dt,PreviewValid);if(applied)Uses++;hint.text="Wind · "+(Brush.Active?"Blowing":PreviewValid?"Hold trigger over ground":Reason);return true;}
   if(Selected==SpiritualTool.PlantSeeds){RefreshSeedTargets(dt);if(plantStrokeSeason!=Season){plantStrokeSeason=Season;nextPlantAt=0;}hint.text="Plant seeds · "+(PreviewValid?PlantCostHint():Reason);if(pressed&&!releaseGate&&PreviewValid&&Season.Hybrid.time>=nextPlantAt){Aim(ray);if(PreviewValid&&PlantAt(PreviewPoint))nextPlantAt=Season.Hybrid.time+.5f;}return true;}
@@ -94,7 +95,7 @@ public sealed partial class GodToolPalette:MonoBehaviour {
   hint.text=Selected+" · "+(PreviewValid?"Trigger to use":Reason);if(edge){bool accepted=PreviewValid&&Apply(Selected.Value,aimed,PreviewPoint);releaseGate=true;if(!accepted)feedback?.Invoke(false,Reason);}
   return true;
  }
- void Aim(Ray ray){
+ void Aim(Ray ray){if(Selected==SpiritualTool.Lightning){AimLightning(ray);return;}
   if(Selected==SpiritualTool.PlantSeeds){AimPlanting(ray);return;}
   if(Selected==SpiritualTool.Rain||Selected==SpiritualTool.RainBrush||Selected==SpiritualTool.WindFan||Selected==SpiritualTool.FoodGift||Selected==SpiritualTool.WoodGift||Selected==SpiritualTool.Whirlwind){bool hitGround=ground.Raycast(ray,out var hit,8*rig.localScale.x);PreviewPoint=hitGround?hit.point:ray.GetPoint(2*rig.localScale.x);string brushReason="Aim at island ground";fanDirection=Vector3.ProjectOnPlane(ray.direction,Vector3.up);if(fanDirection.sqrMagnitude<.0001f)fanDirection=Vector3.ProjectOnPlane(eye.transform.forward,Vector3.up);fanDirection.Normalize();PreviewValid=hitGround&&(Selected==SpiritualTool.Whirlwind?Brush.CanWhirlwind(PreviewPoint,out brushReason):Selected==SpiritualTool.Rain||Selected==SpiritualTool.RainBrush?Brush.CanRain(PreviewPoint,out brushReason):Selected==SpiritualTool.WindFan?Brush.CanWind(PreviewPoint,fanDirection,out brushReason):Brush.CanGift(PreviewPoint,Selected==SpiritualTool.FoodGift,out brushReason));Reason=brushReason;preview.SetActive(hitGround);preview.transform.position=PreviewPoint;PreviewShape(PreviewValid,Selected==SpiritualTool.Whirlwind?WorldBrush.WhirlwindRadius:12);if(PreviewValid&&Selected==SpiritualTool.WindFan)FanPreview();previewMaterial.color=PreviewValid?new Color(.4f,1,.8f):new Color(1,.25f,.18f);return;}
   PreviewShape(true,5);aimed=null;PreviewPoint=ray.GetPoint(2*rig.localScale.x);bool groundHit=false;
@@ -105,7 +106,7 @@ public sealed partial class GodToolPalette:MonoBehaviour {
  public bool Apply(SpiritualTool tool,HybridTarget target,Vector3 point){
   if(tool==SpiritualTool.PlantSeeds)return PlantAt(point);
   if(tool==SpiritualTool.FoodGift||tool==SpiritualTool.WoodGift){bool gifted=Brush.GiftPulse(point,tool==SpiritualTool.FoodGift);Reason=Brush.Reason;if(gifted)Uses++;return gifted;}
-  if(tool==SpiritualTool.Rain||tool==SpiritualTool.RainBrush||tool==SpiritualTool.WindFan||tool==SpiritualTool.Whirlwind){Reason="Hold the brush trigger over ground";return false;}
+  if(tool==SpiritualTool.Rain||tool==SpiritualTool.RainBrush||tool==SpiritualTool.WindFan||tool==SpiritualTool.Whirlwind||tool==SpiritualTool.Lightning){Reason="Hold the brush trigger over ground";return false;}
   if(!HybridState.Number(point.x,-10000,10000)||!HybridState.Number(point.y,-10000,10000)||!HybridState.Number(point.z,-10000,10000)){Reason="Invalid placement";return false;}if(!miracles.CanUse(tool,target,out var reason)){Reason=reason;return false;}
   if(target==probe){spot.transform.position=point;target=spot;}
   if(!miracles.TryUse(tool,target)){Reason=miracles.LastReason;return false;}
