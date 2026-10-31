@@ -1,6 +1,14 @@
 # BWVR roadmap
 
-## Current development — categorized God Tools dock (2026-10-31)
+## Current development — standalone foveated rendering (2026-10-31)
+
+Automatic eye-tracked foveation with conservative fixed fallback is integrated
+through the existing Built-in/OpenXR renderer and Meta XR Core. Settings exposes
+Auto/Fixed/Off; eye tracking remains optional for installation and gameplay.
+See [FOVEATED_RENDERING.md](FOVEATED_RENDERING.md). Device GPU measurements,
+permission/eye-tracking behavior and peripheral UI readability remain Quest gates.
+
+### Previous increment — categorized God Tools dock (2026-10-31)
 
 The low field-of-view dock replaces the tall God Tools scroll. Five categories
 reveal their own tool row, with Empty Hand and real Book/menu shortcuts, idle

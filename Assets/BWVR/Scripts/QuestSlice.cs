@@ -32,7 +32,7 @@ public sealed partial class QuestSlice:MonoBehaviour {
  Vector3 cistern=new Vector3(-.32f,Floor,.25f),well=new Vector3(.4f,Floor,-.2f);
  bool praiseLast,discourageLast;float feedbackReady;
  string SavePath=>Path.Combine(Application.persistentDataPath,"bwvr-season-v1.json");
- void Start(){terrain=Resources.Load<IslandTerrainData>("FirstIsland");art=Resources.Load<GameArtCatalog>("BWVRArt/Catalog");font=Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");Load();state.developmentFocus=developmentFocus;state.observeWithoutFoodWork=developmentFocus&&observeWithoutFoodWork;Build();humanoids=GetComponentsInChildren<HumanoidMotion>();}
+ void Start(){QuestFoveation.Install(gameObject);terrain=Resources.Load<IslandTerrainData>("FirstIsland");art=Resources.Load<GameArtCatalog>("BWVRArt/Catalog");font=Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");Load();state.developmentFocus=developmentFocus;state.observeWithoutFoodWork=developmentFocus&&observeWithoutFoodWork;Build();humanoids=GetComponentsInChildren<HumanoidMotion>();}
  Material Mat(Color c){var m=new Material(Shader.Find("Universal Render Pipeline/Lit")??Shader.Find("Standard"));m.color=c;return m;}
  GameObject Shape(string name,PrimitiveType shape,Vector3 position,Vector3 scale,Color color,Transform parent=null){var g=GameObject.CreatePrimitive(shape);g.name=name;g.transform.SetParent(parent??transform,false);g.transform.localPosition=position;g.transform.localScale=scale;g.GetComponent<Renderer>().sharedMaterial=Mat(color);return g;}
  IslandPlacement Nearest(string kind,Vector3 from,System.Func<IslandPlacement,bool> filter=null)=>terrain?.placements?.Where(p=>p.kind==kind&&(filter==null||filter(p))).OrderBy(p=>(terrain.PlacementPoint(p)-from).sqrMagnitude).FirstOrDefault();

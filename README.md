@@ -38,6 +38,7 @@ Reference: [Meta Link development workflow](https://developers.meta.com/vr/docum
 
 ## Quest controls
 
+- **Standalone foveation:** Settings → Foveation cycles Auto / Fixed / Off. Auto attempts eye-tracked rendering on supported headsets with permission and falls back to low fixed foveation. Desktop/Quest Link rendering stays on its existing path. See [foveated rendering](docs/FOVEATED_RENDERING.md) for setup and unverified hardware gates.
 - Hold **right SIDE trigger (grip) + right stick up/down** to zoom in/out around the island under your gaze (0.5×–8×). Release the side trigger for normal height adjustment. The front/index trigger does not zoom. **Y** resets zoom and recenters; desktop mouse wheel also zooms. Zoom pauses while carrying an object.
 - Left stick: move forward/back/sideways relative to your head. Right stick left/right: 30-degree snap turn; center the stick before turning again. Right stick up/down: rise/lower above the tabletop.
 - Island traversal uses faster defaults: horizontal/vertical stick travel is 4× the earlier rate, right-grip stick zoom is 2.5×, and desktop wheel zoom is 2×. Partial stick deflection still provides fine movement; zoom limits and snap turns stay the same. Desktop WASD uses the same horizontal speed as the sticks.

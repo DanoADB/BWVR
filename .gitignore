@@ -29,3 +29,12 @@ Assets/LocalTerrain/
 Assets/LocalTerrain.meta
 
 __pycache__/
+
+# Meta SDK generates per-machine tooling/runtime defaults on import.
+# DevAgentSettings can contain a local bridge token; never publish it.
+Assets/Resources/DevAgentSettings.asset*
+Assets/Resources/ImmersiveDebuggerSettings.asset*
+Assets/Resources/InputActions.asset*
+Assets/Resources/OculusRuntimeSettings.asset*
+Assets/Resources/OVRPlatformToolSettings.asset*
+Assets/Resources.meta

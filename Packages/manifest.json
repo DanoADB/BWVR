@@ -1,16 +1,27 @@
 {
   "dependencies": {
+    "com.meta.xr.sdk.core": "207.0.1",
     "com.unity.ai.navigation": "2.0.16",
     "com.unity.inputsystem": "1.20.1",
     "com.unity.pipeline": "0.9.1-exp.1",
     "com.unity.ugui": "2.0.0",
     "com.unity.xr.management": "4.6.1",
     "com.unity.xr.openxr": "1.18.0",
+    "com.unity.modules.assetbundle": "1.0.0",
     "com.unity.modules.audio": "1.0.0",
     "com.unity.modules.jsonserialize": "1.0.0",
     "com.unity.modules.particlesystem": "1.0.0",
     "com.unity.modules.physics": "1.0.0",
     "com.unity.modules.ui": "1.0.0",
     "com.unity.modules.xr": "1.0.0"
-  }
+  },
+  "scopedRegistries": [
+    {
+      "name": "Meta",
+      "url": "https://npm.developer.oculus.com",
+      "scopes": [
+        "com.meta.xr.sdk.core"
+      ]
+    }
+  ]
 }
