@@ -1,0 +1,23 @@
+using System;
+using System.Linq;
+using System.Reflection;
+using UnityEngine;
+namespace BWVR.Editor {
+public static class BowlRebuildChecks {
+ static readonly BindingFlags F=BindingFlags.Instance|BindingFlags.NonPublic;
+ static void Check(bool ok,string why){if(!ok)throw new Exception(why);}
+ public static void Verify(Action<CreatureHybrid,ConstructionSite> capture=null){BuildBowlReturnChecks.VerifyRuntime((slice,ball,site)=>{
+  var god=slice.GetComponentInChildren<CreatureHybrid>();var mind=god.GetComponent<CreatureCuriosity>();var state=god.Season;var nav=god.GetComponent<IslandNavigator>();var p=state.buildBowl;Check(god.BowlRebuildPending&&god.Owner==CreatureHybrid.ActionOwner.None,"Physical return did not offer rebuilding");
+  string receipt=JsonUtility.ToJson(state.Hybrid.receipt);int placements=state.placeContributions.nextId;state.paused=true;string paused=JsonUtility.ToJson(state);god.RefreshBowlRebuild();Check(god.BowlRebuildPiece==null&&!god.BowlRebuildGesturing&&god.BowlRebuildPending&&paused==JsonUtility.ToJson(state),"Pause displayed or consumed invitation");state.paused=false;
+  god.RefreshBowlRebuild();Check(!god.BowlRebuildGesturing,"Invitation overrode feedback reaction");mind.Tick(2.1f,state,false);
+  var candidate=site.blocks.First(b=>b.gameObject.activeInHierarchy&&!b.Attached&&b.RecipePiece&&b.CanBuild);bool visible=false;for(int i=0;i<24;i++){var wanted=candidate.transform.position+Quaternion.Euler(0,i*15,0)*Vector3.forward*nav.world.Scale*14;if(!nav.CanPlace(wanted,out var at))continue;god.transform.position=at;god.transform.LookAt(candidate.transform.position);nav.ResetRoute();Physics.SyncTransforms();if(god.CanSeeCue(candidate.GetComponent<HybridTarget>())){visible=true;break;}}Check(visible,"No visible loose-piece stage");
+  string before=JsonUtility.ToJson(state);god.RefreshBowlRebuild();Check(god.BowlRebuildPiece==candidate&&god.BowlRebuildGesturing&&before==JsonUtility.ToJson(state)&&state.placeContributions.nextId==placements&&receipt==JsonUtility.ToJson(state.Hybrid.receipt)&&!candidate.Item.held,"Gesture forged ownership, placement or lesson");var cues=(GatewayCues)typeof(CreatureHybrid).GetField("bowlRebuildCues",F).GetValue(god);var root=(GameObject)typeof(GatewayCues).GetField("root",F).GetValue(cues);Check(cues.ShowingPlacement&&cues.VisibleMilestones==0&&root.GetComponentsInChildren<Collider>().Length==0&&root.GetComponentsInChildren<LineRenderer>().Count(l=>l.enabled)==2,"Cue exceeded two visible guides or acquired physical affordance");capture?.Invoke(god,site);
+  state.Hybrid.time+=2.1f;god.RefreshBowlRebuild();Check(!god.BowlRebuildGesturing&&god.BowlRebuildPiece==candidate,"Gesture repeated or guide vanished early");
+  var clone=JsonUtility.FromJson<SliceState>(JsonUtility.ToJson(state));var field=typeof(QuestSlice).GetField("state",F);field.SetValue(slice,clone);Check(!god.BowlRebuildPending,"Reload retained invitation ownership");field.SetValue(slice,state);
+  Check(site.TryRecipePlan(candidate,out var destination,out _),"No real placement for invitation");Check((bool)typeof(QuestSlice).GetMethod("TryGrab",F).Invoke(slice,new object[]{1,candidate.Item}),"Invited block cannot be picked up");god.RefreshBowlRebuild();Check(!god.BowlRebuildPending&&god.BowlRebuildPiece==null&&!god.BowlRebuildGesturing,"Player pickup did not dismiss invitation");Physics.SyncTransforms();typeof(QuestSlice).GetMethod("Release",F).Invoke(slice,new object[]{1,new Ray(destination+Vector3.up*nav.world.Scale*12,Vector3.down)});Check(candidate.Attached&&state.placeContributions.nextId==placements+1&&state.placeContributions.records.Last().actor=="player","Invited native drop did not record player work");god.RefreshBowlRebuild();Check(!god.BowlRebuildPending&&receipt==JsonUtility.ToJson(state.Hybrid.receipt),"Rebuild retained old cue or changed retrieval lesson");
+  // The same real-return receipt is reused only to exercise transient expiry/owner guards.
+  god.OfferBowlRebuild(p,site,p.lastReturnedShot);Check(god.BowlRebuildPending,"Receipt fixture did not arm");state.Hybrid.time+=31;god.RefreshBowlRebuild();Check(!god.BowlRebuildPending&&god.BowlRebuildPiece==null,"Invitation did not expire");god.OfferBowlRebuild(p,site,p.lastReturnedShot);ball.Throw(Vector3.forward,false);Check(!god.BowlRebuildPending,"New shot retained old rebuild request");ball.ReturnHome();
+  Debug.Log("BWVR_BOWL_REBUILD_PASS: native safe shot + utility-selected physical fetch, returned-ball invitation, pause/feedback protection, visible feasible loose piece and slot, bounded read-only cue geometry, one short gesture, stale-save guard, native player pickup/snap, preserved fetched lesson, expiry and new-shot cleanup");
+ });}
+}
+}

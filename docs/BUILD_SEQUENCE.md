@@ -1,5 +1,9 @@
 # BWVR build sequence
 
+## S5 returned-ball rebuilding invitation (2026-10-30)
+
+After a physical ball return in an active challenge, an idle creature can briefly point to a visible loose piece, with the existing guide showing a feasible snap. The offer is transient, dismissible and read-only; normal utility choices, feedback and motor ownership take priority. Native return/gesture/pickup/snap and existing cue/input checks pass. See [BOWL_REBUILD_INVITATION.md](BOWL_REBUILD_INVITATION.md) for fixture limits. Next candidate: course variations and a creature turn at a rebuilt course. Physical Quest/full-population testing stays deferred.
+
 ## S5 Build & Bowl returns — keep the shared game moving (2026-10-30)
 
 A confirmed safe shot can now invite the creature to physically fetch and return the ball near the player's shooting spot. Existing utility selection, tickets, carry/place, feedback and cleanup are reused; offers grant no completion or reward. Clear sampled destinations, pause/stale-save guards, saved one-shot return counts and Book progress support rebuilding and replay. See [BUILD_BOWL_RETURNS.md](BUILD_BOWL_RETURNS.md) for staged verification limits. Next candidate: visible, voluntary shared-course rebuilding invitations. Physical Quest/full-population testing stays deferred.

@@ -23,7 +23,7 @@ public sealed partial class BeachBall {
  bool CompleteBowlReturn(){
   var mind=creature.GetComponent<CreatureCuriosity>();var site=creature.GetComponent<CreatureConstructionLearning>().sites[0];var delta=creature.transform.position-bowlReturnPoint;delta.y=0;
   if(!ClaimBowlReturn()||!item.held||mind.Holding!=item||mind.Current!=CreatureCuriosity.Phase.FetchPlace||delta.magnitude>nav.Scale*6||!BowlReturnPointClear(bowlReturnPoint,site))return false;
-  var project=bowlReturnProject;int shot=bowlReturnShot;var point=bowlReturnPoint;PlaceOnGround(point);JustFetched=true;project.RecordReturn(shot);creature.Season.WorldPlay.fetchReturns=System.Math.Min(1000000,creature.Season.WorldPlay.fetchReturns+1);creature.Journal.Add(creature.State.time,"build-and-bowl ball returned",CreatureAction.PlayWithToy,StableId,"Physically carried and placed near the player's shooting spot");return true;
+  var project=bowlReturnProject;int shot=bowlReturnShot;var point=bowlReturnPoint;PlaceOnGround(point);JustFetched=true;if(project.RecordReturn(shot))creature.OfferBowlRebuild(project,site,shot);creature.Season.WorldPlay.fetchReturns=System.Math.Min(1000000,creature.Season.WorldPlay.fetchReturns+1);creature.Journal.Add(creature.State.time,"build-and-bowl ball returned",CreatureAction.PlayWithToy,StableId,"Physically carried and placed near the player's shooting spot");return true;
  }
 }
 }
