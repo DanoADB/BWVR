@@ -7,7 +7,7 @@ namespace BWVR.Editor {
 public static class SharedActivitiesChecks {
  [MenuItem("BWVR/Verify play invitations and shared rhythm (Play mode)")]
  public static void Verify(){VerifyWithCapture(null);}
- public static void VerifyWithCapture(Action<SharedRhythm,VillagerSocial,CreatureHybrid> capture){
+ public static void VerifyWithCapture(Action<SharedRhythm,VillagerSocial,CreatureHybrid> capture,Action<SharedRhythm,VillagerSocial,CreatureHybrid> completed=null,Action<SharedRhythm,VillagerSocial,CreatureHybrid> afterFeedback=null){
   if(!Application.isPlaying)throw new Exception("Enter Play mode");
   var slice=UnityEngine.Object.FindAnyObjectByType<QuestSlice>();var god=slice.GetComponentInChildren<CreatureHybrid>();var ball=slice.GetComponentInChildren<BeachBall>();var toy=slice.GetComponentsInChildren<SharedRhythm>().First();var prop=toy.GetComponent<CreatureAffordance>();var residents=slice.GetComponentsInChildren<VillagerSocial>();
   var field=typeof(QuestSlice).GetField("state",BindingFlags.Instance|BindingFlags.NonPublic);var original=field.GetValue(slice);var positions=residents.Select(a=>a.transform.position).ToArray();var godPosition=god.transform.position;var toyPosition=toy.transform.position;
@@ -28,11 +28,11 @@ public static class SharedActivitiesChecks {
    for(int i=0;i<2000&&host.Memory.rhythmGames==oldGames;i++){
     god.Tick(.05f);host.Tick(.05f,false);
     if(toy.Active&&toy.Beats>=3&&!captured){captured=true;capture?.Invoke(toy,host,god);}
-    if(toy.Beats>seen){if((toy.Beats-1)%4<2)villagerNotes++;else creatureNotes++;seen=toy.Beats;}
+    if(toy.Beats>seen){if(toy.VillagerPerformed[toy.Beats-1])villagerNotes++;else creatureNotes++;seen=toy.Beats;}
     if(toy.Active&&!pauseChecked){int beat=toy.Beats;test.paused=true;god.Tick(20);host.Tick(20,true);if(toy.Beats!=beat||!toy.Active)throw new Exception("Pause advanced rhythm");test.paused=false;pauseChecked=true;}
    }
    if(host.Memory.rhythmGames!=oldGames+1||test.WorldPlay.rhythmGames!=1||toy.Beats!=8||villagerNotes!=4||creatureNotes!=4||!pauseChecked||prop.Item.held||prop.host!=null)throw new Exception($"Reciprocal rhythm failed: beats={toy.Beats}, roles={villagerNotes}/{creatureNotes}, phase={god.GetComponent<CreatureCuriosity>().Current}, host={host.Current}");
-   if(!test.Hybrid.receipt.rhythmGame||test.Hybrid.receipt.partner!=host.GetComponent<HybridTarget>().id)throw new Exception("Rhythm teaching misattributed");float preference=test.WorldPlay.rhythmFun;if(!god.Feedback(true)||test.WorldPlay.rhythmFun<=preference||god.Feedback(false))throw new Exception("Rhythm feedback not one-shot");
+   completed?.Invoke(toy,host,god);if(!test.Hybrid.receipt.rhythmGame||test.Hybrid.receipt.partner!=host.GetComponent<HybridTarget>().id)throw new Exception("Rhythm teaching misattributed");float preference=test.WorldPlay.rhythmFun;if(!god.Feedback(true)||test.WorldPlay.rhythmFun<=preference||god.Feedback(false))throw new Exception("Rhythm feedback not one-shot");afterFeedback?.Invoke(toy,host,god);
    var save=JsonUtility.FromJson<SliceState>(JsonUtility.ToJson(test));if(!save.Valid()||save.WorldPlay.rhythmGames!=1||save.Social(0).rhythmGames!=1||!save.Hybrid.receipt.rhythmGame)throw new Exception("Rhythm memory did not save");save.WorldPlay.rhythmFun=float.NaN;if(save.Valid())throw new Exception("Invalid rhythm preference accepted");
    Stage();for(int i=0;i<1000&&!toy.Active;i++){god.Tick(.05f);host.Tick(.05f,false);}if(!toy.Active)throw new Exception($"No rhythm to interrupt: {god.Owner}/{god.GetComponent<CreatureCuriosity>().Current}, host={host.Current}, hunger={test.hunger:F2}, reason={god.Explanation}");int before=host.Memory.rhythmGames;host.GetComponent<CarryItem>().held=true;host.Tick(.05f,false);god.Tick(.05f);host.GetComponent<CarryItem>().held=false;
    if(toy.Active||host.Active||host.Memory.rhythmGames!=before||test.Hybrid.receipt.eligible||god.GetComponentsInChildren<HumanoidHands>().Any(h=>h.touchTarget!=null)||host.GetComponentsInChildren<HumanoidHands>().Any(h=>h.touchTarget!=null))throw new Exception("Pickup did not cancel without shared reward");

@@ -15,14 +15,14 @@ public sealed partial class SharedRhythm:MonoBehaviour {
  }
  public void Offer(VillagerSocial person,CreatureHybrid god,float dt){
   if(dt<=0||Active||person==null||GetComponent<CarryItem>().held)return;creature=god;offerClock+=dt;Fade(dt);
-  if(offeredNotes<2&&offerClock>=.3f+offeredNotes*Interval){host=person;hostMotion=person.GetComponentInChildren<HumanoidMotion>();Tap(hostMotion,offeredNotes++);}
+  if(offeredNotes<2&&offerClock>=.3f+offeredNotes*Interval){host=person;hostMotion=person.GetComponentInChildren<HumanoidMotion>();Tap(hostMotion,VillageMelodies.Note(person.MelodyChoice,offeredNotes++));}
  }
  public bool Begin(CreatureHybrid god){
   var person=GetComponent<CreatureAffordance>().host;
   if(GetComponent<PlayerRhythm>()?.Reserved==true||Ritualist!=null||Active||person==null||person.Current!=VillagerSocial.Phase.WatchGift||!person.Willing||GetComponent<CarryItem>().held||god.Season.paused)return false;
   float unit=god.GetComponent<IslandNavigator>().world.Scale;
   if(Vector3.Distance(person.transform.position,transform.position)>unit*5||Vector3.Distance(god.transform.position,transform.position)>unit*9)return false;
-  host=person;creature=god;hostMotion=person.GetComponentInChildren<HumanoidMotion>();guestMotion=god.GetComponentInChildren<HumanoidMotion>();Active=true;Completed=false;Beats=0;clock=0;nextBeat=.3f;InviteAudience();return true;
+  host=person;creature=god;hostMotion=person.GetComponentInChildren<HumanoidMotion>();guestMotion=god.GetComponentInChildren<HumanoidMotion>();PrepareMelody(person);Active=true;Completed=false;Beats=0;clock=0;nextBeat=.3f;InviteAudience();return true;
  }
  // -1 interrupted, 0 in progress, 1 a fully completed reciprocal game.
  public int Tick(float dt){
@@ -30,8 +30,8 @@ public sealed partial class SharedRhythm:MonoBehaviour {
   float unit=creature.GetComponent<IslandNavigator>().world.Scale;
   if(host==null||host.Offering!=GetComponent<CreatureAffordance>()||host.Current!=VillagerSocial.Phase.WatchGift||!host.Willing||host.GetComponent<CarryItem>().held||GetComponent<CarryItem>().held||Vector3.Distance(host.transform.position,transform.position)>unit*6||Vector3.Distance(creature.transform.position,transform.position)>unit*10){Cancel();return -1;}
   clock+=dt;Fade(dt);hostMotion?.LookAt(creature.transform);guestMotion?.LookAt(host.transform);
-  if(Beats<BeatCount&&clock>=nextBeat){bool villagerTurn=Beats%4<2;Tap(villagerTurn?hostMotion:guestMotion,Beats%2);Beats++;nextBeat=clock+Interval;}
-  if(Beats>=BeatCount&&flash<=0){Completed=true;Active=false;FinishAudience(true);ClearPose();return 1;}return 0;
+  if(Beats<BeatCount&&clock>=nextBeat){bool villagerTurn=Beats%4<2;MelodyBeat(villagerTurn);Beats++;nextBeat=clock+Interval;}
+  if(Beats>=BeatCount&&flash<=0){Completed=true;RememberMelody();Active=false;FinishAudience(true);ClearPose();return 1;}return 0;
  }
  void Tap(HumanoidMotion performer,int note){
   hostMotion?.Touch(null);guestMotion?.Touch(null);hostMotion?.Activity(0);guestMotion?.Activity(0);
