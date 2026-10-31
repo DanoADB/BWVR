@@ -1,6 +1,14 @@
 # BWVR roadmap
 
-## Current development — hands-on terrain shaping (2026-10-31)
+## Current development — categorized God Tools dock (2026-10-31)
+
+The low field-of-view dock replaces the tall God Tools scroll. Five categories
+reveal their own tool row, with Empty Hand and real Book/menu shortcuts, idle
+fading and guarded selection. Existing tool effects and controls remain intact.
+See [GOD_TOOL_DOCK.md](GOD_TOOL_DOCK.md). Physical Quest readability, follow feel
+and supported-zoom comfort remain playtest gates.
+
+### Previous increment — hands-on terrain shaping (2026-10-31)
 
 S8's first bounded terrain brush adds Raise, Lower and Smooth to God tools.
 Charge/release requests a protected clear-ground stroke; replacement navigation

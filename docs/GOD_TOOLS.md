@@ -1,4 +1,4 @@
-> Current palette: Help, Protect, Investigate, Rain, Heal, Wind, Plant, Food and Wood. Only the first three place floating cues. Rain/Wind/Plant act where aimed while the trigger (desktop F) is held; release stops them. Food/Wood give bounded supplies while held. Rain is now the local brush, not the old cistern cast; legacy engine rain remains for compatibility. See [resource gifts](PLAYER_PROVISIONS.md) and [tool art](GOD_TOOL_ART.md). Earlier delivery notes below describe their original increments.
+> Current interface (2026-10-31): the [God Tools category dock](GOD_TOOL_DOCK.md) replaces the scroll palette. Terraform, Weather, Life, Offerings and Guidance contain all 14 tools, with Empty Hand and Book/menu shortcuts. Click a category, select a tool, release, then use its existing world interaction. Desktop supports mouse selection and F; T expands the current category. Only Help/Protect/Investigate place cues. Development energy remains unlimited. The notes below document the original delivery and are historical where they differ from the dock and later brush behavior.
 
 # Summonable god tools — first playable delivery
 

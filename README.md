@@ -18,9 +18,9 @@ The generated scene contains the BWVR bootstrap. It builds the island and spatia
 
 **Creature responses:** a visible nearby placement or suggestion can get a curious glance; choosing a suggested activity gets a brief nod, while continuing other work gets a brief sideways response. Completion and failure have separate affect. These cues preserve autonomy and player teaching. A bounded saved outcome history supplies the future Book of Creation; see [responses and evidence](docs/CREATURE_RESPONSES.md).
 
-**Player planting:** open God tools → Plant seeds. Aim at an empty field outline and hold the tool trigger (desktop F). Move across eligible plots to plant; release to stop. Prepared fields use one seed from stores; new fields also use two timber. See [planting](docs/PLAYER_PLANTING.md). Temporary outlines disappear when you dismiss the tool.
+**Player planting:** open God tools → Life → Plant seeds. Aim at an empty field outline and hold the tool trigger (desktop F). Move across eligible plots to plant; release to stop. Prepared fields use one seed from stores; new fields also use two timber. See [planting](docs/PLAYER_PLANTING.md). Temporary outlines disappear when you dismiss the tool.
 
-**Terrain shaping:** God tools → Raise ground, Lower ground or Smooth ground. Aim at a clear cyan patch, hold the right front trigger (desktop F) still for half a second, then release. The stroke appears after safe navigation preparation; nearby structures, trees, crops and actors are protected. Close tools/Escape to cancel. Edits save with the season. See [terrain shaping](docs/TERRAIN_SHAPING.md).
+**Terrain shaping:** God tools → Terraform → Raise ground, Lower ground or Smooth ground. Aim at a clear cyan patch, hold the right front trigger (desktop F) still for half a second, then release. The stroke appears after safe navigation preparation; nearby structures, trees, crops and actors are protected. Close tools/Escape to cancel. Edits save with the season. See [terrain shaping](docs/TERRAIN_SHAPING.md).
 
 ## Quest Link: press Play in the headset
 
@@ -44,13 +44,13 @@ Reference: [Meta Link development workflow](https://developers.meta.com/vr/docum
 - Point a controller at a resource or villager. Hold the **right front/index trigger** or **left side grip** to carry; release while pointing onto the island to place. Rays use the OpenXR aim pose; held objects use the grip pose.
 - Release the blue water offering over the blue village cistern to deliver water.
 - Aim at the creature and tap right A/B to praise/discourage its last eligible completed action. The front-trigger interaction also praises. Food satisfies hunger; it does not teach an unrelated action.
-- Summon Help, Protect, Investigate, Rain or Healing from the hidden God tools palette, then aim and press to use. Behavior/action cues are player-issued; the five old intention objects are no longer pre-placed beside the cistern. Guidance remains temporary influence, Rain wets/cools the aimed patch while held, and healing targets an injured villager (ankle wrap).
+- The low God Tools dock groups all tools into Terraform, Weather, Life, Offerings and Guidance. Point and click a category, choose a tool, release, then use its existing world interaction. Empty Hand restores ordinary grabbing; Book and Sanctuary have their own shortcuts.
 - Press X (or the left controller menu button) to show/hide the wrist sanctuary. Press Y to recenter the island ahead. Point and trigger to pause, save, resume or begin again.
 - Locomotion is user-controlled; no forced camera travel after the initial placement. The right stick changes viewing height, with ground clearance.
 
 Routine labels and meters are hidden by default. Open the wrist sanctuary (left menu / desktop Tab) and choose **Help / details** for controls, resource numbers and the optional creature intent caption. The world communicates drought through water levels, bucket demonstrations, gestures and ground/crop color. The wrist sanctuary starts closed, including restored seasons, which resume automatically. Open it with X / left menu / desktop Tab.
 
-**Summonable god tools:** turn the underside of the left wrist toward you while looking at it, or open X → God tools. Desktop: T. Select with the right front trigger (desktop F), release, then aim and hold for Rain, Wind, Plant, Food or Wood. Help/Protect/Investigate place floating guidance cues; Heal uses a targeted press. Clear cue/dismiss are in the palette; desktop Escape cancels the selected tool. See [god tools](docs/GOD_TOOLS.md) for targets, costs and validation. The wrist gesture still needs hardware confirmation.
+**God Tools dock:** point with the right controller and click the front trigger. Desktop: mouse + left click (or F), with T to expand/collapse the current category and Escape for Empty Hand. The underside-wrist and Sanctuary shortcuts still work. Rain/Wind/Plant/Food/Wood act while held; Lightning/Terraform charge and release. The dock fades when idle and hides during carrying, zoom, menus or tracking loss. See [God Tools dock](docs/GOD_TOOL_DOCK.md).
 
 Controllers are the first input target. Tracked-hand gestures are not implemented yet.
 

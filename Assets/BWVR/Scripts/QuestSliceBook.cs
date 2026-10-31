@@ -9,7 +9,7 @@ public sealed partial class QuestSlice {
  public bool CreationBookOpen=>creationBook!=null&&creationBook.activeInHierarchy;
  public bool ShowCreationBook(bool show){
   if(creationBook==null||show&&held.Any(i=>i!=null))return false;
-  if(show)godTools.Cancel();
+  if(show){godTools.Cancel();godTools.HideDock();}
   ShowSanctuaryPage(show?creationBook:sanctuaryHome);if(show){panel.SetActive(true);RefreshCreationBook();}return true;
  }
  public void SelectCreationBook(CreationBookSection section){if(!Enum.IsDefined(typeof(CreationBookSection),section))return;bookSection=section;bookIndexOpen=false;bookPage=0;RefreshCreationBook();}

@@ -4,7 +4,7 @@ God tools now includes **Raise ground**, **Lower ground** and **Smooth ground**.
 
 ## Play
 
-Open God tools through the existing underside-wrist gesture or Sanctuary. Desktop: G. Select a sculpt disk and aim at open island ground. A cyan proposed surface and ring indicate an eligible patch; red indicates a rejected patch. The proposed surface is an effect derived from the island grid, not replacement terrain artwork.
+Select Terraform in the low God Tools dock. T, the underside-wrist gesture and Sanctuary remain alternate entry points. Select a sculpt disk and aim at open island ground. A cyan proposed surface and ring indicate an eligible patch; red indicates a rejected patch. The proposed surface is an effect derived from the island grid, not replacement terrain artwork.
 
 Hold the right front/index trigger, or desktop F, still for half a second. Release to request the stroke. Moving more than five original game units cancels the charge. Navigation prepares in the background while the existing island remains playable. The stroke appears only after both navigation profiles are ready and the patch is checked again. Closing/changing tools, Escape, pause or application suspension cancels a pending stroke. Nothing is spent for a preview, canceled charge or rejected request.
 
