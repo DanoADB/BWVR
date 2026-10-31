@@ -56,5 +56,39 @@ It does not establish natural participation frequency, actual headset audio
 quality or Quest performance. These remain physical playtest gates. No APK is
 built for this increment.
 
-Next candidate: optional Book visibility for remembered phrases, followed by
-bounded local villager-to-villager transmission using witnessed performances.
+## Local transmission and Book visibility (2026-10-31)
+
+A reserved audience member can now learn a phrase after two comfortable,
+completed performances in which it saw the performer and heard all four call
+notes. The existing bounded audience, visibility checks, pause, pickup and
+activity ownership remain authoritative. A partial, blocked, canceled or
+late-arrival performance cannot teach a phrase. Completion can count only once.
+Hearing is checked at each actual call, within 24 game units, with a physical
+sightline to the instrument; this does not depend on whether the creature heard
+its own side of the duet.
+
+Each villager keeps four bounded hearing counts, one adopted phrase and its
+teacher's stable identity. Existing performers retain their own phrase. Learning
+by listening does not award a played game or fabricated practice. When the
+learner later offers the chime through the normal social routine, its learned
+phrase is used; a completed duet then creates its own performance memory.
+No new motor, global broadcasts or guaranteed command is introduced.
+
+Book -> Creature -> Village phrases shows the creature's real echo counts and
+preferences, including unknown phrases. People profiles distinguish a learned
+phrase from one the villager has actually performed. These are read-only saved
+projections. The four patterns are authored; their transmission and learned
+preferences must not be labeled uncoded discoveries.
+
+`MelodyTransmissionChecks.VerifyModel` checks old saves, the learning threshold,
+knowledge versus practice, malformed history and pure Book reads. Its native
+runtime check uses real stationary offers and utility-selected duets: late and
+occluded listeners are excluded, paused notes do not count, two real complete
+gatherings teach the phrase, duplicate completion has no effect, the same
+listener becomes the next actual host, and native Save/Load retains the result.
+Existing melody, audience and Book runtime/layout regressions also pass in the
+Editor. Fixtures stage visible reachable actors and suppress competing activities;
+this does not establish natural frequency, sound quality or Quest performance.
+
+Next candidate: make shared music easier for the player to invite nonverbally;
+headset readability and natural participation tuning remain pending playtesting.

@@ -18,20 +18,24 @@ public static class VillageMelodies {
 }
 public sealed partial class SocialMemory {
  public bool hasMelody;public int melodyMotif,melodyEchoes;
- bool MelodyValid()=>melodyMotif>=0&&melodyMotif<4&&melodyEchoes>=0&&melodyEchoes<=rhythmGames&&hasMelody==(melodyEchoes>0);
+ public int[] melodyHeard;public bool hasBorrowedMelody;public int borrowedMelody,melodyTeacher;
+ bool MelodyValid()=>melodyMotif>=0&&melodyMotif<4&&melodyEchoes>=0&&melodyEchoes<=rhythmGames&&hasMelody==(melodyEchoes>0)&&borrowedMelody>=0&&borrowedMelody<4&&melodyTeacher>=0&&melodyTeacher<VillagePopulation.Adults&&(melodyHeard==null||melodyHeard.Length==0||melodyHeard.Length==4&&melodyHeard.All(n=>n>=0&&n<=1000000))&&(!hasBorrowedMelody||melodyHeard!=null&&melodyHeard.Length==4&&melodyHeard[borrowedMelody]>=2);
+ public bool HearMelody(int motif,int teacher){if(motif<0||motif>=4||teacher<0||teacher>=VillagePopulation.Adults)return false;if(melodyHeard==null||melodyHeard.Length==0)melodyHeard=new int[4];melodyHeard[motif]=Math.Min(1000000,melodyHeard[motif]+1);if(hasMelody||hasBorrowedMelody||melodyHeard[motif]<2)return false;hasBorrowedMelody=true;borrowedMelody=motif;melodyTeacher=teacher;return true;}
  public void RememberMelody(int motif){hasMelody=true;melodyMotif=motif;melodyEchoes=Math.Min(rhythmGames,Math.Min(1000000,melodyEchoes+1));}
 }
-public sealed partial class VillagerSocial {public int MelodyChoice=>Memory.hasMelody?Memory.melodyMotif:(hybrid.State.seed^(index*31))&3;}
+public sealed partial class VillagerSocial {public int MelodyChoice=>Memory.hasMelody?Memory.melodyMotif:Memory.hasBorrowedMelody?Memory.borrowedMelody:(hybrid.State.seed^(index*31))&3;public int MelodyTeacherIdentity=>index;}
 public sealed partial class SharedRhythm {
  int activeMelody=-1,heardCalls,echoedCalls;bool melodyCommitted;
  public int[] PerformedNotes{get;private set;}=Array.Empty<int>();public bool[] VillagerPerformed{get;private set;}=Array.Empty<bool>();
  public int CompletedMelody=>Completed&&melodyCommitted?activeMelody:-1;
+ public int PerformanceMelody=>(Active||Completed)?activeMelody:-1;
  void PrepareMelody(VillagerSocial person){activeMelody=person.MelodyChoice;heardCalls=echoedCalls=0;melodyCommitted=false;PerformedNotes=new int[BeatCount];VillagerPerformed=new bool[BeatCount];}
- bool CanHearMelody(){
-  var nav=creature.GetComponent<IslandNavigator>().world;if(Vector3.Distance(creature.transform.position,transform.position)>nav.Scale*12)return false;var from=creature.transform.position+Vector3.up*nav.Scale*10;var shape=GetComponent<Collider>();var end=shape!=null?shape.bounds.center:transform.position;var delta=end-from;Physics.SyncTransforms();
-  foreach(var hit in Physics.RaycastAll(from,delta.normalized,delta.magnitude,~0,QueryTriggerInteraction.Ignore).OrderBy(h=>h.distance)){if(hit.transform.IsChildOf(creature.transform)||hit.transform.IsChildOf(host.transform))continue;return hit.transform==transform||hit.transform.IsChildOf(transform);}return true;
+ bool CanHearMelody()=>CanHearMelody(creature.transform,10,12);
+ public bool CanHearMelody(Transform observer,float height,float range){
+  if(creature==null||host==null||observer==null)return false;var nav=creature.GetComponent<IslandNavigator>().world;if(Vector3.Distance(observer.position,transform.position)>nav.Scale*range)return false;var from=observer.position+Vector3.up*nav.Scale*height;var shape=GetComponent<Collider>();var end=shape!=null?shape.bounds.center:transform.position;var delta=end-from;Physics.SyncTransforms();
+  foreach(var hit in Physics.RaycastAll(from,delta.normalized,delta.magnitude,~0,QueryTriggerInteraction.Ignore).OrderBy(h=>h.distance)){if(hit.transform.IsChildOf(observer)||hit.transform.IsChildOf(host.transform))continue;return hit.transform==transform||hit.transform.IsChildOf(transform);}return true;
  }
- void MelodyBeat(bool villagerTurn){int position=Beats/4*2+Beats%2;int note=VillageMelodies.Note(activeMelody,position);if(villagerTurn&&CanHearMelody())heardCalls|=1<<position;if(!villagerTurn&&(heardCalls&(1<<position))!=0)echoedCalls|=1<<position;Tap(villagerTurn?hostMotion:guestMotion,note);PerformedNotes[Beats]=note;VillagerPerformed[Beats]=villagerTurn;}
+ void MelodyBeat(bool villagerTurn){int position=Beats/4*2+Beats%2;int note=VillageMelodies.Note(activeMelody,position);if(villagerTurn){if(CanHearMelody())heardCalls|=1<<position;foreach(var listener in audience)if(listener!=null)listener.HearVillageMelody(this,position);}if(!villagerTurn&&(heardCalls&(1<<position))!=0)echoedCalls|=1<<position;Tap(villagerTurn?hostMotion:guestMotion,note);PerformedNotes[Beats]=note;VillagerPerformed[Beats]=villagerTurn;}
  void RememberMelody(){if(melodyCommitted||activeMelody<0||heardCalls!=15||echoedCalls!=15)return;var play=creature.Season.WorldPlay;if(play.villageMelodies==null)play.villageMelodies=new VillageMelodyMemory();play.villageMelodies.Record(activeMelody);melodyCommitted=true;creature.Journal.Add(creature.State.time,"villager melody echoed",CreatureAction.PlayWithToy,host.GetComponent<HybridTarget>().id,VillageMelodies.Name(activeMelody)+"; two witnessed calls and two replies completed");}
 }
 }
