@@ -6,7 +6,7 @@ public sealed partial class CreatureHybrid {
  public void NoticePlayerBuild(ConstructionBlock block){
   if(block==null||!block.Attached||block.Item.held||block.Site.Paused||block.Site.Locked||block.Site.IsBridge||Season.paused||suspended||GetComponent<CarryItem>()?.held==true)return;
   var target=block.GetComponent<HybridTarget>();if(target==null||Find(target.id)!=target||!CanSeeCue(target))return;
-  pointedBuild=false;buildPointEvidence=0;buildInvitation=block;buildInvitationSeason=Season;gatewayInvitation=GatewayNeedsPartner(block.Site);buildInvitationDuration=gatewayInvitation?75:45;buildInvitationUntil=State.time+buildInvitationDuration;
+  GetComponentInParent<QuestSlice>().OfferBowlCreatureTurn(block);pointedBuild=false;buildPointEvidence=0;buildInvitation=block;buildInvitationSeason=Season;gatewayInvitation=GatewayNeedsPartner(block.Site);buildInvitationDuration=gatewayInvitation?75:45;buildInvitationUntil=State.time+buildInvitationDuration;
   placedAttention=target;attentionUntil=State.time+12;nextPlacementNotice=State.time+.5f;NoticeCue(target,"You started building here",EvidenceSource.PlayerPlacement);
   Journal.Add(State.time,"shared build invitation",CreatureAction.ConstructionPlay,target.id,"A witnessed player snap invites construction in this yard");nextPerception=nextDecision=0;
  }

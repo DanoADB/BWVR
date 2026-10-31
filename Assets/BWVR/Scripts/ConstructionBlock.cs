@@ -8,7 +8,7 @@ public sealed class ConstructionBlock:MonoBehaviour {
  public bool creatureBuilt;public VillagerBlockPlay VillagerOwner{get;internal set;}
  internal bool wasHeld;
  public void Initialize(ConstructionSite site,Rigidbody body,Vector3 dimensions){Site=site;Body=body;size=dimensions;Item=GetComponent<CarryItem>();spawn=body.position;}
- public void Grab(){Site.buildBowlBall?.CancelBuildBowlShot();Site.Detach(this);wasHeld=true;Body.isKinematic=true;Body.detectCollisions=false;}
+ public void Grab(){Site.buildBowlBall?.CancelCourseShot();Site.Detach(this);wasHeld=true;Body.isKinematic=true;Body.detectCollisions=false;}
  public bool CanBuild=>!Site.BuildBowlReserved&&Site.Repairer==null&&VillagerOwner==null&&!Attached&&Site.TryPlan(this,out _,out _);
  public void CancelHold(){Item.held=false;wasHeld=false;Site.ReturnLoose(this);}
 }

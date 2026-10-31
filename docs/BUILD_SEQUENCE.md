@@ -1,5 +1,9 @@
 # BWVR build sequence
 
+## S5 creature turn at a rebuilt course (2026-10-30)
+
+A real ball return followed by a fresh witnessed player snap can offer one creature roll at that piece. The existing utility chooser and curiosity motor handle pickup, carry to a sampled clear approach, gesture, roll and watch. Actual target detachment and a 12-second harm window produce separate saved creature attempts/hits; player objectives remain unchanged. Carry cancellation does not fall back to an unrelated throw. See [BOWL_CREATURE_TURNS.md](BOWL_CREATURE_TURNS.md) for native fixtures and limits. Next candidate: clearer in-world turn handoffs, then course/aim tuning from Quest playtests. Physical Quest/full-population testing stays deferred.
+
 ## S5 returned-ball rebuilding invitation (2026-10-30)
 
 After a physical ball return in an active challenge, an idle creature can briefly point to a visible loose piece, with the existing guide showing a feasible snap. The offer is transient, dismissible and read-only; normal utility choices, feedback and motor ownership take priority. Native return/gesture/pickup/snap and existing cue/input checks pass. See [BOWL_REBUILD_INVITATION.md](BOWL_REBUILD_INVITATION.md) for fixture limits. Next candidate: course variations and a creature turn at a rebuilt course. Physical Quest/full-population testing stays deferred.
