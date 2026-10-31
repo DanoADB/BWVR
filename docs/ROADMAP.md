@@ -1,6 +1,15 @@
 # BWVR roadmap
 
-## Current development — deeper creature learning (2026-10-31)
+## Current development — hands-on physics play (2026-10-31)
+
+The player requested completely new functionality instead of another musical
+increment. Whirlwind adds a held ground tool that lifts and spins free toys and
+loose construction pieces, then releases their momentum. It reuses existing
+private physics scenes and object reservations. See [WHIRLWIND.md](WHIRLWIND.md)
+for controls, limits and verification. Unlimited testing energy remains enabled;
+Quest feel and performance remain physical playtest gates.
+
+### Previous increment — deeper creature learning
 
 Local musical transmission is now Editor-verified: villagers can adopt an authored
 phrase after two completely heard comfortable gatherings, then perform it as a

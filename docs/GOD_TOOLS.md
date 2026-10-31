@@ -106,3 +106,6 @@ wrist-axis comfort, reach, readability and device frame time remain unverified.
 The older full hybrid water-delivery and DevelopmentFocus state-swap regression
 failures from EXPANDED_POPULATION.md remain unresolved; they were not claimed fixed
 or rerun as a passing full suite in this interaction-focused update.
+
+Whirlwind adds a tenth scroll choice for held lift-and-spin physics play with free
+balls and loose blocks. See [WHIRLWIND.md](WHIRLWIND.md) for controls and limits.
