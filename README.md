@@ -20,6 +20,8 @@ The generated scene contains the BWVR bootstrap. It builds the island and spatia
 
 **Player planting:** open God tools → Plant seeds. Aim at an empty field outline and hold the tool trigger (desktop F). Move across eligible plots to plant; release to stop. Prepared fields use one seed from stores; new fields also use two timber. See [planting](docs/PLAYER_PLANTING.md). Temporary outlines disappear when you dismiss the tool.
 
+**Terrain shaping:** God tools → Raise ground, Lower ground or Smooth ground. Aim at a clear cyan patch, hold the right front trigger (desktop F) still for half a second, then release. The stroke appears after safe navigation preparation; nearby structures, trees, crops and actors are protected. Close tools/Escape to cancel. Edits save with the season. See [terrain shaping](docs/TERRAIN_SHAPING.md).
+
 ## Quest Link: press Play in the headset
 
 Install Meta Horizon Link on Windows and set it as the active OpenXR runtime in its Settings > General. Connect your Quest over USB or Air Link, then launch Quest Link inside the headset before pressing Play in Unity.

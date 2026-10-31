@@ -16,3 +16,9 @@ food — Delapouite — https://game-icons.net/1x1/delapouite/meal.html
 wood — Delapouite — https://game-icons.net/1x1/delapouite/wood-pile.html
 
 Rebuild with Node.js + sharp: node tools/render-god-tool-icons.cjs. No runtime downloads.
+
+Terrain sculpting: Peaks by Lorc, CC BY 3.0.
+https://game-icons.net/1x1/lorc/peaks.html
+https://creativecommons.org/licenses/by/3.0/
+Retrieved 2026-10-31. White transparent PNG; lowered version rotated, smooth version vertically compressed.
+SHA256 terrain.png: 9a2e972309176e43413cdfd80766f78d1b5ba33ac736bfa3f8a093253738851c

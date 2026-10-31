@@ -1,6 +1,16 @@
 # BWVR roadmap
 
-## Current development — shrine gathering bell (2026-10-31)
+## Current development — hands-on terrain shaping (2026-10-31)
+
+S8's first bounded terrain brush adds Raise, Lower and Smooth to God tools.
+Charge/release requests a protected clear-ground stroke; replacement navigation
+prepares in the background before the surface, collision and routes change.
+Confirmed sparse height edits persist; original terrain assets remain untouched.
+See [TERRAIN_SHAPING.md](TERRAIN_SHAPING.md) for controls, limits and validation.
+Unlimited test energy remains enabled. Headset comfort/performance and wider
+terrain-editing scope remain open gates.
+
+### Previous increment — shrine gathering bell (2026-10-31)
 
 Completed shrines/cathedrals now have a sourced bell the player can ring to
 invite a bounded voluntary gathering. Nearby free believers may attend, then

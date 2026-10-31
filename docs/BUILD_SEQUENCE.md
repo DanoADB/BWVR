@@ -217,6 +217,11 @@ Current implementation order, 2026-10-26. Implements [ROADMAP.md](ROADMAP.md). T
 
 ## S8 — Add bounded terrain shaping and further god powers
 
+**First increment:** Raise/Lower/Smooth use protected clear-ground previews,
+charge/release input, background navigation preparation and sparse saved deltas.
+See [TERRAIN_SHAPING.md](TERRAIN_SHAPING.md). Quest comfort, publication frame
+time and broader terrain editing remain gates; this does not mark S8 complete.
+
 **Deliver:** clear-ground raise/lower/smooth brush with explicit energy, area and height limits. Start away from structures, rooted trees, crops and actors. Further miracles are separate small additions using the same target/cost/effect contract; choose them from playtest needs.
 
 **Gate:** preview/cancel causes no mutation. Commit updates rendered surface, collision, navigation and actor grounding together; unsupported edits are rejected. Saves store bounded deltas and old saves load safely. Navigation routes remain valid or are revalidated before work resumes. No full fluid simulation is required or claimed.

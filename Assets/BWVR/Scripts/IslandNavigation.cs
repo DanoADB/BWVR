@@ -6,9 +6,10 @@ using Unity.AI.Navigation;
 namespace BWVR {
 // Routing uses original-size coordinates. Millimetre-sized tabletop agents otherwise
 // lose clearance and shoreline detail to the navigation rasterizer's precision.
-public sealed class IslandNavigation:MonoBehaviour {
+public sealed partial class IslandNavigation:MonoBehaviour {
  public sealed class Profile {public int id;public float radius,height;public NavMeshSurface surface;public NavMeshBuildSettings settings;}
  public Profile villager,creature;public float Scale{get;private set;}public int obstacleCount{get;private set;}
+ public int GeometryRevision{get;private set;}
  public IslandTerrainData Terrain{get;private set;}Mesh walkMesh;float baseY;List<NavMeshBuildSource> baseSources;CreatureBridge bridge;
  readonly Dictionary<int,NavMeshBuildSource> trunks=new Dictionary<int,NavMeshBuildSource>();readonly HashSet<int> uprooted=new HashSet<int>();AsyncOperation[] treeUpdates;bool treesDirty;int recoverFrame=-1;
  public bool TreeNavigationPending=>treesDirty||treeUpdates!=null;
@@ -60,7 +61,7 @@ public sealed class IslandNavigation:MonoBehaviour {
   return new Profile{id=settings.agentTypeID,radius=radius,height=height,surface=surface,settings=settings};
  }
  public Vector3 ProjectFoot(Vector3 position,Profile profile){if(profile==villager&&bridge!=null&&bridge.Walkable&&bridge.Project(position,out var raised))return raised;return Terrain!=null?Terrain.Project(position):position;}
- public void BridgeChanged(CreatureBridge crossing){
+ public void BridgeChanged(CreatureBridge crossing){GeometryRevision++;
   CancelTreeUpdates();
   bridge=crossing;var sources=new List<NavMeshBuildSource>();foreach(var source in baseSources){var item=source;if(item.shape==NavMeshBuildSourceShape.ModifierBox)item.size+=new Vector3(villager.radius*2,0,villager.radius*2);sources.Add(item);}
   if(crossing.Walkable)sources.Add(new NavMeshBuildSource{shape=NavMeshBuildSourceShape.Mesh,sourceObject=crossing.NavigationMesh,transform=Matrix4x4.identity,area=0});
@@ -69,8 +70,8 @@ public sealed class IslandNavigation:MonoBehaviour {
   foreach(var actor in GetComponentsInChildren<IslandNavigator>())if(actor.profile==villager){if(!crossing.Walkable&&crossing.OverWater(actor.transform.position))actor.transform.position=crossing.NearestBank(actor.transform.position);actor.ResetRoute();}
  }
  // Fixed play structures share the existing bounded source/update pipeline.
- public void AddToyBarrier(Vector3 centre,Vector3 size,Quaternion rotation){if(baseSources==null)return;Box(baseSources,centre,size,rotation);treesDirty=true;}
- public void SetTreeRooted(int line,bool rooted){if(!trunks.TryGetValue(line,out var source))return;if(rooted){if(!uprooted.Remove(line))return;baseSources.Add(source);obstacleCount++;}else{if(!uprooted.Add(line))return;baseSources.Remove(source);obstacleCount--;}treesDirty=true;}
+ public void AddToyBarrier(Vector3 centre,Vector3 size,Quaternion rotation){GeometryRevision++;if(baseSources==null)return;Box(baseSources,centre,size,rotation);treesDirty=true;}
+ public void SetTreeRooted(int line,bool rooted){if(!trunks.TryGetValue(line,out var source))return;if(rooted){if(!uprooted.Remove(line))return;baseSources.Add(source);obstacleCount++;}else{if(!uprooted.Add(line))return;baseSources.Remove(source);obstacleCount--;}GeometryRevision++;treesDirty=true;}
  public void InvalidateRoutes(bool recover=false){foreach(var actor in GetComponentsInChildren<IslandNavigator>()){if(recover&&actor.GetComponent<CarryItem>()?.held!=true&&!Sample(actor.transform.position,actor.profile,.2f,out _)&&Sample(actor.transform.position,actor.profile,16,out var safe))actor.transform.position=ProjectFoot(safe,actor.profile);actor.ResetRoute();}}
  public void TreeObstacleChanged(){InvalidateRoutes();recoverFrame=Time.frameCount+3;}
  void CancelTreeUpdates(){if(treeUpdates==null)return;foreach(var p in new[]{villager,creature})if(p?.surface?.navMeshData!=null)NavMeshBuilder.Cancel(p.surface.navMeshData);treeUpdates=null;treesDirty=true;}

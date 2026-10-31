@@ -21,7 +21,7 @@ public sealed partial class QuestSlice:MonoBehaviour {
  BeachBall[] balls=Array.Empty<BeachBall>();
  IslandAudio soundscape;GameObject audioSettings;
  VillageCathedral cathedral;VillageWorship worship;VillageTributes tributes;SpiritCompanion spirit;GodToolPalette godTools;bool toolsKeyLast;
- VillageFamilies families;VillageResources resources;IslandWeather weather;TreePlayWorld treePlay;IslandNavigation navigation; IslandTerrainData terrain; Collider groundCollider; const float Floor=.82f; SliceState state=new SliceState(); Camera eye; Transform rig,left,right,creature; Text status,creatureLabel; GameObject panel; Font font; GameArtCatalog art; OriginalCowMotion cowMotion; HumanoidMotion godMotion; HumanoidMotion[] humanoids=Array.Empty<HumanoidMotion>();
+ VillageFamilies families;VillageResources resources;IslandWeather weather;TreePlayWorld treePlay;IslandNavigation navigation; TerrainSculptor sculptor;IslandTerrainData terrain; Collider groundCollider; const float Floor=.82f; SliceState state=new SliceState(); Camera eye; Transform rig,left,right,creature; Text status,creatureLabel; GameObject panel; Font font; GameArtCatalog art; OriginalCowMotion cowMotion; HumanoidMotion godMotion; HumanoidMotion[] humanoids=Array.Empty<HumanoidMotion>();
  readonly Transform[] aims=new Transform[2]; readonly QuestControls.Hand[] controllerHands=new QuestControls.Hand[2]; bool turnHeld,recenterLast,zoomHeld; Vector3 zoomFocus;
  readonly List<CarryItem> items=new List<CarryItem>(); readonly List<Transform> workers=new List<Transform>();
  readonly ThrowMotion[] throwMotion={new ThrowMotion(),new ThrowMotion()};
@@ -51,6 +51,7 @@ public sealed partial class QuestSlice:MonoBehaviour {
   Renderer ground;
   if(terrain!=null){
    var island=new GameObject("Land 1 - original island geometry");island.transform.SetParent(transform,false);island.AddComponent<MeshFilter>().sharedMesh=terrain.mesh;ground=island.AddComponent<MeshRenderer>();groundCollider=island.AddComponent<MeshCollider>();((MeshCollider)groundCollider).sharedMesh=terrain.mesh;
+   sculptor=TerrainSculptor.Build(transform,terrain,(MeshCollider)groundCollider);terrain=sculptor.Terrain;sculptor.Restore(state,false);
    IslandOcean.Build(transform,terrain);
    if(terrain.HasPlacements){
     cistern=Landmark("building",Vector3.zero,p=>p.town==0&&p.type.Contains("STORAGE_PIT"));
@@ -95,7 +96,7 @@ public sealed partial class QuestSlice:MonoBehaviour {
   balls=GetComponentsInChildren<BeachBall>();foreach(var ball in balls){ball.Configure(hybrid,jobs);ball.Chase.PlayerHolding=()=>held.Any(item=>item==ball.GetComponent<CarryItem>());ball.Goals.Turns.InputAllowed=()=>!MenuOpen&&!applicationSuspended&&held.All(item=>item==null)&&(godTools==null||!godTools.ClaimsInput);ball.Chase.InteractionAllowed=()=>!MenuOpen&&!applicationSuspended&&(!XRSettings.isDeviceActive||(controllerHands[0].tracked&&controllerHands[1].tracked));}foreach(var job in jobs)job.GetComponent<VillagerExploration>().ConfigureBalls(balls);foreach(var job in jobs)job.GetComponent<VillagerExploration>().ConfigurePeers(jobs.Select(j=>j.GetComponent<VillagerExploration>()).ToArray());
   playerMusic=GetComponentsInChildren<PlayerRhythm>();foreach(var music in playerMusic)music.Configure(hybrid,()=>!MenuOpen&&!applicationSuspended&&held.All(i=>i==null)&&(godTools==null||!godTools.ClaimsInput));
   treePlay=TreePlayWorld.Build(transform,navigation,hybrid);
-  miracles=DivineIntervention.Build(transform,hybrid,navigation,cistern,jobs,()=>state);
+  miracles=DivineIntervention.Build(transform,hybrid,navigation,cistern,jobs,()=>state);sculptor?.Configure(navigation,hybrid,miracles);
   weather=IslandWeather.Build(transform,navigation,cistern,()=>state);
   resources=VillageResources.Build(transform,navigation,cistern,jobs,()=>state);
   families=VillageFamilies.Build(transform,navigation,jobs,()=>state);
@@ -291,7 +292,7 @@ public sealed partial class QuestSlice:MonoBehaviour {
  }
  void DeliverWater(){int before=state.gifts;state.Deliver();if(state.gifts>before)signals?.WaterArrived();}
  void Save(){try{Chapter?.Capture();resources?.CaptureToolDelivery();foreach(var ball in balls)ball.Goals?.Capture();if(construction!=null)state.construction=construction.Capture();discoveries?.Capture();learning?.Capture();File.WriteAllText(SavePath+".tmp",JsonUtility.ToJson(state,true));File.Copy(SavePath+".tmp",SavePath,true);saveError=null;notice="Season saved on this device.";}catch(Exception e){saveError="Save failed. Please try again.";notice="Could not save: "+e.Message;if(panel!=null)SetSanctuaryOpen(true);Debug.LogError("BWVR_SAVE_FAILED: "+e.Message);}}
- void Load(){if(!File.Exists(SavePath))return;try{var s=JsonUtility.FromJson<SliceState>(File.ReadAllText(SavePath));if(s==null||!s.Valid())throw new Exception("Invalid season data");state=s;state.paused=false;notice="Season restored.";}catch(Exception){saveError="Saved season unavailable. A fresh season is ready.";notice=saveError;}}
+ void Load(){if(!File.Exists(SavePath))return;try{var s=JsonUtility.FromJson<SliceState>(File.ReadAllText(SavePath));if(s==null||!s.Valid())throw new Exception("Invalid season data");if(terrain!=null&&s.terrainEdits!=null&&s.terrainEdits.cells.Length>0&&(s.terrainEdits.width!=terrain.width||s.terrainEdits.source!=terrain.sourceHash))throw new Exception("Saved terrain belongs to another island");state=s;sculptor?.Restore(state);state.paused=false;notice="Season restored.";}catch(Exception){saveError="Saved season unavailable. A fresh season is ready.";notice=saveError;}}
  void OnApplicationPause(bool paused){applicationSuspended=paused;soundscape?.Suspend(paused);if(paused){pendingBuildTap=null;buildTapSeconds=0;godTools?.Cancel();}if(spirit!=null)spirit.Suspended=paused;if(miracles!=null){miracles.Suspended=paused;miracles.Tick(0,paused||state.paused);}hybrid?.Suspend(paused);foreach(var motion in humanoids)if(motion!=null)motion.paused=paused||state.paused;if(cowMotion!=null)cowMotion.paused=paused||state.paused;if(paused){if(jobs!=null)foreach(var job in jobs)job.GetComponent<VillagerSocial>().ResetTask();if(construction!=null)construction.Paused=true;if(learning!=null)foreach(var site in learning.sites)site.Paused=true;discoveries?.Advance(0,true);for(int i=0;i<2;i++)if(held[i]!=null){held[i].transform.position=held[i].home;held[i].held=false;held[i].GetComponent<Collider>().enabled=true;held[i]=null;}Save();}}
  void OnApplicationQuit(){Save();}
 }

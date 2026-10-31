@@ -4,13 +4,15 @@ namespace BWVR {
  public int line,town,variant;public string command,kind,type;public float x,z,yaw,size=1,vertical,pitch,roll;
 }
 public sealed class IslandTerrainData:ScriptableObject {
+ [System.NonSerialized] public float[] offsets;
+ public float Offset(int x,int z)=>offsets!=null?offsets[z*width+x]/heightUnit:0;
  public int width;public int[] heights,flags,bounds;public float cellSize=10,heightUnit=.67f,scale;public Vector2 origin=new Vector2(1865.61f,2641.24f);public float anchorHeight;public Mesh mesh;public string sourceHash;public string placementHash;public IslandPlacement[] placements=System.Array.Empty<IslandPlacement>();
  public bool HasPlacements=>placements!=null&&placements.Length>0;
  public Vector3 PlacementPoint(IslandPlacement item){var point=Project(World(item.x/cellSize,item.z/cellSize,0));point.y+=item.vertical*scale;return point;}
  public float SeaLevel=>.82f-anchorHeight*scale;
  public Vector3 World(float x,float z,float altitude)=>new Vector3((x*cellSize-origin.x)*scale,SeaLevel+altitude*heightUnit*scale,(z*cellSize-origin.y)*scale);
  public float OriginalHeight(float x,float z){float gx=x/cellSize,gz=z/cellSize;int ix=Mathf.FloorToInt(gx),iz=Mathf.FloorToInt(gz);if(ix<0||iz<0||ix>=width-1||iz>=width-1)return 0;
-  float u=gx-ix,v=gz-iz;float a=Altitude(ix,iz),b=Altitude(ix+1,iz),c=Altitude(ix,iz+1),d=Altitude(ix+1,iz+1);bool split=(flags[iz*width+ix]&128)!=0;
+  float u=gx-ix,v=gz-iz;float a=Altitude(ix,iz)+Offset(ix,iz),b=Altitude(ix+1,iz)+Offset(ix+1,iz),c=Altitude(ix,iz+1)+Offset(ix,iz+1),d=Altitude(ix+1,iz+1)+Offset(ix+1,iz+1);bool split=(flags[iz*width+ix]&128)!=0;
   float height=split?(u+v<=1?a+(b-a)*u+(c-a)*v:d+(c-d)*(1-u)+(b-d)*(1-v)):(u>=v?a+(b-a)*u+(d-b)*v:a+(d-c)*u+(c-a)*v);return height*heightUnit;
  }
  public int Altitude(int x,int z)=>Mathf.Max(0,heights[z*width+x]);
