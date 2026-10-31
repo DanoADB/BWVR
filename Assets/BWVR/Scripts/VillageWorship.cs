@@ -14,10 +14,10 @@ namespace BWVR {
 }
 public sealed partial class SocialMemory {
  public float nextWorshipAt,worshipSeconds;public int rituals;
- bool ReligionValid()=>HybridState.Number(nextWorshipAt,0,100000300)&&HybridState.Number(worshipSeconds,0,100000000)&&Count(rituals);
+ bool ReligionValid()=>HybridState.Number(nextWorshipAt,0,100000300)&&HybridState.Number(worshipSeconds,0,100000000)&&Count(rituals)&&Count(bellVisits)&&bellVisits<=rituals;
 }
 // A scheduler-owned activity: no independent Update, scene scans or competing motor controller.
-public sealed class VillageWorship {
+public sealed partial class VillageWorship {
  readonly VillagerRoutine[] jobs;readonly VillageResources world;readonly CreatureHybrid god;readonly VillageFamilies families;readonly Vector3 altar;readonly VillageCathedral cathedral;
  readonly bool[] active;readonly float[] elapsed,praying,retry;readonly Vector3[] destinations;SliceState known;float perception;bool diversion;
  public int Worshippers{get{int count=0;foreach(bool value in active)if(value)count++;return count;}}
@@ -29,18 +29,18 @@ public sealed class VillageWorship {
   if(previous!=model.fanatic)god.Journal.Add(world.Season.Hybrid.time,"village religion",CreatureAction.IdleOrObserve,"village",model.fanatic?"Widespread obsession interrupts work":"Worship subsides; work can resume");
  }
  public void ResetWorld(){known=null;EnsureSeason();}
- void EnsureSeason(){if(known==world.Season)return;for(int i=0;i<jobs.Length;i++){if(active[i]){active[i]=false;jobs[i].GetComponent<HumanoidMotion>().Pray(false);jobs[i].ResetTask();}retry[i]=0;}known=world.Season;perception=0;diversion=false;}
- public bool Tick(VillagerRoutine job,float dt){if(world.Season.paused||!HybridState.Number(dt,0,1)||dt<=0)return false;EnsureSeason();int i=Array.IndexOf(jobs,job);if(i<0)return false;var social=job.GetComponent<VillagerSocial>();var memory=social.Memory;bool fanatic=world.Season.Religion.fanatic;
+ void EnsureSeason(){if(known==world.Season)return;for(int i=0;i<jobs.Length;i++){if(active[i]){active[i]=false;jobs[i].GetComponent<HumanoidMotion>().Pray(false);jobs[i].ResetTask();}retry[i]=0;}known=world.Season;ResetBellInvitation();perception=0;diversion=false;}
+ public bool Tick(VillagerRoutine job,float dt){if(world.Season.paused||!HybridState.Number(dt,0,1)||dt<=0)return false;EnsureSeason();int i=Array.IndexOf(jobs,job);if(i<0)return false;var social=job.GetComponent<VillagerSocial>();var memory=social.Memory;bool fanatic=world.Season.Religion.fanatic;if(fanatic&&bellActive[i])End(i,false);
   if(job.GetComponent<CarryItem>().held||memory.injury>.05f||social.RecentFright){End(i,false);return false;}
   if(active[i]&&!fanatic&&world.Season.Hybrid.time<world.Season.Religion.cooldownUntil){End(i,true);return false;}
-  if(!active[i]){if(world.Season.Hybrid.time<retry[i])return false;if(!fanatic){if(memory.faith<.45f)return false;if(job.BuildingCathedral)return false;if(families!=null&&families.Owns(job))return false;if(memory.nextWorshipAt==0){memory.nextWorshipAt=world.Season.Hybrid.time+30+i*3;return false;}if(world.Season.Hybrid.time<memory.nextWorshipAt||social.Active||job.Signalling||job.GetComponent<VillagerResourceGathering>().Active||job.GetComponent<VillagerExploration>().Active||job.GetComponent<VillagerBlockPlay>().Active)return false;}
+  if(!active[i]){if(world.Season.Hybrid.time<retry[i])return false;if(!fanatic){bool invited=BellEligible(i);if(!invited&&memory.faith<.45f)return false;if(invited&&!job.AvailableForBell)return false;if(job.BuildingCathedral)return false;if(families!=null&&families.Owns(job))return false;if(!invited&&memory.nextWorshipAt==0){memory.nextWorshipAt=world.Season.Hybrid.time+30+i*3;return false;}if(!invited&&world.Season.Hybrid.time<memory.nextWorshipAt||social.Active||job.Signalling||job.GetComponent<VillagerResourceGathering>().Active||job.GetComponent<VillagerExploration>().Active||job.GetComponent<VillagerBlockPlay>().Active)return false;}
    float angle=i*Mathf.PI*2/jobs.Length;var center=cathedral!=null&&world.Season.Cathedral.level>0?cathedral.Entrance+Vector3.back*world.Navigation.Scale*8:altar;var wanted=center+new Vector3(Mathf.Cos(angle),0,Mathf.Sin(angle))*(14+(i%2)*5)*world.Navigation.Scale;
-   if(!world.Navigation.Sample(wanted,world.Navigation.villager,4,out var point)){retry[i]=world.Season.Hybrid.time+20;return false;}destinations[i]=world.Navigation.ProjectFoot(point,world.Navigation.villager);cathedral?.Cancel(job);families?.Release(job);job.GetComponent<VillagerResourceGathering>().Cancel();social.ResetTask();job.GetComponent<VillagerExploration>().ResetTask();job.GetComponent<VillagerBlockPlay>().ResetTask();job.BeginWorship();active[i]=true;elapsed[i]=praying[i]=0;
+   if(!world.Navigation.Sample(wanted,world.Navigation.villager,4,out var point)){retry[i]=world.Season.Hybrid.time+20;return false;}destinations[i]=world.Navigation.ProjectFoot(point,world.Navigation.villager);if(!fanatic&&BellEligible(i)){bellActive[i]=true;bellUsed[i]=true;bellJoined++;}cathedral?.Cancel(job);families?.Release(job);job.GetComponent<VillagerResourceGathering>().Cancel();social.ResetTask();job.GetComponent<VillagerExploration>().ResetTask();job.GetComponent<VillagerBlockPlay>().ResetTask();job.BeginWorship();active[i]=true;elapsed[i]=praying[i]=0;
   }
-  elapsed[i]+=dt;var nav=job.GetComponent<IslandNavigator>();var motion=job.GetComponent<HumanoidMotion>();if(nav.MoveTo(destinations[i],job.transform.lossyScale.y*1.6f,dt)){praying[i]+=dt;memory.worshipSeconds=Mathf.Min(100000000,memory.worshipSeconds+dt);var toward=god.transform.position-job.transform.position;toward.y=0;if(toward.sqrMagnitude>1e-10f)job.transform.rotation=Quaternion.LookRotation(toward);motion.LookAt(god.transform);motion.Activity(0);motion.Pray(true);job.GetComponent<VillagerAffect>().ProvisionSeen();if(!fanatic&&praying[i]>=(memory.faith>=.65f?8:4)){End(i,true);return false;}}
-  else{motion.Pray(false);if(nav.Blocked&&elapsed[i]>8||elapsed[i]>45&&praying[i]==0){End(i,false);retry[i]=world.Season.Hybrid.time+20;return false;}}
+  elapsed[i]+=dt;var nav=job.GetComponent<IslandNavigator>();var motion=job.GetComponent<HumanoidMotion>();if(nav.MoveTo(destinations[i],job.transform.lossyScale.y*1.6f,dt)){praying[i]+=dt;memory.worshipSeconds=Mathf.Min(100000000,memory.worshipSeconds+dt);var toward=god.transform.position-job.transform.position;toward.y=0;if(toward.sqrMagnitude>1e-10f)job.transform.rotation=Quaternion.LookRotation(toward);motion.LookAt(god.transform);motion.Activity(0);motion.Pray(true);job.GetComponent<VillagerAffect>().ProvisionSeen();if(!fanatic&&praying[i]>=(bellActive[i]?4:memory.faith>=.65f?8:4)){End(i,true);return false;}}
+  else{motion.Pray(false);if(nav.Blocked&&elapsed[i]>8||elapsed[i]>(bellActive[i]?90:45)&&praying[i]==0){End(i,false);retry[i]=world.Season.Hybrid.time+20;return false;}}
   return true;
  }
- void End(int i,bool completed){if(!active[i])return;active[i]=false;var job=jobs[i];job.GetComponent<HumanoidMotion>().Pray(false);job.ResetTask();var memory=job.GetComponent<VillagerSocial>().Memory;memory.nextWorshipAt=world.Season.Hybrid.time+(memory.faith>=.65f?35:70)+i;if(completed&&praying[i]>0)memory.rituals=Math.Min(1000000,memory.rituals+1);}
+ void End(int i,bool completed){if(!active[i])return;bool bell=bellActive[i];bellActive[i]=false;active[i]=false;var job=jobs[i];job.GetComponent<HumanoidMotion>().Pray(false);job.ResetTask();var memory=job.GetComponent<VillagerSocial>().Memory;memory.nextWorshipAt=world.Season.Hybrid.time+(memory.faith>=.65f?35:70)+i;if(completed&&praying[i]>0)memory.rituals=Math.Min(1000000,memory.rituals+1);if(bell&&completed&&praying[i]>=4)memory.bellVisits=Math.Min(memory.rituals,Math.Min(1000000,memory.bellVisits+1));}
 }
 }

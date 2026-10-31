@@ -101,7 +101,7 @@ public sealed partial class QuestSlice:MonoBehaviour {
   families=VillageFamilies.Build(transform,navigation,jobs,()=>state);
   learning=creature.gameObject.AddComponent<CreatureConstructionLearning>();learning.Initialize(hybrid,construction,discoveries,()=>state);
   foreach(var job in jobs)job.GetComponent<VillagerExploration>().ConfigureConstruction(learning);
-  tributes=VillageTributes.Build(transform,hybrid,jobs,navigation,cistern);cathedral=VillageCathedral.Build(transform,resources,families,jobs,cistern);worship=new VillageWorship(jobs,resources,hybrid,families,tributes.Altar,cathedral);
+  tributes=VillageTributes.Build(transform,hybrid,jobs,navigation,cistern);cathedral=VillageCathedral.Build(transform,resources,families,jobs,cistern);worship=new VillageWorship(jobs,resources,hybrid,families,tributes.Altar,cathedral);cathedral.BindBell(worship,()=>!MenuOpen&&!applicationSuspended&&held.All(i=>i==null)&&!(XRSettings.isDeviceActive&&controllerHands[1].grip)&&!(godTools?.ClaimsInput??false));
   foreach(var affordance in affordances){var cue=affordance.gameObject.AddComponent<SpatialTarget>();var offered=affordance;cue.invoke=()=>curiosity.Offer(offered);}
   creature.gameObject.AddComponent<CreatureAffect>().Initialize(curiosity,terrain!=null?terrain.scale:.025f);
   signals=gameObject.AddComponent<DroughtSignals>();signals.Initialize(reservoir,ground.sharedMaterial,jobs,creatureRoutine);

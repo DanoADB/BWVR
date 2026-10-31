@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 namespace BWVR {
-public enum IslandSound {Step,Grasp,Place,Snap,Ball,Pour,Harvest,Notice,Content,Uneasy,Miracle,Discovery,Chime,Bird,Thunder,Gust}
+public enum IslandSound {Step,Grasp,Place,Snap,Ball,Pour,Harvest,Notice,Content,Uneasy,Miracle,Discovery,Chime,Bird,Thunder,Gust,Bell}
 // Presentation only. No audio event grants a resource, teaches, or drives AI perception.
 public sealed partial class IslandAudio:MonoBehaviour {
  public const int VoiceLimit=8;
@@ -14,7 +14,7 @@ public sealed partial class IslandAudio:MonoBehaviour {
  public float NearDistance=>Mathf.Max(unit*12,rig.lossyScale.x*.4f);
  public float FarDistance=>Mathf.Max(unit*180,rig.lossyScale.x*5);
  Func<SliceState> season;IslandNavigation nav;Transform head,rig;float unit,clock,birdAt=8,duck;bool frozen,suspended;int birdSeed=743;
- AudioClip[] clips;readonly AudioSource[] beds=new AudioSource[3];readonly float[] bedGain=new float[3];readonly Voice[] voices=new Voice[VoiceLimit];readonly float[] groupAt=new float[16];readonly float[] emitterAt=new float[64];
+ AudioClip[] clips;readonly AudioSource[] beds=new AudioSource[3];readonly float[] bedGain=new float[3];readonly Voice[] voices=new Voice[VoiceLimit];readonly float[] groupAt=new float[Enum.GetValues(typeof(IslandSound)).Length];readonly float[] emitterAt=new float[64];
  sealed class Voice {public AudioSource sound;public float left,gain;public int priority;}
  sealed class Walker {public HumanoidMotion motion;public CarryItem item;public Vector3 previous;public float distance;}
  readonly List<Walker> walkers=new List<Walker>();
@@ -23,7 +23,7 @@ public sealed partial class IslandAudio:MonoBehaviour {
  }
  void Initialize(){
   Master=Read("master",.8f);Ambience=Read("ambience",.65f);Effects=Read("effects",.8f);
-  var names=new[]{"step","grasp","place","snap","ball","pour","harvest","notice","content","uneasy","miracle","discovery","chime","bird","thunder","gust"};clips=new AudioClip[names.Length];for(int i=0;i<names.Length;i++)clips[i]=Resources.Load<AudioClip>("IslandAudio/"+names[i]);
+  var names=new[]{"step","grasp","place","snap","ball","pour","harvest","notice","content","uneasy","miracle","discovery","chime","bird","thunder","gust","bell"};clips=new AudioClip[names.Length];for(int i=0;i<names.Length;i++)clips[i]=Resources.Load<AudioClip>("IslandAudio/"+names[i]);
   string[] loops={"surf","wind","rain"};for(int i=0;i<3;i++){beds[i]=Source(loops[i]+" ambience",false);beds[i].loop=true;beds[i].priority=180;beds[i].clip=Resources.Load<AudioClip>("IslandAudio/"+loops[i]);beds[i].volume=0;if(beds[i].clip!=null)beds[i].Play();}
   for(int i=0;i<VoiceLimit;i++)voices[i]=new Voice{sound=Source("Context voice "+i,true)};InitializeMusic();
  }

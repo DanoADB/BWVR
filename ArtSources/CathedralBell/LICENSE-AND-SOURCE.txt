@@ -1,0 +1,7 @@
+Bell by Quaternius, Medieval Village pack (2022).
+Public Domain / CC0 1.0 Universal.
+Model/license: https://poly.pizza/m/cILuaO115Y
+Pack/license: https://poly.pizza/bundle/Medieval-Village-Pack-NsHhjhlrfY
+Source: https://static.poly.pizza/203c2af9-cd8b-47d0-b8d5-424b9c4448f7.glb
+CC0 deed: https://creativecommons.org/publicdomain/zero/1.0/
+The source GLB is retained in ArtSources/CathedralBell; FBX conversion preserves geometry/colors.

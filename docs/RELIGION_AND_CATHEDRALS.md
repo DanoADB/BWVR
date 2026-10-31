@@ -84,3 +84,6 @@ weather changes held fixed for this check; other village/creature routines ran.
 The completed level and empty transit cargo were confirmed before restoring the
 original state, actor poses, weather setting and time scale. This demonstrates
 the saved-village path, not a measured real-time headset completion duration.
+
+Completed shrines now also offer a player-ringable gathering bell with bounded,
+voluntary attendance and saved confirmed visits. See [CATHEDRAL_BELL.md](CATHEDRAL_BELL.md).

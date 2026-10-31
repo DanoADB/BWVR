@@ -1,6 +1,14 @@
 # BWVR roadmap
 
-## Current development — charged lightning (2026-10-31)
+## Current development — shrine gathering bell (2026-10-31)
+
+Completed shrines/cathedrals now have a sourced bell the player can ring to
+invite a bounded voluntary gathering. Nearby free believers may attend, then
+resume their routines. Ring cooldown and confirmed visits persist; no faith or
+resource reward is fabricated. See [CATHEDRAL_BELL.md](CATHEDRAL_BELL.md).
+Editor interaction/save/audio regressions pass; headset feel remains pending.
+
+### Previous increment — charged lightning
 
 Lightning adds a charge-and-release scenery miracle. A filled electric halo and
 ready chime precede the released bolt. Real wetness, ignition, fuel/damage and

@@ -4,7 +4,7 @@ namespace BWVR {
 public sealed class VillagerRoutine:MonoBehaviour {
  public bool BuildingCathedral{get;private set;}
  public void BeginCathedral(){ResetTask();BuildingCathedral=true;if(load!=null)load.gameObject.SetActive(false);motion?.Carry(null);}
- public bool Worshipping{get;private set;}
+ public bool Worshipping{get;private set;}public bool AvailableForBell=>phase==0&&celebration<=0&&!BuildingCathedral&&!Worshipping;
  public enum Role{WaterGatherer,Farmer,Forester} public Role role;public int completedJobs{get;private set;}
  public bool Working=>phase==1;public bool Signalling=>phase>=4;public int requestsShown{get;private set;}public WaterVessel bucket{get;private set;} IslandNavigator navigator; CarryItem item;HumanoidMotion motion;Transform load;Vector3 work,store,requestSpot;Func<Vector3,Vector3> ground;Action<Role> completed;int phase;float timer,celebration;CreatureRoutine listener;
  int lastRequestJob=-1;public void ResetRequestCycle(){lastRequestJob=-1;}
