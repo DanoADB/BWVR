@@ -1,5 +1,13 @@
 # BWVR build sequence
 
+## S8 reversible terrain experimentation (2026-10-31)
+
+The Terraform dock adds a single saved Undo stroke, using the existing protected
+background navigation preparation and terrain/physics publication. It preserves
+earlier edits, consumes its history once, and does not refund energy or rewind
+the rest of the island. See [TERRAIN_UNDO.md](TERRAIN_UNDO.md). Quest performance
+and comfort gates remain open; S8 is still partial.
+
 ## S5 villager phrases and creature replies (2026-10-31)
 
 Villager-led chime duets now vary across four authored two-tone motifs. Existing fetch/present, voluntary utility selection and eight-beat call/reply choreography are preserved. Completed fully heard phrases gain separate host familiarity, creature echo counts and bounded phrase preferences; contextual feedback affects later interest without inventing player demonstrations. Native completion/occlusion, typed teaching and Save/Load checks pass. See [VILLAGE_MELODIES.md](VILLAGE_MELODIES.md) for limits. Next candidate: optional Book visibility, then bounded local villager-to-villager transmission. This is a social learning increment, not a claim that S5/S7 or Quest validation is complete.

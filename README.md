@@ -20,7 +20,7 @@ The generated scene contains the BWVR bootstrap. It builds the island and spatia
 
 **Player planting:** open God tools → Life → Plant seeds. Aim at an empty field outline and hold the tool trigger (desktop F). Move across eligible plots to plant; release to stop. Prepared fields use one seed from stores; new fields also use two timber. See [planting](docs/PLAYER_PLANTING.md). Temporary outlines disappear when you dismiss the tool.
 
-**Terrain shaping:** God tools → Terraform → Raise ground, Lower ground or Smooth ground. Aim at a clear cyan patch, hold the right front trigger (desktop F) still for half a second, then release. The stroke appears after safe navigation preparation; nearby structures, trees, crops and actors are protected. Close tools/Escape to cancel. Edits save with the season. See [terrain shaping](docs/TERRAIN_SHAPING.md).
+**Terrain shaping:** God tools → Terraform → Raise ground, Lower ground or Smooth ground. Aim at a clear cyan patch, hold the right front trigger (desktop F) still for half a second, then release. The stroke appears after safe navigation preparation; nearby structures, trees, crops and actors are protected. Close tools/Escape to cancel. Edits save with the season. Terraform → **Undo stroke** reverses only the latest edit, including after reload; it preserves earlier edits and gives no energy refund. See [terrain undo](docs/TERRAIN_UNDO.md) and [terrain shaping](docs/TERRAIN_SHAPING.md).
 
 ## Quest Link: press Play in the headset
 

@@ -1,6 +1,15 @@
 # BWVR roadmap
 
-## Current development — standalone foveated rendering (2026-10-31)
+## Current development — reversible terrain experimentation (2026-10-31)
+
+Terraform now adds a bounded Undo stroke utility: reverse only the latest sculpt,
+including after save/resume, through the existing protected asynchronous terrain
+publication. No energy refund, simulation rewind or redo. See
+[TERRAIN_UNDO.md](TERRAIN_UNDO.md) for validation and limits. Water/food chores
+remain deprioritized, unlimited development energy stays enabled, and Quest
+playtesting remains deferred.
+
+### Previous increment — standalone foveated rendering (2026-10-31)
 
 Automatic eye-tracked foveation with conservative fixed fallback is integrated
 through the existing Built-in/OpenXR renderer and Meta XR Core. Settings exposes

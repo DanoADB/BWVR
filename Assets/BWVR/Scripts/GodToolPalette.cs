@@ -60,7 +60,7 @@ public sealed partial class GodToolPalette:MonoBehaviour {
   if(facing>.65f&&!gestureLatched&&!Open){dwell+=Mathf.Min(dt,.05f);if(dwell>=.35f){Toggle();gestureLatched=true;}}
  }
  public bool Process(Ray ray,bool pressed,bool tracked,bool blocked,float dt,bool xr){
-  RefreshSign();bool owned=ClaimsInput;if(blocked||!tracked){if(Open||Selected.HasValue)Cancel();HideDock();releaseGate=pressed;pressedLast=pressed;dockPressedLast=pressed;return !blocked&&owned;}
+  RefreshSign();bool owned=ClaimsInput;if(blocked||!tracked){if(Open||Selected.HasValue||Sculptor?.Pending==true)Cancel();HideDock();releaseGate=pressed;pressedLast=pressed;dockPressedLast=pressed;return !blocked&&owned;}
   bool uiPressed=pressed||(!xr&&UnityEngine.InputSystem.Mouse.current!=null&&UnityEngine.InputSystem.Mouse.current.leftButton.isPressed);
   if(!uiPressed)releaseGate=false;bool edge=pressed&&!pressedLast&&!releaseGate;pressedLast=pressed;
   var scale=rig.localScale.x;
