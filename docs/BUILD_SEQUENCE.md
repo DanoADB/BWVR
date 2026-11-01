@@ -1,5 +1,14 @@
 # BWVR build sequence
 
+## S5 catch and roll (2026-11-01)
+
+A native gentle toss can offer a short physical catching action through the
+existing utility chooser. The creature must actually reach the moving ball,
+then lowers it for a grounded roll toward its release point. Saved physical
+practice and taught willingness remain separate; see [CATCH_GAME.md](CATCH_GAME.md).
+This returns to player/creature play after the recent god-power increments.
+Quest input, pose alignment and natural participation remain playtest gates.
+
 ## S8 hands-on woodland restoration (2026-10-31)
 
 The Life category adds Regrow trees for depleted managed sites. Paid local pulses

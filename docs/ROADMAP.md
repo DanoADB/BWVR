@@ -1,6 +1,14 @@
 # BWVR roadmap
 
-## Current development — hands-on forest regrowth (2026-10-31)
+## Current development — catch and roll (2026-11-01)
+
+Gentle player tosses can now offer an autonomous short catch-and-roll activity
+through the existing action coordinator and ball physics. Actual catches,
+launched return rolls and trained willingness have separate bounded saved
+records. See [CATCH_GAME.md](CATCH_GAME.md) for scope and validation.
+Water/food work remains deprioritized and Quest testing stays deferred.
+
+### Previous increment — hands-on forest regrowth (2026-10-31)
 
 Life → Regrow trees adds a held miracle for harvested managed tree sites:
 plant a sapling, nurture its visible growth, then restore one finite tree.

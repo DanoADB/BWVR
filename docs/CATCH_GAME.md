@@ -1,0 +1,23 @@
+# Catch and roll — a player/creature ball game
+
+Gently toss the beachball toward the front of an idle creature with the normal hand-motion throw. On desktop, hold Space when releasing E to toss. A nearby slow incoming arc can attract a catching attempt: the creature looks/reaches, catches only when the real moving ball enters its hand reach, lowers it, and rolls toward the ground position of your last release. Pick it up and try another toss. No new controller binding, command menu or automatic camera movement is added.
+
+This extends the existing action coordinator, curiosity motor, carrying rig, private ball physics, affect and contextual teaching. Catching competes with other needs and cannot interrupt another activity. There is no guaranteed command or teleporting interception. A miss leaves the ball physical; ordinary fetch can become available after it settles. Existing goal turns, bowling, puzzle, Build & Bowl and villager games take precedence over this invitation.
+
+## Bounded behavior
+
+Only a native player toss offers a catch, tied to its current fetch ticket and season. The chooser is reconsidered promptly while idle. A sample of the ballistic arc over the next 1.2 seconds must pass within the current hand reach, with incoming speed between one and twelve game units/second, visible in front of the creature. A prediction is not a capture. The existing coordinator grants exclusive action ownership; there is a short reach windup, a 1.5-second anticipation limit and a four-second motor limit.
+
+Capture rechecks the actual ball position, velocity, sight, ticket, ownership and activity context. It then stops the player's flight and takes the ordinary carry lease. A held player object is never taken. The return uses grounded sampled release space, the existing placement animation and a three-to-seven game-unit/second launch with a low bounce. Collision, slopes and wind determine its subsequent motion. **A recorded roll means the ball was released toward the old toss position; it does not prove the player caught it or that it arrived.**
+
+Pause freezes anticipation and ball physics. Target loss, new toss, player grab, environmental impulse, another game, timeout or interruption invalidate the appropriate lease and release temporary carry/pose state. A missed attempt is not recorded as a physical catch. A successful catch can remain recorded even if its later return is interrupted.
+
+## Learning and persistence
+
+`CatchMemory` stores bounded attempts, physical catches, rolls launched, control and willingness. Actual captures improve control, shortening the reach windup slightly and widening reach modestly. Praise/discouragement after a confirmed catch-and-roll receipt changes willingness once through the existing twelve-second feedback window. Skill is not erased by discouragement. Other activities cannot reinforce catching by inheriting a stale receipt.
+
+Book → Creature → Knowledge, skill and choice adds optional catch counts and control/willingness. Reading does not create history. The new memory is optional in old saves; absent or empty inline history starts with neutral willingness and baseline control, and native Save/Load retains its completed facts and learning. In-flight physics, offered tickets and held balls are not resumed as completed games. Catch has a separate attempt mode from ordinary ball play and fetch. New season resets its history.
+
+## Validation
+
+Verified in Unity 6000.6.7f1 Editor on 2026-11-01: pure trajectory/memory/legacy-save guards; native player toss → utility selection → physical flight → actual catch → grounded roll; typed praise once/discouragement; pause, player-grab ownership, wind, miss, interruption and native Save/Load. Existing fetch, beachball, hybrid model/teaching, attempt model/runtime, Book model/layout/input and Sanctuary regressions pass. The native fixture includes cancellation immediately after capture, before the next physics tick: the ball becomes dynamic at its current location, retains actual catching practice and earns no roll. Populated Book text fits at maximum bounded counts. Catch/roll poses and the Book page were rendered and inspected. The controlled fixture freezes simulation time, moves villagers clear, marks authored inspirations known and cools unrelated affordances while stepping actual private physics and the normal utility chooser. These isolation steps are test setup, not new gameplay priorities. Controlled Editor fixtures do not establish natural participation rates, Quest hand alignment or subjective fun. Android player scripts compile (43 assemblies). No APK is part of this increment.

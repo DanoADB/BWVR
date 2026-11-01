@@ -20,6 +20,8 @@ The generated scene contains the BWVR bootstrap. It builds the island and spatia
 
 **Player planting:** open God tools → Life → Plant seeds. Aim at an empty field outline and hold the tool trigger (desktop F). Move across eligible plots to plant; release to stop. Prepared fields use one seed from stores; new fields also use two timber. See [planting](docs/PLAYER_PLANTING.md). Temporary outlines disappear when you dismiss the tool.
 
+**Catch and roll:** gently toss the beachball toward the front of an idle creature using the normal throw (desktop: Space + release E). It may reach, catch the actual moving ball, then roll it toward your last release position. Catching practice and willingness save with the season; see [catch game](docs/CATCH_GAME.md).
+
 **Woodland restoration:** God Tools → Life → Regrow trees. Aim at a harvested managed tree stump or sapling and hold the right front trigger (desktop F). The tool plants and nurtures one finite tree; growth saves with the season. See [forest regrowth](docs/FOREST_REGROWTH.md).
 
 **Terrain shaping:** God tools → Terraform → Raise ground, Lower ground or Smooth ground. Aim at a clear cyan patch, hold the right front trigger (desktop F) still for half a second, then release. The stroke appears after safe navigation preparation; nearby structures, trees, crops and actors are protected. Close tools/Escape to cancel. Edits save with the season. Terraform → **Undo stroke** reverses only the latest edit, including after reload; it preserves earlier edits and gives no energy refund. See [terrain undo](docs/TERRAIN_UNDO.md) and [terrain shaping](docs/TERRAIN_SHAPING.md).
