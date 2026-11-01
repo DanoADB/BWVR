@@ -6,11 +6,11 @@ The God Tools scroll is replaced by a compact, private world-space dock near the
 | --- | --- |
 | Terraform | Raise ground, Lower ground, Smooth ground |
 | Weather | Rain, Wind fan, Lightning, Whirlwind |
-| Life | Plant seeds, Heal |
+| Life | Plant seeds, Heal, Regrow trees |
 | Offerings | Food, Wood |
 | Guidance | Help, Protect, Investigate, plus Clear cue |
 
-The old `RainBrush` API enum remains a Rain alias, not a duplicate button. All 14 current tool choices are represented once. Terraform also provides a rounded **Undo stroke** utility, with a single saved reversal; see [terrain undo](TERRAIN_UNDO.md). The dock also provides Empty Hand, Book of Creation and Sanctuary shortcuts. God-tool and category controls are circular stone disks; utility controls remain rounded rectangles. Glyphs reuse the existing attributed Game-icons.net and Lucide atlases, including the previously sourced terrain and lightning icons. Licenses remain in `Resources/GodToolIcons` and `Resources/BookIcons`. No new external artwork or model download is required.
+The old `RainBrush` API enum remains a Rain alias, not a duplicate button. All 15 current tool choices are represented once. Terraform also provides a rounded **Undo stroke** utility, with a single saved reversal; see [terrain undo](TERRAIN_UNDO.md). The dock also provides Empty Hand, Book of Creation and Sanctuary shortcuts. God-tool and category controls are circular stone disks; utility controls remain rounded rectangles. Glyphs reuse the existing attributed Game-icons.net and Lucide atlases plus a silhouette of the existing CC0 Quaternius pine, including the previously sourced terrain and lightning icons. Licenses remain in `Resources/GodToolIcons` and `Resources/BookIcons`. No new external artwork or model download is required.
 
 ## Controls
 

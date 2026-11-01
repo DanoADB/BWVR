@@ -1,6 +1,14 @@
 # BWVR roadmap
 
-## Current development — reversible terrain experimentation (2026-10-31)
+## Current development — hands-on forest regrowth (2026-10-31)
+
+Life → Regrow trees adds a held miracle for harvested managed tree sites:
+plant a sapling, nurture its visible growth, then restore one finite tree.
+It reuses forestry state, reservations, tree navigation and source artwork.
+See [FOREST_REGROWTH.md](FOREST_REGROWTH.md) for scope and validation.
+Water/food chores stay deprioritized and unlimited test energy remains enabled.
+
+### Previous increment — reversible terrain experimentation (2026-10-31)
 
 Terraform now adds a bounded Undo stroke utility: reverse only the latest sculpt,
 including after save/resume, through the existing protected asynchronous terrain

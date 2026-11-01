@@ -135,7 +135,7 @@ public static class IslandEnvironment {
   int count=0;
   foreach(var p in terrain.placements){
    if(p.kind is "drink" or "villager")continue;
-   var at=terrain.PlacementPoint(p);var name="Original "+p.kind+" L"+p.line+" - "+p.type;Transform marker;
+   var at=terrain.PlacementPoint(p);var name="Original "+p.kind+" L"+p.line+" - "+p.type;Transform marker;string treeModel=null;
    if(p.kind=="building"&&!p.type.Contains("STORAGE_PIT")&&!p.type.Contains("GRAVEYARD")){
     if(layout!=null){
      var plot=layout.plots[p.line];marker=Object.Instantiate(buildings.Find(plot.model),root).transform;
@@ -146,7 +146,7 @@ public static class IslandEnvironment {
     float unit=terrain.scale*p.size;
     if(p.kind=="tree"){
      bool bush=p.variant>=13&&p.variant<=15;string key=bush?"Bush_Common":p.variant is 3 or 4 or 12?"Pine_1":p.variant%2==0?"CommonTree_1":"CommonTree_2";
-     var tree=Place(art,key,marker,Vector3.zero,(bush?new Vector3(3,2.5f,3):new Vector3(10,12.723f,10))*unit);
+     treeModel=key;var tree=Place(art,key,marker,Vector3.zero,(bush?new Vector3(3,2.5f,3):new Vector3(10,12.723f,10))*unit);
      if(tree==null)throw new System.Exception("Missing replacement: "+key);
      AddVegetationLOD(tree,bush);
      // The catalog has no dead/palm meshes yet; use the matching broadleaf silhouette.
@@ -162,7 +162,7 @@ public static class IslandEnvironment {
      for(int i=0;i<6;i++)Place(art,"Rock_Medium_1",marker,new Vector3((i%3-1)*2,0,(i/3-.5f)*3)*unit,new Vector3(.8f,1.4f,.5f)*unit);
     }
    }
-   var view=marker.gameObject.AddComponent<IslandPlacementView>();view.sourceLine=p.line;view.kind=p.kind;
+   var view=marker.gameObject.AddComponent<IslandPlacementView>();view.sourceLine=p.line;view.kind=p.kind;view.modelKey=treeModel;
    if(layout!=null&&layout.plots.TryGetValue(p.line,out var plotInfo)){view.redesigned=true;view.modelKey=plotInfo.model;}
    else if(layout!=null&&(p.kind=="tree"||p.kind=="rock"||p.kind=="feature")&&layout.Cleared(at))marker.gameObject.SetActive(false);
    count++;

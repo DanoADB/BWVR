@@ -1,0 +1,12 @@
+using System.Linq;
+namespace BWVR.Editor {
+public static class ForestRegrowthArt {
+ [UnityEditor.MenuItem("BWVR/Art/Rebuild forest growth glyph")]public static void Rebuild()=>Capture();
+ public static string Capture(){
+var prefab=UnityEngine.Resources.Load<BWVR.EnvironmentArt>("EnvironmentArt").Find("Pine_1");var tree=UnityEngine.Object.Instantiate(prefab);tree.hideFlags=UnityEngine.HideFlags.HideAndDontSave;tree.transform.position=new UnityEngine.Vector3(10000,10000,10000);var go=new UnityEngine.GameObject("Tree glyph capture");go.hideFlags=UnityEngine.HideFlags.HideAndDontSave;var cam=go.AddComponent<UnityEngine.Camera>();cam.enabled=false;cam.orthographic=true;cam.backgroundColor=UnityEngine.Color.clear;cam.clearFlags=UnityEngine.CameraClearFlags.SolidColor;var white=new UnityEngine.Material(UnityEngine.Shader.Find("Unlit/Color")){color=UnityEngine.Color.white};var renderers=tree.GetComponentsInChildren<UnityEngine.Renderer>();var bounds=renderers[0].bounds;foreach(var r in renderers){bounds.Encapsulate(r.bounds);r.sharedMaterials=System.Linq.Enumerable.Repeat(white,r.sharedMaterials.Length).ToArray();r.SetPropertyBlock(null);}cam.orthographicSize=bounds.size.y*.58f;cam.transform.position=bounds.center+UnityEngine.Vector3.back*bounds.size.y*2;cam.transform.LookAt(bounds.center);cam.nearClipPlane=.001f;cam.farClipPlane=bounds.size.y*5;var rt=new UnityEngine.RenderTexture(256,256,24,UnityEngine.RenderTextureFormat.ARGB32);var tex=new UnityEngine.Texture2D(256,256,UnityEngine.TextureFormat.RGBA32,false);var active=UnityEngine.RenderTexture.active;
+try{cam.targetTexture=rt;cam.Render();UnityEngine.RenderTexture.active=rt;tex.ReadPixels(new UnityEngine.Rect(0,0,256,256),0,0);tex.Apply();System.IO.File.WriteAllBytes("Assets/BWVR/Resources/GodToolIcons/regrow.png",UnityEngine.ImageConversion.EncodeToPNG(tex));}finally{UnityEngine.RenderTexture.active=active;UnityEngine.Object.DestroyImmediate(tree);UnityEngine.Object.DestroyImmediate(go);UnityEngine.Object.DestroyImmediate(white);UnityEngine.Object.DestroyImmediate(rt);UnityEngine.Object.DestroyImmediate(tex);}
+UnityEditor.AssetDatabase.ImportAsset("Assets/BWVR/Resources/GodToolIcons/regrow.png");var importer=(UnityEditor.TextureImporter)UnityEditor.AssetImporter.GetAtPath("Assets/BWVR/Resources/GodToolIcons/regrow.png");importer.alphaIsTransparency=true;importer.mipmapEnabled=false;importer.wrapMode=UnityEngine.TextureWrapMode.Clamp;importer.maxTextureSize=256;importer.SaveAndReimport();return "TREE_GLYPH_CAPTURED_FROM_EXISTING_CC0_MODEL";
+
+ }
+}
+}

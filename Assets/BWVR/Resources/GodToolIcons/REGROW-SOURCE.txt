@@ -1,0 +1,7 @@
+Regrow trees glyph: orthographic white silhouette of Pine_1 by Quaternius.
+Source: Assets/ThirdParty/Quaternius/Nature/Models/Pine_1.fbx
+Pack: Stylized Nature MegaKit, free Standard edition. https://quaternius.com
+License: CC0 1.0; original notice: Assets/ThirdParty/Quaternius/Nature/License_Standard.txt
+Rebuild: BWVR > Art > Rebuild forest growth glyph (ForestRegrowthArt.cs).
+Source FBX SHA256: f1e352910cb4f7be686212a5f1d6441861202d237575f7df4852b24cf1cae7eb
+PNG SHA256: 0b3bcfec194423fe669142f4c70b9ffe9a3ec59b161dd7fa31110beeb4f53869

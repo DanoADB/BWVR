@@ -1,5 +1,13 @@
 # BWVR build sequence
 
+## S8 hands-on woodland restoration (2026-10-31)
+
+The Life category adds Regrow trees for depleted managed sites. Paid local pulses
+plant and visibly nurture a sapling through the existing finite forestry cycle.
+It preserves cargo/ownership, saved growth and ordinary harvesting; it does not
+add arbitrary new forest placement or revive destroyed trees. See
+[FOREST_REGROWTH.md](FOREST_REGROWTH.md). Quest gates remain open.
+
 ## S8 reversible terrain experimentation (2026-10-31)
 
 The Terraform dock adds a single saved Undo stroke, using the existing protected
