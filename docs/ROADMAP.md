@@ -1,6 +1,10 @@
 # BWVR roadmap
 
-## Current development — lead with a held beachball (2026-11-02)
+## Current development — unified held-ball play and release (2026-11-02)
+
+The overlapping held-ball controllers now use the established chase service, one curiosity motor, actual-motion completion and saved contextual feedback. A native release settles that outcome before a separate catch/fetch opportunity. See [HELD_BALL_PLAY.md](HELD_BALL_PLAY.md). Food/water remain deprioritized; Quest testing stays open.
+
+### Previous increment — lead with a held beachball (2026-11-02)
 
 Players can hold and move the ball near an idle creature to offer a short autonomous following activity. It routes across dry ground, keeps player ownership and yields to release/cancellation without fabricating a completed lesson. See [HELD_BALL_PLAY.md](HELD_BALL_PLAY.md). Food/water remain deprioritized; Quest testing stays open.
 

@@ -1,5 +1,9 @@
 # BWVR build sequence
 
+## S5 unified follow, release and catch (2026-11-02)
+
+Held-ball play now uses one established chase service and curiosity executor. Qualified real movement can produce its saved, teachable play outcome; normal release settles it once before placement or a toss offers a separate catch/fetch activity. The overlapping Observe path is removed. See [HELD_BALL_PLAY.md](HELD_BALL_PLAY.md). Physical Quest gates remain open.
+
 ## S5 lead with a held beachball (2026-11-02)
 
 An idle creature can choose a bounded investigation of a player-held beachball, using the existing Observe owner and safe ground routing. The player keeps ownership; release, input loss, unsafe ground and the time limit end following without invented completion/training. See [HELD_BALL_PLAY.md](HELD_BALL_PLAY.md). Physical Quest reach and enjoyment remain playtest gates.

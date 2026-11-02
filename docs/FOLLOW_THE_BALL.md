@@ -6,10 +6,10 @@ The creature retains autonomy. Hunger, critical water pressure outside explorati
 
 ## Rules and boundaries
 
-- The held ball must belong to the player, be visible/in front within 45 game units, and be within 28 game units of ground. About three quarters of a second of visible presentation creates an opportunity.
+- The held ball must belong to the player, be visible/in front within 40 horizontal game units, above projected ground and within 250 vertical game units of it. About three quarters of a second of visible presentation creates an opportunity.
 - The existing utility selector chooses the opportunity. The existing curiosity executor owns locomotion, using IslandNavigator's pathfinding, ground projection and actor avoidance. It keeps a stand-off distance from the held ball and never owns the player's carry item.
-- A successful bout requires at least three seconds, eight game units of actual creature travel and six units of ball movement. Release must remain nearby and recently visible. Merely holding still, canceled/unreachable attempts, rapid tracking-size jumps, timeouts and distant releases grant no completion. A ten-second cooldown limits repetition.
-- Sampling/visibility and target updates run at approximately 4 Hz; per-frame navigation uses the cached goal. Existing pause/suspend and controller ownership apply. Tracking loss or menu ownership blocks the game. A bout lasts at most 25 seconds.
+- A successful bout requires at least three seconds, eight game units of actual creature travel and six units of horizontal ball movement. Release must remain nearby and recently visible. Merely holding still, canceled/unreachable attempts, rapid tracking-size jumps, timeouts and distant releases grant no completion. A ten-second cooldown limits repetition.
+- Sampling/visibility and target updates run at approximately 4 Hz; per-frame navigation uses the cached goal. Existing pause/suspend and controller ownership apply. Tracking loss or menu ownership blocks the game. A bout lasts at most eight seconds.
 - Slow release still places the ball; a real toss still uses the existing fetch/bowling routing. A subsequent activity has a separate receipt. Chase completions carry a typed flag so teaching cannot silently become bowling/fetch/rhythm teaching.
 - Completed count, enjoyment, preference and best distance are bounded and saved. Old saves are accepted. Active invitations and movement samples are transient. Saved chase intentions require a currently feasible chase opportunity to resume; an unheld ball after reload cannot masquerade as the same chase.
 
@@ -22,3 +22,8 @@ The creature retains autonomy. Hunger, critical water pressure outside explorati
 The final sequence also passed existing native ball placement, player fetch, bowling model/physical imitation, and sanctuary checks. Unity compilation has no errors/warnings. One initial model fixture incorrectly assumed Unity would leave an absent nested serializable class null; Unity initializes its defaults, so the historical-save assertion now checks valid empty history instead.
 
 Physical Quest input feel, wrist-scale reach, animation appearance and performance remain unverified. No APK was built. The user's original saved season and XR startup settings are restored after testing.
+
+
+## Unified release flow (2026-11-02)
+
+The overlapping Observe-based held-ball increment has been consolidated into this chase service and its existing curiosity motor. Normal release settles qualified play before dispatching a toss, allowing an immediate separate catch opportunity. Consolidated native release, typed training, save/reload, staged withdrawal, spin/catch/fetch/ball and music regressions pass in the Editor; Android player scripts compile. Ordinary withdrawal and stationary bait do not create failed-attempt learning. See [held-ball play](HELD_BALL_PLAY.md) for the current rules and verification.
