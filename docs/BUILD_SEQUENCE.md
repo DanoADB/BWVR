@@ -1,5 +1,9 @@
 # BWVR build sequence
 
+## S5 player-invited shared music (2026-11-02)
+
+A short gesture at the chime body can invite a nearby willing idle host to a stationary duet. The normal social motor, route/ownership guards, opening notes and creature utility remain authoritative. Hold retains pickup; bar taps retain player note demonstrations. See [MUSIC_INVITATIONS.md](MUSIC_INVITATIONS.md) for scope and validation. Physical Quest testing stays deferred.
+
 ## S7 local audience learning from catch games (2026-11-02)
 
 The existing spectator routine now includes player/creature catch displays.

@@ -28,14 +28,15 @@ public sealed partial class VillagerSocial:MonoBehaviour {
  public void ReactToBall(Transform ball,bool blameCreature){if(item.held)return;IslandAudio.Cue(IslandSound.Uneasy,transform.position,GetEntityId().GetHashCode(),.75f,1.25f);GetComponent<VillagerResourceGathering>()?.Cancel();ResetTask();GetComponent<VillagerExploration>()?.ResetTask();GetComponent<VillagerBlockPlay>()?.ResetTask();routine.ResetTask();if(blameCreature){Memory.trust=Mathf.Clamp01(Memory.trust-.18f);Memory.affinity=Mathf.Clamp01(Memory.affinity-.06f);Memory.frights=Math.Min(1000000,Memory.frights+1);Memory.lastFrightAt=season().Hybrid.time;hybrid?.State.RememberBond(GetComponent<HybridTarget>().id,false);}frightening=ball;var away=transform.position-ball.position;away.y=0;if(away.sqrMagnitude<1e-10f)away=transform.right;retreat=transform.position+away.normalized*walker.world.Scale*5;walker.ResetRoute();Current=Phase.Recoil;clock=elapsed=0;motion?.Signal(false,true,ball.position,-20);motion?.LookAt(ball);}
  public void ConfigureSharing(CreatureHybrid god,CreatureAffordance[] objects){hybrid=god;sharingObjects=objects;}
  bool Shareable(CreatureAffordance prop){if(prop==null||prop.host!=null||!prop.Available||prop.GetComponent<ConstructionBlock>()!=null||prop.GetComponent<BeachBall>()!=null||prop.kind==CreatureAffordance.Kind.Villager)return false;return prop.kind!=CreatureAffordance.Kind.Food||prop.GetComponent<DiscoveryObject>()?.treat==true;}
- public bool TryShare(CreatureAffordance prop){
+ public bool TryShare(CreatureAffordance prop)=>TryShareCore(prop,false);
+ bool TryShareCore(CreatureAffordance prop,bool atInstrument){
   if(hybrid==null||season().paused||Active||item.held||!Willing||(!season().developmentFocus&&!season().Finished&&season().water<45)||Memory.nextInvitationAt>season().Hybrid.time||hybrid.Owner!=CreatureHybrid.ActionOwner.None||creature.Current!=CreatureCuriosity.Phase.Rest||(GetComponent<VillagerExploration>()?.Active??false)||(GetComponent<VillagerBlockPlay>()?.Active??false)||!Shareable(prop))return false;
   if(Vector3.Distance(transform.position,prop.transform.position)>walker.world.Scale*120||!hybrid.CanReach(prop.GetComponent<HybridTarget>())||!walker.world.Sample(prop.transform.position,walker.profile,8,out _))return false;
-  ConstructionSite cover=null;var place=KnownMusicPlace(prop);if(place!=null){if(place.Paused||place.Locked||(!CoveredMusicMeeting(prop,out meeting,out cover)&&!MusicMeeting(prop,out meeting)))return false;}else{
+  ConstructionSite cover=null;var place=KnownMusicPlace(prop);if(atInstrument&&place==null){if(!MusicMeeting(prop,out meeting))return false;}else if(place!=null){if(place.Paused||place.Locked||(!CoveredMusicMeeting(prop,out meeting,out cover)&&!MusicMeeting(prop,out meeting)))return false;}else{
   var delta=transform.position-creature.transform.position;delta.y=0;if(delta.sqrMagnitude<1e-10f)delta=-creature.transform.forward;
   if(!walker.world.Sample(creature.transform.position+delta.normalized*walker.world.Scale*7,walker.profile,8,out meeting)||!walker.world.Sample(creature.transform.position+delta.normalized*walker.world.Scale*4,walker.world.creature,8,out offeringPoint))return false;}
-  musicPlace=place;musicAnchor=prop.transform.position;ReservePerformerCover(cover);
-  Offering=prop;prop.host=this;prop.GetComponent<SharedRhythm>()?.ResetOffer();giftOrigin=prop.transform.position;giftRotation=prop.transform.rotation;routine.ResetTask();walker.ResetRoute();clock=elapsed=0;Current=Phase.FetchGift;motion?.LookAt(prop.transform);return true;
+  stationaryMusic=atInstrument||place!=null;musicPlace=place;musicAnchor=prop.transform.position;ReservePerformerCover(cover);
+  Offering=prop;prop.host=this;prop.GetComponent<SharedRhythm>()?.ResetOffer();giftOrigin=prop.transform.position;giftRotation=prop.transform.rotation;if(stationaryMusic)routine.BeginHandsFreeActivity();else routine.ResetTask();walker.ResetRoute();clock=elapsed=0;Current=Phase.FetchGift;motion?.LookAt(prop.transform);return true;
  }
  bool ChooseShare(){if(sharingObjects==null||hybrid==null||Memory.nextInvitationAt>season().Hybrid.time)return false;CreatureAffordance best=null;float score=float.NegativeInfinity;foreach(var prop in sharingObjects){if(!Shareable(prop))continue;float distance=Vector3.Distance(transform.position,prop.transform.position)/walker.world.Scale;float value=(prop.kind==CreatureAffordance.Kind.Food?season().hunger*2:.8f)-distance*.015f;if(value>score){score=value;best=prop;}}return TryShare(best);}
  public void Initialize(CreatureCuriosity god,int identity,Func<SliceState> current){creature=god;index=identity;season=current;walker=GetComponent<IslandNavigator>();motion=GetComponent<HumanoidMotion>();item=GetComponent<CarryItem>();routine=GetComponent<VillagerRoutine>();cooldown=18+identity*13;}
@@ -71,8 +72,8 @@ public sealed partial class VillagerSocial:MonoBehaviour {
   clock+=dt;elapsed+=dt;
   if(Offering==null||Offering.host!=this||elapsed>90){ResetTask();return false;}
   CheckPerformerCover(dt);var prop=Offering;var carried=prop.Item;
-  if(musicPlace!=null&&(musicPlace.Paused||musicPlace.Locked||carried.held||Vector3.Distance(prop.transform.position,musicAnchor)>walker.world.Scale*.5f)){ResetTask();return false;}
-  if(Current==Phase.FetchGift&&musicPlace!=null){
+  if(stationaryMusic&&((musicPlace!=null&&(musicPlace.Paused||musicPlace.Locked))||carried.held||Vector3.Distance(prop.transform.position,musicAnchor)>walker.world.Scale*.5f)){ResetTask();return false;}
+  if(Current==Phase.FetchGift&&stationaryMusic){
    if(walker.MoveTo(meeting,transform.lossyScale.y*1.6f,dt)){PresentOffering(prop);}else if(walker.Blocked&&elapsed>5)ResetTask();return Active;
   }
   if(Current==Phase.FetchGift){
@@ -99,7 +100,7 @@ public sealed partial class VillagerSocial:MonoBehaviour {
  public void RememberDispute(){hybrid?.State.RememberBond(GetComponent<HybridTarget>().id,false);var m=Memory;m.disputes=Math.Min(1000000,m.disputes+1);m.affinity=Mathf.Clamp01(m.affinity-.12f);}
  public void WitnessRide(){var m=Memory;m.witnessed=Math.Min(1000000,m.witnessed+1);m.trust=Mathf.Clamp01(m.trust+.03f);}
  public void Feedback(bool positive){Memory.affinity=Mathf.Clamp01(Memory.affinity+(positive?.08f:-.08f));}
- public void ResetTask(){ReleasePerformerCover();if(!Active)return;if(Offering!=null){var prop=Offering;prop.GetComponent<SharedRhythm>()?.Cancel();if(ownsGift){prop.Item.held=false;prop.transform.SetPositionAndRotation(giftOrigin,giftRotation);prop.GetComponent<Collider>().enabled=true;motion?.Carry(null);}if(prop.host==this)prop.host=null;prop.GetComponent<DiscoveryObject>()?.Refresh();Memory.nextInvitationAt=Mathf.Max(Memory.nextInvitationAt,season().Hybrid.time+30);}Offering=null;musicPlace=null;ownsGift=false;Current=Phase.Idle;clock=elapsed=0;cooldown=Mathf.Lerp(65,25,Memory.boldness)*Mathf.Lerp(1.5f,.75f,Memory.trust);motion?.Signal(false);motion?.LookAt(null);motion?.Activity(0);walker?.ResetRoute();routine?.ResetTask();}
+ public void ResetTask(){ReleasePerformerCover();if(!Active)return;if(Offering!=null){var prop=Offering;prop.GetComponent<SharedRhythm>()?.Cancel();if(ownsGift){prop.Item.held=false;prop.transform.SetPositionAndRotation(giftOrigin,giftRotation);prop.GetComponent<Collider>().enabled=true;motion?.Carry(null);}if(prop.host==this)prop.host=null;prop.GetComponent<DiscoveryObject>()?.Refresh();Memory.nextInvitationAt=Mathf.Max(Memory.nextInvitationAt,season().Hybrid.time+30);}Offering=null;musicPlace=null;stationaryMusic=false;ownsGift=false;Current=Phase.Idle;clock=elapsed=0;cooldown=Mathf.Lerp(65,25,Memory.boldness)*Mathf.Lerp(1.5f,.75f,Memory.trust);motion?.Signal(false);motion?.LookAt(null);motion?.Activity(0);walker?.ResetRoute();routine?.ResetTask();}
  void OnDisable(){ResetTask();}
 }
 }

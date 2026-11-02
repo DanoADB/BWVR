@@ -1,6 +1,10 @@
 # BWVR roadmap
 
-## Current development — local catch-game audiences (2026-11-02)
+## Current development — player-invited shared music (2026-11-02)
+
+Players can invite a nearby free musician by tapping the chime body, leaving the instrument in place. The creature chooses whether to join, and real completed performances retain existing local melody learning. See [MUSIC_INVITATIONS.md](MUSIC_INVITATIONS.md). Food/water stay deprioritized and Quest testing remains open.
+
+### Previous increment — local catch-game audiences (2026-11-02)
 
 Free visible villagers can watch player/creature catch games, clap for a
 witnessed catch-and-roll, and separately learn confidence from observed safe or

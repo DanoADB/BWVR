@@ -90,5 +90,6 @@ Existing melody, audience and Book runtime/layout regressions also pass in the
 Editor. Fixtures stage visible reachable actors and suppress competing activities;
 this does not establish natural frequency, sound quality or Quest performance.
 
-Next candidate: make shared music easier for the player to invite nonverbally;
-headset readability and natural participation tuning remain pending playtesting.
+A player can now invite a nearby free host by tapping the chime body; see
+[music invitations](MUSIC_INVITATIONS.md). Headset readability and natural
+participation tuning remain pending playtesting.

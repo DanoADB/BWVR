@@ -20,6 +20,8 @@ The generated scene contains the BWVR bootstrap. It builds the island and spatia
 
 **Player planting:** open God tools → Life → Plant seeds. Aim at an empty field outline and hold the tool trigger (desktop F). Move across eligible plots to plant; release to stop. Prepared fields use one seed from stores; new fields also use two timber. See [planting](docs/PLAYER_PLANTING.md). Temporary outlines disappear when you dismiss the tool.
 
+**Invite shared music:** point at the chime body and tap/release the right front trigger (desktop F). A nearby free willing villager can approach and offer a duet in place; the creature chooses whether to join. Hold the trigger to pick up instead; the bars still play notes. See [music invitations](docs/MUSIC_INVITATIONS.md).
+
 **Catch and roll:** gently toss the beachball toward the front of an idle creature using the normal throw (desktop: Space + release E). It may reach, catch the actual moving ball, then roll it toward your last release position. Catching practice and willingness save with the season; see [catch game](docs/CATCH_GAME.md). Free villagers who can see the game may watch and clap, then update their own ball confidence from its observed outcome; see [catch audiences](docs/CATCH_AUDIENCE.md).
 
 **Woodland restoration:** God Tools → Life → Regrow trees. Aim at a harvested managed tree stump or sapling and hold the right front trigger (desktop F). The tool plants and nurtures one finite tree; growth saves with the season. See [forest regrowth](docs/FOREST_REGROWTH.md).
