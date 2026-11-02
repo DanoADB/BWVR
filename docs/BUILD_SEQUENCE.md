@@ -1,5 +1,13 @@
 # BWVR build sequence
 
+## S7 local audience learning from catch games (2026-11-02)
+
+The existing spectator routine now includes player/creature catch displays.
+Visible idle witnesses may applaud the real launch, then learn separately from
+its bounded physical outcome; individual confidence feeds existing peer play.
+No catching skill, village-wide opinion or job order is fabricated. See
+[CATCH_AUDIENCE.md](CATCH_AUDIENCE.md) for scope and validation gates.
+
 ## S5 catch and roll (2026-11-01)
 
 A native gentle toss can offer a short physical catching action through the

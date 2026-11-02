@@ -1,6 +1,14 @@
 # BWVR roadmap
 
-## Current development — catch and roll (2026-11-01)
+## Current development — local catch-game audiences (2026-11-02)
+
+Free visible villagers can watch player/creature catch games, clap for a
+witnessed catch-and-roll, and separately learn confidence from observed safe or
+harmful outcomes. Existing peer-play choices use that individual memory.
+See [CATCH_AUDIENCE.md](CATCH_AUDIENCE.md). Jobs retain ownership, food/water
+remain deprioritized, and physical Quest testing remains deferred.
+
+### Previous increment — catch and roll (2026-11-01)
 
 Gentle player tosses can now offer an autonomous short catch-and-roll activity
 through the existing action coordinator and ball physics. Actual catches,
