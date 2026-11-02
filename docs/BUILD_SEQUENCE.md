@@ -1,5 +1,9 @@
 # BWVR build sequence
 
+## S5 lead with a held beachball (2026-11-02)
+
+An idle creature can choose a bounded investigation of a player-held beachball, using the existing Observe owner and safe ground routing. The player keeps ownership; release, input loss, unsafe ground and the time limit end following without invented completion/training. See [HELD_BALL_PLAY.md](HELD_BALL_PLAY.md). Physical Quest reach and enjoyment remain playtest gates.
+
 ## S5 player-invited shared music (2026-11-02)
 
 A short gesture at the chime body can invite a nearby willing idle host to a stationary duet. The normal social motor, route/ownership guards, opening notes and creature utility remain authoritative. Hold retains pickup; bar taps retain player note demonstrations. See [MUSIC_INVITATIONS.md](MUSIC_INVITATIONS.md) for scope and validation. Physical Quest testing stays deferred.

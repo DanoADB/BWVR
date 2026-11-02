@@ -1,6 +1,10 @@
 # BWVR roadmap
 
-## Current development — player-invited shared music (2026-11-02)
+## Current development — lead with a held beachball (2026-11-02)
+
+Players can hold and move the ball near an idle creature to offer a short autonomous following activity. It routes across dry ground, keeps player ownership and yields to release/cancellation without fabricating a completed lesson. See [HELD_BALL_PLAY.md](HELD_BALL_PLAY.md). Food/water remain deprioritized; Quest testing stays open.
+
+### Previous increment — player-invited shared music (2026-11-02)
 
 Players can invite a nearby free musician by tapping the chime body, leaving the instrument in place. The creature chooses whether to join, and real completed performances retain existing local melody learning. See [MUSIC_INVITATIONS.md](MUSIC_INVITATIONS.md). Food/water stay deprioritized and Quest testing remains open.
 

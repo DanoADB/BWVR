@@ -171,6 +171,7 @@ public sealed partial class QuestSlice:MonoBehaviour {
    if(interact&&hit.collider)hit.collider.GetComponentInParent<SpatialTarget>()?.Activate();lastGrip[i]=grip;lastTrigger[i]=trigger;
   }
   bool menu=controllerHands[0].menu;if(!xr)menu=Keyboard.current!=null&&Keyboard.current.tabKey.isPressed;if(menu&&!menuLast)SetSanctuaryOpen(!MenuOpen);menuLast=menu;
+  hybrid.ReportHeldBall(held.FirstOrDefault(i=>i!=null&&i.GetComponent<BeachBall>()!=null),!MenuOpen&&!toolsOwnInput&&!applicationSuspended&&!zoomHeld&&(!xr||((held[0]==null||controllerHands[0].tracked)&&(held[1]==null||controllerHands[1].tracked))));
   Simulate(Time.deltaTime);if(!developmentFocus&&state.Finished&&!outcomeShown){outcomeShown=SetSanctuaryOpen(true);}
   spirit.HandTracked=!xr||controllerHands[0].tracked;
   status.text=SanctuaryText(xr);RefreshSanctuary();TickCreationBook(Time.unscaledDeltaTime);
