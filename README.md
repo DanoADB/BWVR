@@ -22,6 +22,8 @@ The generated scene contains the BWVR bootstrap. It builds the island and spatia
 
 **Invite shared music:** point at the chime body and tap/release the right front trigger (desktop F). A nearby free willing villager can approach and offer a duet in place; the creature chooses whether to join. Hold the trigger to pick up instead; the bars still play notes. See [music invitations](docs/MUSIC_INVITATIONS.md).
 
+**Rotate building blocks:** while carrying a block in the right hand, tap A/B (desktop R/Q) for 90-degree turns. The snap outline and drop use the selected orientation; bridge pieces retain their authored orientation. See [block rotation](docs/BLOCK_ROTATION.md).
+
 **Lead with the ball:** hold the beachball in front of an idle creature and move it slowly over nearby dry ground. It may follow briefly while you keep the toy. After moving together, release nearby to finish a shared game; A/B (desktop 1/2) teaches its preference. Normal throwing and catch/fetch remain available. See [held-ball play](docs/HELD_BALL_PLAY.md).
 
 **Catch and roll:** gently toss the beachball toward the front of an idle creature using the normal throw (desktop: Space + release E). It may reach, catch the actual moving ball, then roll it toward your last release position. Catching practice and willingness save with the season; see [catch game](docs/CATCH_GAME.md). Free villagers who can see the game may watch and clap, then update their own ball confidence from its observed outcome; see [catch audiences](docs/CATCH_AUDIENCE.md).

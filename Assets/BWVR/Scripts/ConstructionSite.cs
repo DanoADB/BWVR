@@ -16,7 +16,7 @@ public sealed partial class ConstructionSite:MonoBehaviour {
  public event System.Action<ConstructionBlock> BlockDetached;
  public VillagerExploration Visitor,Requester,Repairer;
  BrickPlacement[] Pattern=>plan??(plan=ConstructionPatterns.Plan(Recipe,LayerHeight));
- bool Matches(ConstructionBlock block,BrickPlacement p)=>block.Attached&&!block.Item.held&&block.RecipePiece&&(block.Shape==ConstructionShape.Beam)==p.beam&&Vector3.Distance(block.Body.position,p.position)<.09f&&Quaternion.Angle(block.Body.rotation,Quaternion.identity)<4;
+ bool Matches(ConstructionBlock block,BrickPlacement p)=>block.Attached&&!block.Item.held&&block.RecipePiece&&(block.Shape==ConstructionShape.Beam)==p.beam&&Vector3.Distance(block.Body.position,p.position)<.09f&&RecipeFacing(block);
  public bool RecipeComplete{get{foreach(var p in Pattern){bool found=false;foreach(var b in blocks)if(Matches(b,p)){found=true;break;}if(!found)return false;}return true;}}
  public bool SelectRecipe(BuildRecipe selected){if(IsBridge||Repairer!=null||selected==Recipe||Snapped>0||blocks.Any(b=>b.Item.held||b.VillagerOwner!=null))return false;Recipe=selected;return true;}
  Scene simulationScene;PhysicsScene physics;Material[] colors;Material outlineMaterial;LineRenderer preview;readonly Collider[] overlaps=new Collider[32];
@@ -85,7 +85,7 @@ public sealed partial class ConstructionSite:MonoBehaviour {
   }world=default;rotation=transform.rotation;return false;
  }
  public bool FindSnap(ConstructionBlock block,Vector3 desired,Quaternion rotation,out Vector3 target,out Quaternion aligned,out Rigidbody support){
-  var point=Local(desired);var localRotation=Quaternion.Inverse(transform.rotation)*rotation;aligned=Quaternion.Euler(0,Mathf.Round(localRotation.eulerAngles.y/90)*90,0);target=default;support=null;
+  var point=Local(desired);var localRotation=Quaternion.Inverse(transform.rotation)*rotation;aligned=PlayerYaw(rotation);target=default;support=null;
   if(Quaternion.Angle(localRotation,aligned)>30)return false;float best=.85f*.85f;
   float x=Mathf.Round(point.x/2)*2,z=Mathf.Round(point.z/2)*2;var rotated=aligned*block.size;float halfX=Mathf.Abs(rotated.x)*.5f,halfZ=Mathf.Abs(rotated.z)*.5f;
   if(Mathf.Abs(x)+halfX>HalfSize.x-1||Mathf.Abs(z)+halfZ>HalfSize.y-1)return false;
@@ -102,9 +102,9 @@ public sealed partial class ConstructionSite:MonoBehaviour {
   block.transform.SetPositionAndRotation(World(block.Body.position),transform.rotation*block.Body.rotation);if(snap&&(held||!attached||(block.Body.position-prior).sqrMagnitude>.0001f||Quaternion.Angle(priorRotation,block.Body.rotation)>.1f))RecordConfirmedPlacement(block,byCreature?"creature":contributor,repair);if(snap)IslandAudio.Cue(IslandSound.Snap,block.transform.position,block.GetEntityId().GetHashCode());Changed?.Invoke();return snap;
  }
  bool RayPoint(ConstructionBlock block,Ray ray,out Vector3 point){foreach(var hit in Physics.RaycastAll(ray,10).OrderBy(h=>h.distance))if(hit.collider.GetComponentInParent<ConstructionBlock>()!=block&&((hit.collider.GetComponent<ConstructionFoundation>()!=null&&hit.collider.transform.parent==transform)||hit.collider.GetComponent<ConstructionBlock>()?.Site==this)){point=hit.point+Vector3.up*unit*block.size.y*.5f;var support=hit.collider.GetComponentInParent<ConstructionBlock>();if(support!=null&&Vector3.Dot(hit.normal,transform.up)>.8f&&TryPointerSpan(block,support,point,out var span))point=span;return true;}point=World(block.spawn);return false;}
- public bool PlacementPoint(ConstructionBlock block,Ray ray,out Vector3 point){if(!RayPoint(block,ray,out point))return false;if(FindSnap(block,point,transform.rotation,out var local,out _,out _))point=World(local);return true;}
- public bool DropRay(ConstructionBlock block,Ray ray){RayPoint(block,ray,out var point);return Drop(block,point,transform.rotation,false,"player");}
- public void PreviewRay(ConstructionBlock block,Ray ray){if(RayPoint(block,ray,out var point)&&FindSnap(block,point,transform.rotation,out var local,out var rotation,out _))ShowPreview(block,World(local),transform.rotation*rotation);else preview.enabled=false;}
+ public bool PlacementPoint(ConstructionBlock block,Ray ray,out Vector3 point){if(!RayPoint(block,ray,out point))return false;if(FindSnap(block,point,PlayerRotation(block),out var local,out _,out _))point=World(local);return true;}
+ public bool DropRay(ConstructionBlock block,Ray ray){RayPoint(block,ray,out var point);return Drop(block,point,PlayerRotation(block),false,"player");}
+ public void PreviewRay(ConstructionBlock block,Ray ray){if(RayPoint(block,ray,out var point)&&FindSnap(block,point,PlayerRotation(block),out var local,out var rotation,out _))ShowPreview(block,World(local),transform.rotation*rotation);else preview.enabled=false;}
  public void ShowPreview(ConstructionBlock block,Vector3 point,Quaternion rotation){
   preview.enabled=true;preview.startColor=preview.endColor=new Color(.35f,1,.55f);var half=block.size*.5f*unit;
   var corners=new[]{new Vector3(-1,-1,-1),new Vector3(1,-1,-1),new Vector3(1,-1,1),new Vector3(-1,-1,1),new Vector3(-1,1,-1),new Vector3(1,1,-1),new Vector3(1,1,1),new Vector3(-1,1,1)};var order=new[]{0,1,2,3,0,4,5,1,5,6,2,6,7,3,7,4};

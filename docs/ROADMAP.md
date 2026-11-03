@@ -1,6 +1,10 @@
 # BWVR roadmap
 
-## Current development — unified held-ball play and release (2026-11-02)
+## Current development — hands-on block rotation (2026-11-02)
+
+Players can quarter-turn a right-held building block and see the matching snap outline before placement. Rotated beams and roofs retain physical bracing, confirmed contribution and saved geometry rules. See [BLOCK_ROTATION.md](BLOCK_ROTATION.md). Food/water remain deprioritized; Quest testing stays open.
+
+### Previous increment — unified held-ball play and release (2026-11-02)
 
 The overlapping held-ball controllers now use the established chase service, one curiosity motor, actual-motion completion and saved contextual feedback. A native release settles that outcome before a separate catch/fetch opportunity. See [HELD_BALL_PLAY.md](HELD_BALL_PLAY.md). Food/water remain deprioritized; Quest testing stays open.
 

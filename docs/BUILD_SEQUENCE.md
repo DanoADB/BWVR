@@ -1,5 +1,9 @@
 # BWVR build sequence
 
+## S3 player-controlled block orientation (2026-11-02)
+
+Contextual A/B (desktop R/Q) quarter turns now feed the actual held-block pointer preview and drop. Rotated span footprints support both beam axes; geometry, ownership, contribution records and saved placements retain their existing boundaries. See [BLOCK_ROTATION.md](BLOCK_ROTATION.md). Headset controls and readability remain unverified.
+
 ## S5 unified follow, release and catch (2026-11-02)
 
 Held-ball play now uses one established chase service and curiosity executor. Qualified real movement can produce its saved, teachable play outcome; normal release settles it once before placement or a toss offers a separate catch/fetch activity. The overlapping Observe path is removed. See [HELD_BALL_PLAY.md](HELD_BALL_PLAY.md). Physical Quest gates remain open.

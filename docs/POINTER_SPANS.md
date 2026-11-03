@@ -25,3 +25,8 @@ PointerSpanChecks passed actual QuestSlice pickup and release with a physical do
 ShelterChecks runtime, SharedShelterChecks, PlaceContributionChecks runtime, FeedbackChecks, DevelopmentFocusChecks and CreatureCarryChecks passed. The older shelter fixture ran after releasing pre-existing resource jobs. Editor frames advanced during verification; the green spanning outline was captured and visually inspected. These are staged native input-boundary/controller checks, not physical Quest trigger tracking or a full unattended village trial.
 
 The original user save was restored with matching SHA256, Standalone/Android XR startup flags restored, and the temporary Editor closed. No APK or headset result is claimed. The full integrated S4 scenario, unattended scheduler behavior and device gates remain open; this increment fixes a demonstrated obstacle in the actual player placement path first.
+
+
+## Player orientation (2026-11-02)
+
+The later [block rotation](BLOCK_ROTATION.md) increment adds right-held A/B (desktop R/Q) quarter turns. Span search now uses the selected rotated footprint; preview and native drop share that orientation. The original S4 rules for support, bracing, occupancy and confirmed placement remain in force.
