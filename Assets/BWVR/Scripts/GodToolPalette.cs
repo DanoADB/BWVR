@@ -28,7 +28,7 @@ public sealed partial class GodToolPalette:MonoBehaviour {
  }
  void Build(){
   emblems=new GodToolEmblems();buttonStone=new Material(Resources.Load<Shader>("Sanctuary/StoneUI")){name="Rounded tool palette buttons",renderQueue=3000};
-  BuildDock();
+  BuildDock();BuildTargetFeedback();
   spot=HybridTarget.Bind(new GameObject("Saved guidance point"),SpotId,HybridTargetKind.Object);spot.transform.SetParent(transform,false);spot.transform.position=creature.transform.position;creature.Register(spot);
   probe=HybridTarget.Bind(new GameObject("Private placement probe"),"private-preview",HybridTargetKind.Object);probe.transform.SetParent(transform,false);
   sign=new GameObject("Player floating guidance cue");sign.transform.SetParent(transform,false);
@@ -47,7 +47,7 @@ public sealed partial class GodToolPalette:MonoBehaviour {
  public void Toggle(){if(Open){Cancel();return;}if(Season.paused||miracles.Suspended)return;OpenCategory(Selected.HasValue?CategoryFor(Selected.Value):ActiveCategory);}
  public void Select(SpiritualTool tool){if(Season.paused||miracles.Suspended||!Enum.IsDefined(typeof(SpiritualTool),tool))return;CancelSculpt();SeedVisibility(tool==SpiritualTool.PlantSeeds);ForestVisibility(tool==SpiritualTool.RegrowTrees);Brush.Stop();Selected=tool;Open=false;ActiveCategory=CategoryFor(tool);releaseGate=true;previewTimer=0;ShowWand(tool);RefreshDockRows();}
  void ShowWand(SpiritualTool tool){if(wandKind==(int)tool&&wand!=null){wand.SetActive(true);return;}if(wand!=null)Destroy(wand);wand=Symbol(tool,transform);wandKind=(int)tool;}
- public void Cancel(){CancelSculpt();SeedVisibility(false);ForestVisibility(false);Brush?.Stop();Open=false;Selected=null;releaseGate=true;dwell=0;if(wand!=null)wand.SetActive(false);if(preview!=null)preview.SetActive(false);if(hint!=null)hint.gameObject.SetActive(false);PreviewValid=false;RefreshDockRows();}
+ public void Cancel(){if(targetFeedback!=null)targetFeedback.SetActive(false);CancelSculpt();SeedVisibility(false);ForestVisibility(false);Brush?.Stop();Open=false;Selected=null;releaseGate=true;dwell=0;if(wand!=null)wand.SetActive(false);if(preview!=null)preview.SetActive(false);if(hint!=null)hint.gameObject.SetActive(false);PreviewValid=false;RefreshDockRows();}
  public void ClearSign(){if(Season.Hybrid.guidance.playerSign)creature.CancelGuidance("Sign removed by the player");sign.SetActive(false);}
  public void RestoreSign(){var g=Season.Hybrid.guidance;if(!g.playerSign||g.status!=GuidanceStatus.Active)return;if(g.target==SpotId){if(nav.Terrain!=null&&!nav.Terrain.Dry(g.spot)||!creature.CanReach(g.spot)){creature.CancelGuidance("Saved sign is unreachable");return;}spot.transform.position=g.spot;}RefreshSign();}
  void RefreshSign(){var g=Season.Hybrid.guidance;bool visible=g.playerSign&&g.status==GuidanceStatus.Active&&Season.Hybrid.time<g.expiresAt;sign.SetActive(visible);if(!visible)return;
@@ -59,7 +59,7 @@ public sealed partial class GodToolPalette:MonoBehaviour {
   if(facing<.2f||!looking){dwell=0;gestureLatched=false;return;}
   if(facing>.65f&&!gestureLatched&&!Open){dwell+=Mathf.Min(dt,.05f);if(dwell>=.35f){Toggle();gestureLatched=true;}}
  }
- public bool Process(Ray ray,bool pressed,bool tracked,bool blocked,float dt,bool xr){
+ bool ProcessTools(Ray ray,bool pressed,bool tracked,bool blocked,float dt,bool xr){
   RefreshSign();bool owned=ClaimsInput;if(blocked||!tracked){if(Open||Selected.HasValue||Sculptor?.Pending==true)Cancel();HideDock();releaseGate=pressed;pressedLast=pressed;dockPressedLast=pressed;return !blocked&&owned;}
   bool uiPressed=pressed||(!xr&&UnityEngine.InputSystem.Mouse.current!=null&&UnityEngine.InputSystem.Mouse.current.leftButton.isPressed);
   if(!uiPressed)releaseGate=false;bool edge=pressed&&!pressedLast&&!releaseGate;pressedLast=pressed;
