@@ -1,6 +1,10 @@
 # BWVR roadmap
 
-## Current development — hands-on block rotation (2026-11-02)
+## Current development — safe last-block return (2026-11-03)
+
+Players can recall their latest confirmed safe placement through **Book → Places → Build with me → Return last block**. A one-use saved ticket respects dependent pieces, actor ownership, occupied structures and active construction projects while preserving historical placement evidence. See [BLOCK_RETURN.md](BLOCK_RETURN.md). Food/water remain deprioritized; Quest playtesting stays open.
+
+### Previous increment — hands-on block rotation (2026-11-02)
 
 Players can quarter-turn a right-held building block and see the matching snap outline before placement. Rotated beams and roofs retain physical bracing, confirmed contribution and saved geometry rules. See [BLOCK_ROTATION.md](BLOCK_ROTATION.md). Food/water remain deprioritized; Quest testing stays open.
 
