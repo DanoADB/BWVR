@@ -1,6 +1,10 @@
 # BWVR roadmap
 
-## Current development — safe last-block return (2026-11-03)
+## Current development — usable god tools and visible fire (2026-11-03)
+
+Named tool rows, rejection feedback, more usable safe terrain strokes, and fire emitters above replacement art address confusing or invisible effects. Native tool/terrain/fire checks and Android scripts passed; headset re-testing remains open. See [GOD_TOOL_USABILITY.md](GOD_TOOL_USABILITY.md).
+
+### Previous increment — safe last-block return (2026-11-03)
 
 Players can recall their latest confirmed safe placement through **Book → Places → Build with me → Return last block**. A one-use saved ticket respects dependent pieces, actor ownership, occupied structures and active construction projects while preserving historical placement evidence. See [BLOCK_RETURN.md](BLOCK_RETURN.md). Food/water remain deprioritized; Quest playtesting stays open.
 

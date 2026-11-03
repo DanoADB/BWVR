@@ -69,6 +69,7 @@ public sealed partial class GodToolPalette:MonoBehaviour {
   var wandPoint=right.position+right.forward*.16f*scale;var wandFacing=wandPoint-eye.transform.position;wand.transform.SetPositionAndRotation(wandPoint,wandFacing.sqrMagnitude>1e-10f?Quaternion.LookRotation(wandFacing):right.rotation);wand.transform.localScale=Vector3.one*.022f*scale;
   hint.gameObject.SetActive(true);
   previewTimer-=dt;if(previewTimer<=0||edge){previewTimer=Selected.HasValue&&TerrainSculptor.IsSculpt(Selected.Value)?.25f:.1f;Aim(ray);}
+  if(edge&&!PreviewValid&&(Selected==SpiritualTool.Rain||Selected>SpiritualTool.Heal))feedback?.Invoke(false,Reason);
   if(Selected==SpiritualTool.Rain||Selected==SpiritualTool.RainBrush){if(pressed&&!releaseGate&&Brush.PulseReady)Aim(ray);bool applied=Brush.ProcessRain(PreviewPoint,pressed&&!releaseGate,dt,PreviewValid);if(applied)Uses++;hint.text="Rain · "+(Brush.Active?"Raining":PreviewValid?"Hold trigger over ground":Reason);return true;}
   if(TerrainSculptor.IsSculpt(Selected.Value))return SculptPointer(ray,pressed);
   if(Selected==SpiritualTool.Lightning)return LightningPointer(ray,pressed,dt);

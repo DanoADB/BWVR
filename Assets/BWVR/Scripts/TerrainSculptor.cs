@@ -6,7 +6,7 @@ namespace BWVR {
 // One bounded stroke, published with both navigation profiles after preparation.
 // The imported height asset/mesh are never mutated.
 public sealed partial class TerrainSculptor:MonoBehaviour {
- public const float Radius=30,Cost=8,ChargeSeconds=.5f,Cooldown=1.5f;
+ public const float Radius=12,Cost=8,ChargeSeconds=.5f,Cooldown=1.5f;
  public IslandTerrainData Terrain{get;private set;}public string Reason{get;private set;}="";
  public Vector3[] Preview{get;private set;}=Array.Empty<Vector3>();
  Mesh runtimeMesh;MeshCollider ground;IslandNavigation nav;CreatureHybrid god;DivineIntervention miracles;SliceState known;
@@ -28,11 +28,20 @@ public sealed partial class TerrainSculptor:MonoBehaviour {
  }
  bool Propose(Vector3 at,SpiritualTool mode,out Dictionary<int,float> changes,out string why){changes=new Dictionary<int,float>();why="Aim at dry, gentle island ground";if(!HybridState.Number(at.x,-100,100)||!HybridState.Number(at.y,-100,100)||!HybridState.Number(at.z,-100,100)||!Terrain.Dry(at)||Mathf.Abs(Terrain.Project(at).y-at.y)>Terrain.scale*2)return false;if(!Clear(at,out why))return false;
   int cx=Mathf.RoundToInt((at.x/Terrain.scale+Terrain.origin.x)/Terrain.cellSize),cz=Mathf.RoundToInt((at.z/Terrain.scale+Terrain.origin.y)/Terrain.cellSize);if(cx<5||cz<5||cx>=Terrain.width-5||cz>=Terrain.width-5){why="Outside the sculptable island";return false;}float average=Terrain.Project(at).y;int ring=Mathf.CeilToInt(Radius/Terrain.cellSize);
+  if(mode==SpiritualTool.SmoothGround){float sum=0;int samples=0;for(int z=cz-ring;z<=cz+ring;z++)for(int x=cx-ring;x<=cx+ring;x++){if(x<1||z<1||x>=Terrain.width-1||z>=Terrain.width-1)continue;var p=Terrain.World(x,z,Terrain.Altitude(x,z));if(Vector2.Distance(new Vector2(at.x,at.z),new Vector2(p.x,p.z))>=Radius*Terrain.scale||!Terrain.Dry(p))continue;sum+=p.y+Terrain.offsets[z*Terrain.width+x]*Terrain.scale;samples++;}if(samples>0)average=sum/samples;}
+
   for(int z=cz-ring;z<=cz+ring;z++)for(int x=cx-ring;x<=cx+ring;x++){if(x<1||z<1||x>=Terrain.width-1||z>=Terrain.width-1)continue;int cell=z*Terrain.width+x;var pos=Terrain.World(x,z,Terrain.Altitude(x,z));float d=Vector2.Distance(new Vector2(at.x,at.z),new Vector2(pos.x,pos.z))/Terrain.scale;if(d>=Radius)continue;float weight=1-d*d/(Radius*Radius);weight*=weight;float old=Terrain.offsets[cell];float value=mode==SpiritualTool.SmoothGround?Mathf.Lerp(old,(average-pos.y)/Terrain.scale,weight*.25f):old+(mode==SpiritualTool.RaiseGround?1:-1)*weight;value=Mathf.Clamp(value,-TerrainEdits.MaxMeters,TerrainEdits.MaxMeters);
    // Protect shoreline and slope classification in the whole affected grid neighbourhood.
-   if(!Terrain.Dry(pos)||pos.y+value*Terrain.scale<Terrain.SeaLevel+Terrain.scale*3){why="Keep away from shorelines and steep ground";return false;}if(Mathf.Abs(value-old)>.0001f)changes[cell]=value;
+   if(!Terrain.Dry(pos)||pos.y+value*Terrain.scale<Mathf.Min(pos.y,Terrain.SeaLevel+Terrain.scale*3)-Terrain.scale*.0001f)continue;if(Mathf.Abs(value-old)>.0001f)changes[cell]=value;
   }
-  if(changes.Count==0){why="This patch is at its limit";return false;}int count=Terrain.offsets.Count(v=>Mathf.Abs(v)>.00001f);foreach(var c in changes)if(Mathf.Abs(Terrain.offsets[c.Key])<=.00001f)count++;if(count>TerrainEdits.Limit){why="Island sculpting budget reached";return false;}why="";return true;
+  if(changes.Count==0){why="This patch is at its limit";return false;}if(!KeepsWalkableSlopes(changes)){why="Use gentler ground";return false;}int count=Terrain.offsets.Count(v=>Mathf.Abs(v)>.00001f);foreach(var c in changes)if(Mathf.Abs(Terrain.offsets[c.Key])<=.00001f)count++;if(count>TerrainEdits.Limit){why="Island sculpting budget reached";return false;}why="";return true;
+ }
+ // Check the proposal without mutating runtime heights or scanning the island.
+ bool KeepsWalkableSlopes(Dictionary<int,float> changes){
+  float Height(int x,int z,bool proposed){int i=z*Terrain.width+x;return Mathf.Max(0,Terrain.heights[i])*Terrain.heightUnit+(proposed&&changes.TryGetValue(i,out float value)?value:Terrain.offsets[i]);}
+  float Slope(int x,int z,bool proposed){float h=Height(x,z,proposed),dx=(Height(x+1,z,proposed)-h)/Terrain.cellSize,dz=(Height(x,z+1,proposed)-h)/Terrain.cellSize;return dx*dx+dz*dz;}
+  foreach(int cell in changes.Keys){int cx=cell%Terrain.width,cz=cell/Terrain.width;for(int z=cz-1;z<=cz+1;z++)for(int x=cx-1;x<=cx+1;x++){if(x<0||z<0||x>=Terrain.width-1||z>=Terrain.width-1)continue;int i=z*Terrain.width+x;if(Terrain.heights[i]<3||(Terrain.flags[i]&64)!=0)continue;if(Slope(x,z,false)<.49f&&Slope(x,z,true)>=.48f)return false;}}
+  return true;
  }
  public bool CanSculpt(Vector3 at,SpiritualTool mode,out string why){EnsureSeason();Preview=Array.Empty<Vector3>();why="Unknown sculpt tool";if(!IsSculpt(mode))return false;if(god.Season.paused||miracles.Suspended){why="Paused";return false;}if(Pending){why="Preparing safe ground";return false;}if(nav.TreeNavigationPending){why="Navigation is updating";return false;}if(god.Season.Hybrid.time<nextAt){why="Ground is settling";return false;}if(!miracles.CanAfford(Cost)){why="Not enough spiritual energy";return false;}if(!Propose(at,mode,out var changes,out why))return false;Preview=changes.Select(c=>{int x=c.Key%Terrain.width,z=c.Key/Terrain.width;var v=Terrain.World(x,z,Terrain.Altitude(x,z));v.y+=c.Value*Terrain.scale;return v;}).ToArray();return true;}
  #if UNITY_EDITOR

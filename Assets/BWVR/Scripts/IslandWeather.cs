@@ -29,7 +29,7 @@ public sealed partial class IslandWeather:MonoBehaviour {
   rainMaterial.color=new Color(.65f,.81f,.95f,.5f);fireMaterial.color=new Color(1,.36f,.04f,.9f);boltMaterial.color=new Color(.8f,.87f,1,1);
   rain=Particles("Bounded island rain",192,rainMaterial,true);rain.transform.position=island.center+Vector3.up*(island.extents.y+nav.Scale*30);
   var shape=rain.shape;shape.shapeType=ParticleSystemShapeType.Box;shape.scale=new Vector3(nav.Scale*140,nav.Scale,nav.Scale*140);var main=rain.main;main.startLifetime=.9f;main.startSize=nav.Scale*.25f;var rainColor=rain.colorOverLifetime;rainColor.enabled=false;var velocity=rain.velocityOverLifetime;velocity.enabled=true;velocity.space=ParticleSystemSimulationSpace.World;velocity.y=-nav.Scale*45;
-  for(int i=0;i<WeatherState.FireLimit;i++)flames.Add(Particles("Pooled fire "+i,10,fireMaterial,false));
+  for(int i=0;i<WeatherState.FireLimit;i++)flames.Add(Particles("Pooled fire "+i,20,fireMaterial,false));
   var line=new GameObject("Localized lightning - no fullscreen flash");line.transform.SetParent(transform,false);bolt=line.AddComponent<LineRenderer>();bolt.sharedMaterial=boltMaterial;bolt.positionCount=9;bolt.widthMultiplier=nav.Scale*.35f;bolt.shadowCastingMode=ShadowCastingMode.Off;bolt.receiveShadows=false;bolt.enabled=false;
   ResetWorld();
  }
@@ -77,7 +77,7 @@ public sealed partial class IslandWeather:MonoBehaviour {
   atmosphere?.SetWeather(s.time,Wind,paused);ocean?.SetWeather(s.time,s.wind,s.kind==IslandWeatherKind.TidalWave?Mathf.Lerp(island.min.x-nav.Scale*40,island.max.x+nav.Scale*40,Mathf.Clamp01(s.phaseTime/24)):0,s.kind==IslandWeatherKind.TidalWave?nav.Scale*8:0,WaveWidth);
   if(rainFocus!=null)rain.transform.position=rainFocus.position+Vector3.up*nav.Scale*35;
   var emission=rain.emission;emission.rateOverTime=s.rain*90;var velocity=rain.velocityOverLifetime;velocity.x=Wind.x*nav.Scale*12;velocity.z=Wind.z*nav.Scale*12;Play(rain,!paused&&s.rain>.01f,paused);
-  int i=0;foreach(var m in s.materials){if(!m.burning||!byId.TryGetValue(m.id,out var target)||i>=flames.Count)continue;var fire=flames[i++];var bounds=target.Bounds(nav.Scale);fire.transform.position=bounds.center+Vector3.up*bounds.extents.y;var main=fire.main;main.startSize=Mathf.Clamp(bounds.size.y*.4f,nav.Scale*3,nav.Scale*6);var shape=fire.shape;shape.radius=Mathf.Max(nav.Scale,bounds.extents.x*.6f);Play(fire,!paused,paused);}for(;i<flames.Count;i++)Play(flames[i],false,false);
+  int i=0;foreach(var m in s.materials){if(!m.burning||!byId.TryGetValue(m.id,out var target)||i>=flames.Count)continue;var fire=flames[i++];var bounds=target.VisualBounds(nav.Scale);fire.transform.position=new Vector3(bounds.center.x,bounds.max.y+nav.Scale*1.5f,bounds.center.z);var main=fire.main;main.startSize=Mathf.Clamp(bounds.size.y*.4f,nav.Scale*4,nav.Scale*9);var shape=fire.shape;shape.radius=Mathf.Max(nav.Scale,bounds.extents.x*.6f);Play(fire,!paused,paused);}for(;i<flames.Count;i++)Play(flames[i],false,false);
  }
  static void Play(ParticleSystem ps,bool active,bool paused){if(paused){if(ps.isPlaying)ps.Pause();return;}if(active){if(!ps.isPlaying)ps.Play();}else if(!ps.isStopped)ps.Stop(true,ParticleSystemStopBehavior.StopEmitting);}
  public void ResetWorld(){boltRemaining=0;if(bolt!=null)bolt.enabled=false;foreach(var ps in flames)ps.Stop(true,ParticleSystemStopBehavior.StopEmittingAndClear);if(rain!=null)rain.Stop(true,ParticleSystemStopBehavior.StopEmittingAndClear);Visuals(season().paused);}

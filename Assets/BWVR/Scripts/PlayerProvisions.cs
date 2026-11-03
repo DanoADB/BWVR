@@ -21,8 +21,9 @@ public sealed partial class VillageResources {
  public int WitnessProvision(Vector3 point,float fraction){int witnesses=0;foreach(var gatherer in Gatherers){var social=gatherer.GetComponent<VillagerSocial>();if(!ProvisionVisible(social,point)||!social.Memory.WitnessProvision(Season.Hybrid.time,fraction))continue;witnesses++;social.GetComponent<HumanoidMotion>()?.React();social.GetComponent<VillagerAffect>()?.ProvisionSeen();}return witnesses;}
  public float ProvisionSpace(VillageResource kind)=>Mathf.Max(0,FreeSpace(kind)-(kind==VillageResource.Wheat?24-State.exposedWheat:0));
  public bool CanReceiveProvision(Vector3 point,VillageResource kind,out string reason){reason="";if(Season.paused){reason="Paused";return false;}if(kind!=VillageResource.Wood&&kind!=VillageResource.Wheat){reason="Unsupported gift";return false;}
+  if(ProvisionSpace(kind)<=.001f){reason="Village storage is full or reserved";return false;}
   if(!HybridState.Number(point.x,-10000,10000)||!HybridState.Number(point.y,-10000,10000)||!HybridState.Number(point.z,-10000,10000)||!Navigation.Sample(point,Navigation.villager,.5f,out var safe)||(safe-point).sqrMagnitude>Navigation.Scale*Navigation.Scale*4||(Navigation.Terrain!=null&&(!Navigation.Terrain.Dry(point)||Mathf.Abs(Navigation.Terrain.Project(point).y-point.y)>Navigation.Scale*2))){reason="Aim at safe, dry ground";return false;}
-  if(Vector3.Distance(point,Store)>Navigation.Scale*15&&!Gatherers.Any(a=>a.GetComponent<CarryItem>()?.held!=true&&Vector3.Distance(a.transform.position,point)<Navigation.Scale*30)){reason="Bring gifts near villagers or stores";return false;}if(ProvisionSpace(kind)<=.001f){reason="Village storage is full or reserved";return false;}return true;
+  if(Vector3.Distance(point,Store)>Navigation.Scale*15&&!Gatherers.Any(a=>a.GetComponent<CarryItem>()?.held!=true&&Vector3.Distance(a.transform.position,point)<Navigation.Scale*30)){reason="Bring gifts near villagers or stores";return false;}return true;
  }
 }
 }
